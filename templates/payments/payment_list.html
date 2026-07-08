@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Payments{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block topbar_actions %}
+  <button type="button" class="btn btn-primary btn-sm" id="open-record-modal">+ Record Payment</button>
+{% endblock %}
+
+{% block content %}
+
+{# ── Record Payment Modal ───────────────────────────────────────── #}
+<div id="record-payment-modal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:16px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:720px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);position:relative;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;font-size:17px;">Record Payment</h2>
+        <p style="margin:4px 0 0;font-size:13px;color:var(--text-muted);">Capture a payment from a client.</p>
+      </div>
+      <button type="button" id="close-record-modal" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);line-height:1;padding:4px 8px;border-radius:6px;" aria-label="Close">✕</button>
+    </div>
+
+    {# Error banner — shown only when there are error messages #}
+    {% for msg in messages %}
+      {% if msg.tags == 'error' %}
+      <div id="payment-error-banner" style="margin:16px 22px 0;padding:14px 16px;background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.5);border-radius:10px;display:flex;align-items:flex-start;gap:12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" style="flex-shrink:0;margin-top:1px;">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".8" fill="#ef4444"/>
+        </svg>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#ef4444;">Payment Error</div>
+          <div style="font-size:13px;color:#ef4444;margin-top:2px;">{{ msg }}</div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <div style="padding:20px 22px;">
+      <form method="post" action="{% url 'payments:record' %}">
+        {% csrf_token %}
+        <input type="hidden" name="_from_list" value="1">
+
+        <div class="form-group">
+          <label for="loan_id">Select Loan</label>
+          <select name="loan_id" id="loan_id" required class="select2-init form-control">
+            <option value="">— Search for loan —</option>
+            {% for l in active_loans %}
+            <option value="{{ l.pk }}" data-outstanding="{{ l.outstanding_balance }}" data-next-due="{{ l.next_due_amount }}"
+              {% if selected_loan_id == l.pk|stringformat:'s' %}selected{% endif %}>
+              {{ l.loan_number }} — {{ l.client.full_name }} ({{ l.outstanding_balance|money }} outstanding)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount Received ({% currency_symbol %})</label>
+          <input type="number" name="amount" id="amount" min="0" step="0.01"
+                 placeholder="e.g. 250000" required autofocus class="form-control"
+                 value="{{ posted_amount|default:'' }}">
+          <div id="payment-balance-summary" class="text-sm" style="margin-top:4px;color:var(--text-muted);"></div>
+          <div id="payment-warning" class="mt-2"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group">
+            <label for="payment_date">Payment Date</label>
+            <input type="date" name="payment_date" id="payment_date" value="{{ today }}" required class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="payment_method">Payment Method</label>
+            <select name="payment_method" id="payment_method" class="form-control">
+              <option value="CASH">Cash</option>
+              <option value="MOMO">Mobile Money (MTN/Airtel)</option>
+              <option value="BANK">Bank Transfer</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reference_number">Reference / Transaction Number</label>
+          <input type="text" name="reference_number" id="reference_number"
+                 placeholder="Mobile money ID or bank ref (optional)" class="form-control">
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary">Record Payment &amp; Print Receipt</button>
+          <button type="button" id="close-record-modal-2" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{# ── Payment List ───────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-header">
+    <form method="get" class="search-filter-bar">
+      <input type="text" name="q" value="{{ search }}" placeholder="Search loan # or client…" style="width:280px">
+      <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+      {% if search %}<a href="{% url 'payments:list' %}" class="btn btn-secondary btn-sm">Clear</a>{% endif %}
+    </form>
+  </div>
+  <div class="table-wrap">
+    {% if payments %}
+    <table class="aba-table">
+      <thead>
+        <tr><th>Date</th><th>Client</th><th>Loan #</th><th>Amount</th><th>Method</th><th>Recorded By</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td class="text-sm">{{ p.payment_date }}</td>
+          <td><a href="{% url 'clients:detail' p.client.pk %}">{{ p.client.full_name }}</a></td>
+          <td class="mono"><a href="{% url 'loans:detail' p.loan.pk %}">{{ p.loan.loan_number }}</a></td>
+          <td class="mono" style="color:var(--success)">{{ p.amount_received|money }}</td>
+          <td><span class="badge badge-neutral">{{ p.get_payment_method_display }}</span></td>
+          <td class="text-sm text-muted">{{ p.recorded_by.full_name }}</td>
+          <td>
+            <span class="badge {% if p.status == 'ALLOCATED' %}badge-success{% elif p.status == 'REVERSED' %}badge-danger{% else %}badge-warning{% endif %}">
+              {{ p.get_status_display }}
+            </span>
+          </td>
+          <td>
+            {% if p.receipt %}
+            <a href="{% url 'payments:receipt' p.receipt.pk %}" class="btn btn-secondary btn-sm">Receipt</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No payments found.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+(function () {
+  var modal = document.getElementById('record-payment-modal');
+  var hasError = !!document.getElementById('payment-error-banner');
+
+  function openModal() {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // init select2 inside modal
+    if (window.$ && $.fn.select2) {
+      $('#loan_id').select2({ dropdownParent: $(modal), width: '100%' });
+    }
+  }
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Auto-open if there was a POST error
+  if (hasError) openModal();
+
+  document.getElementById('open-record-modal').addEventListener('click', openModal);
+  document.getElementById('close-record-modal').addEventListener('click', closeModal);
+  document.getElementById('close-record-modal-2').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  // Coverage battery widget
+  var loanSel = document.getElementById('loan_id');
+  var amountIn = document.getElementById('amount');
+  var warnBox  = document.getElementById('payment-warning');
+  var balSum   = document.getElementById('payment-balance-summary');
+
+  function fmt(v) { return new Intl.NumberFormat('en-US', {maximumFractionDigits:2}).format(v); }
+  function getNextDue() {
+    if (!loanSel) return 0;
+    var opt = loanSel.selectedOptions ? loanSel.selectedOptions[0] : loanSel.options[loanSel.selectedIndex];
+    return opt ? (parseFloat(opt.dataset.nextDue) || 0) : 0;
+  }
+
+  function updateCoverage() {
+    var amount  = parseFloat(amountIn.value) || 0;
+    var nextDue = getNextDue();
+    if (nextDue <= 0) { warnBox.innerHTML = ''; balSum.textContent = ''; return; }
+    var pct   = Math.min(100, (amount / nextDue) * 100);
+    var level = pct >= 100 ? 'var(--success)' : pct >= 60 ? 'var(--info)' : pct >= 30 ? 'var(--warning)' : 'var(--danger)';
+    var label = amount > nextDue ? 'Overpaid' : amount > 0 ? 'In progress' : 'Pending';
+    warnBox.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);margin-top:6px;">'
+      + '<div style="position:relative;width:56px;height:26px;border:2px solid var(--border);border-radius:6px;padding:2px;flex-shrink:0;">'
+      + '<div style="height:100%;border-radius:4px;background:' + level + ';width:' + Math.max(6, pct) + '%;transition:width .25s;"></div></div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:600;color:var(--text-primary);">' + pct.toFixed(1) + '% covered</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);">{% currency_symbol %} ' + fmt(Math.min(amount,nextDue)) + ' of {% currency_symbol %} ' + fmt(nextDue) + '</div></div>'
+      + '<div style="font-size:12px;font-weight:700;color:' + level + ';white-space:nowrap;">' + label + '</div></div>';
+    balSum.textContent = amount > nextDue
+      ? 'Exceeds expected by {% currency_symbol %} ' + fmt(amount - nextDue)
+      : 'Expected: {% currency_symbol %} ' + fmt(nextDue);
+    balSum.style.color = amount > nextDue ? 'var(--danger)' : 'var(--text-muted)';
+  }
+
+  if (amountIn) amountIn.addEventListener('input', updateCoverage);
+  if (loanSel)  loanSel.addEventListener('change', updateCoverage);
+})();
+</script>
+{% endblock %}

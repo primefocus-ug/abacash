@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}{{ loan.loan_number }}{% endblock %}
+{% block page_title %}{{ loan.loan_number }}{% endblock %}
+
+{% block topbar_actions %}
+
+  {# ── Primary action ── #}
+  {% if loan.status == 'ACTIVE' %}
+  <a href="{% url 'payments:record_for_loan' loan.pk %}" class="btn btn-primary btn-sm" style="gap:6px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Record Payment
+  </a>
+  {% endif %}
+
+  {# ── Manager / CEO loan operations dropdown ── #}
+  {% if loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
+  <div style="position:relative;display:inline-block;" id="loan-ops-wrap">
+    <button
+      class="btn btn-secondary btn-sm"
+      style="gap:6px;"
+      onclick="document.getElementById('loan-ops-menu').classList.toggle('open');"
+      id="loan-ops-btn"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      Loan Actions
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div id="loan-ops-menu" style="
+      display:none; position:absolute; top:calc(100% + 6px); right:0;
+      background:var(--bg-surface); border:1px solid var(--border);
+      border-radius:var(--radius-md); box-shadow:0 8px 24px rgba(15,23,42,.12);
+      min-width:210px; z-index:200; overflow:hidden;
+    ">
+      {# Reschedule #}
+      <button
+        type="button"
+        class="loan-ops-item"
+        hx-get="{% url 'loans:reschedule' loan.pk %}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        onclick="openModal(); document.getElementById('loan-ops-menu').classList.remove('open');"
+      >
+        <span class="loan-ops-icon" style="background:var(--blue-dim);color:var(--blue-400);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        <span>
+          <span style="display:block;font-weight:600;font-size:13px;">Reschedule Payments</span>
+          <span style="display:block;font-size:11px;color:var(--text-muted);">Adjust repayment dates &amp; term</span>
+        </span>
+      </button>
+      {# Renew — only if product allows it #}
+      {% if loan.product.allows_renewal %}
+      <button
+        type="button"
+        class="loan-ops-item"
+        hx-get="{% url 'loans:renew' loan.pk %}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        onclick="openModal(); document.getElementById('loan-ops-menu').classList.remove('open');"
+      >
+        <span class="loan-ops-icon" style="background:var(--teal-dim);color:var(--teal-400);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"/></svg>
+        </span>
+        <span>
+          <span style="display:block;font-weight:600;font-size:13px;">Renew Loan</span>
+          <span style="display:block;font-size:11px;color:var(--text-muted);">Roll over outstanding balance</span>
+        </span>
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Recall (draft / rejected) ── #}
+  {% if loan.status == 'REJECTED' or loan.status == 'DRAFT' %}
+    {% if user == loan.applied_by or user.is_manager or user.is_ceo %}
+    <a href="{% url 'loans:recall' loan.pk %}" class="btn btn-secondary btn-sm"
+       onclick="return confirm('Recall this application back to draft for editing?');">Recall</a>
+    {% endif %}
+  {% endif %}
+
+  {# ── Utility buttons ── #}
+  <div style="display:flex;gap:6px;align-items:center;border-left:1px solid var(--border);padding-left:10px;margin-left:2px;">
+    <a href="{% url 'loans:schedule_download' loan.pk %}" class="btn btn-secondary btn-sm" style="gap:5px;" title="Download schedule as PDF">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download
+    </a>
+    <a href="{% url 'loans:schedule_print' loan.pk %}" target="_blank" class="btn btn-secondary btn-sm" style="gap:5px;" title="Print repayment schedule">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print
+    </a>
+    <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm" style="gap:5px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back
+    </a>
+  </div>
+
+  <style>
+    .loan-ops-item {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 10px 14px;
+      background: transparent; border: none; cursor: pointer;
+      text-align: left; transition: background var(--trans);
+      border-bottom: 1px solid var(--border);
+    }
+    .loan-ops-item:last-child { border-bottom: none; }
+    .loan-ops-item:hover { background: var(--bg-hover); }
+    .loan-ops-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    #loan-ops-menu.open { display: block !important; }
+  </style>
+  <script>
+    document.addEventListener('click', function(e) {
+      var wrap = document.getElementById('loan-ops-wrap');
+      if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('loan-ops-menu').classList.remove('open');
+      }
+    });
+    function openModal() {
+      var overlay = document.getElementById('modal-overlay');
+      if (overlay) overlay.classList.add('active');
+    }
+  </script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="responsive-two-col-grid">
+
+  <!-- Left column -->
+  <div>
+
+    <!-- Loan header card -->
+    <div class="card mb-3 print-hide">
+      <div class="card-body">
+        <div class="flex-between mb-2">
+          <div>
+            <div style="font-size:22px;font-weight:600;font-family:var(--font-mono);">{{ loan.loan_number }}</div>
+            <div class="text-muted text-sm">{{ loan.product.name }} — {{ loan.get_interest_method_display }}</div>
+          </div>
+          <span class="badge
+            {% if loan.status == 'ACTIVE' %}badge-green
+            {% elif loan.status == 'PENDING' %}badge-amber
+            {% elif loan.status == 'APPROVED' %}badge-blue
+            {% elif loan.status == 'COMPLETED' %}badge-teal
+            {% elif loan.status == 'REJECTED' or loan.status == 'DEFAULTED' %}badge-red
+            {% else %}badge-muted{% endif %}">
+            {{ loan.get_status_display }}
+          </span>
+        </div>
+
+        {% if loan.purpose %}
+        <div class="mt-2">
+          <div class="text-muted text-sm">Purpose</div>
+          <div>{{ loan.purpose }}</div>
+        </div>
+        {% endif %}
+
+        {% if loan.rejection_reason %}
+        <div class="alert alert-danger mt-2">
+          <strong>Rejection reason:</strong> {{ loan.rejection_reason }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Approve / Reject (managers/CEO, pending loans only) -->
+    {% if loan.status == 'PENDING' and user.can_approve_loans %}
+    <div class="card mb-3 print-hide" id="reject" style="border-color:var(--border);">
+      <div class="card-header"><span class="card-title">Loan Decision</span></div>
+      <div class="card-body">
+        <div class="flex gap-2 mb-3">
+          <form method="post" action="{% url 'loans:approve' loan.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success"
+                    data-confirm="Approve this loan of {{ loan.principal_amount|money }}?">
+              ✓ Approve Loan
+            </button>
+          </form>
+        </div>
+        <form method="post" action="{% url 'loans:reject' loan.pk %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="rejection_reason">Rejection Reason (required)</label>
+            <textarea name="rejection_reason" id="rejection_reason" rows="3"
+                      placeholder="Explain why this loan is being rejected…" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger">Reject Loan</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Amortization schedule -->
+    <div class="card mb-3" id="schedule-print-card">
+      <div class="print-only" style="display:none; margin-bottom:10px; font-size:18px; font-weight:600;">Repayment Schedule — {{ loan.loan_number }}</div>
+      <div class="card-header"><span class="card-title">Repayment Schedule</span></div>
+      <div class="table-wrap">
+        <table class="aba-table schedule-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Due Date</th><th>Opening Bal.</th>
+              <th>Principal</th><th>Interest</th><th>Penalty</th>
+              <th>Total Due</th><th>Paid</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in schedule %}
+            <tr class="{% if entry.status == 'PAID' %}paid-row{% elif entry.status == 'OVERDUE' %}overdue-row{% endif %}">
+              <td class="text-muted">{{ entry.period_number }}</td>
+              <td>{{ entry.due_date }}</td>
+              <td class="mono">{{ entry.opening_balance|floatformat:0|intcomma }}</td>
+              <td class="mono">{{ entry.principal_due|floatformat:0|intcomma }}</td>
+              <td class="mono">{{ entry.interest_due|floatformat:0|intcomma }}</td>
+              <td class="mono {% if entry.penalty_due > 0 %}style="color:var(--red-400)"{% endif %}">
+                {% if entry.penalty_due > 0 %}{{ entry.penalty_due|floatformat:0|intcomma }}{% else %}—{% endif %}
+              </td>
+              <td class="mono fw-500">{{ entry.total_payment|floatformat:0|intcomma }}</td>
+              <td class="mono" style="color:var(--green-400)">
+                {% if entry.amount_paid > 0 %}{{ entry.amount_paid|floatformat:0|intcomma }}{% else %}—{% endif %}
+              </td>
+              <td>
+                <span class="badge
+                  {% if entry.status == 'PAID' %}badge-green
+                  {% elif entry.status == 'OVERDUE' %}badge-red
+                  {% elif entry.status == 'PARTIAL' %}badge-amber
+                  {% else %}badge-muted{% endif %}">
+                  {{ entry.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9"><div class="empty-state"><p>Schedule not generated yet.</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment history -->
+    <div class="card print-hide">
+      <div class="card-header"><span class="card-title">Payment History</span></div>
+      <div class="table-wrap">
+        {% if payments %}
+        <table class="aba-table">
+          <thead>
+            <tr><th>Date</th><th>Amount</th><th>Principal</th><th>Interest</th><th>Method</th><th>Recorded By</th><th>Receipt</th></tr>
+          </thead>
+          <tbody>
+            {% for p in payments %}
+            <tr>
+              <td>{{ p.payment_date }}</td>
+              <td class="mono" style="color:var(--green-400)">{{ p.amount_received|money }}</td>
+              <td class="mono">{{ p.principal_paid|floatformat:0|intcomma }}</td>
+              <td class="mono">{{ p.interest_paid|floatformat:0|intcomma }}</td>
+              <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+              <td class="text-sm text-muted">{{ p.recorded_by.full_name }}</td>
+              <td>{% if p.receipt %}<a href="{% url 'payments:receipt' p.receipt.pk %}" class="btn btn-secondary btn-sm">Receipt</a>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><p>No payments recorded yet.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if renewals %}
+    <div class="card mb-3 print-hide">
+      <div class="card-header"><span class="card-title">Renewal History</span></div>
+      <div class="table-wrap">
+        <table class="aba-table">
+          <thead>
+            <tr><th>Date</th><th>New Loan</th><th>Rolled Over</th><th>Additional</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            {% for renewal in renewals %}
+            <tr>
+              <td>{{ renewal.renewal_date }}</td>
+              <td><a href="{% url 'loans:detail' renewal.new_loan.pk %}">{{ renewal.new_loan.loan_number }}</a></td>
+              <td class="mono">{{ renewal.outstanding_amount|ugx_plain }}</td>
+              <td class="mono">{{ renewal.additional_amount|ugx_plain }}</td>
+              <td>{{ renewal.reason|truncatechars:50 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- left col -->
+
+  <!-- Right column — client info -->
+  <div>
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Client</span></div>
+      <div class="card-body" style="padding:0;">
+        {% with loan.client as c %}
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:500;font-size:15px;">{{ c.full_name }}</div>
+          <div class="text-muted text-sm">{{ c.client_number }}</div>
+        </div>
+        {% for label, val in client_rows %}
+        <div class="receipt-row" style="padding:10px 20px;">
+          <span class="receipt-label text-sm">{{ label }}</span>
+          <span class="text-sm">{{ val }}</span>
+        </div>
+        {% empty %}
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Phone</span><span>{{ c.phone_primary }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">NIN</span><span class="mono text-sm">{{ c.nin }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Employment</span><span class="text-sm">{{ c.get_employment_status_display }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Income</span><span class="mono text-sm">{{ c.monthly_income|money }}/mo</span></div>
+        {% endfor %}
+        {% endwith %}
+        <div style="padding:12px 20px;">
+          <a href="{% url 'clients:detail' loan.client.pk %}" class="btn btn-secondary btn-sm w-100" style="justify-content:center;">View Full Profile</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header"><span class="card-title">Collateral</span></div>
+      {% with loan.collateral_items.all as items %}
+      {% if items %}
+      <div class="card-body" style="padding:0;">
+        {% for item in items %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
+          <span class="text-sm">{{ item.description }}</span>
+          <span class="mono text-sm">{{ item.estimated_value|money }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state" style="padding:16px;"><p class="text-sm">No collateral recorded.</p></div>
+      {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Loan Info</span></div>
+      <div class="card-body" style="padding:0;">
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Applied By</span><span class="text-sm">{{ loan.applied_by.full_name|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Reviewed By</span><span class="text-sm">{{ loan.reviewed_by.full_name|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Approved</span><span class="text-sm">{{ loan.approval_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Disbursed</span><span class="text-sm">{{ loan.disbursement_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Matures</span><span class="text-sm">{{ loan.maturity_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;border-bottom:none;"><span class="receipt-label text-sm">Total Paid</span><span class="mono" style="color:var(--green-400)">{{ loan.total_paid|money }}</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

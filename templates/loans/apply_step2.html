@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Apply — {{ client.full_name }}{% endblock %}
+{% block page_title %}New Loan Application{% endblock %}
+
+{% block content %}
+<style>
+  .wiz-bar { display:flex; gap:0; margin-bottom:20px; }
+  .wiz-step { flex:1; display:flex; align-items:center; gap:0; }
+  .wiz-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+  .wiz-dot.done { background:var(--success); border-color:var(--success); color:#fff; }
+  .wiz-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .wiz-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-left:8px; white-space:nowrap; }
+  .wiz-label.active { color:var(--accent); }
+  .wiz-line { flex:1; height:2px; background:var(--border); margin:0 8px; }
+  .wiz-line.done { background:var(--success); }
+  .app-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:20px; align-items:start; }
+  @media(max-width:1024px){ .app-grid { grid-template-columns:1fr; } }
+  .fee-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .fee-row:last-child { border-bottom:none; font-weight:700; font-size:14px; }
+  .tier-row.match { background:rgba(37,99,235,.07); font-weight:700; }
+</style>
+
+{# ── Wizard bar ── #}
+<div class="wiz-bar">
+  <div class="wiz-step">
+    <div class="wiz-dot done">✓</div>
+    <span class="wiz-label">Client</span>
+  </div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step">
+    <div class="wiz-dot active">2</div>
+    <span class="wiz-label active">Loan Terms</span>
+  </div>
+  <div class="wiz-line"></div>
+  <div class="wiz-step">
+    <div class="wiz-dot">3</div>
+    <span class="wiz-label">Security</span>
+  </div>
+  <div class="wiz-line"></div>
+  <div class="wiz-step">
+    <div class="wiz-dot">4</div>
+    <span class="wiz-label">Review</span>
+  </div>
+</div>
+
+<div class="app-grid">
+
+  {# ── LEFT: Form ── #}
+  <div>
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between;">
+        <span class="card-title">Loan Terms</span>
+        <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
+      </div>
+      <div class="card-body">
+        <form id="loan-form" method="post"
+              hx-get="{% url 'loans:schedule_preview' %}"
+              hx-trigger="change delay:500ms"
+              hx-target="#schedule-panel"
+              hx-include="#loan-form">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label for="product">Loan Product <span style="color:var(--danger);">*</span></label>
+            <select name="product" id="product" class="select2-init" required>
+              <option value="">— Select product —</option>
+              {% for p in products %}
+              <option value="{{ p.pk }}"
+                      data-min="{{ p.min_amount }}" data-max="{{ p.max_amount }}"
+                      data-rate="{{ p.interest_rate_monthly }}" data-method="{{ p.interest_method }}"
+                      {% if form_data.product and form_data.product.pk == p.pk %}selected{% endif %}>
+                {{ p.name }} — {{ p.interest_rate_monthly }}%/mo ({{ p.get_interest_method_display }})
+              </option>
+              {% endfor %}
+            </select>
+            <div id="product-hint" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="principal">Loan Amount ({% currency_symbol %}) <span style="color:var(--danger);">*</span></label>
+            <input type="number" name="principal" id="principal"
+                   value="{{ form_data.principal|default:'' }}"
+                   placeholder="e.g. 1,000,000" min="0" step="1000" required>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label for="term_months">Term (Months) <span style="color:var(--danger);">*</span></label>
+              <input type="number" name="term_months" id="term_months"
+                     value="{{ form_data.term_months|default:6 }}" min="1" max="60" required>
+            </div>
+            <div class="form-group">
+              <label for="frequency">Repayment Frequency <span style="color:var(--danger);">*</span></label>
+              <select name="frequency" id="frequency" required>
+                <option value="MONTHLY"  {% if form_data.frequency == 'MONTHLY'  or not form_data.frequency %}selected{% endif %}>Monthly</option>
+                <option value="WEEKLY"   {% if form_data.frequency == 'WEEKLY'   %}selected{% endif %}>Weekly</option>
+                <option value="BIWEEKLY" {% if form_data.frequency == 'BIWEEKLY' %}selected{% endif %}>Bi-Weekly</option>
+                <option value="DAILY"    {% if form_data.frequency == 'DAILY'    %}selected{% endif %}>Daily</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="purpose">Loan Purpose</label>
+            <textarea name="purpose" id="purpose" rows="2"
+                      placeholder="What will the client use this loan for?">{{ form_data.purpose|default:'' }}</textarea>
+          </div>
+
+          {# ── Fee summary (always visible, updates via JS) ── #}
+          <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:4px;">
+            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);">Fee & Disbursement Summary</div>
+            <div style="padding:12px 14px;">
+              <div class="fee-row"><span>Principal</span><span id="s-principal" class="mono">—</span></div>
+              <div class="fee-row"><span>Processing Fee <span id="s-fee-label" style="color:var(--text-muted);font-weight:400;"></span></span><span id="s-fee" class="mono">—</span></div>
+              <div class="fee-row"><span>Net Disbursed to Client</span><span id="s-net" class="mono">—</span></div>
+              <div class="fee-row" style="color:var(--text-muted);font-size:12px;border-bottom:none;padding-top:4px;">
+                <span id="s-fee-source"></span>
+              </div>
+            </div>
+          </div>
+
+          {% if office_charge_tiers %}
+          <details style="margin-top:12px;">
+            <summary style="font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;padding:6px 0;">Processing Charge Tiers</summary>
+            <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px;">
+              <thead><tr style="background:var(--surface-2);">
+                <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);">Loan Range</th>
+                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);">Charge</th>
+              </tr></thead>
+              <tbody>
+                {% for tier in office_charge_tiers %}
+                <tr class="tier-row" data-min="{{ tier.min_amount }}" data-max="{{ tier.max_amount|default:'' }}" data-charge="{{ tier.office_charge }}" style="border-bottom:1px solid var(--border);">
+                  <td style="padding:6px 10px;">
+                    {% if tier.max_amount %}{{ tier.min_amount|money }} – {{ tier.max_amount|money }}{% else %}{{ tier.min_amount|money }} and above{% endif %}
+                  </td>
+                  <td style="padding:6px 10px;text-align:right;font-weight:500;">{{ tier.office_charge|money }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </details>
+          {% endif %}
+
+          <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+            <a href="{% url 'loans:apply' %}" class="btn btn-secondary">← Back</a>
+            <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
+            <button type="submit" name="action" value="continue" class="btn btn-primary" style="margin-left:auto;">Continue to Security →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {% if active_loan %}
+    <div class="card" style="margin-top:16px;border-left:3px solid var(--warning);">
+      <div class="card-body" style="padding:14px 16px;">
+        <div style="font-weight:600;font-size:13px;color:var(--warning);">⚠ Active Loan Exists</div>
+        <div style="font-size:13px;margin-top:4px;">{{ active_loan.loan_number }} — Outstanding {{ active_loan.outstanding_balance|money }}</div>
+        {% if can_renew %}
+        <a href="{% url 'loans:renew' active_loan.pk %}" class="btn btn-secondary btn-sm" style="margin-top:8px;">Roll Over This Loan</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── RIGHT: Live schedule ── #}
+  <div>
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between;">
+        <span class="card-title">Repayment Schedule Preview</span>
+        <span class="htmx-indicator" style="font-size:12px;color:var(--text-muted);">Calculating…</span>
+      </div>
+      <div id="schedule-panel">
+        {% if schedule_rows %}
+          {% include "partials/schedule_table.html" %}
+        {% else %}
+        <div class="empty-state" style="padding:40px 24px;">
+          <p>Select a product and enter loan details to preview the schedule.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const productSel  = document.getElementById('product');
+  const principalIn = document.getElementById('principal');
+  const termIn      = document.getElementById('term_months');
+  const sPrincipal  = document.getElementById('s-principal');
+  const sFee        = document.getElementById('s-fee');
+  const sFeeLabel   = document.getElementById('s-fee-label');
+  const sNet        = document.getElementById('s-net');
+  const sFeeSource  = document.getElementById('s-fee-source');
+  const productHint = document.getElementById('product-hint');
+
+  // Parse tier data from DOM
+  const tiers = Array.from(document.querySelectorAll('.tier-row')).map(r => ({
+    min: parseFloat(r.dataset.min) || 0,
+    max: r.dataset.max ? parseFloat(r.dataset.max) : null,
+    charge: parseFloat(r.dataset.charge) || 0,
+    el: r,
+  }));
+
+  function fmt(n) {
+    return '{% currency_symbol %} ' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function getOfficeCharge(p) {
+    for (const t of tiers) {
+      if (t.max === null ? p >= t.min : p >= t.min && p <= t.max) return t.charge;
+    }
+    return 0;
+  }
+
+  function updateSummary() {
+    const p = parseFloat(principalIn.value) || 0;
+    const opt = productSel.selectedOptions[0];
+
+    // Product hint
+    if (opt && opt.dataset.min) {
+      productHint.textContent = `Range: {% currency_symbol %} ${parseInt(opt.dataset.min).toLocaleString()} – {% currency_symbol %} ${parseInt(opt.dataset.max).toLocaleString()} · ${opt.dataset.rate}%/mo ${opt.dataset.method}`;
+    } else {
+      productHint.textContent = '';
+    }
+
+    // Fee from HTMX meta if available, else from tiers
+    const meta = document.getElementById('schedule-preview-meta');
+    let fee = 0, feeLabel = '', feeSource = '';
+    if (meta && parseFloat(meta.dataset.processingFee) > 0) {
+      fee = parseFloat(meta.dataset.processingFee);
+      feeSource = meta.dataset.processingFeeSource || '';
+      const pct = meta.dataset.processingFeePercent;
+      feeLabel = meta.dataset.processingFeeRateText || (pct ? `(${pct}%)` : '');
+    } else {
+      fee = getOfficeCharge(p);
+      feeSource = fee > 0 ? 'Office charge tiers' : 'Company settings';
+    }
+
+    sPrincipal.textContent = p > 0 ? fmt(p) : '—';
+    sFee.textContent = p > 0 ? fmt(fee) : '—';
+    sFeeLabel.textContent = feeLabel ? `· ${feeLabel}` : '';
+    sNet.textContent = p > 0 ? fmt(Math.max(0, p - fee)) : '—';
+    sFeeSource.textContent = feeSource ? `Source: ${feeSource}` : '';
+
+    // Highlight matching tier
+    tiers.forEach(t => {
+      const match = t.max === null ? p >= t.min : p >= t.min && p <= t.max;
+      t.el.classList.toggle('match', match && p > 0);
+    });
+  }
+
+  [productSel, principalIn, termIn].forEach(el => {
+    el?.addEventListener('change', updateSummary);
+    el?.addEventListener('input', updateSummary);
+  });
+
+  // After HTMX swaps schedule, re-read meta and update summary
+  document.body.addEventListener('htmx:afterSwap', e => {
+    if (e.detail.target?.id === 'schedule-panel') updateSummary();
+  });
+
+  updateSummary();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Admin Panel{% endblock %}
+{% block page_title %}Admin Panel{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:user_create' %}" class="btn btn-primary btn-sm">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add user
+  </a>
+  <a href="{% url 'accounts:company_settings' %}" class="btn btn-secondary btn-sm">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Company settings
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Overview stats ───────────────────────────────────────── -->
+<div class="stat-grid" style="margin-bottom: 24px;">
+
+  <a href="{% url 'accounts:user_list' %}" class="stat-card accent-blue" style="text-decoration:none;display:block;">
+    <div class="stat-icon blue">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+    <div class="stat-label">Active staff</div>
+    <div class="stat-value">{{ active_users }}</div>
+  </a>
+
+  <a href="{% url 'accounts:user_list' %}?role=Cashier" class="stat-card accent-gold" style="text-decoration:none;display:block;">
+    <div class="stat-icon gold">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+    </div>
+    <div class="stat-label">Cashiers</div>
+    <div class="stat-value">{{ users_by_role.Cashier }}</div>
+  </a>
+
+  <a href="{% url 'accounts:user_list' %}?role=Manager" class="stat-card accent-blue" style="text-decoration:none;display:block;">
+    <div class="stat-icon blue">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <div class="stat-label">Managers</div>
+    <div class="stat-value">{{ users_by_role.Manager }}</div>
+  </a>
+
+  <a href="{% url 'clients:list' %}" class="stat-card accent-green" style="text-decoration:none;display:block;">
+    <div class="stat-icon green">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+    <div class="stat-label">Total clients</div>
+    <div class="stat-value">{{ total_clients }}</div>
+  </a>
+
+</div>
+
+<!-- ── Two-column panels ────────────────────────────────────── -->
+<div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:start;">
+
+  <!-- Recent staff accounts -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent staff accounts</span>
+      <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary btn-sm">View all</a>
+    </div>
+    <div class="table-wrap" style="border:none;border-radius:0;">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Joined</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for u in recent_users %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-secondary);flex-shrink:0;">
+                  {{ u.full_name|first|upper }}
+                </div>
+                <div>
+                  <div style="font-weight:500;">{{ u.full_name }}</div>
+                  <div style="font-size:12px;color:var(--text-muted);">{{ u.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if u.role == 'CEO' %}badge-info{% elif u.role == 'MANAGER' %}badge-info{% else %}badge-neutral{% endif %}">
+                {{ u.get_role_display }}
+              </span>
+            </td>
+            <td style="color:var(--text-secondary);font-size:13px;">{{ u.date_joined|date:"d M Y" }}</td>
+            <td>
+              <span class="badge {% if u.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                <span class="badge-dot"></span>
+                {% if u.is_active %}Active{% else %}Inactive{% endif %}
+              </span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:28px;">No staff accounts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Company settings summary -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Company settings</span>
+      <a href="{% url 'accounts:company_settings' %}" class="btn btn-secondary btn-sm">Edit</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% with s=settings %}
+      <div class="settings-row">
+        <span class="settings-label">Company name</span>
+        <span class="settings-value">{{ s.company_name }}</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Manager approval limit</span>
+        <span class="settings-value mono">{{ s.manager_approval_limit|money }}</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Default penalty rate</span>
+        <span class="settings-value mono">{{ s.default_penalty_rate }}% / month</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Income multiplier</span>
+        <span class="settings-value mono">{{ s.income_multiplier }}×</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Collateral haircut</span>
+        <span class="settings-value mono">{{ s.collateral_haircut }}%</span>
+      </div>
+      <div class="settings-row" style="border-bottom:none;">
+        <span class="settings-label">SMS reminders</span>
+        <span class="badge {% if s.sms_reminders_enabled %}badge-success{% else %}badge-neutral{% endif %}">
+          <span class="badge-dot"></span>
+          {% if s.sms_reminders_enabled %}Enabled · {{ s.reminder_days_before }}d before{% else %}Disabled{% endif %}
+        </span>
+      </div>
+      {% endwith %}
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="card" style="grid-column:1/-1;">
+    <div class="card-header"><span class="card-title">Quick actions</span></div>
+    <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+      <a href="{% url 'accounts:user_create' %}" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add staff user
+      </a>
+      <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Manage users
+      </a>
+      <a href="{% url 'accounts:company_settings' %}" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82"/></svg>
+        Company settings
+      </a>
+      <a href="{% url 'loans:products' %}" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+        Loan products
+      </a>
+      <a href="{% url 'reports:index' %}" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 22px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  .settings-label { color: var(--text-secondary); }
+  .settings-value { color: var(--text-primary); font-weight: 500; }
+  .mono { font-family: 'Inter', monospace; font-feature-settings: "tnum" 1; }
+
+  .stat-card[href] { transition: border-color .15s, transform .1s; }
+  .stat-card[href]:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  @media (max-width: 900px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    div[style*="grid-template-columns:1.3fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('[data-link]').forEach(function(el) {
+    el.addEventListener('click', function() { window.location.href = this.dataset.link; });
+  });
+</script>
+
+{% endblock %}

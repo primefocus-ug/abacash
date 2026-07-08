@@ -1,0 +1,48 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Collections Report{% endblock %}
+{% block bar_title %}Collections Report{% endblock %}
+{% block doc_title_display %}Collections by Cashier{% endblock %}
+{% block doc_subtitle %}{{ date_from }} — {{ date_to }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Total Collected</div><div class="metric-value green">{{ grand_total|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Transactions</div><div class="metric-value">{{ payment_count }}</div></div>
+  <div class="metric"><div class="metric-label">Cashiers Active</div><div class="metric-value teal">{{ cashier_totals|length }}</div></div>
+</div>
+
+{% for row in cashier_totals %}
+<div class="section-title">{{ row.user.full_name }} — {{ row.count }} transactions — {{ row.total|ugx_plain }}</div>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th><th>Client</th><th>Loan #</th>
+      <th class="r">Amount</th><th class="r">Principal</th><th class="r">Interest</th><th>Method</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in row.payments %}
+    <tr>
+      <td>{{ p.payment_date }}</td>
+      <td>{{ p.client.full_name }}</td>
+      <td class="mono">{{ p.loan.loan_number }}</td>
+      <td class="r green">{{ p.amount_received|ugx_plain }}</td>
+      <td class="r">{{ p.principal_paid|ugx_plain }}</td>
+      <td class="r amber">{{ p.interest_paid|ugx_plain }}</td>
+      <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td class="l" colspan="3">Subtotal</td>
+      <td>{{ row.total|ugx_plain }}</td>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+{% empty %}
+<p style="text-align:center;padding:32px;color:#8a9bac;">No payments found for the selected period.</p>
+{% endfor %}
+{% endblock %}

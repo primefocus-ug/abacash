@@ -1,0 +1,57 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Loan Book{% endblock %}
+{% block bar_title %}Loan Book{% endblock %}
+{% block doc_title_display %}Loan Book Report{% endblock %}
+{% block doc_subtitle %}{{ date_from|default:"All dates" }} — {{ date_to|default:"" }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Total Loans</div><div class="metric-value">{{ loans|length }}</div></div>
+  <div class="metric"><div class="metric-label">Total Principal</div><div class="metric-value teal">{{ total_principal|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Total Outstanding</div><div class="metric-value amber">{{ total_outstanding|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Total Collected</div><div class="metric-value green">{{ total_paid|ugx_plain }}</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Loan #</th><th>Client</th><th>Product</th>
+      <th class="r">Principal</th><th class="r">Paid</th><th class="r">Outstanding</th>
+      <th>Disbursed</th><th>Matures</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for loan in loans %}
+    <tr>
+      <td class="mono">{{ loan.loan_number }}</td>
+      <td>{{ loan.client.full_name }}<br><span style="font-size:10px;color:#8a9bac;">{{ loan.client.phone_primary }}</span></td>
+      <td>{{ loan.product.name }}</td>
+      <td class="r">{{ loan.principal_amount|ugx_plain }}</td>
+      <td class="r green">{{ loan.total_paid|ugx_plain }}</td>
+      <td class="r {% if loan.outstanding_balance > 0 %}amber{% else %}green{% endif %}">{{ loan.outstanding_balance|ugx_plain }}</td>
+      <td>{{ loan.disbursement_date|default:"—" }}</td>
+      <td>{{ loan.maturity_date|default:"—" }}</td>
+      <td>
+        <span class="badge {% if loan.status == 'ACTIVE' %}badge-green{% elif loan.status == 'COMPLETED' %}badge-teal{% elif loan.status == 'DEFAULTED' %}badge-red{% else %}badge-muted{% endif %}">
+          {{ loan.get_status_display }}
+        </span>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" style="text-align:center;padding:24px;color:#8a9bac;">No loans match the selected filters.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if loans %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="3">Totals</td>
+      <td>{{ total_principal|ugx_plain }}</td>
+      <td>{{ total_paid|ugx_plain }}</td>
+      <td>{{ total_outstanding|ugx_plain }}</td>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

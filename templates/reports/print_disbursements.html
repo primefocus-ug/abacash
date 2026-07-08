@@ -1,0 +1,55 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Disbursements{% endblock %}
+{% block bar_title %}Disbursements Report{% endblock %}
+{% block doc_title_display %}Disbursements Report{% endblock %}
+{% block doc_subtitle %}{{ date_from }} — {{ date_to }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Loans Disbursed</div><div class="metric-value teal">{{ loan_count }}</div></div>
+  <div class="metric"><div class="metric-label">Total Principal</div><div class="metric-value green">{{ total_disbursed|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Expected Interest</div><div class="metric-value blue">{{ total_interest_exp|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Processing Fees</div><div class="metric-value amber">{{ total_fees|ugx_plain }}</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Loan #</th><th>Client</th><th>Product</th>
+      <th class="r">Principal</th><th>Term</th><th>Frequency</th>
+      <th>Disbursed</th><th>Officer</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for loan in loans %}
+    <tr>
+      <td class="mono">{{ loan.loan_number }}</td>
+      <td>{{ loan.client.full_name }}<br><span style="font-size:10px;color:#8a9bac;">{{ loan.client.client_number }}</span></td>
+      <td style="font-size:11px;">{{ loan.product.name }}</td>
+      <td class="r">{{ loan.principal_amount|ugx_plain }}</td>
+      <td>{{ loan.term_months }}mo</td>
+      <td style="font-size:11px;">{{ loan.get_repayment_frequency_display }}</td>
+      <td>{{ loan.disbursement_date }}</td>
+      <td style="font-size:11px;">{{ loan.reviewed_by.get_full_name|default:"—" }}</td>
+      <td>
+        <span class="badge {% if loan.status == 'ACTIVE' %}badge-green{% elif loan.status == 'COMPLETED' %}badge-teal{% elif loan.status == 'DEFAULTED' %}badge-red{% else %}badge-muted{% endif %}">
+          {{ loan.get_status_display }}
+        </span>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" style="text-align:center;padding:24px;color:#8a9bac;">No disbursements found.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if loans %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="3">Totals</td>
+      <td>{{ total_disbursed|ugx_plain }}</td>
+      <td colspan="5"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

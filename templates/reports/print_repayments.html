@@ -1,0 +1,56 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Repayments{% endblock %}
+{% block bar_title %}Repayments Report{% endblock %}
+{% block doc_title_display %}Repayments Report{% endblock %}
+{% block doc_subtitle %}{{ date_from }} — {{ date_to }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Payments</div><div class="metric-value teal">{{ payment_count }}</div></div>
+  <div class="metric"><div class="metric-label">Total Received</div><div class="metric-value green">{{ total_received|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Principal Recovered</div><div class="metric-value blue">{{ total_principal|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Interest Collected</div><div class="metric-value amber">{{ total_interest|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Penalties</div><div class="metric-value red">{{ total_penalty|ugx_plain }}</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th><th>Loan #</th><th>Client</th><th>Product</th>
+      <th class="r">Amount</th><th class="r">Principal</th><th class="r">Interest</th><th class="r">Penalty</th>
+      <th>Method</th><th>Cashier</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in payments %}
+    <tr>
+      <td>{{ p.payment_date }}</td>
+      <td class="mono">{{ p.loan.loan_number }}</td>
+      <td>{{ p.client.full_name }}</td>
+      <td style="font-size:11px;">{{ p.loan.product.name }}</td>
+      <td class="r green" style="font-weight:600;">{{ p.amount_received|ugx_plain }}</td>
+      <td class="r">{{ p.principal_paid|ugx_plain }}</td>
+      <td class="r amber">{{ p.interest_paid|ugx_plain }}</td>
+      <td class="r red">{{ p.penalty_paid|ugx_plain }}</td>
+      <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+      <td style="font-size:11px;">{{ p.recorded_by.get_full_name|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="10" style="text-align:center;padding:24px;color:#8a9bac;">No repayments found.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if payments %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="4">Totals</td>
+      <td>{{ total_received|ugx_plain }}</td>
+      <td>{{ total_principal|ugx_plain }}</td>
+      <td>{{ total_interest|ugx_plain }}</td>
+      <td>{{ total_penalty|ugx_plain }}</td>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

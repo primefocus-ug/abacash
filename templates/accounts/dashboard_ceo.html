@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}CEO Dashboard{% endblock %}
+{% block page_title %}CEO Dashboard{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">Reports</a>
+  <a href="{% url 'loans:apply' %}" class="btn btn-primary btn-sm">New Loan</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Metrics row -->
+<div class="metrics-grid mb-3">
+  <div class="metric-card teal" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Total Portfolio</div>
+    <div class="metric-value teal">{{ total_portfolio|money }}</div>
+    <div class="metric-sub">Disbursed (active)</div>
+  </div>
+  <div class="metric-card blue" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Outstanding Balance</div>
+    <div class="metric-value" style="color:var(--blue-400)">{{ total_outstanding|money }}</div>
+    <div class="metric-sub">To be recovered</div>
+  </div>
+  <div class="metric-card green" style="cursor: pointer;" data-link="{% url 'reports:collections' %}">
+    <div class="metric-label">Collected This Month</div>
+    <div class="metric-value green">{{ collected_month|money }}</div>
+    <div class="metric-sub">Total receipts</div>
+  </div>
+  <div class="metric-card green" style="cursor: pointer;" data-link="{% url 'reports:index' %}">
+    <div class="metric-label">Interest Income</div>
+    <div class="metric-value" style="color:var(--amber-400)">{{ interest_income|money }}</div>
+    <div class="metric-sub">This month</div>
+  </div>
+  <div class="metric-card orange" style="cursor: pointer;">
+    <div class="metric-label">Total Expenses</div>
+    <div class="metric-value" style="color:var(--red-400)">{{ total_expenses|money }}</div>
+    <div class="metric-sub">Last {{ period }} months</div>
+  </div>
+  <div class="metric-card purple" style="cursor: pointer;">
+    <div class="metric-label">Capital Injections</div>
+    <div class="metric-value" style="color:var(--indigo-400)">{{ total_injections|money }}</div>
+    <div class="metric-sub">Last {{ period }} months</div>
+  </div>
+  <div class="metric-card red" style="cursor: pointer;" data-link="{% url 'reports:overdue' %}">
+    <div class="metric-label">Overdue Loans</div>
+    <div class="metric-value red">{{ overdue_count }}</div>
+    <div class="metric-sub">loans with missed payments</div>
+  </div>
+  <div class="metric-card amber" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=PENDING">
+    <div class="metric-label">Pending Approvals</div>
+    <div class="metric-value amber">{{ pending_count }}</div>
+    <div class="metric-sub">awaiting review</div>
+  </div>
+</div>
+
+<!-- Chart + stats row -->
+<div class="chart-controls mb-3" style="display:flex;gap:8px;flex-wrap:wrap;">
+  <label style="font-size:13px;color:var(--text-muted);">Period</label>
+  <button type="button" class="btn btn-sm btn-outline {% if period == 3 %}active{% endif %}" data-period="3" onclick="setCollectionPeriod(3)">3m</button>
+  <button type="button" class="btn btn-sm btn-outline {% if period == 6 %}active{% endif %}" data-period="6" onclick="setCollectionPeriod(6)">6m</button>
+  <button type="button" class="btn btn-sm btn-outline {% if period == 12 %}active{% endif %}" data-period="12" onclick="setCollectionPeriod(12)">12m</button>
+</div>
+
+<div class="dashboard-grid">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">{{ period }}-Month Collections</span>
+    </div>
+    <div class="card-body">
+      <div class="chart-wrap">
+        <canvas id="collection-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Collections Trend</span></div>
+    <div class="card-body">
+      <div class="chart-wrap">
+        <canvas id="collection-trend-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Expense Trend</span></div>
+    <div class="card-body">
+      <div class="chart-wrap">
+        <canvas id="expense-trend-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Expense Breakdown</span></div>
+    <div class="card-body">
+      <div class="chart-wrap" style="height:240px;">
+        <canvas id="expense-chart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Risk Distribution Chart -->
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Portfolio Risk Distribution</span>
+  </div>
+  <div class="card-body dashboard-grid dashboard-grid--stacked">
+    <div class="chart-wrap" style="height:240px;">
+      <canvas id="risk-chart"></canvas>
+    </div>
+    <div>
+      <div class="text-muted text-sm mb-2" style="font-weight:500;">Risk Breakdown</div>
+      <div style="display:grid;gap:10px;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green-400);margin-right:6px;"></span>Low Risk</span>
+          <span class="mono" style="color:var(--green-400);">{{ risk_distribution.LOW }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--teal-400);margin-right:6px;"></span>Normal</span>
+          <span class="mono" style="color:var(--teal-400);">{{ risk_distribution.NORMAL }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--amber-400);margin-right:6px;"></span>Watch</span>
+          <span class="mono" style="color:var(--amber-400);">{{ risk_distribution.WATCH }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ff9f1c;margin-right:6px;"></span>Substandard</span>
+          <span class="mono" style="color:#ff9f1c;">{{ risk_distribution.SUBSTANDARD }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--red-400);margin-right:6px;"></span>Doubtful</span>
+          <span class="mono" style="color:var(--red-400);">{{ risk_distribution.DOUBTFUL }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b0000;margin-right:6px;"></span>Loss</span>
+          <span class="mono" style="color:#8b0000;">{{ risk_distribution.LOSS }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loan book table -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recent Loan Book</span>
+    <div class="flex gap-2">
+      <a href="{% url 'reports:loan_book' %}" class="btn btn-secondary btn-sm">Full Report</a>
+      <a href="{% url 'reports:loan_book' %}?export=excel" class="btn btn-secondary btn-sm">Export Excel</a>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal</th><th>Outstanding</th>
+          <th>Next Due</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in recent_loans %}
+        <tr>
+          <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+          <td><a href="{% url 'clients:detail' loan.client.pk %}">{{ loan.client.full_name }}</a></td>
+          <td class="text-sm text-muted">{{ loan.product.name }}</td>
+          <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+          <td class="mono" style="color:{% if loan.outstanding_balance > 0 %}var(--amber-400){% else %}var(--green-400){% endif %}">
+            {{ loan.outstanding_balance|floatformat:0|intcomma }}
+          </td>
+          <td class="text-sm">
+            {% with loan.next_due_date as nd %}
+              {% if nd %}{{ nd }}{% else %}<span class="text-muted">—</span>{% endif %}
+            {% endwith %}
+          </td>
+          <td>
+            <span class="badge
+              {% if loan.status == 'ACTIVE' %}badge-green
+              {% elif loan.status == 'COMPLETED' %}badge-teal
+              {% elif loan.status == 'DEFAULTED' %}badge-red
+              {% else %}badge-muted{% endif %}">
+              {{ loan.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty-state"><p>No loans found.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="application/json" id="monthly-data">
+  {{ monthly_data_json|safe }}
+</script>
+<script type="application/json" id="risk-data">
+  {{ risk_data_json|safe }}
+</script>
+<script type="application/json" id="expense-data">
+  {{ expense_data_json|safe }}
+</script>
+<script type="application/json" id="expense-history-data">
+  {{ expense_history_json|safe }}
+</script>
+<script>
+  const mData = JSON.parse(document.getElementById('monthly-data').textContent || '[]');
+  const expenseData = JSON.parse(document.getElementById('expense-data').textContent || '[]');
+  const expenseHistoryData = JSON.parse(document.getElementById('expense-history-data').textContent || '[]');
+
+  let fullMonthlyData = Array.isArray(mData) ? mData : [];
+  const initialPeriod = {{ period|default:6 }};
+
+  function renderCollectionChart(periodMonths) {
+    const periodData = fullMonthlyData.slice(-periodMonths);
+    const labels = periodData.map(d => d.label);
+    const collected = periodData.map(d => d.collected);
+    const interest = periodData.map(d => d.interest);
+    initCollectionChart(labels, collected, interest);
+  }
+
+  function renderTrendCharts(periodMonths) {
+    const periodData = fullMonthlyData.slice(-periodMonths);
+    const labels = periodData.map(d => d.label);
+    const collected = periodData.map(d => d.collected);
+    const interest = periodData.map(d => d.interest);
+    initCollectionTrendChart(labels, collected, interest);
+
+    const expensePeriodData = Array.isArray(expenseHistoryData) ? expenseHistoryData.slice(-periodMonths) : [];
+    const expenseLabels = expensePeriodData.map(d => d.label);
+    const expenseValues = expensePeriodData.map(d => d.value);
+    initExpenseTrendChart(expenseLabels, expenseValues);
+  }
+
+  function setCollectionPeriod(periodMonths) {
+    renderCollectionChart(periodMonths);
+    renderTrendCharts(periodMonths);
+    document.querySelectorAll('.chart-controls button').forEach(button => {
+      button.classList.toggle('active', Number(button.dataset.period) === periodMonths);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setCollectionPeriod(initialPeriod);
+    if (expenseData && expenseData.length > 0) {
+      initExpenseChart(expenseData);
+    }
+  });
+
+  const riskData = JSON.parse(document.getElementById('risk-data').textContent || '{}');
+  if (riskData && Object.keys(riskData).length > 0) {
+    initRiskChart(riskData);
+  }
+</script>
+{% endblock %}

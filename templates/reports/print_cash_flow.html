@@ -1,0 +1,58 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Cash Flow Report{% endblock %}
+{% block bar_title %}Cash In / Cash Out{% endblock %}
+{% block doc_title_display %}Cash In / Cash Out Report{% endblock %}
+{% block doc_subtitle %}{{ date_from }} — {{ date_to }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Cash In</div><div class="metric-value green">{{ total_cash_in|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Cash Out</div><div class="metric-value red">{{ total_cash_out|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Processing Fees</div><div class="metric-value amber">{{ total_processing_fees|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Total Expenses</div><div class="metric-value teal">{{ total_expenses|ugx_plain }}</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th><th>Type</th><th>Loan #</th><th>Client / Description</th><th>Description</th>
+      <th class="r">Amount</th><th class="r">Principal</th><th class="r">Interest</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in ledger %}
+    <tr>
+      <td>{{ row.date }}</td>
+      <td>
+        {% if row.type == "Expense" %}<span class="badge badge-amber">Expense</span>
+        {% elif row.type == "Disbursement" %}<span class="badge badge-red">Disbursement</span>
+        {% elif row.type == "Processing Fee" %}<span class="badge badge-teal">Processing Fee</span>
+        {% else %}<span class="badge badge-green">Payment</span>{% endif %}
+      </td>
+      <td class="mono">{{ row.loan.loan_number|default:"—" }}</td>
+      <td>{{ row.client.full_name|default:"—" }}</td>
+      <td style="font-size:11px;">{{ row.description }}</td>
+      <td class="r {% if row.cash_in %}green{% elif row.cash_out %}red{% endif %}">
+        {% if row.cash_in %}+ {{ row.cash_in|ugx_plain }}
+        {% elif row.cash_out %}− {{ row.cash_out|ugx_plain }}
+        {% else %}—{% endif %}
+      </td>
+      <td class="r">{{ row.principal|ugx_plain }}</td>
+      <td class="r">{{ row.interest|ugx_plain }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;padding:24px;color:#8a9bac;">No entries for this period.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if ledger %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="5">Totals</td>
+      <td>{{ total_cash_in|ugx_plain }} in / {{ total_cash_out|ugx_plain }} out</td>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

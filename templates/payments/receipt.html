@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Receipt {{ receipt.receipt_number }}{% endblock %}
+{% block page_title %}Receipt{% endblock %}
+
+{% block topbar_actions %}
+  <button onclick="window.print()" class="btn btn-primary btn-sm">Print Receipt</button>
+  <a href="{% url 'loans:detail' receipt.payment.loan.pk %}" class="btn btn-secondary btn-sm">Back to Loan</a>
+{% endblock %}
+
+{% block content %}
+<div class="receipt-wrap">
+  <div class="receipt-header">
+    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{% company_name %}</div>
+    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">Loan Management System · Kampala, Uganda</div>
+    <div style="margin-top:16px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+      <div style="font-size:13px;color:var(--text-muted);">PAYMENT RECEIPT</div>
+      <div class="receipt-number" style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:4px;">
+        {{ receipt.receipt_number }}
+      </div>
+    </div>
+  </div>
+
+  <div class="receipt-row">
+    <span class="receipt-label">Date</span>
+    <span>{{ receipt.payment.payment_date }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Client</span>
+    <span style="font-weight:500;">{{ receipt.payment.client.full_name }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Client #</span>
+    <span class="mono">{{ receipt.payment.client.client_number }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Phone</span>
+    <span>{{ receipt.payment.client.phone_primary }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Loan Reference</span>
+    <span class="mono">{{ receipt.payment.loan.loan_number }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Product</span>
+    <span>{{ receipt.payment.loan.product.name }}</span>
+  </div>
+  {% if guarantees %}
+  <div class="receipt-row">
+    <span class="receipt-label">Guarantors</span>
+    <span>
+      {% for g in guarantees %}
+        <div class="mono">{{ g.guarantor.full_name }} — {{ g.guaranteed_amount|money }}</div>
+      {% endfor %}
+    </span>
+  </div>
+  {% endif %}
+  {% if collateral_items %}
+  <div class="receipt-row">
+    <span class="receipt-label">Collateral</span>
+    <span>
+      {% for c in collateral_items %}
+        <div class="mono">{{ c.description }} — {{ c.estimated_value|money }}</div>
+      {% endfor %}
+    </span>
+  </div>
+  {% endif %}
+  <div class="receipt-row">
+    <span class="receipt-label">Payment Method</span>
+    <span>{{ receipt.payment.get_payment_method_display }}</span>
+  </div>
+  {% if receipt.payment.reference_number %}
+  <div class="receipt-row">
+    <span class="receipt-label">Reference #</span>
+    <span class="mono">{{ receipt.payment.reference_number }}</span>
+  </div>
+  {% endif %}
+
+  <div class="receipt-row">
+    <span class="receipt-label">Principal Paid</span>
+    <span class="mono">{{ receipt.principal_paid|money }}</span>
+  </div>
+  <div class="receipt-row">
+    <span class="receipt-label">Interest Paid</span>
+    <span class="mono">{{ receipt.interest_paid|money }}</span>
+  </div>
+  {% if receipt.penalty_paid > 0 %}
+  <div class="receipt-row">
+    <span class="receipt-label">Penalty Paid</span>
+    <span class="mono" style="color:var(--red-400)">{{ receipt.penalty_paid|money }}</span>
+  </div>
+  {% endif %}
+
+  <div class="receipt-row" style="margin-top:12px;padding-top:16px;border-top:2px solid var(--border);border-bottom:none;">
+    <span style="font-weight:600;font-size:15px;">Amount Received</span>
+    <span class="receipt-total">{{ receipt.amount_received|money }}</span>
+  </div>
+
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div>
+      <div class="text-muted text-sm">Balance Before</div>
+      <div class="mono">{{ receipt.balance_before|money }}</div>
+    </div>
+    <div>
+      <div class="text-muted text-sm">Balance After</div>
+      <div class="mono" style="color:{% if receipt.balance_after == 0 %}var(--green-400){% else %}var(--amber-400){% endif %}">
+        {{ receipt.balance_after|money }}
+      </div>
+    </div>
+  </div>
+
+  {% if receipt.balance_after == 0 %}
+  <div class="alert alert-success mt-3">
+    Loan fully repaid. Congratulations!
+  </div>
+  {% endif %}
+
+  <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:16px;">
+    Served by: {{ receipt.payment.recorded_by.full_name }}<br>
+    Issued: {{ receipt.issued_at|date:"d M Y H:i" }}<br>
+    <strong>{% company_name %} — This is an official receipt. Keep it safe.</strong>
+  </div>
+</div>
+{% endblock %}

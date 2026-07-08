@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Closed Loans{% endblock %}
+{% block page_title %}Closed Loans{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:closed_loans_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:closed_loans_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+    <div style="flex:1;min-width:160px;">
+      <div class="card-title">Fully Repaid Loans</div>
+      <div class="text-sm text-muted">{{ loan_count }} loan{{ loan_count|pluralize }} closed</div>
+    </div>
+    <form method="get" class="filter-bar-single-row print-hide" style="gap:8px;flex-wrap:wrap;">
+      <div class="filter-field"><input type="date" name="date_from" value="{{ date_from }}" placeholder="From"></div>
+      <div class="filter-field"><input type="date" name="date_to"   value="{{ date_to }}"   placeholder="To"></div>
+      <div class="filter-field">
+        <select name="product">
+          <option value="">All products</option>
+          {% for p in products %}<option value="{{ p.pk }}" {% if product_id == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      <a href="{% url 'reports:closed_loans' %}" class="btn btn-secondary btn-sm">Reset</a>
+    </form>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 20px;">
+      <div class="metric-card teal"><div class="metric-label">Closed Loans</div><div class="metric-value teal">{{ loan_count }}</div></div>
+      <div class="metric-card green"><div class="metric-label">Total Principal ({% currency_symbol %})</div><div class="metric-value green">{{ total_principal|ugx_plain }}</div></div>
+      <div class="metric-card blue"><div class="metric-label">Interest Earned</div><div class="metric-value">{{ total_interest|floatformat:0|intcomma }}</div></div>
+      <div class="metric-card amber"><div class="metric-label">Total Collected</div><div class="metric-value amber">{{ total_collected|floatformat:0|intcomma }}</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal ({% currency_symbol %})</th><th>Interest Earned</th><th>Total Collected</th>
+          <th>Disbursed</th><th>Closed</th>
+        </tr></thead>
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+            <td>{{ loan.client.full_name }}<div class="text-sm text-muted">{{ loan.client.client_number }}</div></td>
+            <td class="text-sm">{{ loan.product.name }}</td>
+            <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+            <td class="mono" style="color:var(--success);">{{ loan.total_interest|floatformat:0|intcomma }}</td>
+            <td class="mono" style="font-weight:600;">{{ loan.total_paid|floatformat:0|intcomma }}</td>
+            <td class="text-sm">{{ loan.disbursement_date|default:"—" }}</td>
+            <td class="text-sm">{{ loan.completion_date|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No closed loans found for this filter.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

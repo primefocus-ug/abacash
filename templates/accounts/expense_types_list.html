@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Expense Types{% endblock %}
+{% block page_title %}Expense Types & Categories{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary btn-sm">← Expenses</a>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr;gap:20px;align-items:start;">
+
+  <!-- ── Add Expense Type ────────────────────────── -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">New Expense Type</span></div>
+    <div class="card-body">
+      {% if et_error %}<div class="alert alert-error">{{ et_error }}</div>{% endif %}
+      <form method="post" style="display:grid;gap:14px;">
+        {% csrf_token %}
+        <input type="hidden" name="_action" value="save_expense_type">
+        <div>
+          <label>Category *</label>
+          <select name="category_id" required>
+            <option value="">— Select Category —</option>
+            {% for cat in categories %}<option value="{{ cat.pk }}">{{ cat.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Type Name *</label>
+          <input type="text" name="name" placeholder="e.g. Office Supplies" maxlength="100" required>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea name="description" rows="2" placeholder="Optional"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Save Type</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Categories & Types table ───────────────────────────── -->
+<div class="card mt-3">
+  <div class="card-header"><span class="card-title">All Categories & Types</span></div>
+  {% if categories %}
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Colour</th>
+          <th>Expense Types</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td style="font-weight:600;">{{ cat.name }}</td>
+          <td><span class="badge badge-{{ cat.color }}">{{ cat.color|capfirst }}</span></td>
+          <td>
+            {% for et in cat.expense_types.all %}
+              <span class="badge badge-{{ cat.color }}" style="margin:2px;">
+                {{ et.name }}
+                {% if not et.is_active %}<span style="opacity:.5;font-size:10px;"> (off)</span>{% endif %}
+                <form method="post" style="display:inline;margin-left:4px;">
+                  {% csrf_token %}
+                  <input type="hidden" name="_action" value="toggle_expense_type">
+                  <input type="hidden" name="pk" value="{{ et.pk }}">
+                  <button type="submit" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;font-size:11px;opacity:.7;" title="{% if et.is_active %}Deactivate{% else %}Activate{% endif %}">
+                    {% if et.is_active %}✕{% else %}✓{% endif %}
+                  </button>
+                </form>
+              </span>
+            {% empty %}
+              <span class="text-muted" style="font-size:12px;">No types yet</span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if cat.is_active %}
+              <span class="badge badge-green"><span class="badge-dot"></span>Active</span>
+            {% else %}
+              <span class="badge badge-muted"><span class="badge-dot"></span>Inactive</span>
+            {% endif %}
+          </td>
+          <td style="text-align:right;">
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="_action" value="toggle_category">
+              <input type="hidden" name="pk" value="{{ cat.pk }}">
+              <button type="submit" class="btn btn-secondary btn-sm">
+                {% if cat.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">🏷️</div><p>No categories yet. Add one above.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

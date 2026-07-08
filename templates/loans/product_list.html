@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}Loan Products{% endblock %}
+{% block page_title %}Loan Products{% endblock %}
+
+{% block topbar_actions %}
+  {% if is_ceo %}
+    <a href="{% url 'loans:products_create' %}" class="btn btn-primary btn-sm">+ Add Product</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <form method="get" class="flex gap-2 flex-wrap" style="flex:1">
+      <form method="get" class="search-filter-bar">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search by product name…"
+             style="width:260px;margin-bottom:0">
+      <select name="status" onchange="this.form.submit()" style="width:200px;margin-bottom:0">
+        <option value="">All</option>
+        <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+      {% if q or status %}
+        <a href="{% url 'loans:products' %}" class="btn btn-secondary btn-sm">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="table-wrap">
+    {% if products %}
+      <table class="aba-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Interest</th>
+            <th>Frequency</th>
+            <th>Amount Limits</th>
+            <th>Term Limits</th>
+            <th>Penalty</th>
+            <th>Guarantor</th>
+            <th>Status</th>
+            {% if is_ceo %}<th></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+            <tr>
+              <td>
+                <div style="font-weight:600;">{{ p.name }}</div>
+                {% if p.description %}
+                  <div class="text-sm text-muted" style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    {{ p.description }}
+                  </div>
+                {% endif %}
+              </td>
+              <td class="text-sm">
+                {{ p.interest_rate_monthly|floatformat:0 }}%/mo
+                <div class="text-sm text-muted">{{ p.get_interest_method_display }}</div>
+              </td>
+              <td class="text-sm">{{ p.get_default_repayment_frequency_display }}</td>
+              <td class="mono">
+                {{ p.min_amount|ugx }} - {{ p.max_amount|ugx }}
+              </td>
+              <td class="mono">{{ p.min_term_months }} – {{ p.max_term_months }} months</td>
+              <td class="mono">{{ p.penalty_rate_monthly }}%</td>
+              <td>
+                {% if p.requires_guarantor %}
+                  <span class="badge badge-amber">Required</span>
+                {% else %}
+                  <span class="badge badge-muted">Optional</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.is_active %}
+                  <span class="badge badge-green">Active</span>
+                {% else %}
+                  <span class="badge badge-muted">Inactive</span>
+                {% endif %}
+              </td>
+              {% if is_ceo %}
+                <td style="width:140px;">
+                  <a href="{% url 'loans:products_edit' p.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <p>No loan products found.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Apply — {{ client.full_name }}{% endblock %}
+{% block page_title %}New Loan Application{% endblock %}
+
+{% block content %}
+<style>
+  .wiz-bar { display:flex; gap:0; margin-bottom:20px; }
+  .wiz-step { flex:1; display:flex; align-items:center; gap:0; }
+  .wiz-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .wiz-dot.done { background:var(--success); border-color:var(--success); color:#fff; }
+  .wiz-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .wiz-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-left:8px; white-space:nowrap; }
+  .wiz-label.active { color:var(--accent); }
+  .wiz-line { flex:1; height:2px; background:var(--border); margin:0 8px; }
+  .wiz-line.done { background:var(--success); }
+  .app-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:20px; align-items:start; }
+  @media(max-width:1024px){ .app-grid { grid-template-columns:1fr; } }
+  .sec-section { padding:16px 0; }
+  .sec-section + .sec-section { border-top:1px solid var(--border); }
+  .row-item { display:grid; grid-template-columns:2fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; }
+  .fee-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .fee-row:last-child { border-bottom:none; font-weight:700; }
+</style>
+
+<div class="wiz-bar">
+  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Client</span></div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Loan Terms</span></div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step"><div class="wiz-dot active">3</div><span class="wiz-label active">Security</span></div>
+  <div class="wiz-line"></div>
+  <div class="wiz-step"><div class="wiz-dot">4</div><span class="wiz-label">Review</span></div>
+</div>
+
+<div class="app-grid">
+
+  {# ── LEFT: Security form ── #}
+  <div>
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between;">
+        <span class="card-title">Security Details</span>
+        <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="draft_id" value="{{ loan.pk }}">
+
+          {# Loan summary strip #}
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 14px;background:var(--surface-2);border-radius:10px;margin-bottom:16px;font-size:13px;">
+            <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Product</div><div style="font-weight:600;">{{ loan.product.name }}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Amount</div><div style="font-weight:600;" class="mono">{{ loan.principal_amount|money }}</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Term</div><div style="font-weight:600;">{{ loan.term_months }} mo · {{ loan.get_repayment_frequency_display }}</div></div>
+          </div>
+
+          {% if eligibility %}
+          <div style="padding:10px 14px;border-radius:10px;border-left:3px solid {% if eligibility.eligible %}var(--success){% else %}var(--danger){% endif %};background:var(--surface-2);margin-bottom:16px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong>Eligibility Check</strong>
+              <span class="badge {% if eligibility.eligible %}badge-success{% else %}badge-danger{% endif %}">{% if eligibility.eligible %}Eligible{% else %}Not Eligible{% endif %}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+              <div>Income-based max: <strong>{{ eligibility.income_based_max|money }}</strong></div>
+              <div>Active debt: <strong>{{ eligibility.active_debt|money }}</strong></div>
+              <div>Recommended limit: <strong>{{ eligibility.net_eligible_max|money }}</strong></div>
+              <div>Effective min: <strong>{{ effective_min|money }}</strong></div>
+            </div>
+            {% for f in eligibility.flags %}
+            <div style="font-size:12px;color:var(--warning);margin-top:4px;">⚠ {{ f }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {# Collateral #}
+          <div class="sec-section">
+            <div style="font-weight:700;font-size:14px;margin-bottom:10px;">Collateral</div>
+            <div id="collateral-rows">
+              {% if security_data.collateral_items %}
+                {% for item in security_data.collateral_items %}
+                <div class="row-item">
+                  <div class="form-group" style="margin:0;">
+                    <input type="text" name="collateral_desc" class="form-control" placeholder="e.g. Land title, Motorcycle" value="{{ item.description }}">
+                  </div>
+                  <div class="form-group" style="margin:0;">
+                    <input type="number" name="collateral_value" class="form-control" placeholder="Value ({% currency_symbol %})" min="0" step="1000" value="{{ item.estimated_value }}">
+                  </div>
+                  <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="row-item">
+                  <div class="form-group" style="margin:0;"><input type="text" name="collateral_desc" class="form-control" placeholder="e.g. Land title, Motorcycle"></div>
+                  <div class="form-group" style="margin:0;"><input type="number" name="collateral_value" class="form-control" placeholder="Value ({% currency_symbol %})" min="0" step="1000"></div>
+                  <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
+                </div>
+              {% endif %}
+            </div>
+            <button type="button" onclick="addCollateral()" class="btn btn-secondary btn-sm">+ Add Item</button>
+          </div>
+
+          {# Guarantors #}
+          <div class="sec-section">
+            <div style="font-weight:700;font-size:14px;margin-bottom:10px;">
+              Guarantors
+              {% if loan.product.requires_guarantor %}<span class="badge badge-warning" style="margin-left:6px;font-size:11px;">Required</span>{% endif %}
+            </div>
+            <div id="guarantor-rows">
+              {% if security_data.guarantor_rows %}
+                {% for row in security_data.guarantor_rows %}
+                <div class="row-item">
+                  <div class="form-group" style="margin:0;">
+                    <select name="guarantor_id" class="form-control">
+                      <option value="">— Select guarantor —</option>
+                      {% for g in available_guarantors %}
+                      <option value="{{ g.pk }}" {% if row.guarantor_id == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.full_name }} — {{ g.phone_primary }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000" value="{{ row.amount }}"></div>
+                  <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="row-item">
+                  <div class="form-group" style="margin:0;">
+                    <select name="guarantor_id" class="form-control">
+                      <option value="">— Select guarantor —</option>
+                      {% for g in available_guarantors %}<option value="{{ g.pk }}">{{ g.full_name }} — {{ g.phone_primary }}</option>{% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000"></div>
+                  <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
+                </div>
+              {% endif %}
+            </div>
+            <button type="button" onclick="addGuarantor()" class="btn btn-secondary btn-sm">+ Add Guarantor</button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:16px;border-top:1px solid var(--border);margin-top:8px;flex-wrap:wrap;">
+            <a href="{% url 'loans:apply_step2' client.pk %}{% if loan %}?draft_id={{ loan.pk }}{% endif %}" class="btn btn-secondary">← Back</a>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
+              <button type="submit" name="action" value="continue" class="btn btn-primary">Continue to Review →</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── RIGHT: Schedule + Totals (same data as step 2) ── #}
+  <div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Repayment Schedule</span></div>
+      {% if schedule_rows %}
+        {% include "partials/schedule_table.html" %}
+      {% else %}
+      <div class="empty-state" style="padding:32px;"><p>Loan terms are required to preview the schedule.</p></div>
+      {% endif %}
+    </div>
+
+    {% if loan.principal_amount %}
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header"><span class="card-title">Loan Totals</span></div>
+      <div class="card-body">
+        <div class="fee-row"><span>Principal</span><span class="mono">{{ loan.principal_amount|money }}</span></div>
+        <div class="fee-row"><span>Total Interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
+        <div class="fee-row"><span>Processing Fee</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
+        <div class="fee-row"><span>Total Repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+const guarantorOptions = `{% for g in available_guarantors %}<option value="{{ g.pk }}">{{ g.full_name }} — {{ g.phone_primary }}</option>{% endfor %}`;
+
+function addCollateral() {
+  const row = document.createElement('div');
+  row.className = 'row-item';
+  row.innerHTML = `
+    <div class="form-group" style="margin:0;"><input type="text" name="collateral_desc" class="form-control" placeholder="e.g. Land title, Motorcycle"></div>
+    <div class="form-group" style="margin:0;"><input type="number" name="collateral_value" class="form-control" placeholder="Value ({% currency_symbol %})" min="0" step="1000"></div>
+    <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>`;
+  document.getElementById('collateral-rows').appendChild(row);
+}
+
+function addGuarantor() {
+  const row = document.createElement('div');
+  row.className = 'row-item';
+  row.innerHTML = `
+    <div class="form-group" style="margin:0;"><select name="guarantor_id" class="form-control"><option value="">— Select guarantor —</option>${guarantorOptions}</select></div>
+    <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000"></div>
+    <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>`;
+  document.getElementById('guarantor-rows').appendChild(row);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Defaulted Loans{% endblock %}
+{% block page_title %}Defaulted Loans{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:defaulted_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:defaulted_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+  <div class="metric-card red"><div class="metric-label">Defaulted / Written Off</div><div class="metric-value red">{{ loan_count }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Total Principal at Risk</div><div class="metric-value red">{{ total_defaulted|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card amber"><div class="metric-label">Outstanding Balance</div><div class="metric-value amber">{{ total_outstanding|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card"><div class="metric-label">Written Off</div><div class="metric-value">{{ total_written_off|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card amber"><div class="metric-label">PAR90 Active Loans</div><div class="metric-value amber">{{ par90_count }}</div></div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-header"><div class="card-title">Defaulted &amp; Written-Off Loans</div></div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal ({% currency_symbol %})</th><th>Outstanding</th><th>Disbursed</th><th>Status</th><th>Reason</th>
+        </tr></thead>
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+            <td>{{ loan.client.full_name }}<div class="text-sm text-muted">{{ loan.client.phone_primary }}</div></td>
+            <td class="text-sm">{{ loan.product.name }}</td>
+            <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+            <td class="mono" style="color:var(--danger);">{{ loan.outstanding_balance|floatformat:0|intcomma }}</td>
+            <td class="text-sm">{{ loan.disbursement_date|default:"—" }}</td>
+            <td><span class="badge badge-red">{{ loan.get_status_display }}</span></td>
+            <td class="text-sm" style="max-width:200px;white-space:normal;">{{ loan.write_off_reason|default:loan.rejection_reason|default:"—"|truncatechars:60 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">No defaulted loans on record.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if par90_loans %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title" style="color:var(--warning);">⚠️ Active Loans — 90+ Days Overdue (PAR90)</div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal ({% currency_symbol %})</th><th>Outstanding</th><th>Days Overdue</th>
+        </tr></thead>
+        <tbody>
+          {% for loan in par90_loans %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+            <td>{{ loan.client.full_name }}</td>
+            <td class="text-sm">{{ loan.product.name }}</td>
+            <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+            <td class="mono" style="color:var(--danger);">{{ loan.outstanding_balance|floatformat:0|intcomma }}</td>
+            <td style="color:var(--danger);font-weight:600;">{{ loan.days_overdue }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

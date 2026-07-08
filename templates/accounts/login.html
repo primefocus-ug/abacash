@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/aba.css' %}">
+  <style>
+    body.login-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top left, rgba(45, 212, 191, 0.14), transparent 24%),
+                  radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.16), transparent 28%),
+                  var(--bg-base);
+      color: var(--text-primary);
+    }
+
+    .login-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.1fr) minmax(340px, 0.9fr);
+      gap: 36px;
+      width: min(1240px, calc(100% - 40px));
+      min-height: calc(100vh - 64px);
+      align-items: center;
+    }
+
+    .login-hero,
+    .login-panel {
+      position: relative;
+      border-radius: 34px;
+      overflow: hidden;
+      min-height: 560px;
+    }
+
+    .login-hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+      padding: 48px 44px;
+      background: linear-gradient(180deg, rgba(9, 15, 26, 0.96), rgba(6, 10, 18, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 32px 90px rgba(0, 0, 0, 0.24);
+    }
+
+    .login-hero::before,
+    .login-hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    .login-hero::before {
+      width: 320px;
+      height: 320px;
+      top: -120px;
+      right: -100px;
+      background: rgba(45, 212, 191, 0.22);
+    }
+
+    .login-hero::after {
+      width: 240px;
+      height: 240px;
+      bottom: -80px;
+      left: -70px;
+      background: rgba(96, 165, 250, 0.18);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--teal-400);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      width: fit-content;
+      z-index: 1;
+    }
+
+    .hero-title {
+      font-size: clamp(2.35rem, 4vw, 3.8rem);
+      line-height: 1.02;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      max-width: 640px;
+      z-index: 1;
+    }
+
+    .hero-copy {
+      font-size: 1rem;
+      max-width: 600px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.78);
+      z-index: 1;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      z-index: 1;
+    }
+
+    .hero-metric {
+      position: relative;
+      padding: 22px 22px 18px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(10px);
+      transition: transform 250ms ease, border-color 250ms ease, box-shadow 250ms ease;
+    }
+
+    .hero-metric:hover {
+      transform: translateY(-6px);
+      border-color: rgba(45, 212, 191, 0.24);
+      box-shadow: 0 26px 75px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-metric span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.68);
+    }
+
+    .hero-metric strong {
+      display: block;
+      margin-top: 12px;
+      font-size: 2.45rem;
+      line-height: 1;
+      color: #ffffff;
+    }
+
+    .hero-metric small {
+      display: block;
+      margin-top: 12px;
+      font-size: 0.92rem;
+      color: var(--green-400);
+      font-weight: 600;
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 280px;
+      border-radius: 32px;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 20%, rgba(45, 212, 191, 0.22), transparent 28%),
+                  radial-gradient(circle at 80% 30%, rgba(96, 165, 250, 0.18), transparent 24%),
+                  linear-gradient(135deg, rgba(5, 12, 28, 0.96), rgba(9, 18, 34, 0.98));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      z-index: 1;
+    }
+
+    .hero-visual::before {
+      content: '';
+      position: absolute;
+      inset: 18px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-visual::after {
+      content: '';
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      right: -40px;
+      bottom: -40px;
+      background: rgba(45, 212, 191, 0.2);
+      filter: blur(22px);
+    }
+
+    .login-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+      padding: 16px;
+    }
+
+    .auth-card {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 42px 34px;
+      border-radius: 30px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(10, 14, 26, 0.96));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 40px 110px rgba(0, 0, 0, 0.26);
+      transform-style: preserve-3d;
+      transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+      overflow: hidden;
+    }
+
+    .auth-card:hover {
+      transform: translateY(-10px) rotateX(1deg) rotateY(1deg);
+      box-shadow: 0 52px 130px rgba(0, 0, 0, 0.32);
+      border-color: rgba(45, 212, 191, 0.26);
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.14), rgba(96, 165, 250, 0.12));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .login-brand {
+      position: relative;
+      text-align: center;
+      margin-bottom: 32px;
+      z-index: 1;
+    }
+
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--teal-500), #0f766e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.06em;
+      box-shadow: 0 18px 35px rgba(14, 92, 86, 0.25);
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+
+    .login-sub {
+      margin-top: 10px;
+      font-size: 0.96rem;
+      color: rgba(255, 255, 255, 0.68);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffffff;
+      font-size: 0.96rem;
+      transition: all var(--trans);
+    }
+
+    .form-group input::placeholder {
+      color: rgba(255, 255, 255, 0.46);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: rgba(45, 212, 191, 0.8);
+      box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-primary {
+      min-height: 52px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      border: none;
+      box-shadow: 0 18px 40px rgba(15, 79, 84, 0.26);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 44px rgba(15, 79, 84, 0.32);
+    }
+
+    .login-footer {
+      text-align: center;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.58);
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1050px) {
+      .login-layout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .login-panel,
+      .login-hero {
+        min-height: 420px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .login-layout {
+        gap: 20px;
+      }
+
+      .login-hero,
+      .login-panel {
+        border-radius: 24px;
+        padding: 30px 24px;
+      }
+
+      .hero-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-title {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body class="login-page">
+  <div class="login-layout">
+    <section class="login-hero">
+      <div class="hero-badge">SmartLOANS</div>
+      <h1 class="hero-title">{{ company.company_name }} — Smarter lending, beautifully secure.</h1>
+      <p class="hero-copy">Log in to manage loan portfolios, monitor repayments, and review financial trends with a premium, 3D-inspired interface designed for modern microfinance teams.</p>
+
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <span>Loans</span>
+          <strong>624k</strong>
+          <small>+8.24% last month</small>
+        </div>
+        <div class="hero-metric">
+          <span>Repayments</span>
+          <strong>124k</strong>
+          <small>+12.6% last week</small>
+        </div>
+      </div>
+
+      <div class="hero-visual"></div>
+    </section>
+
+    <section class="login-panel">
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }}">{{ msg }}</div>
+      {% endfor %}
+
+      <div class="auth-card">
+        <div class="login-brand">
+          {% if company.company_logo %}
+          <img class="login-logo" src="{{ company.company_logo.url }}" alt="{{ company.company_name }} logo">
+          {% else %}
+          <div class="login-logo">{{ company.company_name|slice:":3"|upper }}</div>
+          {% endif %}
+          <div class="login-title">{{ company.company_name }}</div>
+          <div class="login-sub">Loan Management System</div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_username">Username</label>
+            <input type="text" name="username" id="id_username"
+                   placeholder="Enter your email or username"
+                   autofocus autocomplete="username" required>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password">Password</label>
+            <input type="password" name="password" id="id_password"
+                   placeholder="Enter your password"
+                   autocomplete="current-password" required>
+          </div>
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors.0 }}
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary w-100">
+            Sign In
+          </button>
+        </form>
+      </div>
+
+      <div class="login-footer">
+        {{ company.company_name }} &copy; {% now "Y" %} — Secure Internal System
+      </div>
+    </section>
+  </div>
+</body>
+</html>

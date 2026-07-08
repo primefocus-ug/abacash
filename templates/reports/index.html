@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block extra_css %}
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .report-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(15,23,42,.10);
+  }
+  .report-card .r-icon {
+    font-size: 28px;
+    width: 28px;
+    text-align: center;
+  }
+  .report-card .r-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .report-card .r-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .report-card .r-open {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-muted);
+    margin: 24px 0 10px;
+  }
+  .section-label:first-child { margin-top: 0; }
+  @media (max-width: 576px) {
+    .reports-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .report-card { padding: 14px; }
+    .report-card .r-icon { font-size: 22px; width: 22px; }
+    .report-card .r-title { font-size: 13px; }
+    .report-card .r-desc { display: none; }
+  }
+  @media (max-width: 380px) {
+    .reports-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="section-label">Portfolio</div>
+<div class="reports-grid">
+
+  <a href="{% url 'reports:loan_book' %}" class="report-card" style="border-color:rgba(37,99,235,.2);">
+    <div class="r-icon"><i class="fas fa-book-open" style="color: #2563eb;"></i></div>
+    <div class="r-title">Loan Book</div>
+    <div class="r-desc">All active and completed loans with principal, outstanding balance, and status.</div>
+    <div class="r-open" style="color:var(--accent);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:disbursements' %}" class="report-card" style="border-color:rgba(16,185,129,.2);">
+    <div class="r-icon"><i class="fas fa-hand-holding-usd" style="color: #10b981;"></i></div>
+    <div class="r-title">Disbursements</div>
+    <div class="r-desc">All loans disbursed in a date range with product, officer, and fee breakdown.</div>
+    <div class="r-open" style="color:var(--success);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:closed_loans' %}" class="report-card" style="border-color:rgba(6,182,212,.2);">
+    <div class="r-icon"><i class="fas fa-check-circle" style="color: #06b6d4;"></i></div>
+    <div class="r-title">Closed Loans</div>
+    <div class="r-desc">Fully repaid loans with completion dates, total interest earned, and recovery rate.</div>
+    <div class="r-open" style="color:var(--cyan);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:defaulted' %}" class="report-card" style="border-color:rgba(239,68,68,.2);">
+    <div class="r-icon"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i></div>
+    <div class="r-title">Defaulted Loans</div>
+    <div class="r-desc">Loans marked as defaulted or written off, plus active loans 90+ days overdue.</div>
+    <div class="r-open" style="color:var(--danger);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:par' %}" class="report-card" style="border-color:rgba(245,158,11,.2);">
+    <div class="r-icon"><i class="fas fa-chart-pie" style="color: #f59e0b;"></i></div>
+    <div class="r-title">Portfolio at Risk (PAR)</div>
+    <div class="r-desc">PAR1, PAR30, PAR60, PAR90 buckets with overdue amounts and portfolio percentages.</div>
+    <div class="r-open" style="color:var(--warning);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:overdue' %}" class="report-card" style="border-color:rgba(239,68,68,.15);">
+    <div class="r-icon"><i class="fas fa-bell" style="color: #ef4444;"></i></div>
+    <div class="r-title">Overdue Installments</div>
+    <div class="r-desc">Individual missed installments sorted by days overdue with amounts outstanding.</div>
+    <div class="r-open" style="color:var(--danger);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+</div>
+
+<div class="section-label">Collections & Payments</div>
+<div class="reports-grid">
+
+  <a href="{% url 'reports:repayments' %}" class="report-card" style="border-color:rgba(16,185,129,.2);">
+    <div class="r-icon"><i class="fas fa-coins" style="color: #10b981;"></i></div>
+    <div class="r-title">Repayments</div>
+    <div class="r-desc">All payments received in a date range with principal, interest, and penalty breakdown.</div>
+    <div class="r-open" style="color:var(--success);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:collections' %}" class="report-card" style="border-color:rgba(96,165,250,.2);">
+    <div class="r-icon"><i class="fas fa-user-tie" style="color: #60a5fa;"></i></div>
+    <div class="r-title">Collections by Cashier</div>
+    <div class="r-desc">Payments grouped by cashier with totals — useful for daily reconciliation.</div>
+    <div class="r-open" style="color:var(--info);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:cash_flow' %}" class="report-card" style="border-color:rgba(139,92,246,.2);">
+    <div class="r-icon"><i class="fas fa-chart-line" style="color: #8b5cf6;"></i></div>
+    <div class="r-title">Cash In / Cash Out</div>
+    <div class="r-desc">Combined ledger of disbursements and repayments for cash flow analysis.</div>
+    <div class="r-open" style="color:var(--purple);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+</div>
+
+<div class="section-label">Financial Statements</div>
+<div class="reports-grid">
+
+  <a href="{% url 'reports:income' %}" class="report-card" style="border-color:rgba(245,158,11,.2);">
+    <div class="r-icon"><i class="fas fa-file-invoice-dollar" style="color: #f59e0b;"></i></div>
+    <div class="r-title">Monthly Income Statement</div>
+    <div class="r-desc">Interest earned, penalties, and principal recovered for any calendar month.</div>
+    <div class="r-open" style="color:var(--warning);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:client_statement' %}" class="report-card" style="border-color:rgba(37,99,235,.2);">
+    <div class="r-icon"><i class="fas fa-user" style="color: #2563eb;"></i></div>
+    <div class="r-title">Client Statement</div>
+    <div class="r-desc">Full loan and payment history for a single client — printable account statement.</div>
+    <div class="r-open" style="color:var(--accent);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+</div>
+
+{% endblock %}

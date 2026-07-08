@@ -1,0 +1,84 @@
+{% load humanize aba_filters %}
+{% if error %}
+<div class="empty-state" style="padding:24px;"><p>{{ error }}</p></div>
+{% elif schedule_rows %}
+<div id="schedule-preview-meta" style="display:none;"
+     data-processing-fee="{{ processing_fee|default:'0' }}"
+     data-processing-fee-source="{{ fee_source|default:'' }}"
+     data-processing-fee-percent="{{ processing_fee_percent|default:'' }}"
+     data-processing-fee-rate-text="{{ processing_fee_rate_text|default:'' }}">
+</div>
+<div style="border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--surface);">
+  <div style="padding:16px 18px; border-bottom:1px solid var(--border); background:linear-gradient(90deg, var(--surface-2), var(--surface));">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+      <div>
+        <div style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted);">Loan Repayment Schedule</div>
+        <div style="font-size:18px; font-weight:600; margin-top:4px;">Repayment Report</div>
+      </div>
+      <div style="text-align:right; font-size:12px; color:var(--text-muted);">
+        <div>Prepared for loan review</div>
+        <div style="margin-top:2px;">Generated on {{ now|date:"d M Y"|default:"today" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);background:var(--surface-2);">
+    <div style="padding:12px 14px;border-right:1px solid var(--border);">
+      <div class="metric-label">Principal</div>
+      <div class="mono fw-500">{{ principal|default:totals.total_repayable|money }}</div>
+    </div>
+    <div style="padding:12px 14px;border-right:1px solid var(--border);">
+      <div class="metric-label">Total Interest</div>
+      <div class="mono fw-500">{{ totals.total_interest|money }}</div>
+    </div>
+    <div style="padding:12px 14px;border-right:1px solid var(--border);">
+      <div class="metric-label">Total Repayable</div>
+      <div class="mono fw-500">{{ totals.total_repayable|money }}</div>
+    </div>
+    <div style="padding:12px 14px;">
+      <div class="metric-label">Processing Fee</div>
+      <div class="mono fw-500">{{ processing_fee|default:0|money }}</div>
+      <div class="text-sm text-muted" style="margin-top:2px;">
+        {% if processing_fee_rate_text %}
+          {{ processing_fee_rate_text }}
+        {% else %}
+          {{ processing_fee_percent|default:0|floatformat:2 }}%
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="overflow-x:auto; padding:8px 10px 12px;">
+    <table class="aba-table" style="font-size:12px; margin-bottom:0;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Due Date</th>
+          <th>Opening Bal.</th>
+          <th>Principal</th>
+          <th>Interest</th>
+          <th>Total Due</th>
+          <th>Closing Bal.</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in schedule_rows %}
+        <tr>
+          <td class="text-muted">{{ row.period_number }}</td>
+          <td>{{ row.due_date }}</td>
+          <td class="mono">{{ row.opening_balance|floatformat:0|intcomma }}</td>
+          <td class="mono">{{ row.principal_due|floatformat:0|intcomma }}</td>
+          <td class="mono">{{ row.interest_due|floatformat:0|intcomma }}</td>
+          <td class="mono fw-500">{{ row.total_payment|floatformat:0|intcomma }}</td>
+          <td class="mono text-muted">{{ row.closing_balance|floatformat:0|intcomma }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state" style="padding:24px;">
+  <p>Enter loan details to preview the schedule.</p>
+</div>
+{% endif %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Income Statement{% endblock %}
+{% block page_title %}Monthly Income Statement{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:income_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:income_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<!-- Month picker -->
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;">
+      <div>
+        <label style="display:block;margin-bottom:4px;">Select Month</label>
+        <input type="month" name="month" value="{{ month_str }}" style="margin-bottom:0;width:180px;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">View</button>
+    </form>
+  </div>
+</div>
+
+<!-- Statement card -->
+<div style="max-width:640px;">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div style="font-weight:600;font-size:15px;">{% company_name %} — Income Statement</div>
+        <div class="text-sm text-muted">{{ period_start }} to {{ period_end }}</div>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+
+      <!-- Income -->
+      <div style="padding:14px 20px;background:var(--bg-raised);border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);">Income</span>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Interest Earned</span>
+        <span class="mono fw-500" style="color:var(--teal-400)">{{ total_interest|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Late Payment Penalties</span>
+        <span class="mono fw-500" style="color:var(--amber-400)">{{ total_penalties|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:14px 20px;border-bottom:2px solid var(--border);font-weight:600;">
+        <span>Total Income</span>
+        <span class="mono" style="color:var(--green-400);font-size:16px;">{{ total_interest|add:total_penalties|ugx }}</span>
+      </div>
+
+      <!-- Cash flow -->
+      <div style="padding:14px 20px;background:var(--bg-raised);border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);">Cash Flow</span>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Principal Recovered</span>
+        <span class="mono">{{ total_principal|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Total Cash Received</span>
+        <span class="mono fw-500">{{ total_received|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>New Loans Disbursed ({{ loan_count }})</span>
+        <span class="mono" style="color:var(--red-400)">- {{ total_disbursed|ugx }}</span>
+      </div>
+
+      <!-- Activity -->
+      <div style="padding:14px 20px;background:var(--bg-raised);border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);">Activity</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Payment Transactions</span>
+        <span class="mono">{{ payment_count }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;">
+        <span>Loans Disbursed</span>
+        <span class="mono">{{ loan_count }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="text-sm text-muted mt-2" style="text-align:center;">
+    Generated on {% now "d M Y H:i" %} by {{ request.user.full_name }}
+  </div>
+</div>
+{% endblock %}

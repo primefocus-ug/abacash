@@ -1,0 +1,23 @@
+Django==5.0.6
+django-allauth==0.63.6
+django-tenants==3.7.0
+psycopg2-binary==2.9.9
+reportlab==4.2.2
+python-decouple==3.8
+django-auditlog==2.3.0
+django-htmx==1.17.3
+celery==5.3.6
+django-celery-beat==2.6.0
+django-extensions==3.2.3
+redis==5.0.3
+africastalking==1.2.6
+twilio==8.13.0
+WeasyPrint==62.3
+openpyxl==3.1.2
+# WeasyPrint 62.3 supports Pillow>=9.1.0. Pin a newer wheel-backed release to
+# avoid source-build failures seen with 10.3.0 on newer Python toolchains.
+Pillow==11.2.1
+whitenoise==6.7.0
+gunicorn==22.0.0
+django-crispy-forms==2.1
+crispy-bootstrap5==2024.2

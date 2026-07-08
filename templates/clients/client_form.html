@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+{% endblock %}
+
+{% block content %}
+<div id="client-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:960px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;">{{ title }}</h2>
+        <p class="text-sm text-muted" style="margin:6px 0 0;">Register a new client without leaving the current workflow.</p>
+      </div>
+      <button type="button" id="client-modal-close" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+    <form method="post" enctype="multipart/form-data" style="padding:20px;max-width:860px;width:100%;">
+      {% csrf_token %}
+
+      {% if duplicates %}
+  <div class="alert alert-warning mb-3">
+    <strong>Potential duplicate client found.</strong>
+    A client with the same National ID or primary phone already exists. Please edit the existing record or cancel registration.
+  </div>
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Matching Client Records</span></div>
+    <div class="card-body">
+      <ul class="list-group">
+        {% for dup in duplicates %}
+        <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <strong>{{ dup.full_name }}</strong> — {{ dup.client_number }}<br>
+            NIN: {{ dup.nin }}<br>
+            Phone: {{ dup.phone_primary }}
+          </div>
+          <div class="btn-group" role="group" aria-label="Duplicate actions">
+            <a href="{% url 'clients:detail' pk=dup.pk %}" class="btn btn-secondary btn-sm">View</a>
+            {% if user.is_manager or user.is_ceo %}
+            <a href="{% url 'clients:edit' pk=dup.pk %}" class="btn btn-primary btn-sm">Edit</a>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="mt-3">
+        <a href="{% url 'clients:list' %}" class="btn btn-outline-secondary btn-sm">Cancel registration</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Passport Photo -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Passport Photo <span style="color:var(--red-400)">*</span></span></div>
+    <div class="card-body">
+      <div class="form-group">
+        {% if client.passport_photo %}
+        <div style="margin-bottom:10px;">
+          <img src="{{ client.passport_photo.url }}" alt="Current photo"
+               style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
+          <div class="form-hint">Current photo — upload a new one to replace it.</div>
+        </div>
+        {% endif %}
+        <label for="passport_photo">Upload Passport Photo</label>
+        <input type="file" name="passport_photo" id="passport_photo"
+               accept="image/*" {% if action == 'create' %}required{% endif %}>
+        <div class="form-hint">JPEG or PNG, max 2 MB. Clear background, face clearly visible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal Information -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Personal Information</span></div>
+    <div class="card-body">
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="first_name">First Name <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="first_name" id="first_name" required
+                 value="{{ client.first_name|default:'' }}" placeholder="e.g. John">
+        </div>
+        <div class="form-group">
+          <label for="other_names">Other Names</label>
+          <input type="text" name="other_names" id="other_names"
+                 value="{{ client.other_names|default:'' }}" placeholder="Middle name(s)">
+        </div>
+        <div class="form-group">
+          <label for="last_name">Last Name / Surname <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="last_name" id="last_name" required
+                 value="{{ client.last_name|default:'' }}" placeholder="e.g. Mukasa">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nin">National ID Number (NIN) <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="nin" id="nin" required maxlength="20"
+                 value="{{ client.nin|default:'' }}" placeholder="e.g. CF20100122XXXXXX"
+                 style="text-transform:uppercase;font-family:var(--font-mono)">
+          <div class="form-hint">14-character Uganda NIN on the back of the National ID card.</div>
+        </div>
+        <div class="form-group">
+          <label for="date_of_birth">Date of Birth <span style="color:var(--red-400)">*</span></label>
+          <input type="date" name="date_of_birth" id="date_of_birth" required
+                 value="{{ client.date_of_birth|default:'' }}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gender">Gender <span style="color:var(--red-400)">*</span></label>
+          <select name="gender" id="gender" required>
+            <option value="">— Select —</option>
+            {% for val, label in gender_choices %}
+            <option value="{{ val }}" {% if client.gender == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="marital_status">Marital Status <span style="color:var(--red-400)">*</span></label>
+          <select name="marital_status" id="marital_status" required>
+            <option value="">— Select —</option>
+            {% for val, label in marital_choices %}
+            <option value="{{ val }}" {% if client.marital_status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contact Information -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Contact Information</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone_primary">Primary Phone <span style="color:var(--red-400)">*</span></label>
+          <input type="tel" name="phone_primary" id="phone_primary" required
+                 value="{{ client.phone_primary|default:'' }}" placeholder="+256700123456">
+          <div class="form-hint">Uganda format: +256XXXXXXXXX — used for SMS reminders.</div>
+        </div>
+        <div class="form-group">
+          <label for="phone_secondary">Secondary Phone</label>
+          <input type="tel" name="phone_secondary" id="phone_secondary"
+                 value="{{ client.phone_secondary|default:'' }}" placeholder="+256700123456">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" name="email" id="email"
+                 value="{{ client.email|default:'' }}" placeholder="client@example.com">
+        </div>
+        <div class="form-group">
+          <label for="district">District <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="district" id="district"
+                 value="{{ client.district|default:'Kampala' }}" placeholder="e.g. Kampala" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="physical_address">Physical Address <span style="color:var(--red-400)">*</span></label>
+        <textarea name="physical_address" id="physical_address" rows="2" required
+                  placeholder="Plot number, street, LC1 area, district">{{ client.physical_address|default:'' }}</textarea>
+        <div class="form-hint">Include enough detail for a field officer to locate the client.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Employment -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Employment & Income</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="employment_status">Employment Status <span style="color:var(--red-400)">*</span></label>
+          <select name="employment_status" id="employment_status" required>
+            <option value="">— Select —</option>
+            {% for val, label in employment_choices %}
+            <option value="{{ val }}" {% if client.employment_status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="monthly_income">Monthly Income ({% currency_symbol %}) <span style="color:var(--red-400)">*</span></label>
+          <input type="number" name="monthly_income" id="monthly_income" min="0" step="10000"
+                 value="{{ client.monthly_income|default:'' }}" placeholder="e.g. 800000" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="employer_name">Employer / Business Name</label>
+          <input type="text" name="employer_name" id="employer_name"
+                 value="{{ client.employer_name|default:'' }}" placeholder="e.g. Kampala City Council">
+        </div>
+        <div class="form-group">
+          <label for="job_title">Job Title / Business Type</label>
+          <input type="text" name="job_title" id="job_title"
+                 value="{{ client.job_title|default:'' }}" placeholder="e.g. Teacher, Trader">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="employer_address">Employer / Business Address</label>
+        <input type="text" name="employer_address" id="employer_address"
+               value="{{ client.employer_address|default:'' }}" placeholder="Work location or business address">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Next of Kin (only shown on create) -->
+  {% if action == "create" %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <span class="card-title">Next of Kin</span>
+      <span class="text-sm text-muted">Recommended before loan approval</span>
+    </div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="kin_name">Full Name</label>
+          <input type="text" name="kin_name" id="kin_name" placeholder="Next of kin full name">
+        </div>
+        <div class="form-group">
+          <label for="kin_relationship">Relationship</label>
+          <input type="text" name="kin_relationship" id="kin_relationship"
+                 placeholder="e.g. Spouse, Parent, Sibling">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="kin_phone">Phone Number</label>
+          <input type="tel" name="kin_phone" id="kin_phone" placeholder="+256700123456">
+        </div>
+        <div class="form-group">
+          <label for="kin_phone2">Second Phone</label>
+          <input type="tel" name="kin_phone2" id="kin_phone2" placeholder="+256700123456">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="kin_address">Physical Address</label>
+        <input type="text" name="kin_address" id="kin_address" placeholder="Next of kin address">
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="kin_is_guarantor" id="kin_is_guarantor" style="width:auto;">
+          <span>This person is also acting as loan guarantor</span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Notes + blacklist (edit only, CEO) -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Additional Notes</span></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label for="notes">Internal Notes</label>
+        <textarea name="notes" id="notes" rows="3"
+                  placeholder="Any internal notes about this client (not shown to client)">{{ client.notes|default:'' }}</textarea>
+      </div>
+      {% if action == "edit" and user.is_ceo %}
+      <hr style="border-color:var(--border);margin:16px 0;">
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="is_active" id="is_active" style="width:auto;"
+                 {% if client.is_active %}checked{% endif %}>
+          <span>Account is active</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="is_blacklisted" id="is_blacklisted" style="width:auto;"
+                 {% if client.is_blacklisted %}checked{% endif %}>
+          <span style="color:var(--red-400)">Blacklist this client</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="blacklist_reason">Blacklist Reason</label>
+        <textarea name="blacklist_reason" id="blacklist_reason" rows="2"
+                  placeholder="Required if blacklisting">{{ client.blacklist_reason|default:'' }}</textarea>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="flex gap-2 mb-4">
+    <button type="submit" class="btn btn-primary btn-lg">
+      {% if action == "create" %}Register Client{% else %}Save Changes{% endif %}
+    </button>
+    <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+  </div>
+
+</form>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.getElementById('client-modal-close');
+    const modal = document.getElementById('client-modal');
+    closeBtn?.addEventListener('click', function () {
+      window.location.href = '{% url "clients:list" %}';
+    });
+    modal?.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        window.location.href = '{% url "clients:list" %}';
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Overdue Report{% endblock %}
+{% block page_title %}Overdue Report{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:overdue_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:overdue_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="metrics-grid mb-3">
+  <div class="metric-card red">
+    <div class="metric-label">Total Overdue Amount</div>
+    <div class="metric-value red" style="font-size:20px;">{{ total_overdue|ugx }}</div>
+    <div class="metric-sub">as of {{ today }}</div>
+  </div>
+  <div class="metric-card amber">
+    <div class="metric-label">Overdue Entries</div>
+    <div class="metric-value amber">{{ rows|length }}</div>
+    <div class="metric-sub">unpaid schedule entries</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    {% if rows %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Client</th><th>Loan #</th><th>Product</th>
+          <th>Due Date</th><th>Days Overdue</th>
+          <th>Original Due</th><th>Amount Paid</th><th>Still Owed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            <a href="{% url 'clients:detail' row.entry.loan.client.pk %}">{{ row.entry.loan.client.full_name }}</a>
+            <div class="text-sm text-muted">{{ row.entry.loan.client.phone_primary }}</div>
+          </td>
+          <td class="mono"><a href="{% url 'loans:detail' row.entry.loan.pk %}">{{ row.entry.loan.loan_number }}</a></td>
+          <td class="text-sm">{{ row.entry.loan.product.name }}</td>
+          <td style="color:var(--red-400)">{{ row.entry.due_date }}</td>
+          <td>
+            <span class="badge
+              {% if row.days_overdue > 30 %}badge-red
+              {% elif row.days_overdue > 7 %}badge-amber
+              {% else %}badge-muted{% endif %}">
+              {{ row.days_overdue }} days
+            </span>
+          </td>
+          <td class="mono">{{ row.entry.total_payment|ugx_plain }}</td>
+          <td class="mono" style="color:var(--green-400)">{{ row.entry.amount_paid|ugx_plain }}</td>
+          <td class="mono fw-500" style="color:var(--red-400)">{{ row.overdue_amount|ugx_plain }}</td>
+          <td>
+            <a href="{% url 'payments:record_for_loan' row.entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid var(--border);font-weight:600;">
+          <td colspan="7" style="padding:12px 16px;">TOTAL OVERDUE</td>
+          <td class="mono" style="padding:12px 16px;color:var(--red-400)">{{ total_overdue|ugx_plain }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">✓</div>
+      <p>No overdue payments. Portfolio is healthy.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

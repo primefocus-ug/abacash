@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+<form method="get" class="search-filter-bar">
+{% load aba_filters %}
+{% block title %}Fee Types{% endblock %}
+{% block page_title %}Fee Types{% endblock %}
+{% block topbar_actions %}<a href="{% url 'accounts:fee_type_create' %}" class="btn btn-primary btn-sm">+ Add Fee</a>{% endblock %}
+{% block content %}<div class="card"><div class="card-header"><form method="get" class="flex gap-2 flex-wrap" style="flex:1"><input name="q" value="{{ q }}" placeholder="Search fees" style="width:240px;margin-bottom:0"><select name="applied_to" style="width:220px;margin-bottom:0"><option value="">All uses</option>{% for v,l in applied_to_choices %}<option value="{{ v }}" {% if applied_to_filter == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select><button class="btn btn-secondary btn-sm">Filter</button></form></div><div class="table-wrap"><table class="aba-table"><thead><tr><th>Name</th><th>Applies To</th><th>Method</th><th>Amount</th><th>Mandatory</th><th>Status</th><th></th></tr></thead><tbody>{% for f in fee_types %}<tr><td>{{ f.name }}<div class="text-sm text-muted">{{ f.description }}</div></td><td>{{ f.get_applied_to_display }}</td><td>{{ f.get_calculation_method_display }}</td><td class="mono">{{ f.amount|ugx }}</td><td>{{ f.is_mandatory|yesno:"Yes,No" }}</td><td>{{ f.is_active|yesno:"Active,Inactive" }}</td><td><a class="btn btn-secondary btn-sm" href="{% url 'accounts:fee_type_edit' f.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="7">No fee types found.</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

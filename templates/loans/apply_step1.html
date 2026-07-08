@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}New Loan — Select Client{% endblock %}
+{% block page_title %}New Loan Application — Step 1: Select Client{% endblock %}
+
+{% block content %}
+<style>
+  .wizard-progress { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; }
+  .wizard-chip { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-secondary); font-size:12px; font-weight:600; }
+  .wizard-chip.active { background:var(--accent-soft); color:var(--accent); border-color:rgba(37,99,235,0.24); }
+  .wizard-required { padding:10px 12px; border-left:3px solid var(--accent); background:var(--surface-2); border-radius:8px; margin-bottom:12px; }
+  .wizard-required strong { display:block; margin-bottom:4px; }
+  .wizard-footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:12px; border-top:1px solid var(--border); margin-top:12px; }
+  .search-spinner { display:none; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; }
+  .htmx-request .search-spinner { display:inline-block; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+
+<div id="loan-apply-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:860px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;">New Loan Application</h2>
+        <div class="wizard-progress">
+          <span class="wizard-chip active">1. Client</span>
+          <span>→</span>
+          <span class="wizard-chip">2. Loan Terms</span>
+          <span>→</span>
+          <span class="wizard-chip">3. Security</span>
+          <span>→</span>
+          <span class="wizard-chip">4. Review</span>
+        </div>
+      </div>
+      <button type="button" id="loan-apply-modal-close" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+
+    <div style="padding:20px;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Step 1 of 4 · Select Client</span></div>
+        <div class="card-body">
+          <div class="wizard-required">
+            <strong>Required before moving forward</strong>
+            Choose a client to continue the application. Search by name, NIN, or client number.
+          </div>
+
+          <div class="flex gap-2 mb-3" style="align-items:center;">
+            <input
+              type="search"
+              id="client-search"
+              name="q"
+              class="form-control"
+              placeholder="Type client name, NIN, or client number…"
+              autocomplete="off"
+              hx-get="{% url 'loans:client_search' %}"
+              hx-trigger="input changed delay:250ms, search"
+              hx-target="#client-results"
+              hx-indicator="#search-indicator"
+            >
+            <span id="search-indicator" class="search-spinner"></span>
+          </div>
+
+          <div id="client-results"
+               hx-get="{% url 'loans:client_search' %}"
+               hx-trigger="load"
+               hx-target="#client-results">
+            <div class="empty-state"><p>Loading clients…</p></div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="wizard-footer">
+            <a href="{% url 'loans:list' %}" class="btn btn-tertiary">← Back</a>
+            <a href="#" class="btn btn-primary" onclick="return false;">Next Step →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 text-sm text-muted">
+        Client not registered yet?
+        <a href="{% url 'clients:create' %}">Register new client →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.getElementById('loan-apply-modal-close');
+    closeBtn?.addEventListener('click', () => window.location.href = '{% url "loans:list" %}');
+    document.getElementById('loan-apply-modal')?.addEventListener('click', function (e) {
+      if (e.target === this) window.location.href = '{% url "loans:list" %}';
+    });
+  });
+</script>
+{% endblock %}

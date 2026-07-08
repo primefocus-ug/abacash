@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ company.name }}{% endblock %} — Loan Management</title>
+  {% load static aba_filters %}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/aba.css' %}">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  {% block extra_css %}{% endblock %}
+
+  <style>
+    /* ── DESIGN TOKENS ─────────────────────────────────────── */
+    :root {
+      --sidebar-bg:       #F8FAFB;
+      --sidebar-surface:  #FFFFFF;
+      --sidebar-border:   #E5E7EB;
+      --sidebar-hover:    #F3F4F6;
+      --sidebar-text:     #64748B;
+      --sidebar-text-hi:  #0F172A;
+      --sidebar-width:    280px;
+
+      --accent:           #2563EB;
+      --accent-2:         #0F766E;
+      --accent-light:     #EFF6FF;
+      --accent-active-bg: #E8F0FF;
+      --accent-hover:     #1D4ED8;
+      --accent-soft:      rgba(37, 99, 235, 0.12);
+      
+      --success:          #10B981;
+      --warning:          #F59E0B;
+      --danger:           #EF4444;
+      --info:             #3B82F6;
+      --cyan:             #06B6D4;
+      --purple:           #8B5CF6;
+
+      --main-bg:          #F5F8FC;
+      --surface:          #FFFFFF;
+      --surface-2:        #F8FAFC;
+      --surface-3:        #EEF2F7;
+      --border:           #E2E8F0;
+      --text-primary:     #0F172A;
+      --text-secondary:   #475569;
+      --text-muted:       #64748B;
+
+      --radius-sm:  8px;
+      --radius-md:  12px;
+      --radius-lg:  16px;
+      --topbar-h:   64px;
+      --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.08);
+
+      --font-body:    'Sans', system-ui, sans-serif;
+      --font-heading: 'sans-serif', 'Plus Jakarta Sans', sans-serif;
+      --font-mono:    'sans-serif', 'Courier New', monospace;
+
+      font-feature-settings: "tnum" 1, "kern" 1;
+    }
+
+    /* ── DARK THEME ──────────────────────────────────────────── */
+    [data-theme="dark"] {
+      --sidebar-bg:       #0F172A;
+      --sidebar-surface:  #111827;
+      --sidebar-border:   #334155;
+      --sidebar-hover:    #1E293B;
+      --sidebar-text:     #94A3B8;
+      --sidebar-text-hi:  #E2E8F0;
+
+      --accent:           #60A5FA;
+      --accent-2:         #2DD4BF;
+      --accent-light:     #1E3A8A;
+      --accent-active-bg: rgba(96,165,250,.16);
+      --accent-hover:     #93C5FD;
+      --accent-soft:      rgba(96,165,250,.16);
+
+      --success:          #34D399;
+      --warning:          #FBBF24;
+      --danger:           #F87171;
+      --info:             #60A5FA;
+
+      --main-bg:          #020617;
+      --surface:          #111827;
+      --surface-2:        #1F2937;
+      --surface-3:        #273449;
+      --border:           #334155;
+      --text-primary:     #F8FAFC;
+      --text-secondary:   #CBD5E1;
+      --text-muted:       #94A3B8;
+
+      --shadow-soft: 0 16px 40px rgba(2, 6, 23, 0.35);
+
+      --bg-surface: var(--surface);
+      --bg-raised: var(--surface-2);
+      --bg-muted: var(--surface-3);
+      --bg-input: var(--surface-2);
+      --bg-hover: var(--surface-3);
+      --blue-50: rgba(96, 165, 250, 0.16);
+      --blue-300: #93C5FD;
+      --blue-500: var(--accent);
+      --blue-600: var(--accent-hover);
+    }
+
+    /* ── RESET ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      overflow-x: hidden;
+    }
+    body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.10), transparent 28%),
+        linear-gradient(135deg, #f7faff 0%, var(--main-bg) 100%);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-width: 0;
+      transition: background-color .3s ease, color .3s ease;
+      letter-spacing: -0.01em;
+      position: relative;
+    }
+    [data-theme="dark"] body {
+      background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.16), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.12), transparent 26%),
+        linear-gradient(135deg, #020617 0%, var(--main-bg) 100%);
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.7), transparent 85%);
+      opacity: 0.7;
+      z-index: -1;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      min-height: 100vh;
+      width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
+      gap: 0;
+      align-items: stretch;
+      justify-items: stretch;
+    }
+
+    /* ── SIDEBAR ────────────────────────────────────────────── */
+    .sidebar {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,250,252,0.96) 100%);
+      width: var(--sidebar-width);
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148,163,184,.25) transparent;
+      border-right: 1px solid var(--sidebar-border);
+      z-index: 100;
+      box-shadow: 0 20px 60px rgba(15,23,42,0.08);
+      transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+      backdrop-filter: blur(14px);
+    }
+    [data-theme="dark"] .sidebar {
+      background: linear-gradient(180deg, rgba(17,24,39,0.98) 0%, rgba(15,23,42,0.98) 100%);
+      box-shadow: 0 16px 50px rgba(2,6,23,0.42);
+      scrollbar-color: rgba(255,255,255,.2) transparent;
+    }
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(107,114,128,.3); border-radius: 3px; transition: background .3s ease; }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(107,114,128,.6); }
+    [data-theme="dark"] .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+    [data-theme="dark"] .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.25); }
+
+    /* Brand */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--sidebar-border);
+      transition: border-color .3s ease;
+    }
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: .5px;
+      flex-shrink: 0;
+      transition: background .3s ease;
+    }
+    [data-theme="dark"] .logo-mark {
+      background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+    }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--sidebar-text-hi);
+      line-height: 1.2;
+      transition: color .3s ease;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--sidebar-text);
+      letter-spacing: .3px;
+      margin-top: 2px;
+      transition: color .3s ease;
+    }
+
+    /* Nav */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-section { padding: 0; }
+    .nav-section-title {
+      padding: 12px 20px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .nav-section:first-child .nav-section-title { margin-top: 0; }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      color: var(--sidebar-text);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .3s ease;
+      cursor: pointer;
+      position: relative;
+      margin: 0 12px;
+    }
+    .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .6; transition: opacity .2s, color .3s ease; }
+    .nav-link:hover {
+      background: var(--sidebar-hover);
+      color: var(--sidebar-text-hi);
+    }
+    .nav-link:hover svg { opacity: .9; }
+    .nav-link.active {
+      background: var(--accent-active-bg);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-link.active svg { opacity: 1; color: var(--accent); }
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 0 2px 2px 0;
+      background: var(--accent);
+    }
+
+    /* Nav groups */
+    .nav-group { }
+    .nav-group-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      color: var(--sidebar-text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      margin: 0 12px;
+      border-radius: var(--radius-md);
+    }
+    .nav-group-toggle:hover { 
+      background: var(--sidebar-hover);
+      color: var(--sidebar-text-hi);
+    }
+    .nav-group-toggle svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: .6;
+      transition: transform .2s;
+    }
+    .nav-group.collapsed .nav-group-toggle svg { transform: rotate(-90deg); }
+    .nav-group-items { overflow: hidden; transition: max-height .2s ease; }
+    .nav-group.collapsed .nav-group-items { max-height: 0 !important; }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 16px 12px 20px;
+      border-top: 1px solid var(--sidebar-border);
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--sidebar-surface);
+      border: 1px solid var(--sidebar-border);
+      transition: all .2s;
+    }
+    .user-card:hover {
+      background: var(--main-bg);
+      border-color: var(--border);
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sidebar-text-hi);
+      line-height: 1.2;
+    }
+    .user-role {
+      font-size: 12px;
+      color: var(--sidebar-text);
+      margin-top: 2px;
+    }
+
+    /* ── MAIN AREA ───────────────────────────────────────────── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-width: 0;
+      width: 100%;
+      margin-left: 0;
+      max-width: 100%;
+    }
+
+    /* Desktop: apply sidebar offset */
+    @media (min-width: 769px) {
+      .main {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+        min-width: 0;
+      }
+    }
+
+    /* ── TOPBAR ─────────────────────────────────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: rgba(255,255,255,0.82);
+      border-bottom: 1px solid rgba(226,232,240,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(15,23,42,0.04);
+      transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+      backdrop-filter: blur(12px);
+    }
+    [data-theme="dark"] .topbar {
+      background: rgba(17,24,39,0.9);
+      border-color: rgba(51,65,85,0.95);
+      box-shadow: 0 12px 30px rgba(2,6,23,0.24);
+    }
+    .topbar-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex: 1;
+      transition: color .3s ease;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ── ALERTS ─────────────────────────────────────────────── */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 450;
+      border-left: 4px solid transparent;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideDown .2s ease;
+      transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .alert-success { background: rgba(16,185,129,.08); border-left-color: var(--success); color: #059669; }
+    .alert-error   { background: rgba(239,68,68,.08);  border-left-color: var(--danger);  color: #dc2626; }
+    .alert-warning { background: rgba(245,158,11,.08); border-left-color: var(--warning); color: #d97706; }
+    .alert-info    { background: rgba(59,130,246,.08); border-left-color: var(--info);    color: #2563eb; }
+    [data-theme="dark"] .alert-success { background: rgba(52,211,153,.12); color: #34D399; }
+    [data-theme="dark"] .alert-error   { background: rgba(248,113,113,.12); color: #F87171; }
+    [data-theme="dark"] .alert-warning { background: rgba(251,191,36,.12); color: #FBBF24; }
+    [data-theme="dark"] .alert-info    { background: rgba(96,165,250,.12); color: #60A5FA; }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: all .2s;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(15,23,42,0.04);
+    }
+    .btn-primary   { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%); color: #fff; }
+    .btn-primary:hover { background: linear-gradient(135deg, var(--accent-hover) 0%, #0F766E 100%); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(37,99,235,0.22); }
+    .btn-secondary { background: var(--surface-2); color: var(--text-secondary); border-color: var(--border); transition: background-color .3s ease, color .3s ease, border-color .3s ease; }
+    .btn-secondary:hover { background: var(--surface-3); color: var(--text-primary); }
+    .btn-tertiary {
+      background: transparent;
+      color: var(--text-secondary);
+      border-color: var(--border);
+      box-shadow: none;
+    }
+    .btn-tertiary:hover {
+      background: var(--surface-2);
+      color: var(--text-primary);
+    }
+    .btn-sm { padding: 7px 12px; font-size: 13px; }
+    .btn-danger { background: rgba(239,68,68,.1); color: #dc2626; border-color: rgba(239,68,68,.2); transition: background-color .3s ease, color .3s ease, border-color .3s ease; }
+    .btn-danger:hover { background: #ef4444; color: #fff; }
+    [data-theme="dark"] .btn-secondary { background: var(--surface-3); border-color: var(--surface-2); color: var(--text-secondary); }
+    [data-theme="dark"] .btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
+    [data-theme="dark"] .btn-tertiary { color: var(--text-secondary); border-color: var(--border); }
+    [data-theme="dark"] .btn-tertiary:hover { background: var(--surface-2); color: var(--text-primary); }
+    [data-theme="dark"] .btn-danger { background: rgba(248,113,113,.2); color: #F87171; border-color: rgba(248,113,113,.3); }
+    [data-theme="dark"] .btn-danger:hover { background: #F87171; color: #fff; }
+
+    /* ── PAGE BODY ───────────────────────────────────────────── */
+    .page-body {
+      padding: 28px;
+      flex: 1;
+      overflow-y: auto;
+      min-width: 0;
+      width: 100%;
+    }
+
+    /* ── STAT CARDS ──────────────────────────────────────────– */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all .2s;
+      cursor: pointer;
+    }
+    .stat-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(59,130,246,.1);
+      transform: translateY(-2px);
+    }
+    .stat-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      transition: background-color .3s ease, color .3s ease;
+    }
+    .stat-icon.blue { background: #DBEAFE; color: #3B82F6; }
+    .stat-icon.green { background: #DCFCE7; color: #10B981; }
+    .stat-icon.cyan { background: #CFFAFE; color: #06B6D4; }
+    .stat-icon.red { background: #FEE2E2; color: #EF4444; }
+    .stat-icon.amber { background: #FEF3C7; color: #F59E0B; }
+    .stat-icon.purple { background: #F3E8FF; color: #8B5CF6; }
+    [data-theme="dark"] .stat-icon.blue { background: rgba(96,165,250,.2); color: #60A5FA; }
+    [data-theme="dark"] .stat-icon.green { background: rgba(52,211,153,.2); color: #34D399; }
+    [data-theme="dark"] .stat-icon.cyan { background: rgba(34,211,238,.2); color: #22D3EE; }
+    [data-theme="dark"] .stat-icon.red { background: rgba(248,113,113,.2); color: #F87171; }
+    [data-theme="dark"] .stat-icon.amber { background: rgba(251,191,36,.2); color: #FBBF24; }
+    [data-theme="dark"] .stat-icon.purple { background: rgba(168,85,247,.2); color: #D8B4FE; }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: color .3s ease;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      transition: color .3s ease;
+    }
+    .stat-change {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .stat-change.positive { color: var(--success); }
+    .stat-change.negative { color: var(--danger); }
+
+    /* ── CARDS ───────────────────────────────────────────────── */
+    .card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.96) 100%);
+      border: 1px solid rgba(226,232,240,0.9);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+      transition: all .2s;
+      position: relative;
+    }
+    [data-theme="dark"] .card {
+      background: linear-gradient(135deg, rgba(17,24,39,0.96) 0%, rgba(31,41,55,0.98) 100%);
+      border-color: rgba(51,65,85,0.95);
+      box-shadow: 0 14px 38px rgba(2,6,23,0.28);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(37,99,235,0.04), transparent 32%);
+      pointer-events: none;
+    }
+    [data-theme="dark"] .card {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      transition: background-color .3s ease, border-color .3s ease;
+    }
+    [data-theme="dark"] .card-header {
+      background: rgba(31,41,55,0.96);
+      border-color: rgba(51,65,85,0.95);
+    }
+    [data-theme="dark"] .card-body {
+      background: transparent;
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color .3s ease;
+    }
+    .card-body {
+      padding: 20px;
+      transition: background-color .3s ease;
+    }
+
+    /* ── TABLES ──────────────────────────────────────────────– */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--surface);
+      transition: background-color .3s ease;
+    }
+    thead th {
+      padding: 12px 16px;
+      background: var(--surface-2);
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+    }
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+    }
+    tbody tr:hover td { background: var(--surface-2); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* ── BADGES ──────────────────────────────────────────────– */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background-color .3s ease, color .3s ease;
+    }
+    .badge-success { background: rgba(16,185,129,.1); color: #059669; }
+    .badge-danger  { background: rgba(239,68,68,.1);  color: #dc2626; }
+    .badge-warning { background: rgba(245,158,11,.1); color: #d97706; }
+    .badge-info    { background: rgba(59,130,246,.1); color: #2563eb; }
+    .badge-neutral { background: rgba(107,114,128,.1); color: #6B7280; }
+    [data-theme="dark"] .badge-success { background: rgba(52,211,153,.2); color: #34D399; }
+    [data-theme="dark"] .badge-danger  { background: rgba(248,113,113,.2); color: #F87171; }
+    [data-theme="dark"] .badge-warning { background: rgba(251,191,36,.2); color: #FBBF24; }
+    [data-theme="dark"] .badge-info    { background: rgba(96,165,250,.2); color: #60A5FA; }
+    [data-theme="dark"] .badge-neutral { background: rgba(148,163,184,.2); color: #CBD5E1; }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────– */
+    @media (max-width: 1200px) {
+      :root { --sidebar-width: 260px; }
+      .stat-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 1024px) {
+      :root { --sidebar-width: 240px; }
+    }
+    @media (max-width: 768px) {
+      :root { --sidebar-width: 100%; --topbar-h: 56px; }
+      .main { margin-left: 0; width: 100%; }
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 72vw;
+        max-width: 320px;
+        transform: translateX(-100%);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform .3s ease, opacity .3s ease, box-shadow .3s ease;
+        z-index: 1001;
+        background: var(--sidebar-surface);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+      #sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity .25s ease, visibility .25s ease;
+      }
+      #sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+      .stat-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+      .topbar { padding: 0 16px; }
+    }
+    @media (max-width: 480px) {
+      .sidebar { width: 85vw; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .page-body { padding: 12px; }
+    }
+
+    /* ── PRINT — compact, company-branded layouts ───────────────── */
+    @page { size: auto; margin: 12mm; }
+    @media print {
+      html, body { background: #fff !important; color: #000 !important; }
+      body { font-size: 11px; line-height: 1.2; }
+
+      /* Hide UI chrome */
+      .sidebar, .topbar, .btn, .print-hide, .topbar-actions, .page-title, .alert, .form-group, .wizard-footer, .card-footer { display: none !important; }
+
+      /* Layout adjustments */
+      .main { margin-left: 0 !important; width: 100% !important; }
+      .page-body, .pagie-body { padding: 6mm !important; }
+
+      /* Compact cards & tables */
+      .card { border: none !important; box-shadow: none !important; margin: 0 0 6mm !important; page-break-inside: avoid; }
+      .card-header { padding: 6px 0 !important; }
+      .card-body { padding: 6px 0 !important; }
+      table, .aba-table { font-size: 10px !important; border-collapse: collapse !important; }
+      thead th, tbody td { padding: 6px 8px !important; }
+
+      /* Print header/footer — fixed */
+      .print-header { display: block !important; position: fixed; top: 0; left: 0; right: 0; height: 48px; padding: 6px 12mm; background: #fff; border-bottom: 1px solid #e5e7eb; z-index: 9999; }
+      .print-header .logo { height: 36px; width: auto; float: left; }
+      .print-header .company { float: left; margin-left: 12px; font-weight:700; font-size:14px; color:#111827; }
+      .print-footer { display: block !important; position: fixed; bottom: 0; left: 0; right: 0; height: 28px; padding: 4px 12mm; background: #fff; border-top: 1px solid #e5e7eb; font-size: 10px; color: #374151; z-index: 9999; }
+      .print-only { display: block !important; }
+
+      /* Reduce margins in content to allow more per page */
+      .page-body, .card-body, .table-wrap { margin: 0; }
+
+      /* Ensure tables can break across pages reasonably */
+      table { page-break-inside: auto; }
+      tr    { page-break-inside: avoid; page-break-after: auto; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+    }
+  </style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <div class="logo-mark">ABA</div>
+      <div>
+        <div class="brand-name">{{ company.name }}</div>
+        <div class="brand-sub">Loan Management</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% with current_namespace=request.resolver_match.namespace|default:'' current_name=request.resolver_match.url_name|default:'' %}
+
+      <!-- DASHBOARD -->
+      <div class="nav-section">
+        <a href="{% url 'accounts:dashboard' %}"
+           class="nav-link {% if current_namespace == 'accounts' and current_name == 'dashboard' or current_namespace == 'accounts' and current_name == 'home' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+      </div>
+
+      <!-- CORE OPERATIONS -->
+      {% if not user.is_cashier %}
+      <div class="nav-group" data-group="operations">
+        <button type="button" class="nav-group-toggle" aria-expanded="false">
+          <span class="nav-group-label">Core Operations</span>
+          <span class="nav-group-arrow">▾</span>
+        </button>
+        <div class="nav-group-items">
+
+          <a href="{% url 'clients:list' %}"
+             class="nav-link {% if current_namespace == 'clients' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Clients</span>
+          </a>
+
+          <a href="{% url 'loans:list' %}"
+             class="nav-link {% if current_namespace == 'loans' and current_name != 'apply' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span>All Loans</span>
+          </a>
+
+          <a href="{% url 'loans:apply' %}"
+             class="nav-link {% if current_namespace == 'loans' and current_name == 'apply' or current_namespace == 'loans' and current_name == 'apply_step2' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            <span>New Loan</span>
+          </a>
+
+          {% if user.is_ceo %}
+          <a href="{% url 'loans:products' %}"
+             class="nav-link {% if current_namespace == 'loans' and current_name == 'products' or current_namespace == 'loans' and current_name == 'products_create' or current_namespace == 'loans' and current_name == 'products_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>
+            </svg>
+            <span>Loan Products</span>
+          </a>
+          {% endif %}
+
+          <a href="{% url 'payments:list' %}"
+             class="nav-link {% if current_namespace == 'payments' and current_name != 'record' and current_name != 'record_for_loan' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="1" y="4" width="22" height="16" rx="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            <span>Payments</span>
+          </a>
+
+          <a href="{% url 'payments:record' %}"
+             class="nav-link {% if current_namespace == 'payments' and current_name == 'record' or current_namespace == 'payments' and current_name == 'record_for_loan' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="1" y="4" width="22" height="16" rx="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+              <path d="M12 14v3m0 0l-1.5-1.5M12 17l1.5-1.5"/>
+            </svg>
+            <span>Record Payment</span>
+          </a>
+
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- INSIGHTS -->
+      {% if user.is_manager or user.is_ceo %}
+      <div class="nav-group" data-group="insights">
+        <button type="button" class="nav-group-toggle" aria-expanded="false">
+          <span class="nav-group-label">Insights</span>
+          <span class="nav-group-arrow">▾</span>
+        </button>
+        <div class="nav-group-items">
+
+          <a href="{% url 'reports:index' %}"
+             class="nav-link {% if current_namespace == 'reports' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6"  y1="20" x2="6"  y2="14"/>
+            </svg>
+            <span>Reports</span>
+          </a>
+
+          <a href="{% url 'accounts:guarantor_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'guarantor_list' or current_namespace == 'accounts' and current_name == 'guarantor_detail' or current_namespace == 'accounts' and current_name == 'guarantor_create' or current_namespace == 'accounts' and current_name == 'guarantor_create_ajax' or current_namespace == 'accounts' and current_name == 'guarantor_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            <span>Guarantors</span>
+          </a>
+
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- FINANCIAL -->
+      {% if user.is_ceo %}
+      <div class="nav-group" data-group="financial">
+        <button type="button" class="nav-group-toggle" aria-expanded="false">
+          <span class="nav-group-label">Financial</span>
+          <span class="nav-group-arrow">▾</span>
+        </button>
+        <div class="nav-group-items">
+
+          <a href="{% url 'accounts:expense_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'expense_list' or current_namespace == 'accounts' and current_name == 'expense_create' or current_namespace == 'accounts' and current_name == 'expense_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <span>Expenses</span>
+          </a>
+
+          <a href="{% url 'accounts:expense_types_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'expense_types_list' %}active{% endif %}"
+             style="padding-left:36px;font-size:13px;">
+            <span>Expense Types</span>
+          </a>
+
+          <a href="{% url 'accounts:capital_injection_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'capital_injection_list' or current_namespace == 'accounts' and current_name == 'capital_injection_create' or current_namespace == 'accounts' and current_name == 'capital_injection_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+            <span>Capital Injections</span>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ACCOUNTS -->
+      <div class="nav-group" data-group="accounts">
+        <button type="button" class="nav-group-toggle" aria-expanded="false">
+          <span class="nav-group-label">Accounts</span>
+          <span class="nav-group-arrow">▾</span>
+        </button>
+        <div class="nav-group-items">
+
+          <a href="{% url 'accounts:bank_account_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'bank_account_list' or current_namespace == 'accounts' and current_name == 'bank_account_create' or current_namespace == 'accounts' and current_name == 'bank_account_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <path d="M2 10h20"/>
+              <path d="M6 15h4"/>
+            </svg>
+            <span>Bank Accounts</span>
+          </a>
+
+          <a href="{% url 'accounts:bank_transaction_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'bank_transaction_list' or current_namespace == 'accounts' and current_name == 'bank_transaction_create' or current_namespace == 'accounts' and current_name == 'bank_transaction_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 4h16v16H4z"/>
+              <path d="M4 8h16"/>
+              <path d="M8 4v16"/>
+            </svg>
+            <span>Bank Transactions</span>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ADMINISTRATION -->
+      <div class="nav-group" data-group="admin">
+        <button type="button" class="nav-group-toggle" aria-expanded="false">
+          <span class="nav-group-label">Administration</span>
+          <span class="nav-group-arrow">▾</span>
+        </button>
+        <div class="nav-group-items">
+
+          <a href="{% url 'accounts:admin_dashboard' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'admin_dashboard' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            <span>Admin Panel</span>
+          </a>
+
+          <a href="{% url 'accounts:user_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'user_list' or current_namespace == 'accounts' and current_name == 'user_create' or current_namespace == 'accounts' and current_name == 'user_edit' or current_namespace == 'accounts' and current_name == 'user_toggle' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87m-4-12a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span>Users</span>
+          </a>
+
+          <a href="{% url 'accounts:branch_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'branch_list' or current_namespace == 'accounts' and current_name == 'branch_create' or current_namespace == 'accounts' and current_name == 'branch_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 9l6-6 6 6"/>
+              <rect x="3" y="9" width="18" height="12" rx="1"/>
+              <line x1="9" y1="13" x2="9" y2="21"/>
+              <line x1="15" y1="13" x2="15" y2="21"/>
+            </svg>
+            <span>Branches</span>
+          </a>
+
+          <a href="{% url 'accounts:company_settings' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'company_settings' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Settings</span>
+          </a>
+
+          <a href="{% url 'accounts:fee_type_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'fee_type_list' or current_namespace == 'accounts' and current_name == 'fee_type_create' or current_namespace == 'accounts' and current_name == 'fee_type_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            <span>Fee Types</span>
+          </a>
+
+          <a href="{% url 'accounts:holiday_list' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'holiday_list' or current_namespace == 'accounts' and current_name == 'holiday_create' or current_namespace == 'accounts' and current_name == 'holiday_edit' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="1"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <path d="M7 7v-2m10 2v-2"/>
+            </svg>
+            <span>Holidays</span>
+          </a>
+
+          <a href="{% url 'accounts:audit_log' %}"
+             class="nav-link {% if current_namespace == 'accounts' and current_name == 'audit_log' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span>Audit Log</span>
+          </a>
+
+        </div>
+      </div>
+      {% endif %}
+
+      {% endwith %}
+    </nav>
+
+    <!-- User card -->
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <div style="min-width:0;flex:1;">
+          <div class="user-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ user.get_full_name|default:user.username }}
+          </div>
+          <div class="user-role">{{ user.get_role_display }}</div>
+        </div>
+        <a href="{% url 'accounts:logout' %}" class="user-logout" title="Sign out" aria-label="Sign out">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <button id="sidebar-toggle"
+              style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:6px;border-radius:var(--radius-sm);transition:background .15s,color .15s;display:none;"
+              aria-label="Toggle navigation">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-secondary btn-sm" id="theme-toggle" aria-label="Toggle theme">
+          <svg id="theme-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <span id="theme-toggle-label">Light</span>
+        </button>
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </div>
+
+    <!-- Flash messages -->
+    <div class="alerts-wrap" style="margin-top:8px;">
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags|default:'info' }}" data-autohide>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+          {% if msg.tags == 'success' %}
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          {% elif msg.tags == 'error' %}
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+          {% else %}
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/>
+          {% endif %}
+        </svg>
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Print header (visible only when printing) -->
+    <div class="print-header print-only" style="display:none;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="{% static 'img/logo.png' %}" alt="ABA Uganda" class="logo" onerror="this.style.display='none'">
+        <div class="company">
+          {{ company.name }} — Loan Management<br>
+          P.O. Box XXXX, Kampala · +256 700 000000
+        </div>
+      </div>
+    </div>
+
+    <!-- Page content -->
+    <div class="pagie-body">
+      {% block content %}{% endblock %}
+    </div>
+
+  </div>
+</div>
+
+{% else %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+
+<!-- Scripts -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% load static %}
+<script src="{% static 'js/aba.js' %}"></script>
+
+<script>
+/* ─── Nav Group Accordion ──────────────────────── */
+const GroupManager = {
+  STORAGE_PREFIX: 'aba_group_',
+
+  getGroupState: function(name) {
+    try { const s = localStorage.getItem(this.STORAGE_PREFIX + name); return s === 'true'; } catch(e) { return false; }
+  },
+
+  setGroupState: function(name, open) {
+    try { localStorage.setItem(this.STORAGE_PREFIX + name, open ? 'true' : 'false'); } catch(e) {}
+  },
+
+  toggleGroup: function(group) {
+    const name   = group.dataset.group;
+    const toggle = group.querySelector('.nav-group-toggle');
+    if (!toggle) return;
+    group.classList.toggle('collapsed');
+    const isOpen = !group.classList.contains('collapsed');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    this.setGroupState(name, isOpen);
+    const items = group.querySelector('.nav-group-items');
+    if (items) items.style.maxHeight = isOpen ? items.scrollHeight + 'px' : '0';
+  },
+
+  initializeGroups: function() {
+    const self = this;
+    document.querySelectorAll('.nav-group[data-group]').forEach(function(group) {
+      const name   = group.dataset.group;
+      const toggle = group.querySelector('.nav-group-toggle');
+      const items  = group.querySelector('.nav-group-items');
+      if (!toggle || !items) return;
+
+      const hasActiveChild = items.querySelector('.nav-link.active') !== null;
+      const isOpen = hasActiveChild || self.getGroupState(name);
+      if (isOpen) {
+        group.classList.remove('collapsed');
+        toggle.setAttribute('aria-expanded', 'true');
+        items.style.maxHeight = items.scrollHeight + 'px';
+      } else {
+        group.classList.add('collapsed');
+        toggle.setAttribute('aria-expanded', 'false');
+        items.style.maxHeight = '0';
+      }
+
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        self.toggleGroup(group);
+      });
+    });
+  }
+};
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  GroupManager.initializeGroups();
+
+  /* Show hamburger on mobile */
+  var toggle = document.getElementById('sidebar-toggle');
+  function checkMobile() {
+    if (window.innerWidth <= 768) {
+      toggle.style.display = 'block';
+    } else {
+      toggle.style.display = 'none';
+      closeSidebar();
+    }
+  }
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  /* Close sidebar on nav-link click (mobile) */
+  document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  /* Auto-hide alerts */
+  document.querySelectorAll('[data-autohide]').forEach(function(el) {
+    setTimeout(function() {
+      el.style.transition = 'opacity .4s ease, transform .4s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-4px)';
+      setTimeout(function() { el.remove(); }, 400);
+    }, 5000);
+  });
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+
+<!-- Print footer (visible only when printing) -->
+<div class="print-footer print-only" style="display:none;">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>{{ company.name }} — Official Document</div>
+    <div>Printed on <span class="print-date"></span></div>
+  </div>
+</div>
+<script>
+  function updatePrintMeta(){
+    try{
+      var d = new Date();
+      var el = document.querySelector('.print-date');
+      if(el) el.textContent = d.toLocaleString();
+    }catch(e){}
+  }
+  window.addEventListener('beforeprint', updatePrintMeta);
+  document.addEventListener('DOMContentLoaded', updatePrintMeta);
+</script>
+
+<!-- Generic modal container for HTMX-loaded forms -->
+<div id="modal" aria-hidden="true" style="display:none;position:fixed;inset:0;z-index:11000;align-items:center;justify-content:center;">
+  <div id="modal-backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);"></div>
+  <div id="modal-card" role="dialog" aria-modal="true" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:680px;width:94%;max-height:90vh;overflow:auto;position:relative;padding:24px;box-shadow:var(--shadow-soft);">
+    <button id="modal-close" aria-label="Close" style="position:absolute;right:10px;top:10px;background:transparent;border:none;font-size:18px;">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    function showModal(){
+      var m = document.getElementById('modal'); if(!m) return; m.style.display = 'flex'; m.setAttribute('aria-hidden','false');
+    }
+    function hideModal(){
+      var m = document.getElementById('modal'); if(!m) return; m.style.display = 'none'; m.setAttribute('aria-hidden','true');
+      var body = document.getElementById('modal-body'); if(body) body.innerHTML = '';
+    }
+    // Expose for scripts returned inside HTMX fragments
+    window.showModal = showModal;
+    window.hideModal = hideModal;
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.id === 'modal-backdrop') hideModal();
+      if(e.target && e.target.id === 'modal-close') hideModal();
+    });
+    // HTMX: after content swapped into modal-body, show modal
+    document.body.addEventListener('htmx:afterSwap', function(evt){
+      var target = evt.detail.target;
+      if(target && target.id === 'modal-body') showModal();
+    });
+    // When an HTMX request fails, show a small alert
+    document.body.addEventListener('htmx:afterRequest', function(evt){
+      if(evt.detail.xhr && evt.detail.xhr.status >= 400){
+        alert('Failed to load dialog: ' + evt.detail.xhr.statusText);
+      }
+    });
+    // Close modal on Escape
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ hideModal(); } });
+  })();
+</script>
+</body>
+</html>

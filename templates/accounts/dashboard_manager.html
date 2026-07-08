@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Manager Dashboard{% endblock %}
+{% block page_title %}Manager Dashboard{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'loans:apply' %}" class="btn btn-primary btn-sm">New Loan Application</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Metrics -->
+<div class="metrics-grid mb-3">
+  <div class="metric-card teal" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Total Portfolio</div>
+    <div class="metric-value teal">{{ total_portfolio|money }}</div>
+    <div class="metric-sub">Active loans</div>
+  </div>
+  <div class="metric-card blue" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Outstanding</div>
+    <div class="metric-value" style="color:var(--blue-400)">{{ total_outstanding|money }}</div>
+    <div class="metric-sub">To be collected</div>
+  </div>
+  <div class="metric-card green" style="cursor: pointer;">
+    <div class="metric-label">Collected This Month</div>
+    <div class="metric-value green">{{ collected_month|money }}</div>
+    <div class="metric-sub">Total collected</div>
+  </div>
+  <div class="metric-card amber" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=PENDING">
+    <div class="metric-label">Pending Approvals</div>
+    <div class="metric-value amber">{{ pending_count }}</div>
+    <div class="metric-sub">awaiting your review</div>
+  </div>
+  <div class="metric-card red" style="cursor: pointer;" data-link="{% url 'reports:overdue' %}">
+    <div class="metric-label">Overdue Entries</div>
+    <div class="metric-value red">{{ overdue_count }}</div>
+    <div class="metric-sub">missed payments</div>
+  </div>
+  <div class="metric-card" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Active Loans</div>
+    <div class="metric-value">{{ active_loan_count }}</div>
+    <div class="metric-sub">in portfolio</div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Staff Performance</span>
+    <span class="text-sm text-muted">Applications and collections this month</span>
+  </div>
+  <div class="card-body">
+    <canvas id="staffPerformanceChart" height="140"></canvas>
+  </div>
+  <div class="table-wrap">
+    {% if staff_performance %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Staff</th>
+          <th>Applications</th>
+          <th>Active Loans</th>
+          <th>Collections</th>
+          <th>Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in staff_performance %}
+        <tr>
+          <td>{{ row.user.full_name }}</td>
+          <td class="mono">{{ row.applications_count }}</td>
+          <td class="mono">{{ row.active_loans_count }}</td>
+          <td class="mono">{{ row.collections_this_month|money }}</td>
+          <td class="text-muted text-sm">{{ row.user.commission_rate|floatformat:2 }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No staff activity recorded yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  (function(){
+    const labels = [];
+    const apps = [];
+    const collects = [];
+    document.querySelectorAll('table.aba-table tbody tr').forEach(function(row){
+      const cols = row.querySelectorAll('td');
+      if (!cols || cols.length < 4) return;
+      labels.push(cols[0].textContent.trim());
+      apps.push(Number(cols[1].textContent.trim()) || 0);
+      // collections column contains money formatted text like '{% currency_symbol %} 1,234'
+      const collText = cols[3].textContent.replace(/[^0-9.-]/g,'');
+      collects.push(Number(collText) || 0);
+    });
+    if (labels.length === 0) return;
+    const ctx = document.getElementById('staffPerformanceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Applications', data: apps, backgroundColor: 'rgba(37,99,235,0.8)' },
+          { label: 'Collections ({% currency_symbol %})', data: collects, backgroundColor: 'rgba(16,185,129,0.8)' }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true }
+        },
+        plugins: { legend: { position: 'top' } }
+      }
+    });
+  })();
+</script>
+
+<!-- Pending approvals -->
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Pending Loan Approvals</span>
+    <span class="badge badge-amber">{{ pending_count }}</span>
+  </div>
+  <div class="table-wrap">
+    {% if pending_loans %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Amount</th><th>Applied By</th><th>Date</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in pending_loans %}
+        <tr>
+          <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+          <td><a href="{% url 'clients:detail' loan.client.pk %}">{{ loan.client.full_name }}</a></td>
+          <td>{{ loan.product.name }}</td>
+          <td class="mono" style="color:var(--teal-400)">{{ loan.principal_amount|money }}</td>
+          <td class="text-muted text-sm">{{ loan.applied_by.full_name }}</td>
+          <td class="text-muted text-sm">{{ loan.application_date }}</td>
+          <td>
+            <div class="flex gap-2">
+              <form method="post" action="{% url 'loans:approve' loan.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm"
+                        data-confirm="Approve loan {{ loan.loan_number }} for {{ loan.principal_amount|money }}?">
+                  Approve
+                </button>
+              </form>
+              <a href="{% url 'loans:detail' loan.pk %}#reject" class="btn btn-danger btn-sm">Reject</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">✓</div><p>No loans pending approval.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Overdue -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Overdue Payments</span>
+    <a href="{% url 'reports:overdue' %}" class="btn btn-secondary btn-sm">Full Report</a>
+  </div>
+  <div class="table-wrap">
+    {% if overdue_schedules %}
+    <table class="aba-table">
+      <thead>
+        <tr><th>Client</th><th>Loan #</th><th>Due Date</th><th>Amount Due</th><th>Period</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for entry in overdue_schedules|slice:":20" %}
+        <tr>
+          <td><a href="{% url 'clients:detail' entry.loan.client.pk %}">{{ entry.loan.client.full_name }}</a></td>
+          <td class="mono"><a href="{% url 'loans:detail' entry.loan.pk %}">{{ entry.loan.loan_number }}</a></td>
+          <td style="color:var(--red-400)">{{ entry.due_date }}</td>
+          <td class="mono" style="color:var(--red-400)">{{ entry.total_payment|money }}</td>
+          <td>{{ entry.period_number }}</td>
+          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">✓</div><p>No overdue payments.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

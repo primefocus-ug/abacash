@@ -1,0 +1,89 @@
+{% load humanize aba_filters %}
+<div style="padding:0;">
+
+  {# ── Header info strip ── #}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;border-bottom:1px solid var(--border);background:var(--bg-raised);">
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Loan</div>
+      <div style="font-family:var(--font-mono);font-weight:600;font-size:14px;">{{ loan.loan_number }}</div>
+    </div>
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Outstanding</div>
+      <div style="font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--amber-400);">{{ loan.outstanding_balance|money }}</div>
+    </div>
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Product</div>
+      <div style="font-size:13px;font-weight:500;">{{ loan.product.name }}</div>
+    </div>
+    <div style="padding:12px 18px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Current Term</div>
+      <div style="font-size:13px;font-weight:500;">{{ loan.term_months }} months</div>
+    </div>
+  </div>
+
+  {# ── Helper note ── #}
+  <div style="margin:16px 20px 0;padding:10px 14px;background:var(--blue-dim);border-radius:var(--radius-sm);font-size:12.5px;color:var(--blue-400);border-left:3px solid var(--blue-400);">
+    {{ helper_text }}
+  </div>
+
+  {# ── Form ── #}
+  <form method="post"
+        hx-post="{{ request.path }}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        style="padding:20px;">
+
+    {% csrf_token %}
+
+    <div class="form-row" style="margin-bottom:16px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>New Term (months)</label>
+        <input type="number" name="term_months"
+               value="{{ default_term }}"
+               min="{{ min_term }}" max="{{ max_term }}"
+               required
+               style="font-family:var(--font-mono);">
+        <div class="form-hint">Min {{ min_term }} — Max {{ max_term }} months</div>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Repayment Frequency</label>
+        <select name="frequency">
+          {% for value, label in frequency_choices %}
+          <option value="{{ value }}" {% if value == loan.repayment_frequency %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {% if not is_reschedule %}
+    <div class="form-group">
+      <label>Additional Amount (UGX)</label>
+      <input type="number" name="additional_amount" value="0" step="1" min="0"
+             style="font-family:var(--font-mono);">
+      <div class="form-hint">Extra funds to add on top of the rolled-over balance. Leave 0 if none.</div>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label>{{ is_reschedule|yesno:"Rescheduling Reason,Renewal Reason" }} <span style="color:var(--red-400);">*</span></label>
+      <textarea name="reason" rows="3" required
+                placeholder="{% if is_reschedule %}Explain why the repayment schedule is being adjusted…{% else %}Explain why this loan is being renewed…{% endif %}"></textarea>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:4px;border-top:1px solid var(--border);margin-top:4px;">
+      <button type="button" class="btn btn-secondary"
+              onclick="document.getElementById('modal-overlay').classList.remove('active');">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-primary" style="gap:6px;">
+        {% if is_reschedule %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {% else %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"/></svg>
+        {% endif %}
+        {{ submit_label }}
+      </button>
+    </div>
+
+  </form>
+</div>

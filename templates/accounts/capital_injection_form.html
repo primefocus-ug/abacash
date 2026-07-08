@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}{% if action == 'edit' %}Edit{% else %}Record{% endif %} Capital Injection{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit{% else %}Record{% endif %} Capital Injection{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:capital_injection_list' %}" class="btn btn-secondary btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div id="capital-injection-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:720px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;">{{ title }}</h2>
+        <p class="text-sm text-muted" style="margin:6px 0 0;">Record a capital injection without navigating away.</p>
+      </div>
+      <button type="button" id="capital-injection-modal-close" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="card">
+        <div class="card-body">
+          <h3 style="margin-bottom:20px;">{{ title }}</h3>
+          <form method="post">
+            {% csrf_token %}
+      <div class="form-grid">
+        <div>
+          <label for="source">Source *</label>
+          <input type="text" id="source" name="source" required placeholder="e.g., Equity Partners, Bank Loan, Government Grant" value="{{ injection.source|default:'' }}">
+        </div>
+
+        <div>
+          <label for="amount">Amount ({% currency_symbol %}) *</label>
+          <input type="number" id="amount" name="amount" step="0.01" required placeholder="0.00" value="{{ injection.amount|default:'' }}">
+        </div>
+
+        <div>
+          <label for="injected_date">Date *</label>
+          <input type="date" id="injected_date" name="injected_date" required value="{{ injection.injected_date|default:'' }}">
+        </div>
+
+        <div>
+          <label for="investor">Investor Name</label>
+          <input type="text" id="investor" name="investor" placeholder="Optional investor/source contact name" value="{{ injection.investor|default:'' }}">
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Optional details about this capital injection...">{{ injection.notes|default:'' }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Update{% else %}Record{% endif %} Injection</button>
+        <a href="{% url 'accounts:capital_injection_list' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.getElementById('capital-injection-modal-close');
+    const modal = document.getElementById('capital-injection-modal');
+    closeBtn?.addEventListener('click', function () {
+      window.location.href = '{% url "accounts:capital_injection_list" %}';
+    });
+    modal?.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        window.location.href = '{% url "accounts:capital_injection_list" %}';
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Loans{% endblock %}
+{% block page_title %}All Loans{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'loans:apply' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    New Application
+  </a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .filter-bar-wrapper { display:flex; align-items:center; gap:12px; padding:12px 0; }
+  .filter-bar-single-row { display:flex; align-items:center; gap:10px; flex-wrap:nowrap; overflow-x:auto; flex:1; padding:4px 0; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .filter-bar-single-row::-webkit-scrollbar { height:4px; }
+  .filter-bar-single-row::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .filter-field input, .filter-field select { width:100%; min-width:160px; padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface-2); color:var(--text-primary); font-size:13px; transition:all .15s; }
+  .filter-field input:focus, .filter-field select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(96,165,250,.15); outline:none; }
+  .filter-field input::placeholder { color:var(--text-muted); }
+  .filter-actions { display:flex; gap:6px; flex-shrink:0; }
+
+  /* Clickable rows */
+  .loan-table tbody tr.clickable-row { cursor:pointer; transition:background-color .15s; position:relative; }
+  .loan-table tbody tr.clickable-row:hover { background:var(--surface-2) !important; box-shadow:inset 3px 0 0 var(--accent); }
+
+  /* Draft rows — visually separated */
+  .draft-section { margin-bottom:24px; }
+  .draft-section-header { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:var(--surface-3); border-bottom:1px solid var(--border); }
+  .draft-section-header span { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+  .draft-row td { opacity:.85; }
+  .draft-row { border-left:3px dashed var(--border) !important; }
+  .draft-row:hover td { opacity:1; }
+  .draft-actions { display:flex; gap:6px; align-items:center; }
+
+  /* Badges */
+  .badge-green { background:rgba(16,185,129,.12); color:var(--success); }
+  .badge-amber { background:rgba(245,158,11,.12); color:var(--warning); }
+  .badge-blue  { background:rgba(59,130,246,.12); color:var(--info); }
+  .badge-teal  { background:rgba(6,182,212,.12); color:var(--cyan); }
+  .badge-red   { background:rgba(239,68,68,.12); color:var(--danger); }
+  .badge-muted { background:rgba(107,114,128,.1); color:var(--text-muted); }
+  [data-theme="dark"] .badge-green { background:rgba(52,211,153,.15); color:#34D399; }
+  [data-theme="dark"] .badge-amber { background:rgba(251,191,36,.15); color:#FBBF24; }
+  [data-theme="dark"] .badge-blue  { background:rgba(96,165,250,.15); color:#60A5FA; }
+  [data-theme="dark"] .badge-teal  { background:rgba(34,211,238,.15); color:#22D3EE; }
+  [data-theme="dark"] .badge-red   { background:rgba(248,113,113,.15); color:#F87171; }
+  [data-theme="dark"] .badge-muted { background:rgba(148,163,184,.15); color:#94A3B8; }
+  .badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+
+  .loan-table th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); padding:12px 16px; white-space:nowrap; }
+  .loan-table td { padding:14px 16px; vertical-align:middle; }
+  .card-header-content { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .empty-state { text-align:center; padding:48px 24px; color:var(--text-muted); }
+  .empty-state p { font-size:14px; color:var(--text-secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Draft applications (separated, above main list) ── #}
+{% with drafts=loans|draft_loans %}
+{% if drafts %}
+<div class="card draft-section">
+  <div class="draft-section-header">
+    <span>📝 Draft Applications — {{ drafts|length }} incomplete</span>
+    <span style="font-size:12px;color:var(--text-muted);">These have not been submitted for approval</span>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table loan-table">
+      <thead>
+        <tr>
+          <th>Loan #</th>
+          <th>Client</th>
+          <th>Product</th>
+          <th>Principal</th>
+          <th>Started</th>
+          <th>By</th>
+          <th style="width:160px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in drafts %}
+        <tr class="draft-row">
+          <td class="mono" style="font-weight:500;color:var(--text-muted);">{{ loan.loan_number }}</td>
+          <td>
+            <div style="font-weight:500;">{{ loan.client.full_name }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">{{ loan.client.client_number }}</div>
+          </td>
+          <td style="font-size:13px;color:var(--text-secondary);">{{ loan.product.name|default:"—" }}</td>
+          <td class="mono" style="color:var(--text-muted);">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+          <td style="font-size:13px;color:var(--text-muted);">{{ loan.application_date }}</td>
+          <td style="font-size:13px;color:var(--text-muted);">{{ loan.applied_by.get_short_name|default:"—" }}</td>
+          <td>
+            <div class="draft-actions">
+              <a href="{% url 'loans:apply_step2' loan.client.pk %}?draft_id={{ loan.pk }}"
+                 class="btn btn-primary btn-sm" style="gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                Continue
+              </a>
+              {% if user == loan.applied_by or user.is_manager or user.is_ceo %}
+              <form method="post" action="{% url 'loans:draft_delete' loan.pk %}" style="margin:0;" onsubmit="return confirm('Delete draft {{ loan.loan_number }}? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm" title="Delete draft">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6m4-6v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+
+{# ── Main loan portfolio (non-draft) ── #}
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-content" style="flex:1;">
+      <div>
+        <div class="card-title">Loan Portfolio</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Active, pending, completed and other loans</div>
+      </div>
+      <div class="filter-bar-wrapper">
+        <form method="get" class="filter-bar-single-row">
+          <div class="filter-field">
+            <input type="text" name="q" value="{{ search|default:'' }}" placeholder="Search loan # or client…">
+          </div>
+          <div class="filter-field">
+            <select name="status" onchange="this.form.submit()">
+              <option value="">All statuses</option>
+              {% for val, label in status_choices %}
+                {% if val != 'DRAFT' %}
+                <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-field">
+            <select name="staff" onchange="this.form.submit()">
+              <option value="">All staff</option>
+              {% for staff in staff_choices %}
+              <option value="{{ staff.pk }}" {% if staff_filter == staff.pk|stringformat:"s" %}selected{% endif %}>{{ staff.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+            {% if search or status_filter or staff_filter %}
+              <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    {% with active_loans=loans|non_draft_loans %}
+    {% if active_loans %}
+      <div style="padding:12px 20px 0;">
+        <span class="badge badge-blue" style="background:var(--accent-soft);color:var(--accent);padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">
+          {{ active_loans|length }} loan{{ active_loans|length|pluralize }}
+        </span>
+      </div>
+      <div class="table-wrap">
+        <table class="aba-table loan-table">
+          <thead>
+            <tr>
+              <th>Loan #</th>
+              <th>Client</th>
+              <th>Product</th>
+              <th>Principal</th>
+              <th>Outstanding</th>
+              <th>Applied</th>
+              <th>Status</th>
+              <th style="width:60px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in active_loans %}
+            <tr data-href="{% url 'loans:detail' loan.pk %}" class="clickable-row" tabindex="0" role="link">
+              <td class="mono" style="font-weight:500;color:var(--accent);">{{ loan.loan_number }}</td>
+              <td>
+                <div style="font-weight:500;">{{ loan.client.full_name }}</div>
+                <div style="font-size:12px;color:var(--text-muted);">{{ loan.client.client_number }}</div>
+              </td>
+              <td style="font-size:13px;color:var(--text-secondary);">{{ loan.product.name }}</td>
+              <td class="mono" style="font-weight:500;">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+              <td class="mono" style="font-weight:500;{% if loan.outstanding_balance > 0 and loan.is_overdue %}color:var(--danger);{% endif %}">
+                {{ loan.outstanding_balance|floatformat:0|intcomma }}
+              </td>
+              <td style="font-size:13px;color:var(--text-muted);">{{ loan.application_date }}</td>
+              <td>
+                <span class="badge {% if loan.status == 'ACTIVE' %}badge-green{% elif loan.status == 'PENDING' %}badge-amber{% elif loan.status == 'APPROVED' %}badge-blue{% elif loan.status == 'COMPLETED' %}badge-teal{% elif loan.status == 'REJECTED' or loan.status == 'DEFAULTED' %}badge-red{% else %}badge-muted{% endif %}">
+                  {% if loan.status == 'ACTIVE' %}<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentcolor;margin-right:4px;"></span>{% endif %}
+                  {{ loan.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <a href="{% url 'loans:detail' loan.pk %}" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>{% if search %}No loans found matching "{{ search }}".{% else %}No loans yet.{% endif %}</p>
+        {% if not search %}
+          <a href="{% url 'loans:apply' %}" class="btn btn-primary btn-sm" style="margin-top:16px;">Apply for Loan</a>
+        {% endif %}
+      </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.loan-table tbody tr.clickable-row').forEach(function(row){
+    row.addEventListener('click', function(e){
+      if(e.target.closest('a') || e.target.closest('button') || e.target.closest('form')) return;
+      var href = row.getAttribute('data-href');
+      if(href) window.location = href;
+    });
+    row.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        var href = row.getAttribute('data-href');
+        if(href) window.location = href;
+      }
+    });
+  });
+})();
+</script>
+{% endblock %}

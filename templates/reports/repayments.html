@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Repayments Report{% endblock %}
+{% block page_title %}Repayments Report{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:repayments_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <button onclick="window.print()" class="btn btn-secondary btn-sm print-hide">🖨 Print</button>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+    <div style="flex:1;min-width:160px;">
+      <div class="card-title">Repayments Received</div>
+      <div class="text-sm text-muted">{{ date_from }} — {{ date_to }}</div>
+    </div>
+    <form method="get" class="filter-bar-single-row print-hide" style="gap:8px;flex-wrap:wrap;">
+      <div class="filter-field"><input type="date" name="date_from" value="{{ date_from }}"></div>
+      <div class="filter-field"><input type="date" name="date_to"   value="{{ date_to }}"></div>
+      <div class="filter-field">
+        <select name="method">
+          <option value="">All methods</option>
+          {% for val, label in methods %}<option value="{{ val }}" {% if method_filter == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      <a href="{% url 'reports:repayments' %}" class="btn btn-secondary btn-sm">Reset</a>
+    </form>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 20px;">
+      <div class="metric-card teal"><div class="metric-label">Payments</div><div class="metric-value teal">{{ payment_count }}</div></div>
+      <div class="metric-card green"><div class="metric-label">Total Received ({% currency_symbol %})</div><div class="metric-value green">{{ total_received|ugx_plain }}</div></div>
+      <div class="metric-card blue"><div class="metric-label">Principal Recovered</div><div class="metric-value">{{ total_principal|floatformat:0|intcomma }}</div></div>
+      <div class="metric-card amber"><div class="metric-label">Interest Collected</div><div class="metric-value amber">{{ total_interest|floatformat:0|intcomma }}</div></div>
+      <div class="metric-card red"><div class="metric-label">Penalties Collected</div><div class="metric-value red">{{ total_penalty|floatformat:0|intcomma }}</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Date</th><th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Amount ({% currency_symbol %})</th><th>Principal</th><th>Interest</th><th>Penalty</th>
+          <th>Method</th><th>Cashier</th>
+        </tr></thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td class="text-sm">{{ p.payment_date }}</td>
+            <td class="mono"><a href="{% url 'loans:detail' p.loan.pk %}">{{ p.loan.loan_number }}</a></td>
+            <td>{{ p.client.full_name }}</td>
+            <td class="text-sm">{{ p.loan.product.name }}</td>
+            <td class="mono" style="font-weight:600;">{{ p.amount_received|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.principal_paid|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.interest_paid|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.penalty_paid|floatformat:0|intcomma }}</td>
+            <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+            <td class="text-sm">{{ p.recorded_by.get_full_name|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted);">No repayments found for this period.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

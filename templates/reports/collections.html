@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Collections Report{% endblock %}
+{% block page_title %}Collections Report{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:collections_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:collections_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<!-- Date filter -->
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;">
+      <div>
+        <label style="display:block;margin-bottom:4px;">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">Filter</button>
+    </form>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="metrics-grid mb-3">
+  <div class="metric-card green">
+    <div class="metric-label">Total Collected</div>
+    <div class="metric-value green" style="font-size:20px;">{{ grand_total|ugx }}</div>
+    <div class="metric-sub">{{ date_from }} to {{ date_to }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Total Transactions</div>
+    <div class="metric-value">{{ payment_count }}</div>
+  </div>
+  <div class="metric-card teal">
+    <div class="metric-label">Cashiers Active</div>
+    <div class="metric-value teal">{{ cashier_totals|length }}</div>
+  </div>
+</div>
+
+{% for row in cashier_totals %}
+<div class="card mb-3">
+  <div class="card-header">
+    <div>
+      <div style="font-weight:600;">{{ row.user.full_name }}</div>
+      <div class="text-sm text-muted">{{ row.user.get_role_display }}</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="mono fw-500" style="color:var(--green-400);font-size:16px;">{{ row.total|ugx }}</div>
+      <div class="text-sm text-muted">{{ row.count }} transactions</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table" style="font-size:13px;">
+      <thead>
+        <tr><th>Date</th><th>Client</th><th>Loan #</th><th>Amount</th><th>Principal</th><th>Interest</th><th>Method</th></tr>
+      </thead>
+      <tbody>
+        {% for p in row.payments %}
+        <tr>
+          <td>{{ p.payment_date }}</td>
+          <td>{{ p.client.full_name }}</td>
+          <td class="mono">{{ p.loan.loan_number }}</td>
+          <td class="mono" style="color:var(--green-400)">{{ p.amount_received|ugx_plain }}</td>
+          <td class="mono">{{ p.principal_paid|ugx_plain }}</td>
+          <td class="mono" style="color:var(--amber-400)">{{ p.interest_paid|ugx_plain }}</td>
+          <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% empty %}
+<div class="empty-state"><p>No payments found for the selected period.</p></div>
+{% endfor %}
+{% endblock %}

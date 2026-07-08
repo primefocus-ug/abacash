@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Financial Overview{% endblock %}
+{% block page_title %}Financial Overview{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Financial summary</span>
+    <form method="get" style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <label class="text-sm text-muted">Period:</label>
+      <select name="period" onchange="this.form.submit()" class="form-control">
+        <option value="7" {% if period == 7 %}selected{% endif %}>Last 7 days</option>
+        <option value="30" {% if period == 30 %}selected{% endif %}>Last 30 days</option>
+        <option value="90" {% if period == 90 %}selected{% endif %}>Last 90 days</option>
+        <option value="365" {% if period == 365 %}selected{% endif %}>Last 12 months</option>
+      </select>
+    </form>
+  </div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+      <div class="stat-card">
+        <div class="stat-label">Total Disbursed</div>
+        <div class="stat-value mono">{{ disbursed|money }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Repayments</div>
+        <div class="stat-value mono">{{ repayments|money }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value mono">{{ expenses|money }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Capital Injections</div>
+        <div class="stat-value mono">{{ injections|money }}</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div class="card-subtitle">Net Cash Flow</div>
+      <div style="font-size:20px;font-weight:600;margin-top:6px;">{{ net_cash|money }}</div>
+      <div class="text-sm text-muted">From {{ start_date }} to {{ end_date }}</div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <a href="?period={{ period }}&export=csv" class="btn btn-secondary">Export CSV</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

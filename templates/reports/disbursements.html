@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Disbursements Report{% endblock %}
+{% block page_title %}Disbursements Report{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:disbursements_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:disbursements_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+    <div style="flex:1;min-width:160px;">
+      <div class="card-title">Loans Disbursed</div>
+      <div class="text-sm text-muted">{{ date_from }} — {{ date_to }}</div>
+    </div>
+    <form method="get" class="filter-bar-single-row print-hide" style="gap:8px;flex-wrap:wrap;">
+      <div class="filter-field"><input type="date" name="date_from" value="{{ date_from }}"></div>
+      <div class="filter-field"><input type="date" name="date_to"   value="{{ date_to }}"></div>
+      <div class="filter-field">
+        <select name="product">
+          <option value="">All products</option>
+          {% for p in products %}<option value="{{ p.pk }}" {% if product_id == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      <a href="{% url 'reports:disbursements' %}" class="btn btn-secondary btn-sm">Reset</a>
+    </form>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 20px;">
+      <div class="metric-card teal"><div class="metric-label">Loans Disbursed</div><div class="metric-value teal">{{ loan_count }}</div></div>
+      <div class="metric-card green"><div class="metric-label">Total Principal ({% currency_symbol %})</div><div class="metric-value green">{{ total_disbursed|ugx_plain }}</div></div>
+      <div class="metric-card blue"><div class="metric-label">Expected Interest</div><div class="metric-value">{{ total_interest_exp|floatformat:0|intcomma }}</div></div>
+      <div class="metric-card amber"><div class="metric-label">Processing Fees</div><div class="metric-value amber">{{ total_fees|floatformat:0|intcomma }}</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal ({% currency_symbol %})</th><th>Term</th><th>Frequency</th>
+          <th>Disbursed</th><th>Officer</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+            <td>{{ loan.client.full_name }}<div class="text-sm text-muted">{{ loan.client.client_number }}</div></td>
+            <td class="text-sm">{{ loan.product.name }}</td>
+            <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+            <td class="text-sm">{{ loan.term_months }} mo</td>
+            <td class="text-sm">{{ loan.get_repayment_frequency_display }}</td>
+            <td class="text-sm">{{ loan.disbursement_date }}</td>
+            <td class="text-sm">{{ loan.reviewed_by.get_full_name|default:"—" }}</td>
+            <td><span class="badge {% if loan.status == 'ACTIVE' %}badge-green{% elif loan.status == 'COMPLETED' %}badge-teal{% elif loan.status == 'DEFAULTED' %}badge-red{% else %}badge-muted{% endif %}">{{ loan.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">No disbursements found for this period.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

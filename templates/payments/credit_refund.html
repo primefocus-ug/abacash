@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Refund Credit — {{ client.full_name }}{% endblock %}
+{% block page_title %}Refund Credit Balance{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:480px;margin:0 auto;">
+  <div class="card-header"><span class="card-title">Refund to {{ client.full_name }}</span></div>
+  <div class="card-body">
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:20px;">
+      <span class="text-muted text-sm">Available Credit Balance</span>
+      <span class="mono fw-500" style="color:var(--teal-400);">UGX {{ client.credit_balance|floatformat:0|intcomma }}</span>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label">Refund Amount (UGX)</label>
+        <input type="number" name="amount" class="form-control" min="1"
+               max="{{ client.credit_balance }}" step="1" required
+               placeholder="Enter amount to refund">
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Notes / Reason</label>
+        <textarea name="notes" class="form-control" rows="2"
+                  placeholder="Reason for refund (optional)"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <a href="{% url 'clients:detail' client.pk %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary"
+                onclick="return confirm('Refund UGX to {{ client.full_name }}? This cannot be undone.')">
+          Confirm Refund
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

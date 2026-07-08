@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Portfolio at Risk{% endblock %}
+{% block page_title %}Portfolio at Risk (PAR){% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:par_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:par_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .par-bucket { border-left: 4px solid; border-radius: var(--radius-lg); margin-bottom: 24px; }
+  .par-bucket.par1  { border-color: var(--warning); }
+  .par-bucket.par30 { border-color: #f97316; }
+  .par-bucket.par60 { border-color: var(--danger); }
+  .par-bucket.par90 { border-color: #7f1d1d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;">
+  <div class="metric-card amber"><div class="metric-label">PAR1 (1–30 days)</div><div class="metric-value amber">{{ par1|length }}</div><div class="metric-sub">{{ par1_total|money }} — {{ par1_pct }}%</div></div>
+  <div class="metric-card amber"><div class="metric-label">PAR30 (31–60 days)</div><div class="metric-value amber">{{ par30|length }}</div><div class="metric-sub">{{ par30_total|money }} — {{ par30_pct }}%</div></div>
+  <div class="metric-card red"><div class="metric-label">PAR60 (61–90 days)</div><div class="metric-value red">{{ par60|length }}</div><div class="metric-sub">{{ par60_total|money }} — {{ par60_pct }}%</div></div>
+  <div class="metric-card red"><div class="metric-label">PAR90 (90+ days)</div><div class="metric-value red">{{ par90|length }}</div><div class="metric-sub">{{ par90_total|money }} — {{ par90_pct }}%</div></div>
+  <div class="metric-card teal"><div class="metric-label">Active Portfolio</div><div class="metric-value teal">{{ active_portfolio|floatformat:0|intcomma }}</div><div class="metric-sub">Outstanding balance</div></div>
+</div>
+
+{% for bucket, rows, label, cls in par_buckets %}{% endfor %}
+
+{% for bucket, rows, label, cls, total, pct in par_data %}
+<div class="card par-bucket {{ cls }}">
+  <div class="card-header">
+    <div class="card-title">{{ label }} — {{ rows|length }} loan{{ rows|length|pluralize }}</div>
+    <div class="text-sm text-muted">{{ total|money }} overdue &nbsp;|&nbsp; {{ pct }}% of portfolio</div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr><th>Loan #</th><th>Client</th><th>Product</th><th>Outstanding ({% currency_symbol %})</th><th>Overdue Amount</th><th>Days Overdue</th></tr></thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' r.loan.pk %}">{{ r.loan.loan_number }}</a></td>
+            <td>{{ r.loan.client.full_name }}<div class="text-sm text-muted">{{ r.loan.client.phone_primary }}</div></td>
+            <td class="text-sm">{{ r.loan.product.name }}</td>
+            <td class="mono">{{ r.loan.outstanding_balance|floatformat:0|intcomma }}</td>
+            <td class="mono" style="color:var(--danger);font-weight:600;">{{ r.overdue_amount|floatformat:0|intcomma }}</td>
+            <td style="color:var(--danger);font-weight:700;">{{ r.days_overdue }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">No loans in this bucket.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

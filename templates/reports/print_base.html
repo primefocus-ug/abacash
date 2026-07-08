@@ -1,0 +1,138 @@
+{% load aba_filters humanize %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{% block doc_title %}Report{% endblock %} — ABA Uganda</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:13px;color:#162935;background:#fff;padding:32px 40px;max-width:1100px;margin:0 auto}
+
+  /* print bar */
+  .print-bar{position:fixed;top:0;left:0;right:0;background:#162935;color:#fff;padding:10px 40px;display:flex;align-items:center;justify-content:space-between;font-size:13px;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+  .print-bar-title{font-weight:600;letter-spacing:.02em}
+  .print-bar-actions{display:flex;gap:10px}
+  .btn-print{background:#127970;color:#fff;border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:background .15s}
+  .btn-print:hover{background:#0f6c64}
+  .btn-close{background:transparent;color:#94a3b8;border:1px solid #334155;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+  .btn-close:hover{background:#1e293b;color:#fff}
+  .doc-wrapper{padding-top:56px}
+
+  /* doc header */
+  .doc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;border-bottom:2px solid #162935;margin-bottom:22px}
+  .org-name{font-size:20px;font-weight:700;color:#162935}
+  .org-sub{font-size:11px;color:#516a7f;margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+  .doc-title-block{text-align:right}
+  .doc-title{font-size:15px;font-weight:700;color:#162935;text-transform:uppercase;letter-spacing:.05em}
+  .doc-ref{font-family:'DM Mono',monospace;font-size:11px;color:#516a7f;margin-top:3px}
+
+  /* metrics */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border:1px solid #c9d6e0;border-radius:8px;overflow:hidden;margin-bottom:22px;background:#f4f8fb}
+  .metric{padding:13px 16px;border-right:1px solid #c9d6e0}
+  .metric:last-child{border-right:none}
+  .metric-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#516a7f;margin-bottom:5px}
+  .metric-value{font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:#162935}
+  .metric-value.green{color:#188457}
+  .metric-value.red{color:#bf312d}
+  .metric-value.amber{color:#c07a11}
+  .metric-value.teal{color:#127970}
+  .metric-value.blue{color:#265ee8}
+  .metric-sub{font-size:10px;color:#6d7e8f;margin-top:3px}
+
+  /* section title */
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#516a7f;margin:18px 0 8px}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:20px}
+  thead tr{background:#162935}
+  thead th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#fff;white-space:nowrap}
+  thead th.r{text-align:right}
+  tbody tr{border-bottom:1px solid #e8eef3}
+  tbody tr:nth-child(even){background:#f8fafc}
+  td{padding:8px 12px;vertical-align:middle}
+  td.mono{font-family:'DM Mono',monospace;font-size:12px}
+  td.r{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
+  td.muted{color:#8a9bac}
+  td.green{color:#188457}
+  td.red{color:#bf312d}
+  td.amber{color:#c07a11}
+  tfoot tr{background:#162935}
+  tfoot td{padding:9px 12px;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:#fff;text-align:right}
+  tfoot td.l{text-align:left;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+  /* badge */
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .badge-green{background:#d1fae5;color:#065f46}
+  .badge-red{background:#fee2e2;color:#991b1b}
+  .badge-amber{background:#fef3c7;color:#92400e}
+  .badge-teal{background:#ccfbf1;color:#0f766e}
+  .badge-blue{background:#dbeafe;color:#1e40af}
+  .badge-muted{background:#f1f5f9;color:#475569}
+
+  /* info grid */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #c9d6e0;border-radius:8px;overflow:hidden;margin-bottom:22px}
+  .info-section{padding:14px 18px}
+  .info-section:first-child{border-right:1px solid #c9d6e0}
+  .info-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#516a7f;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e8eef3}
+  .info-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+  .info-label{color:#516a7f}
+  .info-value{font-weight:500;color:#162935}
+
+  /* footer */
+  .doc-footer{margin-top:28px;padding-top:14px;border-top:1px solid #c9d6e0;display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#6d7e8f}
+
+  @media print{
+    .print-bar{display:none!important}
+    .doc-wrapper{padding-top:0!important}
+    body{padding:20px 28px}
+    thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    tfoot tr{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    tbody tr:nth-child(even){-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .metrics{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    table{page-break-inside:auto}
+    tr{page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <span class="print-bar-title">{% block bar_title %}Report{% endblock %} — ABA Uganda</span>
+  <div class="print-bar-actions">
+    <button class="btn-close" onclick="window.close()">✕ Close</button>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Save PDF
+    </button>
+  </div>
+</div>
+
+<div class="doc-wrapper">
+  <div class="doc-header">
+    <div>
+      <div class="org-name">ABA Uganda</div>
+      <div class="org-sub">Loan Management System</div>
+    </div>
+    <div class="doc-title-block">
+      <div class="doc-title">{% block doc_title_display %}Report{% endblock %}</div>
+      <div class="doc-ref">{% block doc_subtitle %}{% endblock %}</div>
+      <div class="doc-ref" style="margin-top:2px;font-size:10px;">Generated: {% now "d M Y, H:i" %} by {{ request.user.full_name }}</div>
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <div class="doc-footer">
+    <span>ABA Uganda Loan Management System</span>
+    <span>Printed: {% now "d M Y H:i" %}</span>
+  </div>
+</div>
+
+<script>
+  if(new URLSearchParams(window.location.search).get('print')==='1'){
+    window.addEventListener('load',()=>setTimeout(()=>window.print(),400));
+  }
+</script>
+</body>
+</html>

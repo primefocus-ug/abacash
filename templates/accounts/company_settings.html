@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Company Settings{% endblock %}
+{% block page_title %}Company Settings{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary btn-sm">Admin Panel</a>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" style="max-width:900px;">
+  {% csrf_token %}
+
+  <!-- Company Identity -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Company Identity</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company_name">Company Name <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="company_name" id="company_name" required
+                 value="{{ s.company_name }}">
+        </div>
+        <div class="form-group">
+          <label for="currency_symbol">Currency Symbol <span style="color:var(--red-400)">*</span></label>
+          <input type="text" name="currency_symbol" id="currency_symbol" required maxlength="10"
+                 value="{{ s.currency_symbol }}" placeholder="UGX">
+          <div class="form-hint">Currency symbol displayed with monetary amounts across the application.</div>
+        </div>
+        <div class="form-group">
+          <label for="company_email">Company Email</label>
+          <input type="email" name="company_email" id="company_email"
+                 value="{{ s.company_email }}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company_phone">Company Phone</label>
+          <input type="tel" name="company_phone" id="company_phone"
+                 value="{{ s.company_phone }}" placeholder="+256700000000">
+        </div>
+        <div class="form-group">
+          <label for="company_website">Company Website</label>
+          <input type="url" name="company_website" id="company_website"
+                 value="{{ s.company_website }}" placeholder="https://example.com">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="company_registration">Registration Number</label>
+          <input type="text" name="company_registration" id="company_registration"
+                 value="{{ s.company_registration }}" placeholder="e.g., 8001000000000">
+        </div>
+        <div class="form-group">
+          <label for="tax_identification">Tax Identification Number (TIN)</label>
+          <input type="text" name="tax_identification" id="tax_identification"
+                 value="{{ s.tax_identification }}" placeholder="e.g., 1000000000">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="company_address">Company Address</label>
+        <textarea name="company_address" id="company_address" rows="2">{{ s.company_address }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="company_logo">Company Logo</label>
+        {% if s.company_logo %}
+        <div style="margin-bottom:8px;">
+          <img src="{{ s.company_logo.url }}" alt="Logo"
+               style="height:48px;object-fit:contain;border-radius:4px;border:1px solid var(--border);">
+        </div>
+        {% endif %}
+        <input type="file" name="company_logo" id="company_logo" accept="image/*">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Loan Business Rules -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Loan Business Rules</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="manager_approval_limit">Manager Approval Limit ({% currency_symbol %}) <span style="color:var(--red-400)">*</span></label>
+          <input type="number" name="manager_approval_limit" id="manager_approval_limit"
+                 value="{{ s.manager_approval_limit }}" min="0" step="100000" required>
+          <div class="form-hint">Loans above this amount require CEO approval.</div>
+        </div>
+        <div class="form-group">
+          <label for="max_active_loans_per_client">Max Active Loans Per Client</label>
+          <input type="number" name="max_active_loans_per_client" id="max_active_loans_per_client"
+                 value="{{ s.max_active_loans_per_client }}" min="1" max="10" style="max-width:120px;">
+          <div class="form-hint">Maximum simultaneous active loans per client.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="default_penalty_rate">Default Penalty Rate (% / month) <span style="color:var(--red-400)">*</span></label>
+          <input type="number" name="default_penalty_rate" id="default_penalty_rate"
+                 value="{{ s.default_penalty_rate }}" min="0" max="50" step="0.5" required>
+          <div class="form-hint">Applied to overdue loan balances each month.</div>
+        </div>
+        <div class="form-group">
+          <label for="income_multiplier">Income Multiplier <span style="color:var(--red-400)">*</span></label>
+          <input type="number" name="income_multiplier" id="income_multiplier"
+                 value="{{ s.income_multiplier }}" min="1" max="10" step="0.5" required>
+          <div class="form-hint">Max loan = monthly income × this value (e.g. 3 = 3× income).</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="collateral_haircut">Collateral Haircut (%) <span style="color:var(--red-400)">*</span></label>
+          <input type="number" name="collateral_haircut" id="collateral_haircut"
+                 value="{{ s.collateral_haircut }}" min="10" max="100" step="5" required>
+          <div class="form-hint">Percentage of collateral value used as loan floor.</div>
+        </div>
+        <div class="form-group">
+          <label for="grace_period_days">Grace Period (Days)</label>
+          <input type="number" name="grace_period_days" id="grace_period_days"
+                 value="{{ s.grace_period_days }}" min="0" max="15" style="max-width:120px;">
+          <div class="form-hint">Days before marking payment as overdue.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Fee Settings -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Fee Settings</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="processing_fee_method">Processing Fee Method</label>
+          <select name="processing_fee_method" id="processing_fee_method">
+            <option value="PERCENTAGE" {% if s.processing_fee_method == 'PERCENTAGE' %}selected{% endif %}>Percentage</option>
+            <option value="RANGE" {% if s.processing_fee_method == 'RANGE' %}selected{% endif %}>Range-based</option>
+          </select>
+          <div class="form-hint">Choose whether processing fees are charged as a percentage or by amount ranges.</div>
+        </div>
+        <div class="form-group">
+          <label for="default_processing_fee_percent">Processing Fee (%)</label>
+          <input type="number" name="default_processing_fee_percent" id="default_processing_fee_percent"
+                 value="{{ s.default_processing_fee_percent }}" min="0" max="10" step="0.1">
+          <div class="form-hint">Used when the fee method is percentage.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="processing_fee_ranges">Processing Fee Ranges</label>
+        <textarea name="processing_fee_ranges" id="processing_fee_ranges" rows="5" placeholder="0-500000:5000&#10;500001-1000000:10000">{{ s.processing_fee_ranges }}</textarea>
+        <div class="form-hint">Enter each range as MIN-MAX:AMOUNT per line. Use a blank upper limit such as 500001-:10000 for an 'and above' tier.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="early_repayment_penalty_percent">Early Repayment Penalty (%)</label>
+          <input type="number" name="early_repayment_penalty_percent" id="early_repayment_penalty_percent"
+                 value="{{ s.early_repayment_penalty_percent }}" min="0" max="10" step="0.1">
+          <div class="form-hint">Penalty for early loan repayment (0 = no penalty).</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="loan_restructure_fee">Loan Restructure Fee ({% currency_symbol %})</label>
+          <input type="number" name="loan_restructure_fee" id="loan_restructure_fee"
+                 value="{{ s.loan_restructure_fee }}" min="0" step="1000">
+          <div class="form-hint">Flat fee charged for loan restructuring.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SMS / Reminder Settings -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">SMS & Reminder Settings</span></div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="sms_reminders_enabled" style="width:auto;"
+                 {% if s.sms_reminders_enabled %}checked{% endif %}>
+          <span>Enable SMS payment reminders</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reminder_days_before">Days Before Due Date to Send Reminder</label>
+          <input type="number" name="reminder_days_before" id="reminder_days_before"
+                 value="{{ s.reminder_days_before }}" min="1" max="14" style="max-width:120px;">
+        </div>
+        <div class="form-group">
+          <label for="sms_sender_id">SMS Sender ID</label>
+          <input type="text" name="sms_sender_id" id="sms_sender_id"
+                 value="{{ s.sms_sender_id }}" maxlength="20" style="max-width:200px;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="adjust_due_dates_for_holidays" style="width:auto;"
+                 {% if s.adjust_due_dates_for_holidays %}checked{% endif %}>
+          <span>Adjust due dates that fall on holidays to next working day</span>
+        </label>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Savings Settings -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Savings Settings (Future Module)</span></div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="savings_enabled" style="width:auto;"
+                 {% if s.savings_enabled %}checked{% endif %}>
+          <span>Enable Savings Accounts Module</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="default_savings_interest_rate">Savings Interest Rate (% / year)</label>
+          <input type="number" name="default_savings_interest_rate" id="default_savings_interest_rate"
+                 value="{{ s.default_savings_interest_rate }}" min="0" max="20" step="0.1" style="max-width:150px;">
+        </div>
+        <div class="form-group">
+          <label for="minimum_savings_balance">Minimum Savings Balance ({% currency_symbol %})</label>
+          <input type="number" name="minimum_savings_balance" id="minimum_savings_balance"
+                 value="{{ s.minimum_savings_balance }}" min="0" step="1000" style="max-width:200px;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Share Capital Settings -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Share Capital Settings (Future Module)</span></div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" name="shares_enabled" style="width:auto;"
+                 {% if s.shares_enabled %}checked{% endif %}>
+          <span>Enable Share Capital Module</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="share_price">Price Per Share ({% currency_symbol %})</label>
+          <input type="number" name="share_price" id="share_price"
+                 value="{{ s.share_price }}" min="1000" step="1000" style="max-width:200px;">
+        </div>
+        <div class="form-group">
+          <label for="dividend_frequency">Dividend Frequency</label>
+          <select name="dividend_frequency" id="dividend_frequency" style="max-width:200px;">
+            <option value="MONTHLY" {% if s.dividend_frequency == "MONTHLY" %}selected{% endif %}>Monthly</option>
+            <option value="QUARTERLY" {% if s.dividend_frequency == "QUARTERLY" %}selected{% endif %}>Quarterly</option>
+            <option value="ANNUALLY" {% if s.dividend_frequency == "ANNUALLY" %}selected{% endif %}>Annually</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="minimum_shares">Minimum Shares Per Member</label>
+          <input type="number" name="minimum_shares" id="minimum_shares"
+                 value="{{ s.minimum_shares }}" min="1" max="10000" style="max-width:150px;">
+        </div>
+        <div class="form-group">
+          <label for="maximum_shares">Maximum Shares Per Member</label>
+          <input type="number" name="maximum_shares" id="maximum_shares"
+                 value="{{ s.maximum_shares }}" min="1" max="100000" style="max-width:150px;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Risk Management -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Risk Management</span></div>
+    <div class="card-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="max_portfolio_at_risk_percent">Max Portfolio at Risk (%)</label>
+          <input type="number" name="max_portfolio_at_risk_percent" id="max_portfolio_at_risk_percent"
+                 value="{{ s.max_portfolio_at_risk_percent }}" min="0" max="50" step="0.5" style="max-width:150px;">
+          <div class="form-hint">Maximum acceptable PAR percentage before alerts.</div>
+        </div>
+        <div class="form-group">
+          <label for="auto_write_off_days">Auto Write-Off Days</label>
+          <input type="number" name="auto_write_off_days" id="auto_write_off_days"
+                 value="{{ s.auto_write_off_days }}" min="90" max="365" step="30" style="max-width:150px;">
+          <div class="form-hint">Days overdue before loan is flagged for write-off.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Role Permissions Reference -->
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Role Permissions Reference</span></div>
+    <div class="card-body" style="padding:0;">
+      <table class="aba-table">
+        <thead>
+          <tr><th>Permission</th><th>Cashier</th><th>Manager</th><th>CEO</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Record payments</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Register clients</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Apply for loans</td><td>✓</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Approve loans ≤ {{ s.manager_approval_limit|money }}</td><td>—</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Approve loans above limit</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>View reports</td><td>—</td><td>✓</td><td>✓</td></tr>
+          <tr><td>Manage loan products</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>Manage users & settings</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>Blacklist clients</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>Manage guarantors</td><td>—</td><td>View</td><td>✓</td></tr>
+          <tr><td>Restructure loans</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>Write-off loans</td><td>—</td><td>—</td><td>✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex gap-2 mb-4">
+    <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
+    <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
+  </div>
+
+</form>
+{% endblock %}

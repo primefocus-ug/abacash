@@ -1,0 +1,72 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Defaulted Loans{% endblock %}
+{% block bar_title %}Defaulted Loans{% endblock %}
+{% block doc_title_display %}Defaulted &amp; Written-Off Loans{% endblock %}
+{% block doc_subtitle %}As at {{ today }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Defaulted / Written Off</div><div class="metric-value red">{{ loan_count }}</div></div>
+  <div class="metric"><div class="metric-label">Principal at Risk</div><div class="metric-value red">{{ total_defaulted|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Outstanding Balance</div><div class="metric-value amber">{{ total_outstanding|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Written Off</div><div class="metric-value">{{ total_written_off|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">PAR90 Active</div><div class="metric-value amber">{{ par90_count }}</div></div>
+</div>
+
+<div class="section-title">Defaulted &amp; Written-Off Loans</div>
+<table>
+  <thead>
+    <tr>
+      <th>Loan #</th><th>Client</th><th>Product</th>
+      <th class="r">Principal</th><th class="r">Outstanding</th>
+      <th>Disbursed</th><th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for loan in loans %}
+    <tr>
+      <td class="mono">{{ loan.loan_number }}</td>
+      <td>{{ loan.client.full_name }}<br><span style="font-size:10px;color:#8a9bac;">{{ loan.client.phone_primary }}</span></td>
+      <td style="font-size:11px;">{{ loan.product.name }}</td>
+      <td class="r">{{ loan.principal_amount|ugx_plain }}</td>
+      <td class="r red">{{ loan.outstanding_balance|ugx_plain }}</td>
+      <td>{{ loan.disbursement_date|default:"—" }}</td>
+      <td><span class="badge badge-red">{{ loan.get_status_display }}</span></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" style="text-align:center;padding:24px;color:#8a9bac;">No defaulted loans on record.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if loans %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="3">Totals</td>
+      <td>{{ total_defaulted|ugx_plain }}</td>
+      <td>{{ total_outstanding|ugx_plain }}</td>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+
+{% if par90_loans %}
+<div class="section-title">Active Loans — 90+ Days Overdue (PAR90)</div>
+<table>
+  <thead>
+    <tr><th>Loan #</th><th>Client</th><th>Product</th><th class="r">Principal</th><th class="r">Outstanding</th></tr>
+  </thead>
+  <tbody>
+    {% for loan in par90_loans %}
+    <tr>
+      <td class="mono">{{ loan.loan_number }}</td>
+      <td>{{ loan.client.full_name }}</td>
+      <td style="font-size:11px;">{{ loan.product.name }}</td>
+      <td class="r">{{ loan.principal_amount|ugx_plain }}</td>
+      <td class="r red">{{ loan.outstanding_balance|ugx_plain }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

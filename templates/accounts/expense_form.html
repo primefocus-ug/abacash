@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}{% if action == 'edit' %}Edit{% else %}Record{% endif %} Expense{% endblock %}
+{% block page_title %}{% if action == 'edit' %}Edit{% else %}Record{% endif %} Expense{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:640px;">
+  <div class="card-header"><span class="card-title">{{ title }}</span></div>
+  <div class="card-body">
+    <form method="post" style="display:grid;gap:16px;">
+      {% csrf_token %}
+      <div class="form-row">
+        <div>
+          <label>Category</label>
+          <select id="form-category" name="category" onchange="loadTypes(this.value)">
+            <option value="">— Select Category —</option>
+            {% for cat in categories %}
+              <option value="{{ cat.pk }}" {% if expense.category_id == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Expense Type</label>
+          <select id="form-type" name="expense_type">
+            <option value="">— Select Type —</option>
+            {% for cat in categories %}{% for et in cat.expense_types.all %}{% if et.is_active %}
+              <option value="{{ et.pk }}" data-cat="{{ cat.pk }}"
+                {% if expense.expense_type_id == et.pk %}selected{% endif %}>{{ et.name }}</option>
+            {% endif %}{% endfor %}{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Amount ({% currency_symbol %}) *</label>
+          <input type="number" name="amount" step="0.01" required value="{{ expense.amount|default:'' }}" placeholder="0.00">
+        </div>
+        <div>
+          <label>Date *</label>
+          <input type="date" name="expense_date" required value="{{ expense.expense_date|default:'' }}">
+        </div>
+      </div>
+      <div>
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Optional notes…">{{ expense.description|default:'' }}</textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Update{% else %}Record{% endif %} Expense</button>
+        <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const URL_TYPES = '{% url "accounts:expense_types_for_category" %}';
+
+function loadTypes(categoryId) {
+  var sel = document.getElementById('form-type');
+  sel.innerHTML = '<option value="">— Select Type —</option>';
+  if (!categoryId) return;
+  fetch(URL_TYPES + '?category_id=' + categoryId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      data.types.forEach(function(t) {
+        var o = document.createElement('option');
+        o.value = t.id; o.textContent = t.name;
+        sel.appendChild(o);
+      });
+    });
+}
+
+/* On edit: filter type options to only show the selected category's types */
+document.addEventListener('DOMContentLoaded', function() {
+  var catSel  = document.getElementById('form-category');
+  var typeSel = document.getElementById('form-type');
+  var selectedCat = catSel.value;
+  if (selectedCat) {
+    var currentType = typeSel.value;
+    Array.from(typeSel.options).forEach(function(o) {
+      if (o.value && o.dataset.cat && o.dataset.cat !== selectedCat) o.style.display = 'none';
+    });
+    typeSel.value = currentType;
+  }
+});
+</script>
+{% endblock %}

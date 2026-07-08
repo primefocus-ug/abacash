@@ -1,0 +1,40 @@
+{% if clients %}
+<table class="aba-table">
+  <thead>
+    <tr><th>Client #</th><th>Name</th><th>Phone</th><th>Active Loans</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for c in clients %}
+    <tr>
+      <td class="mono">{{ c.client_number }}</td>
+      <td>
+        {{ c.full_name }}
+        <div class="text-sm text-muted">{{ c.nin }}</div>
+      </td>
+      <td class="text-sm">{{ c.phone_primary }}</td>
+      <td>
+        {% if c.active_loan_count > 0 %}
+        <span class="badge badge-amber">{{ c.active_loan_count }} active</span>
+        {% else %}
+        <span class="text-muted text-sm">None</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if c.is_blacklisted %}
+        <span class="badge badge-red">Blacklisted</span>
+        {% else %}
+        <a href="{% url 'loans:apply_step2' c.pk %}" class="btn btn-primary btn-sm">Select →</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% elif q %}
+<div class="empty-state">
+  <p>No clients found for "{{ q }}".</p>
+  <a href="{% url 'clients:create' %}" class="btn btn-secondary btn-sm mt-2">Register New Client</a>
+</div>
+{% else %}
+<div class="empty-state"><p>Start typing to search clients.</p></div>
+{% endif %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Cash Flow Report{% endblock %}
+{% block page_title %}Cash In / Cash Out Report{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:cash_flow_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:cash_flow_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;">
+      <div>
+        <label style="display:block;margin-bottom:4px;">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">Filter</button>
+    </form>
+  </div>
+</div>
+
+<div class="metrics-grid mb-3">
+  <div class="metric-card green">
+    <div class="metric-label">Cash In</div>
+    <div class="metric-value green" style="font-size:20px;">{{ total_cash_in|ugx }}</div>
+    <div class="metric-sub">Payments + processing fees</div>
+  </div>
+  <div class="metric-card red">
+    <div class="metric-label">Cash Out</div>
+    <div class="metric-value red" style="font-size:20px;">{{ total_cash_out|ugx }}</div>
+    <div class="metric-sub">Disbursements + expenses</div>
+  </div>
+  <div class="metric-card amber">
+    <div class="metric-label">Processing Fees</div>
+    <div class="metric-value amber" style="font-size:20px;">{{ total_processing_fees|ugx }}</div>
+    <div class="metric-sub">Fee revenue on disbursements</div>
+  </div>
+  <div class="metric-card teal">
+    <div class="metric-label">Total Expenses</div>
+    <div class="metric-value teal" style="font-size:20px;">{{ total_expenses|ugx }}</div>
+    <div class="metric-sub">{{ expense_count }} expense record{{ expense_count|pluralize }}</div>
+  </div>
+</div>
+
+<style>
+  #cf-ledger tbody tr { cursor:pointer; }
+  #cf-ledger tbody tr:hover td { background:var(--surface-2); }
+
+  /* popup internals — all theme-aware */
+  .cf-popup-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+  .cf-amt { font-size:22px; font-weight:700; font-family:var(--font-mono); letter-spacing:-.5px; }
+  .cf-amt.in  { color:var(--success); }
+  .cf-amt.out { color:var(--danger); }
+  .cf-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; }
+  .cf-field label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:3px; }
+  .cf-field span  { font-size:14px; color:var(--text-primary); font-weight:500; }
+  .cf-breakdown { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .cf-bk { background:var(--surface-3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; }
+  .cf-bk label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:4px; }
+  .cf-bk span   { font-size:14px; font-weight:600; font-family:var(--font-mono); color:var(--text-primary); }
+  .cf-loan-link { display:inline-flex; align-items:center; gap:7px; margin-top:16px; padding:9px 16px; border-radius:var(--radius-md); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:600; border:1px solid transparent; transition:background .15s; }
+  .cf-loan-link:hover { background:var(--accent-active-bg); }
+</style>
+
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Cash In / Cash Out Ledger</span></div>
+  <div class="table-wrap">
+    {% if ledger %}
+    <table class="aba-table" id="cf-ledger">
+      <thead>
+        <tr>
+          <th style="width:100px">Date</th>
+          <th style="width:130px">Type</th>
+          <th>Client</th>
+          <th>Description</th>
+          <th style="width:160px;text-align:right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in ledger %}
+        <tr
+          data-type="{{ row.type }}"
+          data-date="{{ row.date }}"
+          data-client="{{ row.client.full_name|default:'—' }}"
+          data-desc="{{ row.description|escapejs }}"
+          data-cash-in="{{ row.cash_in|ugx_plain }}"
+          data-cash-out="{{ row.cash_out|ugx_plain }}"
+          data-principal="{{ row.principal|ugx_plain }}"
+          data-interest="{{ row.interest|ugx_plain }}"
+          data-penalty="{{ row.penalty|ugx_plain }}"
+          {% if row.loan %}
+          data-loan-num="{{ row.loan.loan_number }}"
+          data-loan-url="{% url 'loans:detail' row.loan.pk %}"
+          {% endif %}
+        >
+          <td class="mono" style="white-space:nowrap">{{ row.date }}</td>
+          <td>
+            {% if row.type == "Expense" %}
+              <span class="badge badge-amber">Expense</span>
+            {% elif row.type == "Disbursement" %}
+              <span class="badge badge-red">Disbursement</span>
+            {% elif row.type == "Processing Fee" %}
+              <span class="badge badge-teal">Processing Fee</span>
+            {% else %}
+              <span class="badge badge-green">Payment</span>
+            {% endif %}
+          </td>
+          <td>{{ row.client.full_name|default:"—" }}</td>
+          <td class="text-sm" style="color:var(--text-muted)">{{ row.description }}</td>
+          <td class="mono fw-500" style="text-align:right">
+            {% if row.cash_in %}
+              <span style="color:var(--green-400)">+ {{ row.cash_in|ugx_plain }}</span>
+            {% elif row.cash_out %}
+              <span style="color:var(--red-400)">− {{ row.cash_out|ugx_plain }}</span>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="text-align:right;font-weight:600">Net Cash Flow</td>
+          <td class="mono fw-500" style="text-align:right">
+            {% if total_cash_in > total_cash_out %}
+              <span style="color:var(--green-400)">+ {{ total_cash_in|ugx_plain }}</span>
+            {% else %}
+              <span style="color:var(--red-400)">− {{ total_cash_out|ugx_plain }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No ledger entries found for the selected period.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+(function(){
+  var BADGE = {
+    'Payment':       '<span class="badge badge-green">Payment</span>',
+    'Disbursement':  '<span class="badge badge-red">Disbursement</span>',
+    'Processing Fee':'<span class="badge badge-teal">Processing Fee</span>',
+    'Expense':       '<span class="badge badge-amber">Expense</span>',
+  };
+
+  document.querySelectorAll('#cf-ledger tbody tr').forEach(function(row){
+    row.addEventListener('click', function(){
+      var d = row.dataset;
+      var isIn = d.cashIn && d.cashIn !== '0';
+      var amtHtml = isIn
+        ? '<span class="cf-amt in">+ UGX ' + d.cashIn  + '</span>'
+        : '<span class="cf-amt out">&minus; UGX ' + d.cashOut + '</span>';
+
+      var breakdown = '';
+      if(d.type === 'Payment'){
+        breakdown = '<div class="cf-breakdown">'
+          + '<div class="cf-bk"><label>Principal</label><span>' + d.principal + '</span></div>'
+          + '<div class="cf-bk"><label>Interest</label><span>'  + d.interest  + '</span></div>'
+          + '<div class="cf-bk"><label>Penalty</label><span>'   + d.penalty   + '</span></div>'
+          + '</div>';
+      }
+
+      var loanLink = d.loanNum
+        ? '<a href="' + d.loanUrl + '" class="cf-loan-link">'
+          + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+          + 'View Loan ' + d.loanNum + '</a>'
+        : '';
+
+      document.getElementById('modal-body').innerHTML =
+        '<div class="cf-popup-header">'
+        +   (BADGE[d.type] || d.type)
+        +   amtHtml
+        + '</div>'
+        + '<div class="cf-detail-grid">'
+        +   '<div class="cf-field"><label>Date</label><span>' + d.date + '</span></div>'
+        +   '<div class="cf-field"><label>Client</label><span>' + d.client + '</span></div>'
+        +   (d.loanNum ? '<div class="cf-field"><label>Loan #</label><span>' + d.loanNum + '</span></div>' : '<div></div>')
+        +   '<div class="cf-field" style="grid-column:1/-1"><label>Description</label><span>' + d.desc + '</span></div>'
+        + '</div>'
+        + breakdown
+        + loanLink;
+
+      showModal();
+    });
+  });
+})();
+</script>
+{% endblock %}

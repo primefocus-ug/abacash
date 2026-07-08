@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+{% block title %}Bank Transactions{% endblock %}
+{% block page_title %}Bank Transactions{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:bank_transaction_create' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Transaction
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;flex-wrap:wrap;">
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Branch</label>
+        <select name="branch" style="width:180px;margin-bottom:0;">
+          <option value="">All Branches</option>
+          {% for branch in branches %}
+            <option value="{{ branch.pk }}" {% if branch_filter == branch.pk|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Type</label>
+        <select name="type" style="width:140px;margin-bottom:0;">
+          <option value="">All Types</option>
+          {% for val, label in transaction_type_choices %}
+            <option value="{{ val }}" {% if type_filter == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:150px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:150px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Search</label>
+        <input type="search" name="q" value="{{ q }}" placeholder="Category, branch, ref..." style="width:200px;margin-bottom:0;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      {% if branch_filter or type_filter or date_from or date_to or q %}
+        <a href="{% url 'accounts:bank_transaction_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<div class="metrics-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:20px;">
+  <div class="metric-card blue" style="cursor:default;">
+    <div class="metric-label">Total Amount</div>
+    <div class="metric-value blue">{{ total_amount|ugx }}</div>
+    <div class="metric-sub">Filtered transactions</div>
+  </div>
+  <div class="metric-card green" style="cursor:default;">
+    <div class="metric-label">Total Entries</div>
+    <div class="metric-value green">{{ transactions.paginator.count }}</div>
+    <div class="metric-sub">Matching records</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Bank Transactions</span>
+  </div>
+  <div class="table-wrap">
+    {% if transactions %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Branch</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td>{{ forloop.counter0|add:transactions.start_index }}</td>
+          <td>{{ transaction.branch.name|default:'—' }}</td>
+          <td>{{ transaction.category|default:'—' }}</td>
+          <td><span class="badge badge-{{ transaction.transaction_type|lower }}">{{ transaction.get_transaction_type_display }}</span></td>
+          <td class="mono">{{ transaction.amount|ugx }}</td>
+          <td class="mono">{{ transaction.transaction_date|date:'Y-m-d H:i:s' }}</td>
+          <td style="text-align:right;">
+            <a href="{% url 'accounts:bank_transaction_edit' transaction.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">🏦</div><p>No bank transactions found.</p></div>
+    {% endif %}
+  </div>
+  {% if transactions.has_other_pages %}
+  <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;justify-content:center;">
+    {% if transactions.has_previous %}
+      <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-sm btn-secondary">«</a>
+      <a href="?page={{ transactions.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-sm btn-secondary">‹</a>
+    {% endif %}
+    <span style="font-size:13px;color:var(--text-muted);">Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+    {% if transactions.has_next %}
+      <a href="?page={{ transactions.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-sm btn-secondary">›</a>
+      <a href="?page={{ transactions.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}" class="btn btn-sm btn-secondary">»</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

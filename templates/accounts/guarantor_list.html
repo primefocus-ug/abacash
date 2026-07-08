@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+{% block title %}Guarantors{% endblock %}{% block page_title %}Guarantors{% endblock %}{% block topbar_actions %}<a href="{% url 'accounts:guarantor_create' %}" class="btn btn-primary btn-sm">+ Add Guarantor</a>{% endblock %}
+{% block content %}<div class="card"><div class="table-wrap"><table class="aba-table"><thead><tr><th>Name</th><th>Type</th><th>Phone</th><th>Capacity</th><th>Verified</th><th></th></tr></thead><tbody>{% for g in guarantors %}<tr><td>{{ g.full_name|default:g.company_name }}</td><td>{{ g.get_guarantor_type_display }}</td><td>{{ g.phone_primary }}</td><td>{{ g.available_capacity|ugx }}</td><td>{{ g.is_verified|yesno:"Yes,No" }}</td><td><a class="btn btn-secondary btn-sm" href="{% url 'accounts:guarantor_detail' g.pk %}">View</a></td></tr>{% empty %}<tr><td colspan="6">No guarantors found.</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}

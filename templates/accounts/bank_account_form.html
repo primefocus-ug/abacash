@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:bank_account_list' %}" class="btn btn-secondary btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">{{ title }}</span></div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Account Name *</label>
+            <input type="text" name="account_name" class="form-control" required
+                   value="{{ account.account_name|default:'' }}" placeholder="e.g. Operations Account">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bank Name *</label>
+            <input type="text" name="bank_name" class="form-control" required
+                   value="{{ account.bank_name|default:'' }}" placeholder="e.g. Stanbic Bank">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bank Branch</label>
+            <input type="text" name="branch_name" class="form-control"
+                   value="{{ account.branch_name|default:'' }}" placeholder="e.g. Kampala Road">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Account Number *</label>
+            <input type="text" name="account_number" class="form-control" required
+                   value="{{ account.account_number|default:'' }}" placeholder="e.g. 9030012345678">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Account Type</label>
+            <select name="account_type" class="form-control">
+              {% for val, label in account_type_choices %}
+                <option value="{{ val }}" {% if account.account_type == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Currency</label>
+            <input type="text" name="currency" class="form-control" maxlength="10"
+                   value="{% if account.currency %}{{ account.currency }}{% else %}{% currency_symbol %}{% endif %}">
+          </div>
+
+          {% if action == 'create' %}
+          <div class="form-group">
+            <label class="form-label">Opening Balance ({% currency_symbol %})</label>
+            <input type="number" name="opening_balance" class="form-control" step="0.01" min="0"
+                   value="{{ account.opening_balance|default:'0' }}">
+          </div>
+          {% else %}
+          <div class="form-group">
+            <label class="form-label">Current Balance ({% currency_symbol %})</label>
+            <input type="number" name="current_balance" class="form-control" step="0.01"
+                   value="{{ account.current_balance }}">
+            <small style="color:var(--text-muted);">Adjust manually if needed; normally updated via transactions.</small>
+          </div>
+          {% endif %}
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="2">{{ account.notes|default:'' }}</textarea>
+          </div>
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" name="is_active" {% if action == 'create' or account.is_active %}checked{% endif %}>
+              <span>Active</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary">Save Account</button>
+          <a href="{% url 'accounts:bank_account_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:bank_transaction_list' %}" class="btn btn-secondary btn-sm">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+  <div class="card">
+    <div class="card-header"><span class="card-title">{{ title }}</span></div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-control" required>
+              <option value="">— Select Branch —</option>
+              {% for branch in branches %}
+                <option value="{{ branch.pk }}" {% if transaction.branch_id == branch.pk %}selected{% endif %}>{{ branch.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bank Account</label>
+            <select name="bank_account" class="form-control" required>
+              <option value="">— Select Bank Account —</option>
+              {% for account in bank_accounts %}
+                <option value="{{ account.pk }}" {% if transaction.bank_account_id == account.pk %}selected{% endif %}>{{ account.account_name }} — {{ account.bank_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Transaction Date</label>
+            <input type="datetime-local" name="transaction_date" class="form-control" required
+                   value="{{ transaction.transaction_date|default:now|date:'Y-m-d\TH:i' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Amount ({% currency_symbol %})</label>
+            <input type="number" name="amount" class="form-control" step="0.01" required
+                   value="{{ transaction.amount|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select name="transaction_type" class="form-control" required>
+              {% for val, label in transaction_type_choices %}
+                <option value="{{ val }}" {% if transaction.transaction_type == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" name="category" class="form-control"
+                   value="{{ transaction.category|default:'' }}" placeholder="e.g. Loan Repayment — Principal">
+          </div>
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Reference Number</label>
+            <input type="text" name="reference_number" class="form-control"
+                   value="{{ transaction.reference_number|default:'' }}" placeholder="Bank or payment reference">
+          </div>
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="3">{{ transaction.notes|default:'' }}</textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button type="submit" class="btn btn-primary">Save Transaction</button>
+          <a href="{% url 'accounts:bank_transaction_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

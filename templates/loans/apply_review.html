@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Review — {{ client.full_name }}{% endblock %}
+{% block page_title %}New Loan Application{% endblock %}
+
+{% block content %}
+<style>
+  .wiz-bar { display:flex; gap:0; margin-bottom:20px; }
+  .wiz-step { flex:1; display:flex; align-items:center; gap:0; }
+  .wiz-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .wiz-dot.done { background:var(--success); border-color:var(--success); color:#fff; }
+  .wiz-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .wiz-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-left:8px; white-space:nowrap; }
+  .wiz-label.active { color:var(--accent); }
+  .wiz-line { flex:1; height:2px; background:var(--border); margin:0 8px; }
+  .wiz-line.done { background:var(--success); }
+  .app-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:20px; align-items:start; }
+  @media(max-width:1024px){ .app-grid { grid-template-columns:1fr; } }
+  .review-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .review-row:last-child { border-bottom:none; }
+  .fee-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .fee-row:last-child { border-bottom:none; font-weight:700; font-size:14px; }
+  .review-section { margin-bottom:20px; }
+  .review-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin-bottom:8px; }
+</style>
+
+<div class="wiz-bar">
+  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Client</span></div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Loan Terms</span></div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Security</span></div>
+  <div class="wiz-line done"></div>
+  <div class="wiz-step"><div class="wiz-dot active">4</div><span class="wiz-label active">Review</span></div>
+</div>
+
+<div class="app-grid">
+
+  {# ── LEFT: Summary + Submit ── #}
+  <div>
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between;">
+        <span class="card-title">Application Summary</span>
+        <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
+      </div>
+      <div class="card-body">
+
+        {# Loan details #}
+        <div class="review-section">
+          <div class="review-section-title">Loan Details</div>
+          <div class="review-row"><span>Product</span><strong>{{ loan.product.name }}</strong></div>
+          <div class="review-row"><span>Principal</span><strong class="mono">{{ loan.principal_amount|money }}</strong></div>
+          <div class="review-row"><span>Term</span><strong>{{ loan.term_months }} months</strong></div>
+          <div class="review-row"><span>Frequency</span><strong>{{ loan.get_repayment_frequency_display }}</strong></div>
+          <div class="review-row"><span>Interest Rate</span><strong>{{ loan.interest_rate_monthly }}%/month ({{ loan.get_interest_method_display }})</strong></div>
+          {% if loan.purpose %}
+          <div class="review-row"><span>Purpose</span><span style="text-align:right;max-width:60%;">{{ loan.purpose }}</span></div>
+          {% endif %}
+        </div>
+
+        {# Fee breakdown #}
+        <div class="review-section">
+          <div class="review-section-title">Cost Breakdown</div>
+          <div class="fee-row"><span>Principal</span><span class="mono">{{ loan.principal_amount|money }}</span></div>
+          <div class="fee-row"><span>Total Interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
+          <div class="fee-row"><span>Processing Fee</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
+          <div class="fee-row"><span>Total Repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
+        </div>
+
+        {# Collateral #}
+        <div class="review-section">
+          <div class="review-section-title">Collateral</div>
+          {% if collateral_items %}
+            {% for c in collateral_items %}
+            <div class="review-row"><span>{{ c.description }}</span><span class="mono">{{ c.estimated_value|money }}</span></div>
+            {% endfor %}
+          {% else %}
+            <div style="color:var(--text-muted);font-size:13px;">None provided</div>
+          {% endif %}
+        </div>
+
+        {# Guarantors #}
+        <div class="review-section">
+          <div class="review-section-title">
+            Guarantors
+            {% if loan.product.requires_guarantor %}<span class="badge badge-warning" style="margin-left:6px;font-size:11px;">Required</span>{% endif %}
+          </div>
+          {% if guarantor_rows %}
+            {% for g in guarantor_rows %}
+            <div class="review-row"><span>{{ g.guarantor.full_name }}</span><span class="mono">{{ g.amount|money }}</span></div>
+            {% endfor %}
+          {% else %}
+            <div style="color:var(--text-muted);font-size:13px;">None provided</div>
+          {% endif %}
+        </div>
+
+        {% if eligibility %}
+        <div style="padding:10px 14px;border-radius:10px;border-left:3px solid {% if eligibility.eligible %}var(--success){% else %}var(--danger){% endif %};background:var(--surface-2);margin-bottom:16px;font-size:13px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <strong>Eligibility</strong>
+            <span class="badge {% if eligibility.eligible %}badge-success{% else %}badge-danger{% endif %}">{% if eligibility.eligible %}Eligible{% else %}Not Eligible{% endif %}</span>
+          </div>
+          {% for f in eligibility.flags %}
+          <div style="font-size:12px;color:var(--warning);">⚠ {{ f }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="draft_id" value="{{ loan.pk }}">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <a href="{% url 'loans:apply_step3' client.pk %}?draft_id={{ loan.pk }}" class="btn btn-secondary">← Back</a>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
+              <button type="submit" name="action" value="submit" class="btn btn-primary">Submit for Approval →</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── RIGHT: Full schedule ── #}
+  <div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Repayment Schedule</span></div>
+      {% if schedule_rows %}
+        {% include "partials/schedule_table.html" %}
+      {% else %}
+        <div class="empty-state" style="padding:32px;"><p>Schedule unavailable — loan terms may be incomplete.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

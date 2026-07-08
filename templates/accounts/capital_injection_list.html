@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Capital Injections{% endblock %}
+{% block page_title %}Capital Injections{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary btn-sm">Admin Panel</a>
+  <a href="{% url 'accounts:capital_injection_create' %}" class="btn btn-primary btn-sm">+ Record Capital Injection</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;flex-wrap:wrap;">
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Search</label>
+        <input type="text" name="q" value="{{ q }}" placeholder="Source or investor..." style="width:200px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    </form>
+  </div>
+</div>
+
+<div class="metric-card purple mb-3" style="cursor:default;">
+  <div class="metric-label">Total Capital Injected</div>
+  <div class="metric-value" style="color:var(--indigo-400);">UGX {{ total_amount|floatformat:0|intcomma }}</div>
+  <div class="metric-sub">Filtered period</div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Capital Injection Ledger</span></div>
+  <div class="table-wrap">
+    {% if injections %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Source</th>
+          <th>Investor</th>
+          <th>Amount</th>
+          <th>Notes</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for injection in injections %}
+        <tr>
+          <td>{{ injection.injected_date }}</td>
+          <td><strong>{{ injection.source }}</strong></td>
+          <td class="text-sm text-muted">{{ injection.investor|default:"-" }}</td>
+          <td class="mono" style="color:var(--green-400);">UGX {{ injection.amount|floatformat:0|intcomma }}</td>
+          <td class="text-sm text-muted">{{ injection.notes|default:"-"|truncatewords:5 }}</td>
+          <td style="text-align:center;">
+            <a href="{% url 'accounts:capital_injection_edit' injection.pk %}" class="btn btn-xs btn-secondary">Edit</a>
+            <a href="{% url 'accounts:capital_injection_delete' injection.pk %}" class="btn btn-xs btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No capital injections recorded.</p></div>
+    {% endif %}
+  </div>
+  {% if injections.has_other_pages %}
+  <div class="card-footer" style="text-align:center;">
+    {% if injections.has_previous %}
+      <a href="?page=1" class="btn btn-sm btn-secondary">First</a>
+      <a href="?page={{ injections.previous_page_number }}" class="btn btn-sm btn-secondary">Previous</a>
+    {% endif %}
+    <span style="margin:0 8px;font-size:13px;">Page {{ injections.number }} of {{ injections.paginator.num_pages }}</span>
+    {% if injections.has_next %}
+      <a href="?page={{ injections.next_page_number }}" class="btn btn-sm btn-secondary">Next</a>
+      <a href="?page={{ injections.paginator.num_pages }}" class="btn btn-sm btn-secondary">Last</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

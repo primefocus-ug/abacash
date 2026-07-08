@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Users{% endblock %}
+{% block page_title %}Staff Users{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:user_create' %}" class="btn btn-primary btn-sm">+ Add User</a>
+  <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary btn-sm">Admin Panel</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<form method="get" class="search-filter-bar" style="margin-bottom:16px;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search name or email…" style="width:260px;">
+  <select name="role" style="width:160px;">
+    <option value="">All Roles</option>
+    {% for val, label in role_choices %}
+    <option value="{{ val }}" {% if role_filter == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+  {% if q or role_filter %}<a href="{% url 'accounts:user_list' %}" class="btn btn-secondary btn-sm">Clear</a>{% endif %}
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td style="font-weight:500;">{{ u.full_name }}</td>
+          <td class="mono text-sm">{{ u.username }}</td>
+          <td class="text-sm">{{ u.email }}</td>
+          <td class="text-sm">{{ u.phone|default:"—" }}</td>
+          <td>
+            <span class="badge {% if u.role == 'CEO' %}badge-teal{% elif u.role == 'MANAGER' %}badge-blue{% else %}badge-muted{% endif %}">
+              {{ u.get_role_display }}
+            </span>
+          </td>
+          <td class="text-sm text-muted">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            <span class="badge {% if u.is_active %}badge-green{% else %}badge-red{% endif %}">
+              {% if u.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+          </td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'accounts:user_edit' u.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            {% if u != request.user %}
+            <form method="post" action="{% url 'accounts:user_toggle' u.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm {% if u.is_active %}btn-danger{% else %}btn-secondary{% endif %}"
+                      onclick="return confirm('{% if u.is_active %}Deactivate{% else %}Activate{% endif %} {{ u.full_name }}?')">
+                {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+              </button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8"><div class="empty-state"><p>No users found.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

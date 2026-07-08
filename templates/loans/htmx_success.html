@@ -1,0 +1,15 @@
+<div style="padding:18px;max-width:720px;margin:0 auto;text-align:center;">
+  <div class="text-lg" style="font-weight:600;margin-bottom:8px;">{{ message }}</div>
+  <div class="text-muted text-sm" style="margin-bottom:12px;">The page will refresh to show updated loan details.</div>
+  <script>
+    (function(){
+      try{
+        // Close modal if available
+        if(window.hideModal) window.hideModal();
+        // Redirect if provided, otherwise reload
+        var redirect = {{ redirect|default:'null'|safe }};
+        if(redirect){ window.location.href = redirect; } else { window.location.reload(); }
+      }catch(e){ window.location.reload(); }
+    })();
+  </script>
+</div>

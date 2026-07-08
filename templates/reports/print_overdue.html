@@ -1,0 +1,51 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Overdue Report{% endblock %}
+{% block bar_title %}Overdue Report{% endblock %}
+{% block doc_title_display %}Overdue Installments{% endblock %}
+{% block doc_subtitle %}As at {{ today }}{% endblock %}
+
+{% block content %}
+<div class="metrics">
+  <div class="metric"><div class="metric-label">Total Overdue</div><div class="metric-value red">{{ total_overdue|ugx_plain }}</div></div>
+  <div class="metric"><div class="metric-label">Overdue Entries</div><div class="metric-value amber">{{ rows|length }}</div></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Client</th><th>Loan #</th><th>Product</th>
+      <th>Due Date</th><th class="r">Days Overdue</th>
+      <th class="r">Original Due</th><th class="r">Paid</th><th class="r">Still Owed</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.entry.loan.client.full_name }}<br><span style="font-size:10px;color:#8a9bac;">{{ row.entry.loan.client.phone_primary }}</span></td>
+      <td class="mono">{{ row.entry.loan.loan_number }}</td>
+      <td style="font-size:11px;">{{ row.entry.loan.product.name }}</td>
+      <td class="red">{{ row.entry.due_date }}</td>
+      <td class="r">
+        <span class="badge {% if row.days_overdue > 30 %}badge-red{% elif row.days_overdue > 7 %}badge-amber{% else %}badge-muted{% endif %}">
+          {{ row.days_overdue }}d
+        </span>
+      </td>
+      <td class="r">{{ row.entry.total_payment|ugx_plain }}</td>
+      <td class="r green">{{ row.entry.amount_paid|ugx_plain }}</td>
+      <td class="r red">{{ row.overdue_amount|ugx_plain }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" style="text-align:center;padding:24px;color:#8a9bac;">No overdue payments. Portfolio is healthy.</td></tr>
+    {% endfor %}
+  </tbody>
+  {% if rows %}
+  <tfoot>
+    <tr>
+      <td class="l" colspan="7">Total Overdue</td>
+      <td>{{ total_overdue|ugx_plain }}</td>
+    </tr>
+  </tfoot>
+  {% endif %}
+</table>
+{% endblock %}

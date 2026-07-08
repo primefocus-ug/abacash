@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Cashier Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'payments:record' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Record Payment
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Metrics -->
+<div class="metrics-grid mb-3">
+  <div class="metric-card teal" style="cursor: pointer;">
+    <div class="metric-label">Collected Today</div>
+    <div class="metric-value teal">{{ collected_today_total|money }}</div>
+    <div class="metric-sub">Your collections</div>
+  </div>
+  <div class="metric-card amber" style="cursor: pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE">
+    <div class="metric-label">Due Today</div>
+    <div class="metric-value amber">{{ due_today_count }}</div>
+    <div class="metric-sub">loans with payments due</div>
+  </div>
+</div>
+
+<!-- Loans due today -->
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Payments Due Today</span>
+    <span class="badge badge-amber">{{ due_today_count }}</span>
+  </div>
+  <div class="table-wrap">
+    {% if due_today %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Client</th>
+          <th>Loan #</th>
+          <th>Amount Due</th>
+          <th>Period</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in due_today %}
+        <tr>
+          <td><a href="{% url 'clients:detail' entry.loan.client.pk %}">{{ entry.loan.client.full_name }}</a></td>
+          <td class="mono"><a href="{% url 'loans:detail' entry.loan.pk %}">{{ entry.loan.loan_number }}</a></td>
+          <td class="mono" style="color:var(--amber-400)">{{ entry.total_payment|money }}</td>
+          <td>Period {{ entry.period_number }}</td>
+          <td>
+            <a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">✓</div>
+      <p>No payments due today.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Recent payments -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recent Payments — You</span>
+  </div>
+  <div class="table-wrap">
+    {% if recent_payments %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Loan</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Receipt</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in recent_payments %}
+        <tr>
+          <td class="text-muted text-sm">{{ p.payment_date }}</td>
+          <td>{{ p.client.full_name }}</td>
+          <td class="mono">{{ p.loan.loan_number }}</td>
+          <td class="mono" style="color:var(--green-400)">{{ p.amount_received|money }}</td>
+          <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+          <td>
+            {% if p.receipt %}
+            <a href="{% url 'payments:receipt' p.receipt.pk %}" class="btn btn-secondary btn-sm">Print</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No payments recorded yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

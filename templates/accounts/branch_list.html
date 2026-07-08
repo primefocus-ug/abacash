@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}Branches{% endblock %}
+{% block page_title %}Branches{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:branch_create' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add Branch
+  </a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Enhanced filter bar - single row alignment */
+  .filter-bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .filter-bar-single-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    flex: 1;
+    padding: 4px 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .filter-bar-single-row::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .filter-bar-single-row::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .filter-field {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .filter-field input {
+    width: 100%;
+    min-width: 200px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: all var(--trans);
+  }
+
+  .filter-field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+    outline: none;
+  }
+
+  .filter-field input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Enhanced clickable rows */
+  .branch-table tbody tr.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+  }
+
+  .branch-table tbody tr.clickable-row:hover {
+    background: var(--bg-hover) !important;
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .branch-table tbody tr.clickable-row:hover td:last-child::after {
+    content: '→';
+    position: absolute;
+    right: 8px;
+    color: var(--accent);
+    font-weight: 600;
+    animation: slideRight 0.2s ease;
+  }
+
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Better badge styles */
+  .badge-success {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--success);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-muted {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  [data-theme="dark"] .badge-success {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34D399;
+  }
+
+  [data-theme="dark"] .badge-muted {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94A3B8;
+  }
+
+  /* Table improvements */
+  .branch-table th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    padding: 12px 16px;
+    white-space: nowrap;
+  }
+
+  .branch-table td {
+    padding: 14px 16px;
+    vertical-align: middle;
+  }
+
+  .branch-table .mono {
+    font-family: 'Inter', monospace;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Card header improvements */
+  .card-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .card-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-header-title h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .card-header-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Meta info bar */
+  .meta-info-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0 16px;
+    flex-wrap: wrap;
+  }
+
+  .meta-info-bar .text-sm {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .filter-bar-single-row {
+      gap: 8px;
+    }
+    .filter-field input {
+      min-width: 150px;
+    }
+    .card-header-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-content" style="flex:1;">
+      <div class="card-header-title">
+        <div>
+          <h4>Branch Management</h4>
+          <div class="card-header-subtitle">Manage branch locations, staff, and operational limits</div>
+        </div>
+      </div>
+
+      <div class="filter-bar-wrapper">
+        <form method="get" class="filter-bar-single-row">
+          <div class="filter-field">
+            <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Search branches by name or code...">
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search
+            </button>
+            {% if q %}
+              <a href="{% url 'accounts:branch_list' %}" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    {% if branches %}
+      <div class="meta-info-bar" style="padding: 16px 20px 0;">
+        <span class="badge badge-info" style="background: var(--accent-soft); color: var(--accent); padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+          {{ branches|length }} branch{{ branches|length|pluralize }}
+        </span>
+        <span class="text-sm">Click on any row to view branch details</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="aba-table branch-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Code</th>
+              <th>Manager</th>
+              <th>Staff</th>
+              <th>Active Loans</th>
+              <th>Approval Limit</th>
+              <th>Status</th>
+              <th style="width:80px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in branches %}
+            <tr data-href="{% url 'accounts:branch_edit' b.pk %}" class="clickable-row" tabindex="0" role="link" aria-label="View {{ b.name }} details">
+              <td>
+                <div style="font-weight: 500; color: var(--text-primary);">{{ b.name }}</div>
+              </td>
+              <td class="mono" style="color: var(--text-secondary); font-size: 13px;">{{ b.code }}</td>
+              <td>{{ b.manager|default:"—" }}</td>
+              <td style="text-align:center;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;background:var(--surface-2);border-radius:8px;font-size:13px;font-weight:500;color:var(--text-secondary);">
+                  {{ b.staff_count|default:0 }}
+                </span>
+              </td>
+              <td style="text-align:center;">
+                {% if b.active_loans > 0 %}
+                  <span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;background:var(--accent-soft);border-radius:8px;font-size:13px;font-weight:600;color:var(--accent);">
+                    {{ b.active_loans }}
+                  </span>
+                {% else %}
+                  <span style="color:var(--text-muted);">—</span>
+                {% endif %}
+              </td>
+              <td class="mono" style="color: var(--text-primary); font-weight: 500;">{{ b.approval_limit|ugx }}</td>
+              <td>
+                {% if b.is_active %}
+                  <span class="badge badge-success">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentcolor;margin-right:4px;"></span>
+                    Active
+                  </span>
+                {% else %}
+                  <span class="badge badge-muted">
+                    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentcolor;margin-right:4px;"></span>
+                    Inactive
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'accounts:branch_edit' b.pk %}" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();" data-tooltip="Edit branch">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🏢</div>
+        <p>
+          {% if q %}
+            No branches found matching "{{ q }}".
+          {% else %}
+            No branches have been added yet.
+          {% endif %}
+        </p>
+        {% if not q %}
+          <a href="{% url 'accounts:branch_create' %}" class="btn btn-primary btn-sm" style="margin-top:16px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Create First Branch
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // Make table rows clickable
+  (function() {
+    function shouldIgnore(target) {
+      return target.closest && (target.closest('a') || target.closest('button') || target.closest('input') || target.closest('select'));
+    }
+
+    document.querySelectorAll('.branch-table tbody tr.clickable-row').forEach(function(row) {
+      // Click handler
+      row.addEventListener('click', function(e) {
+        if (shouldIgnore(e.target)) return;
+        var href = row.getAttribute('data-href');
+        if (href) window.location = href;
+      });
+
+      // Keyboard handler
+      row.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          var href = row.getAttribute('data-href');
+          if (href) window.location = href;
+        }
+      });
+    });
+  })();
+</script>
+{% endblock %}

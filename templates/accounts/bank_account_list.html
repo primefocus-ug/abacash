@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+{% block title %}Bank Accounts{% endblock %}
+{% block page_title %}Bank Accounts{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:bank_account_create' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Account
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-icon blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      </div>
+    </div>
+    <div class="stat-label">Total Active Balance</div>
+    <div class="stat-value">{{ total_balance|ugx }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-header">
+      <div class="stat-icon green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </div>
+    </div>
+    <div class="stat-label">Total Accounts</div>
+    <div class="stat-value">{{ bank_accounts.count }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Institution Bank Accounts</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Account Name</th>
+          <th>Bank</th>
+          <th>Account Number</th>
+          <th>Type</th>
+          <th>Currency</th>
+          <th>Opening Balance</th>
+          <th>Current Balance</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for acc in bank_accounts %}
+        <tr>
+          <td style="font-weight:600;">{{ acc.account_name }}</td>
+          <td>{{ acc.bank_name }}{% if acc.branch_name %} <span style="color:var(--text-muted);font-size:12px;">— {{ acc.branch_name }}</span>{% endif %}</td>
+          <td style="font-family:var(--font-mono);font-size:13px;">{{ acc.account_number }}</td>
+          <td><span class="badge badge-info">{{ acc.get_account_type_display }}</span></td>
+          <td>{{ acc.currency }}</td>
+          <td style="font-family:var(--font-mono);">{{ acc.opening_balance|ugx }}</td>
+          <td style="font-family:var(--font-mono);font-weight:700;">{{ acc.current_balance|ugx }}</td>
+          <td>
+            {% if acc.is_active %}
+              <span class="badge badge-success"><span class="badge-dot"></span>Active</span>
+            {% else %}
+              <span class="badge badge-neutral"><span class="badge-dot"></span>Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'accounts:bank_account_edit' acc.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No bank accounts added yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

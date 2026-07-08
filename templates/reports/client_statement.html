@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+{% block title %}Client Statement{% endblock %}
+{% block page_title %}Client Statement{% endblock %}
+
+{% block topbar_actions %}
+  {% if client %}
+  <a href="{% url 'reports:client_statement_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:client_statement_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card print-hide" style="margin-bottom:20px;">
+  <div class="card-header"><div class="card-title">Select Client</div></div>
+  <div class="card-body">
+    <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1;min-width:220px;">
+        <label>Client</label>
+        <select name="client" onchange="this.form.submit()">
+          <option value="">— Choose a client —</option>
+          {% for c in all_clients %}
+          <option value="{{ c.pk }}" {% if client_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.full_name }} ({{ c.client_number }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">View Statement</button>
+    </form>
+  </div>
+</div>
+
+{% if client %}
+<div class="card">
+  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <div class="card-title">{{ client.full_name }}</div>
+      <div class="text-sm text-muted">{{ client.client_number }} &nbsp;|&nbsp; {{ client.phone_primary }} &nbsp;|&nbsp; {{ client.district }}</div>
+    </div>
+    <div class="text-sm text-muted">Statement generated: {% now "d M Y" %}</div>
+  </div>
+
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;">
+      <div class="metric-card teal"><div class="metric-label">Total Loans</div><div class="metric-value teal">{{ loans|length }}</div></div>
+      <div class="metric-card green"><div class="metric-label">Active Loans</div><div class="metric-value green">{{ client.active_loan_count }}</div></div>
+      <div class="metric-card blue"><div class="metric-label">Total Payments</div><div class="metric-value">{{ payments|length }}</div></div>
+    </div>
+
+    <div style="font-weight:600;font-size:14px;margin-bottom:10px;">Loan History</div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Loan #</th><th>Product</th><th>Principal ({% currency_symbol %})</th><th>Outstanding</th>
+          <th>Disbursed</th><th>Maturity</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          {% for loan in loans %}
+          <tr>
+            <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+            <td class="text-sm">{{ loan.product.name }}</td>
+            <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+            <td class="mono" style="{% if loan.outstanding_balance > 0 and loan.is_overdue %}color:var(--danger);{% endif %}">{{ loan.outstanding_balance|floatformat:0|intcomma }}</td>
+            <td class="text-sm">{{ loan.disbursement_date|default:"—" }}</td>
+            <td class="text-sm">{{ loan.maturity_date|default:"—" }}</td>
+            <td><span class="badge {% if loan.status == 'ACTIVE' %}badge-green{% elif loan.status == 'COMPLETED' %}badge-teal{% elif loan.status == 'DEFAULTED' %}badge-red{% elif loan.status == 'PENDING' %}badge-amber{% else %}badge-muted{% endif %}">{{ loan.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No loans on record.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="font-weight:600;font-size:14px;margin-bottom:10px;">Payment History</div>
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr>
+          <th>Date</th><th>Loan #</th><th>Amount ({% currency_symbol %})</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Method</th>
+        </tr></thead>
+        <tbody>
+          {% for p in payments %}
+          <tr>
+            <td class="text-sm">{{ p.payment_date }}</td>
+            <td class="mono"><a href="{% url 'loans:detail' p.loan.pk %}">{{ p.loan.loan_number }}</a></td>
+            <td class="mono" style="font-weight:600;">{{ p.amount_received|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.principal_paid|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.interest_paid|floatformat:0|intcomma }}</td>
+            <td class="mono text-sm">{{ p.penalty_paid|floatformat:0|intcomma }}</td>
+            <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted);">No payments on record.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

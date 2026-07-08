@@ -1,0 +1,40 @@
+{% extends "reports/print_base.html" %}
+{% load aba_filters humanize %}
+{% block doc_title %}Income Statement{% endblock %}
+{% block bar_title %}Income Statement{% endblock %}
+{% block doc_title_display %}Monthly Income Statement{% endblock %}
+{% block doc_subtitle %}{{ period_start }} — {{ period_end }}{% endblock %}
+
+{% block content %}
+<div style="max-width:560px;">
+
+  <div class="section-title">Income</div>
+  <table>
+    <tbody>
+      <tr><td>Interest Earned</td><td class="r green">{{ total_interest|ugx_plain }}</td></tr>
+      <tr><td>Late Payment Penalties</td><td class="r amber">{{ total_penalties|ugx_plain }}</td></tr>
+      <tr style="font-weight:600;border-top:2px solid #162935;">
+        <td>Total Income</td><td class="r green" style="font-size:14px;">{{ total_interest|add:total_penalties|ugx_plain }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Cash Flow</div>
+  <table>
+    <tbody>
+      <tr><td>Principal Recovered</td><td class="r">{{ total_principal|ugx_plain }}</td></tr>
+      <tr><td>Total Cash Received</td><td class="r" style="font-weight:600;">{{ total_received|ugx_plain }}</td></tr>
+      <tr><td>New Loans Disbursed ({{ loan_count }})</td><td class="r red">− {{ total_disbursed|ugx_plain }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Activity</div>
+  <table>
+    <tbody>
+      <tr><td>Payment Transactions</td><td class="r">{{ payment_count }}</td></tr>
+      <tr><td>Loans Disbursed</td><td class="r">{{ loan_count }}</td></tr>
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}

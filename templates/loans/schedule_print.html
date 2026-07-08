@@ -1,0 +1,465 @@
+{% load humanize aba_filters %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repayment Schedule — {{ loan.loan_number }}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 13px;
+    color: #162935;
+    background: #fff;
+    padding: 32px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #162935;
+    margin-bottom: 24px;
+  }
+  .org-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.3px;
+    color: #162935;
+  }
+  .org-sub {
+    font-size: 11px;
+    color: #516a7f;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .doc-title-block { text-align: right; }
+  .doc-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #162935;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .doc-ref {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #516a7f;
+    margin-top: 4px;
+  }
+
+  /* ── Two-column info grid ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid #c9d6e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .info-section { padding: 16px 20px; }
+  .info-section:first-child { border-right: 1px solid #c9d6e0; }
+  .info-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #516a7f;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e8eef3;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 12.5px;
+  }
+  .info-label { color: #516a7f; }
+  .info-value { font-weight: 500; color: #162935; text-align: right; }
+  .info-value.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── Summary metrics ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid #c9d6e0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    background: #f4f8fb;
+  }
+  .metric { padding: 14px 16px; border-right: 1px solid #c9d6e0; }
+  .metric:last-child { border-right: none; }
+  .metric-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #516a7f;
+    margin-bottom: 6px;
+  }
+  .metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: #162935;
+  }
+  .metric-sub { font-size: 10px; color: #6d7e8f; margin-top: 3px; }
+
+  /* ── Schedule table ── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #516a7f;
+    margin-bottom: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead tr { background: #162935; }
+  thead th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #fff;
+    white-space: nowrap;
+  }
+  thead th:not(:first-child) { text-align: right; }
+
+  tbody tr { border-bottom: 1px solid #e8eef3; }
+  tbody tr:nth-child(even) { background: #f8fafc; }
+  tbody tr.paid-row { color: #8a9bac; }
+  tbody tr.overdue-row { color: #bf312d; }
+  tbody tr.overdue-row td { background: #fff5f5 !important; }
+
+  td {
+    padding: 9px 12px;
+    vertical-align: middle;
+    color: inherit;
+  }
+  td:not(:first-child):not(:nth-child(2)) {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  td:nth-child(2) { color: #516a7f; font-size: 12px; }
+
+  .td-period { color: #8a9bac; font-size: 11px; }
+  .td-total { font-weight: 600; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .status-PAID    { background: #d1fae5; color: #065f46; }
+  .status-OVERDUE { background: #fee2e2; color: #991b1b; }
+  .status-PARTIAL { background: #fef3c7; color: #92400e; }
+  .status-PENDING { background: #f1f5f9; color: #475569; }
+
+  /* ── Totals footer row ── */
+  tfoot tr { background: #162935; }
+  tfoot td {
+    padding: 10px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-align: right;
+  }
+  tfoot td:first-child, tfoot td:nth-child(2) {
+    text-align: left;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  /* ── Footer ── */
+  .doc-footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #c9d6e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 11px;
+    color: #6d7e8f;
+  }
+  .signature-block { text-align: center; }
+  .signature-line {
+    width: 180px;
+    border-bottom: 1px solid #162935;
+    margin-bottom: 6px;
+    height: 32px;
+  }
+  .signature-label { font-size: 10px; color: #516a7f; }
+
+  /* ── Print button (screen only) ── */
+  .print-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #162935;
+    color: #fff;
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  }
+  .print-bar-title { font-weight: 600; letter-spacing: .02em; }
+  .print-bar-actions { display: flex; gap: 10px; }
+  .btn-print {
+    background: #127970;
+    color: #fff;
+    border: none;
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .15s;
+  }
+  .btn-print:hover { background: #0f6c64; }
+  .btn-close-tab {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .btn-close-tab:hover { background: #1e293b; color: #fff; }
+
+  /* push content below fixed bar on screen */
+  .print-bar + .doc-wrapper { padding-top: 56px; }
+
+  @media print {
+    .print-bar { display: none !important; }
+    .doc-wrapper { padding-top: 0 !important; }
+    body { padding: 20px 28px; }
+    thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tfoot tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr.overdue-row td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .metrics { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .info-grid { page-break-inside: avoid; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <span class="print-bar-title">Repayment Schedule — {{ loan.loan_number }}</span>
+  <div class="print-bar-actions">
+    <button class="btn-close-tab" onclick="window.close()">✕ Close</button>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Save PDF
+    </button>
+  </div>
+</div>
+
+<div class="doc-wrapper">
+
+  <!-- Document header -->
+  <div class="doc-header">
+    <div>
+      <div class="org-name">ABA Uganda</div>
+      <div class="org-sub">Loan Management System</div>
+    </div>
+    <div class="doc-title-block">
+      <div class="doc-title">Loan Repayment Schedule</div>
+      <div class="doc-ref">{{ loan.loan_number }}</div>
+      <div class="doc-ref" style="margin-top:2px;font-size:11px;">Generated: {% now "d M Y" %}</div>
+    </div>
+  </div>
+
+  <!-- Loan + Client info -->
+  <div class="info-grid">
+    <div class="info-section">
+      <div class="info-section-title">Client Information</div>
+      <div class="info-row">
+        <span class="info-label">Full Name</span>
+        <span class="info-value">{{ loan.client.full_name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Client No.</span>
+        <span class="info-value mono">{{ loan.client.client_number }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Phone</span>
+        <span class="info-value mono">{{ loan.client.phone_primary }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">NIN</span>
+        <span class="info-value mono">{{ loan.client.nin|default:"—" }}</span>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-section-title">Loan Details</div>
+      <div class="info-row">
+        <span class="info-label">Product</span>
+        <span class="info-value">{{ loan.product.name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Interest Method</span>
+        <span class="info-value">{{ loan.get_interest_method_display }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Disbursed</span>
+        <span class="info-value">{{ loan.disbursement_date|default:"—" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Maturity Date</span>
+        <span class="info-value">{{ loan.maturity_date|default:"—" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Frequency</span>
+        <span class="info-value">{{ loan.get_repayment_frequency_display }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value">{{ loan.get_status_display }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Principal</div>
+      <div class="metric-value">{{ loan.principal_amount|money }}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Interest</div>
+      <div class="metric-value">{{ loan.total_interest|money }}</div>
+      <div class="metric-sub">{{ loan.product.interest_rate_monthly }}% / month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Processing Fee</div>
+      <div class="metric-value">{{ loan.processing_fee|default:0|money }}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Repayable</div>
+      <div class="metric-value">{{ loan.total_repayable|money }}</div>
+      <div class="metric-sub">{{ schedule.count }} instalment{{ schedule.count|pluralize }}</div>
+    </div>
+  </div>
+
+  <!-- Schedule table -->
+  <div class="section-title">Repayment Schedule</div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th style="text-align:left;">Due Date</th>
+        <th>Opening Bal.</th>
+        <th>Principal</th>
+        <th>Interest</th>
+        <th>Penalty</th>
+        <th>Total Due</th>
+        <th>Paid</th>
+        <th style="text-align:center;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in schedule %}
+      <tr class="{% if entry.status == 'PAID' %}paid-row{% elif entry.status == 'OVERDUE' %}overdue-row{% endif %}">
+        <td class="td-period">{{ entry.period_number }}</td>
+        <td>{{ entry.due_date }}</td>
+        <td>{{ entry.opening_balance|floatformat:0|intcomma }}</td>
+        <td>{{ entry.principal_due|floatformat:0|intcomma }}</td>
+        <td>{{ entry.interest_due|floatformat:0|intcomma }}</td>
+        <td>{% if entry.penalty_due > 0 %}{{ entry.penalty_due|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
+        <td class="td-total">{{ entry.total_payment|floatformat:0|intcomma }}</td>
+        <td>{% if entry.amount_paid > 0 %}{{ entry.amount_paid|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
+        <td style="text-align:center;">
+          <span class="status-pill status-{{ entry.status }}">{{ entry.get_status_display }}</span>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" style="text-align:center;padding:24px;color:#8a9bac;">No schedule generated yet.</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if schedule %}
+    <tfoot>
+      <tr>
+        <td colspan="2">Totals</td>
+        <td>—</td>
+        <td>{{ loan.principal_amount|floatformat:0|intcomma }}</td>
+        <td>{{ loan.total_interest|floatformat:0|intcomma }}</td>
+        <td>—</td>
+        <td>{{ loan.total_repayable|floatformat:0|intcomma }}</td>
+        <td>{{ loan.total_paid|floatformat:0|intcomma }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+    {% endif %}
+  </table>
+
+  <!-- Signature / footer -->
+  <div class="doc-footer">
+    <div>
+      <div style="font-size:11px;color:#516a7f;">Prepared by: {{ request.user.full_name }}</div>
+      <div style="font-size:10px;color:#8a9bac;margin-top:3px;">This document is computer-generated and valid without a signature.</div>
+    </div>
+    <div style="display:flex;gap:48px;">
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-label">Client Signature</div>
+      </div>
+      <div class="signature-block">
+        <div class="signature-line"></div>
+        <div class="signature-label">Authorised Officer</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.doc-wrapper -->
+
+<script>
+  // Auto-trigger print if ?print=1 is in URL
+  if (new URLSearchParams(window.location.search).get('print') === '1') {
+    window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+  }
+</script>
+</body>
+</html>

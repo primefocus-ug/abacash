@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'loans:products' %}" class="btn btn-secondary btn-sm">Back</a>
+  {% if action == 'edit' and product %}
+    <a href="{% url 'loans:products_edit' product.pk %}" class="btn btn-secondary btn-sm">Refresh</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{{ action|title }} Loan Product</span>
+  </div>
+
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group">
+          <label for="name">Product Name</label>
+          <input id="name" type="text" name="name" required
+                 value="{{ product_form_defaults.name|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label for="interest_rate_monthly">Interest Rate (Monthly %) </label>
+             <input id="interest_rate_monthly" type="number" name="interest_rate_monthly" step="1" min="0" required
+                 value="{{ product_form_defaults.interest_rate_monthly|default:'' }}">
+        </div>
+      </div>
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="form-group">
+          <label for="interest_method">Interest Method</label>
+          <select id="interest_method" name="interest_method" required>
+            {% for val, label in interest_method_choices %}
+              <option value="{{ val }}" {% if product_form_defaults.interest_method == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="default_repayment_frequency">Default Repayment Frequency</label>
+          <select id="default_repayment_frequency" name="default_repayment_frequency" required>
+            {% for val, label in frequency_choices %}
+              <option value="{{ val }}" {% if product_form_defaults.default_repayment_frequency == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="form-group">
+          <label for="min_amount">Min Amount ({% currency_symbol %})</label>
+          <input id="min_amount" type="number" name="min_amount" step="1" min="0" required
+                 value="{{ product_form_defaults.min_amount|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label for="max_amount">Max Amount ({% currency_symbol %})</label>
+          <input id="max_amount" type="number" name="max_amount" step="1" min="0" required
+                 value="{{ product_form_defaults.max_amount|default:'' }}">
+        </div>
+      </div>
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="form-group">
+          <label for="min_term_months">Min Term (Months)</label>
+          <input id="min_term_months" type="number" name="min_term_months" step="1" min="1" required
+                 value="{{ product_form_defaults.min_term_months|default:'' }}">
+        </div>
+
+        <div class="form-group">
+          <label for="max_term_months">Max Term (Months)</label>
+          <input id="max_term_months" type="number" name="max_term_months" step="1" min="1" required
+                 value="{{ product_form_defaults.max_term_months|default:'' }}">
+        </div>
+      </div>
+
+      <div style="margin-top:14px;" class="grid-2">
+        <div class="form-group" style="max-width:420px;">
+          <label for="penalty_rate_monthly">Penalty Rate (Monthly %)</label>
+             <input id="penalty_rate_monthly" type="number" name="penalty_rate_monthly" step="1" min="0" required
+                 value="{{ product_form_defaults.penalty_rate_monthly|default:'' }}">
+        </div>
+        <div class="form-group" style="max-width:420px;">
+          <label for="processing_fee_percent">Product Processing Fee (% fallback)</label>
+          <input id="processing_fee_percent" type="number" name="processing_fee_percent" step="0.01" min="0" max="10"
+                 value="{{ product_form_defaults.processing_fee_percent|default:'0' }}">
+          <div class="form-hint">
+            Used only when <strong>Company Settings → Fee Method</strong> is set to <em>Percentage</em>
+            and the company-level rate is 0. The company setting always takes priority.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label for="description">Description (optional)</label>
+        <textarea id="description" name="description" rows="3">{{ product_form_defaults.description|default:'' }}</textarea>
+      </div>
+
+      <div class="grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" name="requires_guarantor"
+                   {% if product_form_defaults.requires_guarantor %}checked{% endif %}>
+            Requires guarantor
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" name="is_active"
+                   {% if product_form_defaults.is_active %}checked{% endif %}>
+            Active (available for applications)
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:18px;align-items:center;">
+        <button type="submit" class="btn btn-primary">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

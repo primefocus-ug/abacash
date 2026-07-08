@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Record Payment{% endblock %}
+{% block page_title %}Record Payment{% endblock %}
+
+{% block content %}
+<div id="payment-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:720px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0;">Record Payment</h2>
+        <p class="text-sm text-muted" style="margin:6px 0 0;">Capture a payment from a client without leaving the workflow.</p>
+      </div>
+      <button type="button" id="payment-modal-close" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Payment Details</span></div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+        {% if not loan %}
+        <div class="form-group">
+          <label for="loan_id">Select Loan</label>
+          <select name="loan_id" id="loan_id" required class="select2-init form-control">
+            <option value="">— Search for loan —</option>
+            {% for l in active_loans %}
+            <option value="{{ l.pk }}" data-outstanding="{{ l.outstanding_balance }}" data-next-due="{{ l.next_due_amount }}">
+              {{ l.loan_number }} — {{ l.client.full_name }} ({{ l.outstanding_balance|money }} outstanding)
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        {% else %}
+        <input type="hidden" name="loan_id" id="loan_id" value="{{ loan.pk }}" data-outstanding="{{ loan.outstanding_balance }}" data-next-due="{{ loan.next_due_amount }}">
+        <div class="card mb-3" style="background:var(--bg-raised);">
+          <div class="card-body" style="padding:14px 18px;">
+            <div style="font-weight:500;font-size:15px;">{{ loan.client.full_name }}</div>
+            <div class="text-muted text-sm">{{ loan.loan_number }} · {{ loan.product.name }}</div>
+            <div class="mt-2" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div><div class="text-muted text-sm">Outstanding</div><div class="mono" style="color:var(--red-400);">{{ loan.outstanding_balance|money }}</div></div>
+              <div><div class="text-muted text-sm">Next Due</div><div>{{ loan.next_due_date|default:"—" }}</div></div>
+              <div><div class="text-muted text-sm">Next Amount</div><div class="mono">{{ loan.next_due_amount|money }}</div></div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="amount">Amount Received ({% currency_symbol %})</label>
+          <input type="number" name="amount" id="amount" min="0" step="0.01"
+                 placeholder="e.g. 250000" required autofocus class="form-control" value="{{ loan.next_due_amount|default_if_none:'' }}">
+          <small class="text-muted">Enter any amount received from the client</small>
+          <div id="payment-balance-summary" class="text-muted text-sm mt-2"></div>
+          <div id="payment-warning" class="mt-3">
+            <div class="payment-warning-shell" role="status" aria-live="polite" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:#f8fafc;">
+              <div class="payment-battery" style="border-color:rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);">
+                <div class="payment-battery-fill" data-level="mid" style="width:8%;background:var(--amber-400);"></div>
+              </div>
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:12px;font-weight:600;color:inherit;">Coverage preview</div>
+                <div style="font-size:12px;color:rgba(248,250,252,0.7);">Select a loan to preview coverage.</div>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--amber-400);white-space:nowrap;">Pending</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="payment_date">Payment Date</label>
+            <input type="date" name="payment_date" id="payment_date" value="{{ today }}" required class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="payment_method">Payment Method</label>
+            <select name="payment_method" id="payment_method" class="select2-init form-control">
+              <option value="CASH">Cash</option>
+              <option value="MOMO">Mobile Money (MTN/Airtel)</option>
+              <option value="BANK">Bank Transfer</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reference_number">Reference / Transaction Number</label>
+          <input type="text" name="reference_number" id="reference_number"
+                 placeholder="Mobile money ID or bank ref (optional)" class="form-control">
+        </div>
+
+        <div class="flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary btn-lg">Record Payment & Print Receipt</button>
+          <a href="{% url 'loans:list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .payment-warning-shell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-raised);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .payment-battery {
+    position: relative;
+    width: 58px;
+    height: 30px;
+    border: 2px solid var(--border);
+    border-radius: 7px;
+    padding: 2px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+  }
+  .payment-battery::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 8px;
+    width: 4px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  .payment-battery-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.25s ease;
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const closeBtn = document.getElementById('payment-modal-close');
+    const modal = document.getElementById('payment-modal');
+    const loanElement = document.getElementById('loan_id');
+    const amountInput = document.getElementById('amount');
+    const warningBox = document.getElementById('payment-warning');
+    const balanceSummary = document.getElementById('payment-balance-summary');
+
+    closeBtn?.addEventListener('click', function () {
+      window.location.href = '{% url "payments:list" %}';
+    });
+    modal?.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        window.location.href = '{% url "payments:list" %}';
+      }
+    });
+
+    function parseDecimal(value) {
+      const num = parseFloat(String(value).replace(/,/g, ''));
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function getNextDue() {
+      if (!loanElement) {
+        return 0;
+      }
+      if (loanElement.tagName.toLowerCase() === 'select') {
+        const selected = loanElement.selectedOptions[0];
+        return selected ? parseDecimal(selected.dataset.nextDue) : 0;
+      }
+      return parseDecimal(loanElement.dataset.nextDue);
+    }
+
+    function formatUgx(value) {
+      return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value);
+    }
+
+    function updatePaymentWarning() {
+      const amount = parseDecimal(amountInput.value);
+      const nextDue = getNextDue();
+
+      if (nextDue > 0) {
+        amountInput.value = amountInput.value && amount > 0 ? amountInput.value : nextDue;
+      }
+
+      const coverageAmount = Math.min(amount, nextDue);
+      const coveragePercent = nextDue > 0 ? Math.min(100, (coverageAmount / nextDue) * 100) : 0;
+      const coverageText = nextDue > 0
+        ? `{% currency_symbol %} ${formatUgx(coverageAmount)} of {% currency_symbol %} ${formatUgx(nextDue)} covered`
+        : 'No expected amount available';
+
+      if (nextDue > 0) {
+        // determine semantic level for color styling
+        const level = coveragePercent >= 100 ? 'full' : coveragePercent >= 60 ? 'high' : coveragePercent >= 30 ? 'mid' : 'low';
+        warningBox.innerHTML = `
+          <div class="payment-warning-shell">
+            <div class="payment-battery">
+              <div class="payment-battery-fill" data-level="${level}" style="width:${Math.max(8, coveragePercent)}%;"></div>
+            </div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary);">${coveragePercent.toFixed(1)}% covered</div>
+              <div style="font-size:12px;color:var(--text-muted);">${coverageText}</div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:${coveragePercent >= 100 ? 'var(--green-400)' : coveragePercent >= 60 ? 'var(--teal-400)' : coveragePercent >= 30 ? 'var(--amber-400)' : 'var(--red-400)'};white-space:nowrap;">
+              ${amount > nextDue ? 'Overpaid' : amount > 0 ? 'In progress' : 'Pending'}
+            </div>
+          </div>
+        `;
+
+        if (amount > 0 && amount > nextDue) {
+          const overpay = amount - nextDue;
+          balanceSummary.innerHTML = `<span style="color:var(--red-400);">Payment exceeds the expected amount by {% currency_symbol %} ${formatUgx(overpay)}.</span>`;
+        } else {
+          balanceSummary.textContent = `Expected amount: {% currency_symbol %} ${formatUgx(nextDue)}.`;
+        }
+      } else {
+        // No next-due available — keep a helpful preview visible
+        warningBox.innerHTML = `
+          <div class="payment-warning-shell" role="status" aria-live="polite">
+            <div class="payment-battery">
+              <div class="payment-battery-fill" data-level="mid" style="width:8%;"></div>
+            </div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Coverage preview</div>
+              <div style="font-size:12px;color:var(--text-muted);">No expected amount available — select a loan to preview coverage.</div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--amber-400);white-space:nowrap;">Pending</div>
+          </div>
+        `;
+        balanceSummary.textContent = '';
+      }
+    }
+
+    if (amountInput) {
+      amountInput.addEventListener('input', updatePaymentWarning);
+    }
+
+    if (loanElement) {
+      loanElement.addEventListener('change', updatePaymentWarning);
+    }
+
+    const paymentDateInput = document.getElementById('payment_date');
+    if (paymentDateInput && !paymentDateInput.value) {
+      const today = new Date().toISOString().split('T')[0];
+      paymentDateInput.value = today;
+    }
+
+    // Always render the battery-style coverage indicator once the form is ready.
+    warningBox.innerHTML = `
+      <div class="payment-warning-shell" role="status" aria-live="polite">
+        <div class="payment-battery">
+          <div class="payment-battery-fill" data-level="mid" style="width:8%;"></div>
+        </div>
+        <div style="min-width:0;flex:1;">
+          <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Coverage preview</div>
+          <div style="font-size:12px;color:var(--text-muted);">Enter an amount to see the loan coverage.</div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--amber-400);white-space:nowrap;">Pending</div>
+      </div>
+    `;
+
+    updatePaymentWarning();
+  });
+</script>
+{% endblock %}

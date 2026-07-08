@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Loan Book{% endblock %}
+{% block page_title %}Loan Book{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:loan_book_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:loan_book_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div class="card mb-3 print-hide">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
+      <div>
+        <label style="display:block;margin-bottom:4px;">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">Product</label>
+        <select name="product" style="margin-bottom:0;width:200px;">
+          <option value="">All products</option>
+          {% for p in products %}
+          <option value="{{ p.pk }}" {% if product_id == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end;">Filter</button>
+      {% if date_from or date_to or product_id %}
+      <a href="{% url 'reports:loan_book' %}" class="btn btn-secondary btn-sm" style="align-self:flex-end;">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Printable report header -->
+<div class="print-only" style="display:none; margin-bottom:18px;">
+  <div style="font-size:18px; font-weight:700; margin-bottom:4px;">Loan Book Report</div>
+  <div style="font-size:12px; color:#475569;">
+    Generated on {% now "d M Y, H:i" %} ·
+    {% if date_from or date_to %}
+      Date range: {{ date_from|default:"Any" }} – {{ date_to|default:"Any" }} ·
+    {% else %}
+      All dates ·
+    {% endif %}
+    {% if product_id %}Product filter applied{% else %}All products{% endif %}
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="metrics-grid mb-3 print-hide">
+  <div class="metric-card teal">
+    <div class="metric-label">Total Loans</div>
+    <div class="metric-value">{{ loans.count }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Total Principal</div>
+    <div class="metric-value" style="font-size:18px;">{{ total_principal|ugx }}</div>
+  </div>
+  <div class="metric-card amber">
+    <div class="metric-label">Total Outstanding</div>
+    <div class="metric-value amber" style="font-size:18px;">{{ total_outstanding|ugx }}</div>
+  </div>
+  <div class="metric-card green">
+    <div class="metric-label">Total Collected</div>
+    <div class="metric-value green" style="font-size:18px;">{{ total_paid|ugx }}</div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="table-wrap">
+    {% if loans %}
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Loan #</th><th>Client</th><th>Product</th>
+          <th>Principal</th><th>Total Repayable</th>
+          <th>Paid</th><th>Outstanding</th>
+          <th>Disbursed</th><th>Matures</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in loans %}
+        <tr>
+          <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+          <td>
+            <a href="{% url 'clients:detail' loan.client.pk %}">{{ loan.client.full_name }}</a>
+            <div class="text-sm text-muted">{{ loan.client.phone_primary }}</div>
+          </td>
+          <td class="text-sm">{{ loan.product.name }}</td>
+          <td class="mono">{{ loan.principal_amount|ugx_plain }}</td>
+          <td class="mono">{{ loan.total_repayable|ugx_plain }}</td>
+          <td class="mono" style="color:var(--green-400)">{{ loan.total_paid|ugx_plain }}</td>
+          <td class="mono" style="color:{% if loan.outstanding_balance > 0 %}var(--amber-400){% else %}var(--green-400){% endif %}">
+            {{ loan.outstanding_balance|ugx_plain }}
+          </td>
+          <td class="text-sm">{{ loan.disbursement_date|default:"—" }}</td>
+          <td class="text-sm">{{ loan.maturity_date|default:"—" }}</td>
+          <td>
+            <span class="badge
+              {% if loan.status == 'ACTIVE' %}badge-green
+              {% elif loan.status == 'COMPLETED' %}badge-teal
+              {% elif loan.status == 'DEFAULTED' %}badge-red
+              {% else %}badge-muted{% endif %}">
+              {{ loan.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid var(--border);font-weight:600;">
+          <td colspan="3" style="padding:12px 16px;">TOTALS</td>
+          <td class="mono" style="padding:12px 16px;">{{ total_principal|ugx_plain }}</td>
+          <td></td>
+          <td class="mono" style="padding:12px 16px;color:var(--green-400)">{{ total_paid|ugx_plain }}</td>
+          <td class="mono" style="padding:12px 16px;color:var(--amber-400)">{{ total_outstanding|ugx_plain }}</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No loans match the selected filters.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
