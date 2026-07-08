@@ -1,43 +1,82 @@
 import os
 from pathlib import Path
-from urllib.parse import urlparse
-
-from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# ------------------------------------------------------------------ #
+# Small os.getenv helpers (os.getenv only ever returns str or None,
+# so bools/ints/lists need casting by hand)
+# ------------------------------------------------------------------ #
+def env_bool(key, default=False):
+    val = os.getenv(key)
+    if val is None:
+        return default
+    return val.strip().lower() in ("1", "true", "yes", "on")
 
 
-SECRET_KEY = config("SECRET_KEY", default="devv-insecure-change-me-in-production")
-DEBUG =True
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost,.localhost", cast=Csv())
+def env_int(key, default=None):
+    val = os.getenv(key)
+    return int(val) if val not in (None, "") else default
 
 
-
-def _database_from_url(url: str) -> dict:
-    u = urlparse(url)
-    if u.scheme not in ("postgres", "postgresql"):
-        raise ValueError(
-            f"DATABASE_URL must be postgres:// or postgresql:// (Postgres is "
-            f"required for django-tenants), got {u.scheme!r}"
-        )
-    path = (u.path or "").lstrip("/")
-    return {
-        "ENGINE": "django_tenants.postgresql_backend",
-        "NAME": path or "db",
-        "USER": u.username or "postgres",
-        "PASSWORD": u.password or "@Developer25",
-        "HOST": u.hostname or "localhost",
-        "PORT": str(u.port or 5432),
-    }
+def env_list(key, default=""):
+    val = os.getenv(key, default)
+    return [item.strip() for item in val.split(",") if item.strip()]
 
 
+# ------------------------------------------------------------------ #
+# Core / environment
+#
+# These env vars must actually be present in the process environment
+# when Django starts. With systemd that means EnvironmentFile=.env in
+# the .service unit (already set in gunicorn.service / celery.service /
+# celerybeat.service) — systemd loads the file itself, so os.getenv()
+# sees the values with no extra loader needed in this file.
+#
+# If you ever run manage.py by hand in a plain shell, remember
+# os.getenv() will NOT read .env automatically — you'd need to
+# `export $(cat .env | xargs)` first, or run under systemd/docker
+# which inject env vars for you.
+# ------------------------------------------------------------------ #
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set")
+
+DEBUG = env_bool("DEBUG", default=False)
+
+# Base domain lets us build ALLOWED_HOSTS / CSRF origins for every tenant
+# subdomain without hardcoding each one.
+BASE_DOMAIN = os.getenv("BASE_DOMAIN", "abacash.loan")
+
+ALLOWED_HOSTS = env_list(
+    "ALLOWED_HOSTS",
+    default=f".{BASE_DOMAIN},localhost,127.0.0.1",
+)
+
+# Django 4+ requires scheme + supports a leading wildcard label here.
+CSRF_TRUSTED_ORIGINS = env_list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=f"https://*.{BASE_DOMAIN},https://{BASE_DOMAIN}",
+)
+
+# ------------------------------------------------------------------ #
+# Database — set directly from separate env vars, no DATABASE_URL
+# parsing. django-tenants requires Postgres.
+# ------------------------------------------------------------------ #
 DATABASES = {
-    "default": _database_from_url(
-        config("DATABASE_URL", default="postgres://postgres:@Developer25@localhost:5432/db")
-    )
+    "default": {
+        "ENGINE": "django_tenants.postgresql_backend",
+        "NAME": os.getenv("DB_NAME", "lendip_db"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432"),
+    }
 }
+
+if not DATABASES["default"]["PASSWORD"] and not DEBUG:
+    raise RuntimeError("DB_PASSWORD environment variable is not set")
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
@@ -144,7 +183,9 @@ SITE_ID = 1
 
 # ------------------------------------------------------------------ #
 # Logging
-# ------------------------------------------------------------------
+# ------------------------------------------------------------------ #
+(BASE_DIR / "logs").mkdir(parents=True, exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -207,7 +248,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 if DEBUG:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -223,9 +264,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 MULTITENANT_RELATIVE_MEDIA_ROOT = "%s"
 
-INTERNAL_IPS = ["127.0.0.1"]
+INTERNAL_IPS = env_list("INTERNAL_IPS", default="127.0.0.1")
 
-CELERY_BROKER_URL = config("REDIS_URL", default="redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TIMEZONE = "Africa/Kampala"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
@@ -236,29 +277,55 @@ CELERY_ACCEPT_CONTENT = ["json"]
 # ------------------------------------------------------------------ #
 # Africa's Talking (SMS)                                              #
 # ------------------------------------------------------------------ #
-AT_API_KEY = config("AT_API_KEY", default="")
-AT_USERNAME = config("AT_USERNAME", default="sandbox")
-AT_SENDER_ID = config("AT_SENDER_ID", default="ABAUGANDA")
+AT_API_KEY = os.getenv("AT_API_KEY", "")
+AT_USERNAME = os.getenv("AT_USERNAME", "sandbox")
+AT_SENDER_ID = os.getenv("AT_SENDER_ID", "ABAUGANDA")
 
 # ------------------------------------------------------------------ #
 # Twilio (WhatsApp)                                                    #
 # ------------------------------------------------------------------ #
-TWILIO_ACCOUNT_SID = config("TWILIO_ACCOUNT_SID", default="")
-TWILIO_AUTH_TOKEN = config("TWILIO_AUTH_TOKEN", default="")
-TWILIO_WHATSAPP_FROM = config("TWILIO_WHATSAPP_FROM", default="whatsapp:+14155238886")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886")
 
 # ------------------------------------------------------------------ #
 # Email (error alerts / contact form)                                  #
 # ------------------------------------------------------------------ #
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
-EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = env_int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@abauganda.com")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER", "noreply@abauganda.com")
+
+ADMINS = [
+    tuple(pair.split(":", 1))
+    for pair in env_list("ADMINS", default="")
+    if ":" in pair
+]
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # ------------------------------------------------------------------ #
 # Business rules                                                       #
 # ------------------------------------------------------------------ #
 MANAGER_APPROVAL_LIMIT = 5_000_000  # UGX fallback; per-tenant value lives on CompanySettings
+
+# ------------------------------------------------------------------ #
+# Security — nginx terminates TLS and proxies to gunicorn over HTTP,
+# so Django needs to trust the X-Forwarded-Proto header nginx sets,
+# and these hardening flags should only bite in production (DEBUG=False).
+# ------------------------------------------------------------------ #
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", default=not DEBUG)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
+
+# Only enable HSTS once you've confirmed HTTPS works cleanly on the
+# apex + every subdomain (Cloudflare SSL mode must be "Full (strict)").
+SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", default=0 if DEBUG else 3600)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = False
