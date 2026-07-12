@@ -10,8 +10,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = config("SECRET_KEY", default="devv-insecure-change-me-in-production")
-DEBUG =True
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost,.localhost", cast=Csv())
+DEBUG = config("DEBUG", default=True, cast=bool)
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="127.0.0.1,localhost,.localhost,abacash.loan,.abacash.loan,.abacash.loans",
+    cast=Csv(),
+)
+
+# Canonical public domain (used in sitemap + SEO meta tags)
+PUBLIC_DOMAIN = config("PUBLIC_DOMAIN", default="abacash.loan")
+SITE_URL = config("SITE_URL", default="https://abacash.loan")
 
 
 
@@ -102,6 +110,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+# django-tenants: public schema (abacash.loan) gets its own URL config
+# so it shows the marketing landing page instead of the app login.
+PUBLIC_SCHEMA_URLCONF = "config.urls_public"
 
 
 TEMPLATES = [

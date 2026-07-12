@@ -3179,3 +3179,689 @@ django.template.exceptions.TemplateSyntaxError: 'block' tag with name 'title' ap
 2026-07-08 08:43:21 [INFO] django.server: "POST /loans/apply/0735e43b-3fc0-43f7-ada4-9140b47b8f4b/review/?draft_id=0d5c7987-cbf9-4e7e-8d19-632dec1c55e8 HTTP/1.1" 302 0
 2026-07-08 08:43:21 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 52184
 2026-07-08 08:43:21 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 10:43:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-10 10:44:19 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60087
+2026-07-10 10:44:19 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-07-10 10:44:19 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 10:44:19 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 304 0
+2026-07-10 10:44:20 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-10 10:44:20 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-07-10 10:44:25 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-07-10 10:44:25 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 10930
+2026-07-10 10:45:04 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-07-10 10:45:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 49982
+2026-07-10 10:45:04 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 10:45:33 [INFO] django.server: "POST /loans/ab2f7d90-62c1-439f-ab24-8a5d43a5fb93/approve/ HTTP/1.1" 302 0
+2026-07-10 10:45:34 [INFO] django.server: "GET /loans/ab2f7d90-62c1-439f-ab24-8a5d43a5fb93/ HTTP/1.1" 200 52869
+2026-07-10 10:45:34 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 10:45:49 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-07-10 10:45:49 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 10930
+2026-07-10 10:46:09 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 11104
+2026-07-10 10:46:32 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 11104
+2026-07-10 10:47:00 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 11104
+2026-07-10 12:03:15 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-07-10 12:03:16 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 49991
+2026-07-10 12:03:16 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:03:29 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58159
+2026-07-10 12:03:29 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:16:51 [INFO] django.server: "GET /payments/receipt/5bd99cff-6638-4685-beab-5aadfb6a6c61/ HTTP/1.1" 200 45890
+2026-07-10 12:16:52 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:17:21 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60096
+2026-07-10 12:17:21 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:17:25 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 51773
+2026-07-10 12:17:25 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:17:31 [INFO] django.server: "POST /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/approve/ HTTP/1.1" 302 0
+2026-07-10 12:17:31 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 54085
+2026-07-10 12:17:31 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:17:40 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/print/ HTTP/1.1" 200 13059
+2026-07-10 12:18:11 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:18:11 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:18:14 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 53665
+2026-07-10 12:18:14 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:18:20 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:18:20 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:18:23 [INFO] django.server: "GET /loans/ef6896de-d800-4f50-a898-83fc2c53cbe9/ HTTP/1.1" 200 55737
+2026-07-10 12:18:23 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:18:46 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 49788
+2026-07-10 12:18:46 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:18:49 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 74002
+2026-07-10 12:18:49 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:19:16 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 43232
+2026-07-10 12:19:17 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:19:25 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 54226
+2026-07-10 12:19:25 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:20:18 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 12:20:18 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:20:24 [INFO] django.server: "GET /loans/62774a8a-e288-4ab8-bdbe-5af966cc3e07/ HTTP/1.1" 200 73988
+2026-07-10 12:20:24 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:20:34 [INFO] django.server: "GET /payments/receipt/fa6725e6-6f05-426b-9f39-fe739c948310/ HTTP/1.1" 200 45891
+2026-07-10 12:20:34 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:20:45 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:20:45 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:20:50 [INFO] django.server: "GET /loans/f04dd454-f0f0-4965-a90c-cf3de491f0e8/ HTTP/1.1" 200 59555
+2026-07-10 12:20:51 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:21:14 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 12:21:14 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:21:20 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 12:21:20 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:21:23 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 12:21:23 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:21:37 [INFO] django.server: "GET /clients/3534988e-37e5-4b76-9bce-529690431156/ HTTP/1.1" 200 49838
+2026-07-10 12:21:37 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:21:37 [WARNING] django.request: Not Found: /media/aba/photos/client_3534988e-37e5-4b76-9bce-529690431156/primeserver-removebg-preview.ico
+2026-07-10 12:21:37 [WARNING] django.server: "GET /media/aba/photos/client_3534988e-37e5-4b76-9bce-529690431156/primeserver-removebg-preview.ico HTTP/1.1" 404 3170
+2026-07-10 12:21:41 [INFO] django.server: "GET /loans/f04dd454-f0f0-4965-a90c-cf3de491f0e8/ HTTP/1.1" 200 59555
+2026-07-10 12:21:41 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:24:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 12:24:15 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:24:45 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:24:45 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:25:26 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 12:25:26 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:25:31 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 56257
+2026-07-10 12:25:31 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:25:37 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 53665
+2026-07-10 12:25:37 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:25:50 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 12:25:50 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:15 [INFO] django.server: "GET /clients/?per_page=10&q=&status=blacklisted HTTP/1.1" 200 50347
+2026-07-10 12:26:15 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:26 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:26:26 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:31 [INFO] django.server: "GET /loans/?q=&status=&staff=2 HTTP/1.1" 200 58832
+2026-07-10 12:26:31 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:35 [INFO] django.server: "GET /loans/?q=&status=APPROVED&staff=2 HTTP/1.1" 200 49839
+2026-07-10 12:26:35 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:38 [INFO] django.server: "GET /loans/?q=&status=REJECTED&staff=2 HTTP/1.1" 200 49839
+2026-07-10 12:26:38 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:42 [INFO] django.server: "GET /loans/?q=&status=DEFAULTED&staff=2 HTTP/1.1" 200 49839
+2026-07-10 12:26:42 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:26:45 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 12:26:45 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:35:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 12:35:34 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 12:35:50 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 56257
+2026-07-10 12:35:50 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:15:29 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 13:15:29 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:15:37 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 13:15:37 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:15:40 [INFO] django.server: "GET /clients/0735e43b-3fc0-43f7-ada4-9140b47b8f4b/ HTTP/1.1" 200 49840
+2026-07-10 13:15:40 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:15:40 [WARNING] django.request: Not Found: /media/aba/photos/client_0735e43b-3fc0-43f7-ada4-9140b47b8f4b/WhatsApp_Image_2026-07-04_at_1.46.36_PM.jpeg
+2026-07-10 13:15:40 [WARNING] django.server: "GET /media/aba/photos/client_0735e43b-3fc0-43f7-ada4-9140b47b8f4b/WhatsApp_Image_2026-07-04_at_1.46.36_PM.jpeg HTTP/1.1" 404 3206
+2026-07-10 13:15:42 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 53665
+2026-07-10 13:15:42 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:16:13 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 13:16:13 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:16:17 [INFO] django.server: "GET /clients/9d6eacd0-2578-4dba-820a-db9f15970571/ HTTP/1.1" 200 50284
+2026-07-10 13:16:17 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:16:17 [WARNING] django.request: Not Found: /media/aba/photos/client_9d6eacd0-2578-4dba-820a-db9f15970571/parrt_17.png
+2026-07-10 13:16:17 [WARNING] django.server: "GET /media/aba/photos/client_9d6eacd0-2578-4dba-820a-db9f15970571/parrt_17.png HTTP/1.1" 404 3110
+2026-07-10 13:16:22 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 54226
+2026-07-10 13:16:22 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:16:56 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 13:16:56 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:17:14 [INFO] django.server: - Broken pipe from ('127.0.0.1', 63898)
+2026-07-10 13:17:15 [INFO] django.server: - Broken pipe from ('127.0.0.1', 60185)
+2026-07-10 13:17:15 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 47276
+2026-07-10 13:17:15 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:17:16 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 3417
+2026-07-10 13:17:28 [INFO] django.server: "GET /loans/apply/c2506ee1-9709-4b17-9b38-b4917bd5788f/ HTTP/1.1" 200 53096
+2026-07-10 13:17:28 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 13:17:48 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=vXLciYAf5UESjbxP7CNG1RwTuXZ9sTTFSLcwXbS1rChljpMpNZgerZm9wFN5qcc5&product=2&principal=500000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4501
+2026-07-10 13:17:54 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=vXLciYAf5UESjbxP7CNG1RwTuXZ9sTTFSLcwXbS1rChljpMpNZgerZm9wFN5qcc5&product=2&principal=500000&term_months=1&frequency=WEEKLY&purpose= HTTP/1.1" 200 3839
+2026-07-10 13:18:49 [ERROR] django.request: Internal Server Error: /loans/apply/c2506ee1-9709-4b17-9b38-b4917bd5788f/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 45, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 250, in loan_apply_step2
+    loan.save()
+  File "C:\Users\aggyd\Desktop\tenant\loans\models.py", line 473, in save
+    super().save(*args, **kwargs)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 822, in save
+    self.save_base(
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 909, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1071, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1112, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1847, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1823, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+2026-07-10 13:18:49 [ERROR] django.server: "POST /loans/apply/c2506ee1-9709-4b17-9b38-b4917bd5788f/ HTTP/1.1" 500 211261
+2026-07-10 14:51:35 [ERROR] django.request: Internal Server Error: /loans/apply/c2506ee1-9709-4b17-9b38-b4917bd5788f/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 45, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 250, in loan_apply_step2
+    loan.save()
+  File "C:\Users\aggyd\Desktop\tenant\loans\models.py", line 473, in save
+    super().save(*args, **kwargs)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 822, in save
+    self.save_base(
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 909, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1071, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1112, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1847, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1823, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+2026-07-10 14:51:35 [ERROR] django.server: "POST /loans/apply/c2506ee1-9709-4b17-9b38-b4917bd5788f/ HTTP/1.1" 500 211261
+2026-07-10 15:01:21 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-07-10 15:01:22 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 15:01:22 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 15:01:34 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 56257
+2026-07-10 15:01:34 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 15:01:37 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/ HTTP/1.1" 200 53665
+2026-07-10 15:01:37 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 15:01:43 [INFO] django.server: "GET /loans/0d5c7987-cbf9-4e7e-8d19-632dec1c55e8/reschedule/ HTTP/1.1" 200 3939
+2026-07-10 16:24:09 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 54226
+2026-07-10 16:24:09 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:24:13 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 16:24:13 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:24:17 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 16:24:17 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:24:21 [INFO] django.server: "GET /loans/77e3ae7e-fd07-466a-9a43-c24299151a2e/ HTTP/1.1" 200 58380
+2026-07-10 16:24:21 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:24:26 [INFO] django.server: "GET /loans/77e3ae7e-fd07-466a-9a43-c24299151a2e/renew/ HTTP/1.1" 200 4217
+2026-07-10 16:27:09 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 16:27:09 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:27:15 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 16:27:16 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:27:19 [INFO] django.server: "GET /loans/ef6896de-d800-4f50-a898-83fc2c53cbe9/ HTTP/1.1" 200 55737
+2026-07-10 16:27:20 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:27:24 [INFO] django.server: "GET /loans/ef6896de-d800-4f50-a898-83fc2c53cbe9/print/ HTTP/1.1" 200 15732
+2026-07-10 16:27:46 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 49788
+2026-07-10 16:27:47 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:27:49 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 74002
+2026-07-10 16:27:49 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:28:04 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 43232
+2026-07-10 16:28:04 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:28:08 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 16:28:09 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:28:11 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 16:28:11 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:28:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-10 16:28:15 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:31:14 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 54226
+2026-07-10 16:31:14 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:33:13 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 58404
+2026-07-10 16:33:13 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:33:19 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60209
+2026-07-10 16:33:20 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:33:23 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 49788
+2026-07-10 16:33:23 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:33:26 [INFO] django.server: "GET /reports/disbursements/ HTTP/1.1" 200 48662
+2026-07-10 16:33:26 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:34:53 [INFO] django.server: "GET /reports/disbursements/ HTTP/1.1" 200 48662
+2026-07-10 16:34:53 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:35:05 [INFO] django.server: "GET /reports/disbursements/?date_from=2026-07-01&date_to=2026-07-10&product=1 HTTP/1.1" 200 47626
+2026-07-10 16:35:05 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:35:30 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 16:35:30 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:35:42 [INFO] django.server: "GET /clients/9d6eacd0-2578-4dba-820a-db9f15970571/ HTTP/1.1" 200 50284
+2026-07-10 16:35:42 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:35:42 [WARNING] django.request: Not Found: /media/aba/photos/client_9d6eacd0-2578-4dba-820a-db9f15970571/parrt_17.png
+2026-07-10 16:35:42 [WARNING] django.server: "GET /media/aba/photos/client_9d6eacd0-2578-4dba-820a-db9f15970571/parrt_17.png HTTP/1.1" 404 3110
+2026-07-10 16:35:50 [INFO] django.server: "GET /loans/77e3ae7e-fd07-466a-9a43-c24299151a2e/ HTTP/1.1" 200 58380
+2026-07-10 16:35:50 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-10 16:35:55 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61529
+2026-07-10 16:35:55 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-11 18:12:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-12 06:42:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-12 06:42:26 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-07-12 06:42:28 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 48846
+2026-07-12 06:42:28 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-07-12 06:42:29 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 304 0
+2026-07-12 06:42:29 [WARNING] django.server: "GET /static/img/logo.png HTTP/1.1" 404 1799
+2026-07-12 06:42:30 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-12 06:42:30 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-07-12 06:43:09 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 302 0
+2026-07-12 06:43:11 [ERROR] django.request: Internal Server Error: /accounts/login/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\views.py", line 74, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\models.py", line 363, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-07-12 06:43:11 [ERROR] django.server: "GET /accounts/login/?next=/accounts/dashboard/ HTTP/1.1" 500 177453
+2026-07-12 06:43:12 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-12 06:43:12 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2920
+2026-07-12 06:43:21 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\views.py", line 74, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\models.py", line 363, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-07-12 06:43:21 [ERROR] django.server: "GET / HTTP/1.1" 500 176843
+2026-07-12 06:43:31 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\views.py", line 74, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\accounts\models.py", line 363, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-07-12 06:43:31 [ERROR] django.server: "GET / HTTP/1.1" 500 176843
+2026-07-12 06:47:56 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\tenant\config\settings.py changed, reloading.
+2026-07-12 06:48:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-12 06:48:10 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\tenant\tenants\views.py changed, reloading.
+2026-07-12 06:48:12 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-12 06:48:30 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\tenants\views.py", line 14, in landing
+    return render(request, "tenants/landing.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: tenants/landing.html
+2026-07-12 06:48:30 [ERROR] django.server: "GET / HTTP/1.1" 500 103339
+2026-07-12 06:49:50 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\tenants\views.py", line 14, in landing
+    return render(request, "tenants/landing.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: tenants/landing.html
+2026-07-12 06:49:50 [ERROR] django.server: "GET / HTTP/1.1" 500 103339
+2026-07-12 06:49:52 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\tenants\views.py", line 14, in landing
+    return render(request, "tenants/landing.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: tenants/landing.html
+2026-07-12 06:49:52 [ERROR] django.server: "GET / HTTP/1.1" 500 103339
+2026-07-12 06:50:00 [WARNING] django.request: Not Found: /accounts/login/
+2026-07-12 06:50:00 [WARNING] django.server: "GET /accounts/login/?next=/accounts/dashboard/ HTTP/1.1" 404 2911
+2026-07-12 06:50:47 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-07-12 06:50:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 49311
+2026-07-12 06:50:48 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-07-12 06:50:51 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 60674
+2026-07-12 06:50:54 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 61994
+2026-07-12 06:51:09 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 47741
+2026-07-12 06:51:10 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 3417
+2026-07-12 06:51:14 [INFO] django.server: "GET /loans/apply/326c194a-778e-4c20-9fee-fcb6e2ec1cd9/ HTTP/1.1" 200 53557
+2026-07-12 06:51:26 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=iZOny0nFmf4hDrEOUJuIeQml0qBt0EzbFNfHddFrIXHKDFToA6XgEYcB28ppYXSB&product=1&principal=200000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4479
+2026-07-12 06:51:34 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=iZOny0nFmf4hDrEOUJuIeQml0qBt0EzbFNfHddFrIXHKDFToA6XgEYcB28ppYXSB&product=1&principal=200000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3188
+2026-07-12 06:51:42 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=iZOny0nFmf4hDrEOUJuIeQml0qBt0EzbFNfHddFrIXHKDFToA6XgEYcB28ppYXSB&product=1&principal=200000&term_months=3&frequency=MONTHLY&purpose= HTTP/1.1" 200 3512
+2026-07-12 06:52:17 [ERROR] django.request: Internal Server Error: /loans/apply/326c194a-778e-4c20-9fee-fcb6e2ec1cd9/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 45, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\loans\views.py", line 250, in loan_apply_step2
+    loan.save()
+  File "C:\Users\aggyd\Desktop\tenant\loans\models.py", line 473, in save
+    super().save(*args, **kwargs)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 822, in save
+    self.save_base(
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 909, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1071, in _save_table
+    results = self._do_insert(
+              ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\base.py", line 1112, in _do_insert
+    return manager._insert(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 1847, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1823, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.IntegrityError: duplicate key value violates unique constraint "loans_loan_loan_number_key"
+DETAIL:  Key (loan_number)=(LN-2026-00008) already exists.
+
+2026-07-12 06:52:17 [ERROR] django.server: "POST /loans/apply/326c194a-778e-4c20-9fee-fcb6e2ec1cd9/ HTTP/1.1" 500 211223

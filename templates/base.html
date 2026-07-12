@@ -805,11 +805,18 @@
   <aside class="sidebar" id="sidebar">
 
     <div class="sidebar-brand">
-      <div class="logo-mark">ABA</div>
-      <div>
-        <div class="brand-name">{{ company.name }}</div>
-        <div class="brand-sub">Loan Management</div>
-      </div>
+      {% load static %}
+      <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+        <img src="{% static 'images/logo.png' %}"
+             alt="AbaCash Logo"
+             style="width:40px;height:40px;border-radius:var(--radius-md);object-fit:contain;flex-shrink:0;"
+             onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex';">
+        <div id="logo-fallback" class="logo-mark" style="display:none;">ABA</div>
+        <div>
+          <div class="brand-name">{{ company.name }}</div>
+          <div class="brand-sub">Loan Management</div>
+        </div>
+      </a>
     </div>
 
     <nav class="sidebar-nav">
@@ -1169,7 +1176,8 @@
     <!-- Print header (visible only when printing) -->
     <div class="print-header print-only" style="display:none;">
       <div style="display:flex;align-items:center;gap:12px;">
-        <img src="{% static 'img/logo.png' %}" alt="ABA Uganda" class="logo" onerror="this.style.display='none'">
+        {% load static %}
+        <img src="{% static 'images/logo.png' %}" alt="AbaCash" class="logo" onerror="this.style.display='none'">
         <div class="company">
           {{ company.name }} — Loan Management<br>
           P.O. Box XXXX, Kampala · +256 700 000000
