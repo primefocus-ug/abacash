@@ -563,6 +563,45 @@ class Loan(models.Model):
         ]
 
 
+class LoanDisbursementAudit(models.Model):
+    """Audit record for disbursement date changes.
+
+    Records who changed a loan's disbursement date, when, and why.
+    """
+    ACTION_CHOICES = [
+        ("approve", "Approve"),
+        ("regenerate", "Regenerate Schedule"),
+        ("reschedule", "Reschedule"),
+        ("renew", "Renewal"),
+    ]
+
+    loan = models.ForeignKey(
+        Loan,
+        on_delete=models.CASCADE,
+        related_name="disbursement_audits",
+    )
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="disbursement_changes",
+    )
+    old_disbursement_date = models.DateField(null=True, blank=True)
+    new_disbursement_date = models.DateField(null=True, blank=True)
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    reason = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Disbursement Audit"
+        verbose_name_plural = "Disbursement Audits"
+
+    def __str__(self):
+        who = self.changed_by.full_name if self.changed_by else "System"
+        return f"{self.loan.loan_number}: {self.get_action_display()} by {who} on {self.created_at.date()}"
+
+
 class Guarantor(models.Model):
     """
     A person who provides a guarantee for a client's loan.

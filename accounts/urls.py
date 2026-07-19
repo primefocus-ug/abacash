@@ -1,7 +1,17 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
+from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = "accounts"
+
+class TenantPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = "accounts/password_reset_confirm.html"
+    success_url = reverse_lazy("password_reset_complete")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["reset_username"] = getattr(self, "reset_user", None).username if getattr(self, "reset_user", None) else ""
+        return context
 
 urlpatterns = [
     # Authentication
@@ -81,4 +91,13 @@ urlpatterns = [
     # System Parameters
     path("admin-panel/parameters/",         views.system_parameters,    name="system_parameters"),
     path("admin-panel/parameters/<int:pk>/delete/", views.system_parameter_delete, name="system_parameter_delete"),
+
+    # Password reset helper views for tenant and registration onboarding flow
+    path("password_reset/", auth_views.PasswordResetView.as_view(
+        template_name="accounts/password_reset_form.html"), name="password_reset"),
+    path("password_reset/done/", auth_views.PasswordResetDoneView.as_view(
+        template_name="accounts/password_reset_done.html"), name="password_reset_done"),
+    path("reset/<uidb64>/<token>/", TenantPasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path("reset/done/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="accounts/password_reset_complete.html"), name="password_reset_complete"),
 ]

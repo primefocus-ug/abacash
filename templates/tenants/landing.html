@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Abacash — Modern Loan Management Platform. Simple, powerful, secure.">
+  <meta name="keywords" content="abacash, loan management, lending platform, microfinance, Uganda">
+  <title>Abacash — Loan Management Platform</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/aba.css' %}">
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --accent: #60A5FA;
+      --accent-2: #2DD4BF;
+      --success: #34D399;
+      --danger: #F87171;
+      --main-bg: #020617;
+      --surface: #111827;
+      --surface-2: #1F2937;
+      --surface-3: #273449;
+      --border: #334155;
+      --text-primary: #F8FAFC;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --container-padding: clamp(1rem, 5vw, 4rem);
+      --nav-height: 70px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: clamp(0.95rem, 1vw + 0.5rem, 1.1rem);
+      line-height: 1.6;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Navigation – fully responsive */
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem var(--container-padding);
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: var(--nav-height);
+      gap: 0.5rem;
+    }
+
+    .logo {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(0.8rem, 2vw, 2rem);
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: color 0.3s;
+      text-decoration: none;
+      font-size: clamp(0.85rem, 1vw, 1rem);
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .nav-buttons {
+      display: flex;
+      gap: clamp(0.5rem, 1.5vw, 1rem);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.6rem clamp(1rem, 2vw, 1.8rem);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font-size: clamp(0.8rem, 0.9vw + 0.2rem, 1rem);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #3B82F6);
+      color: white;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(96, 165, 250, 0.1);
+    }
+
+    /* Mobile nav toggle */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-toggle span {
+      width: 28px;
+      height: 3px;
+      background: var(--text-primary);
+      border-radius: 3px;
+      transition: 0.3s;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: clamp(2rem, 8vh, 4rem) var(--container-padding) clamp(1.5rem, 4vh, 3rem);
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid var(--accent);
+      padding: 0.4rem 1.2rem;
+      border-radius: 50px;
+      font-size: clamp(0.75rem, 0.8vw + 0.2rem, 0.95rem);
+      color: var(--accent);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.9rem, 6vw, 3.2rem);
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #F8FAFC, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 1.5vw + 0.3rem, 1.4rem);
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 0.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: clamp(0.8rem, 2vw, 1.5rem);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-buttons .btn {
+      min-width: 160px;
+      flex: 0 1 auto;
+    }
+
+    /* Features Section */
+    .features {
+      padding: clamp(2rem, 6vh, 4rem) var(--container-padding);
+      background: linear-gradient(135deg, rgba(45, 212, 191, 0.05), rgba(96, 165, 250, 0.05));
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-family: 'Sora', sans-serif;
+      font-weight: 800;
+      margin-bottom: clamp(2rem, 4vh, 3.5rem);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: clamp(1.2rem, 2.5vw, 2.5rem);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      transition: all 0.3s;
+      backdrop-filter: blur(4px);
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(96, 165, 250, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      font-size: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: clamp(1.1rem, 1.2vw + 0.3rem, 1.35rem);
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: clamp(0.85rem, 0.9vw + 0.1rem, 1rem);
+      line-height: 1.6;
+    }
+
+    /* Pricing Section */
+    .pricing {
+      padding: clamp(2rem, 6vh, 4rem) var(--container-padding);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      margin-top: 2.5rem;
+    }
+
+    .pricing-card {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.8rem, 3vw, 2.8rem);
+      text-align: center;
+      transition: all 0.3s;
+      position: relative;
+      backdrop-filter: blur(4px);
+    }
+
+    .pricing-card.featured {
+      border: 2px solid var(--accent);
+      transform: scale(1.02);
+      box-shadow: 0 24px 48px rgba(96, 165, 250, 0.2);
+    }
+
+    .pricing-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.1);
+    }
+
+    .badge-featured {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #020617;
+      padding: 0.3rem 1.2rem;
+      border-radius: 50px;
+      font-size: clamp(0.65rem, 0.7vw + 0.1rem, 0.8rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .plan-name {
+      font-size: clamp(1.2rem, 1.5vw + 0.2rem, 1.6rem);
+      font-weight: 700;
+      margin: 0.8rem 0;
+    }
+
+    .plan-price {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      margin: 0.8rem 0;
+      color: var(--accent);
+    }
+
+    .plan-description {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      font-size: clamp(0.85rem, 0.9vw + 0.1rem, 1rem);
+    }
+
+    .plan-features {
+      text-align: left;
+      margin-bottom: 1.5rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 0;
+    }
+
+    .plan-features li {
+      list-style: none;
+      margin-bottom: 0.6rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: clamp(0.85rem, 0.8vw + 0.1rem, 1rem);
+    }
+
+    .plan-features li:before {
+      content: '✓';
+      color: var(--success);
+      font-weight: bold;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .pricing-card .btn {
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    /* Registration Section */
+    .registration {
+      padding: clamp(2rem, 6vh, 4rem) var(--container-padding);
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(45, 212, 191, 0.05));
+      border-top: 1px solid var(--border);
+    }
+
+    .registration-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.8rem, 4vw, 3.5rem);
+      backdrop-filter: blur(4px);
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+      font-size: clamp(0.85rem, 0.9vw + 0.1rem, 0.95rem);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: rgba(31, 41, 55, 0.5);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: clamp(0.9rem, 0.9vw + 0.1rem, 1rem);
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .required {
+      color: var(--danger);
+    }
+
+    .error-text {
+      color: var(--danger);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, var(--accent), #3B82F6);
+      color: rgba(255, 255, 255, 0.596);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: clamp(0.95rem, 1vw + 0.1rem, 1.1rem);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(96, 165, 250, 0.3);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Messages */
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert {
+      padding: 0.8rem 1.2rem;
+      border-radius: var(--radius-md);
+      border-left: 4px solid;
+      font-size: clamp(0.85rem, 0.9vw + 0.1rem, 1rem);
+    }
+
+    .alert-error {
+      background: rgba(248, 113, 113, 0.1);
+      border-left-color: var(--danger);
+      color: #FCA5A5;
+    }
+
+    .alert-success {
+      background: rgba(52, 211, 153, 0.1);
+      border-left-color: var(--success);
+      color: #86EFAC;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(17, 24, 39, 0.9);
+      border-top: 1px solid var(--border);
+      padding: clamp(2rem, 5vh, 3.5rem) var(--container-padding) 1.5rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: clamp(1.5rem, 3vw, 2.5rem);
+      margin-bottom: 2rem;
+    }
+
+    .footer-section h4 {
+      margin-bottom: 0.8rem;
+      color: var(--text-primary);
+      font-size: clamp(1rem, 1.1vw + 0.1rem, 1.15rem);
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section a {
+      color: var(--text-secondary);
+      transition: color 0.3s;
+      display: block;
+      margin-bottom: 0.4rem;
+      text-decoration: none;
+      font-size: clamp(0.85rem, 0.8vw + 0.1rem, 0.95rem);
+    }
+
+    .footer-section a:hover {
+      color: var(--accent);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: clamp(0.75rem, 0.8vw + 0.1rem, 0.9rem);
+    }
+
+    /* Responsive breakpoints */
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: flex;
+      }
+
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        padding: 1rem 0;
+        gap: 0.8rem;
+        border-top: 1px solid var(--border);
+        margin-top: 0.5rem;
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem 0;
+      }
+
+      .nav-buttons {
+        width: 100%;
+        justify-content: center;
+        gap: 0.8rem;
+      }
+
+      .nav-buttons .btn {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(1.8rem, 7vw, 2.8rem);
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .hero-buttons .btn {
+        width: 100%;
+        max-width: 300px;
+        min-width: unset;
+      }
+
+      .pricing-card.featured {
+        transform: scale(1);
+      }
+
+      .pricing-card .btn {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .registration-container {
+        padding: 1.5rem;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --container-padding: 1rem;
+      }
+
+      nav {
+        padding: 0.6rem 1rem;
+      }
+
+      .logo {
+        font-size: 1.1rem;
+      }
+
+      .nav-buttons .btn {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        min-width: 80px;
+      }
+
+      .hero {
+        padding: 2rem 1rem;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .feature-card {
+        padding: 1.2rem;
+      }
+
+      .pricing-card {
+        padding: 1.5rem;
+      }
+
+      .plan-price {
+        font-size: 1.8rem;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .plan-features li {
+        justify-content: center;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-height: 900px) {
+      .hero {
+        padding-top: 1.8rem;
+        padding-bottom: 1.5rem;
+      }
+
+      .features,
+      .pricing,
+      .registration {
+        padding-top: 1.8rem;
+        padding-bottom: 1.8rem;
+      }
+
+      .hero-badge {
+        margin-bottom: 0.75rem;
+      }
+
+      .hero-buttons {
+        gap: 0.75rem;
+      }
+
+      footer {
+        padding: 1.5rem var(--container-padding) 1rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.8rem;
+      }
+
+      .btn {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+      }
+
+      .registration-container {
+        padding: 1rem;
+      }
+    }
+
+    /* Handle very large screens */
+    @media (min-width: 1600px) {
+      .hero h1 {
+        font-size: 5rem;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .pricing-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Touch-friendly tap targets */
+    @media (hover: none) {
+      .btn, .nav-links a, .footer-section a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">Abacash</div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#register">Get Started</a>
+      <div class="nav-buttons">
+        <a href="#register" class="btn btn-secondary">Start Free Trial</a>
+        <a href="/admin/" class="btn btn-primary">Sign In</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">🚀 Modern Loan Management</div>
+    <h1>Powerful Loan Management<br>Made Simple</h1>
+    <p>Streamline your lending operations with our modern, secure platform. From application to repayment, everything in one place.</p>
+    <div class="hero-buttons">
+      <a href="#register" class="btn btn-primary">Start Free Trial</a>
+      <a href="#features" class="btn btn-secondary">Learn More</a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <h2 class="section-title">Powerful Features for Modern Lending</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Loan Applications</h3>
+        <p>Streamlined application workflow with instant approval tracking and document management.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Payment Processing</h3>
+        <p>Record payments, generate receipts, and track repayment schedules effortlessly.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Advanced Reports</h3>
+        <p>Comprehensive reporting including loan book, collections, overdue analysis, and income statements.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3>Smart Reminders</h3>
+        <p>Automated SMS and WhatsApp reminders for upcoming payments and renewals.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Multi-User Access</h3>
+        <p>Role-based permissions with Cashier, Manager, and CEO access levels.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Enterprise Security</h3>
+        <p>Bank-grade encryption, audit logs, and compliance with data protection standards.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="pricing">
+    <h2 class="section-title">Simple, Transparent Pricing</h2>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3 class="plan-name">STARTER</h3>
+        <div class="plan-price">Free</div>
+        <p class="plan-description">Perfect for getting started</p>
+        <ul class="plan-features">
+          <li>Up to 100 clients</li>
+          <li>Basic loan tracking</li>
+          <li>Payment recording</li>
+          <li>Email support</li>
+        </ul>
+        <button class="btn btn-secondary" onclick="document.getElementById('register').scrollIntoView({behavior: 'smooth'})">Get Started</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="badge-featured">Most Popular</div>
+        <h3 class="plan-name">PROFESSIONAL</h3>
+        <div class="plan-price">Custom</div>
+        <p class="plan-description">For growing teams</p>
+        <ul class="plan-features">
+          <li>Unlimited clients</li>
+          <li>Advanced reporting</li>
+          <li>SMS/WhatsApp reminders</li>
+          <li>Multiple users</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-primary" onclick="document.getElementById('register').scrollIntoView({behavior: 'smooth'})">Request Demo</button>
+      </div>
+
+      <div class="pricing-card">
+        <h3 class="plan-name">ENTERPRISE</h3>
+        <div class="plan-price">Custom</div>
+        <p class="plan-description">For large organizations</p>
+        <ul class="plan-features">
+          <li>Everything in Professional</li>
+          <li>Multi-branch support</li>
+          <li>Custom integrations</li>
+          <li>Dedicated account manager</li>
+          <li>24/7 support</li>
+        </ul>
+        <button class="btn btn-secondary" onclick="document.getElementById('register').scrollIntoView({behavior: 'smooth'})">Contact Sales</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Registration Section -->
+  <section id="register" class="registration">
+    <div class="registration-container">
+      <h2 class="section-title" style="margin-bottom: 2rem; font-size: clamp(1.6rem, 3vw, 2.2rem);">Start Your Free Trial</h2>
+      
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'tenants:public_register' %}" id="registrationForm">
+        {% csrf_token %}
+
+        <div class="form-group {% if form.company_name.errors %}error{% endif %}">
+          <label for="company_name">Company Name <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="company_name" 
+            name="company_name" 
+            required
+            value="{{ form_data.company_name }}"
+            placeholder="Your organization name"
+          >
+          {% if errors.company_name %}
+            <div class="error-text">{{ errors.company_name }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.contact_name.errors %}error{% endif %}">
+          <label for="contact_name">Contact Person <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="contact_name" 
+            name="contact_name" 
+            required
+            value="{{ form_data.contact_name }}"
+            placeholder="Your full name"
+          >
+          {% if errors.contact_name %}
+            <div class="error-text">{{ errors.contact_name }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.email.errors %}error{% endif %}">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required
+            value="{{ form_data.email }}"
+            placeholder="your@email.com"
+          >
+          {% if errors.email %}
+            <div class="error-text">{{ errors.email }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.phone.errors %}error{% endif %}">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            required
+            value="{{ form_data.phone }}"
+            placeholder="+256..."
+          >
+          {% if errors.phone %}
+            <div class="error-text">{{ errors.phone }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option value="Uganda" {% if form_data.country == 'Uganda' %}selected{% endif %}>Uganda</option>
+            <option value="Kenya" {% if form_data.country == 'Kenya' %}selected{% endif %}>Kenya</option>
+            <option value="Tanzania" {% if form_data.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
+            <option value="Rwanda" {% if form_data.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
+            <option value="Other" {% if form_data.country == 'Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="city">City</label>
+          <input 
+            type="text" 
+            id="city" 
+            name="city"
+            value="{{ form_data.city }}"
+            placeholder="Your city"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="plan">Pricing Plan</label>
+          <select id="plan" name="plan">
+            <option value="STARTER" {% if form_data.plan == 'STARTER' %}selected{% endif %}>Starter (Free)</option>
+            <option value="PROFESSIONAL" {% if form_data.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional</option>
+            <option value="ENTERPRISE" {% if form_data.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea 
+            id="message" 
+            name="message"
+            placeholder="Tell us about your lending operation..."
+          >{{ form_data.message }}</textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Start Your Free Trial</button>
+
+        <p style="text-align: center; color: var(--text-muted); font-size: clamp(0.75rem, 0.8vw + 0.1rem, 0.9rem); margin-top: 1rem;">
+          We'll review your application and contact you within 24 hours.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Compliance</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4>Follow Us</h4>
+        <ul>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">Instagram</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Abacash. All rights reserved. | Loan Management Platform</p>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav toggle with accessibility
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    navToggle.addEventListener('click', function() {
+      const isOpen = navLinks.classList.toggle('open');
+      this.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Close nav on link click (mobile)
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // Smooth scroll with offset for fixed header
+    document.querySelectorAll('a[href^="#"]:not([href="#"])').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        const target = document.querySelector(targetId);
+        if (target) {
+          e.preventDefault();
+          const navHeight = document.querySelector('nav').offsetHeight;
+          const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+          window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Close mobile menu on resize to desktop
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        navLinks.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  </script>
+</body>
+</html>

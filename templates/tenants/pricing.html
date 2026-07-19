@@ -1,0 +1,65 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Pricing | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Pricing plans</div>
+    <h1 class="hero-title">Flexible pricing for every stage of your business.</h1>
+    <p class="hero-copy">Choose a package that matches your loan portfolio, team size, and operational needs. Get started quickly with transparent pricing.</p>
+  </section>
+
+  <section class="section-heading" style="margin-top: 2rem;">
+    <div class="section-label">Plans</div>
+    <h2>Simple packages for scaling lenders of every size</h2>
+  </section>
+
+  <div class="grid pricing-grid">
+    {% for plan in pricing_plans %}
+      <section class="pricing-card card{% if plan.featured %} featured{% endif %}">
+        {% if plan.featured %}
+          <div class="badge-featured">Most Popular</div>
+        {% endif %}
+        <p class="pricing-name">{{ plan.name }}</p>
+        <div class="pricing-price">{{ plan.price }}</div>
+        <p class="pricing-note">{{ plan.description }}</p>
+        <ul class="pricing-features">
+          {% for item in plan.features %}
+            <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        <a href="{% if plan.name == 'STARTER' %}{% url 'tenants:public_register' %}{% else %}{% url 'tenants:support' %}{% endif %}" class="btn {% if plan.featured %}btn-primary{% else %}btn-secondary{% endif %}">{{ plan.button_text }}</a>
+      </section>
+    {% endfor %}
+  </div>
+
+  <section class="section-card" style="margin-top: 2.5rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Quick links</div>
+      <h2>Where else to go</h2>
+    </div>
+    <div class="page-link-list">
+      <div class="page-link-item">
+        <div>
+          <strong>Home</strong>
+          <small>Return to the main landing page.</small>
+        </div>
+        <a href="{% url 'tenants:landing' %}" class="btn btn-secondary">Home</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Features</strong>
+          <small>Review what the platform can do.</small>
+        </div>
+        <a href="{% url 'tenants:features' %}" class="btn btn-secondary">Features</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Register</strong>
+          <small>Start your free trial or account setup.</small>
+        </div>
+        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

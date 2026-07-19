@@ -1,0 +1,112 @@
+{% extends "tenants/landing_base.html" %}
+{% load static %}
+{% block title %}Home | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Abacash Loan Platform</div>
+    <h1 class="hero-title">Abacash makes loan operations faster, simpler, and more secure.</h1>
+    <p class="hero-copy">A modern public landing experience for Abacash. Discover features, compare plans, contact support, and register your organization in one smooth flow.</p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#" data-modal-target="register-modal-template">Register Now</a>
+      <a class="btn btn-secondary" href="#" data-modal-target="login-modal-template">Login</a>
+      <a class="btn btn-secondary" href="{% url 'tenants:support' %}">Support</a>
+    </div>
+
+    <div class="brand-logos">
+      <img loading="lazy" src="{% static 'images/logo.png' %}" alt="Abacash logo">
+      <img loading="lazy" src="{% static 'images/aba.png' %}" alt="Abacash symbol">
+    </div>
+  </section>
+
+  <section class="section-card" style="padding: 2rem; margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Why Abacash</div>
+      <h2>Designed for growing lenders who need speed and clarity.</h2>
+    </div>
+    <div class="grid feature-grid">
+      <article class="feature-card card">
+        <div class="feature-icon">⚡</div>
+        <h3>Fast onboarding</h3>
+        <p>Start with a simple registration and get a consistent setup flow that keeps your lending team moving.</p>
+      </article>
+      <article class="feature-card card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Secure operations</h3>
+        <p>Trust modern security practices for borrower data, payment records, and multi-user access control.</p>
+      </article>
+      <article class="feature-card card">
+        <div class="feature-icon">🤝</div>
+        <h3>Support first</h3>
+        <p>Access email, phone, and guided onboarding support directly from the public landing experience.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Explore the site</div>
+      <h2>Browse all marketing pages</h2>
+    </div>
+    <div class="grid page-grid">
+      <a class="link-card" href="{% url 'tenants:features' %}">
+        <h3>Features</h3>
+        <p>See what makes Abacash effective for loan officers, managers, and administrators.</p>
+        <span class="btn btn-secondary">View Features</span>
+      </a>
+      <a class="link-card" href="{% url 'tenants:pricing' %}">
+        <h3>Pricing</h3>
+        <p>Compare plans for startups, growth, and enterprise scale.</p>
+        <span class="btn btn-secondary">View Pricing</span>
+      </a>
+      <a class="link-card" href="#" data-modal-target="register-modal-template">
+        <h3>Register</h3>
+        <p>Apply for your Abacash account and start onboarding.</p>
+        <span class="btn btn-secondary">Register</span>
+      </a>
+      <a class="link-card" href="{% url 'tenants:support' %}">
+        <h3>Help & Support</h3>
+        <p>Contact onboarding or support to get assistance setting up your tenant.</p>
+        <span class="btn btn-secondary">Get Help</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Quick links</div>
+      <h2>Jump to the key pages</h2>
+    </div>
+    <div class="page-link-list">
+      <div class="page-link-item">
+        <div>
+          <strong>Home</strong>
+          <small>Return to the landing site overview.</small>
+        </div>
+        <a href="{% url 'tenants:landing' %}" class="btn btn-secondary">Home</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Features</strong>
+          <small>View our product capabilities.</small>
+        </div>
+        <a href="{% url 'tenants:features' %}" class="btn btn-secondary">Features</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Pricing</strong>
+          <small>Compare plans and pricing.</small>
+        </div>
+        <a href="{% url 'tenants:pricing' %}" class="btn btn-secondary">Pricing</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Register</strong>
+          <small>Open the registration form page.</small>
+        </div>
+        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

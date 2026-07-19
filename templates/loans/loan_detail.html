@@ -122,8 +122,7 @@
       }
     });
     function openModal() {
-      var overlay = document.getElementById('modal-overlay');
-      if (overlay) overlay.classList.add('active');
+      if (typeof showModal === 'function') { showModal(); } else if (typeof window.showModal === 'function') { window.showModal(); }
     }
   </script>
 
@@ -174,77 +173,62 @@
     {% if loan.status == 'PENDING' and user.can_approve_loans %}
     <div class="card mb-3 print-hide" id="reject" style="border-color:var(--border);">
       <div class="card-header"><span class="card-title">Loan Decision</span></div>
-      <div class="card-body">
-        <div class="flex gap-2 mb-3">
-          <form method="post" action="{% url 'loans:approve' loan.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success"
-                    data-confirm="Approve this loan of {{ loan.principal_amount|money }}?">
-              ✓ Approve Loan
-            </button>
-          </form>
-        </div>
-        <form method="post" action="{% url 'loans:reject' loan.pk %}">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="rejection_reason">Rejection Reason (required)</label>
-            <textarea name="rejection_reason" id="rejection_reason" rows="3"
-                      placeholder="Explain why this loan is being rejected…" required></textarea>
+      <div class="card-body" style="padding:12px;">
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+
+          <!-- Approve column -->
+          <div style="flex:1 1 320px;min-width:260px;max-width:720px;">
+            <form method="post" action="{% url 'loans:approve' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;">
+              {% csrf_token %}
+
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <div style="flex:1;min-width:160px;">
+                  <div style="font-size:13px;color:var(--text-muted);">Loan Amount</div>
+                  <div style="font-weight:600;font-size:16px;">{{ loan.principal_amount|money }}</div>
+                </div>
+
+                <div style="flex:1;min-width:160px;">
+                  <div style="font-size:13px;color:var(--text-muted);">Repayable (P+I)</div>
+                  <div style="font-weight:600;font-size:16px;">{{ loan.total_repayable|money }}</div>
+                </div>
+
+                {% if user.is_ceo %}
+                <div style="min-width:180px;">
+                  <label for="disbursement_date" style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Disbursement date</label>
+                  <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;" />
+                </div>
+                {% endif %}
+
+              </div>
+
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button type="submit" class="btn btn-success" style="padding:10px 16px;font-weight:600;" data-confirm="Approve this loan of {{ loan.principal_amount|money }}?">✓ Approve Loan</button>
+                <div style="color:var(--text-muted);font-size:13px;">Approving will activate the loan and set disbursement date above.</div>
+              </div>
+            </form>
           </div>
-          <button type="submit" class="btn btn-danger">Reject Loan</button>
-        </form>
+
+          <!-- Reject column -->
+          <div style="flex:1 1 320px;min-width:260px;max-width:480px;">
+            <form method="post" action="{% url 'loans:reject' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;">
+              {% csrf_token %}
+              <label for="rejection_reason" style="font-weight:600;font-size:13px;color:var(--text-muted);">Rejection reason (required)</label>
+              <textarea name="rejection_reason" id="rejection_reason" rows="4" placeholder="Explain why this loan is being rejected…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button type="submit" class="btn btn-danger" style="padding:10px 14px;font-weight:600;">Reject Loan</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
       </div>
     </div>
     {% endif %}
 
-    <!-- Amortization schedule -->
-    <div class="card mb-3" id="schedule-print-card">
-      <div class="print-only" style="display:none; margin-bottom:10px; font-size:18px; font-weight:600;">Repayment Schedule — {{ loan.loan_number }}</div>
-      <div class="card-header"><span class="card-title">Repayment Schedule</span></div>
-      <div class="table-wrap">
-        <table class="aba-table schedule-table">
-          <thead>
-            <tr>
-              <th>#</th><th>Due Date</th><th>Opening Bal.</th>
-              <th>Principal</th><th>Interest</th><th>Penalty</th>
-              <th>Total Due</th><th>Paid</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for entry in schedule %}
-            <tr class="{% if entry.status == 'PAID' %}paid-row{% elif entry.status == 'OVERDUE' %}overdue-row{% endif %}">
-              <td class="text-muted">{{ entry.period_number }}</td>
-              <td>{{ entry.due_date }}</td>
-              <td class="mono">{{ entry.opening_balance|floatformat:0|intcomma }}</td>
-              <td class="mono">{{ entry.principal_due|floatformat:0|intcomma }}</td>
-              <td class="mono">{{ entry.interest_due|floatformat:0|intcomma }}</td>
-              <td class="mono {% if entry.penalty_due > 0 %}style="color:var(--red-400)"{% endif %}">
-                {% if entry.penalty_due > 0 %}{{ entry.penalty_due|floatformat:0|intcomma }}{% else %}—{% endif %}
-              </td>
-              <td class="mono fw-500">{{ entry.total_payment|floatformat:0|intcomma }}</td>
-              <td class="mono" style="color:var(--green-400)">
-                {% if entry.amount_paid > 0 %}{{ entry.amount_paid|floatformat:0|intcomma }}{% else %}—{% endif %}
-              </td>
-              <td>
-                <span class="badge
-                  {% if entry.status == 'PAID' %}badge-green
-                  {% elif entry.status == 'OVERDUE' %}badge-red
-                  {% elif entry.status == 'PARTIAL' %}badge-amber
-                  {% else %}badge-muted{% endif %}">
-                  {{ entry.get_status_display }}
-                </span>
-              </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="9"><div class="empty-state"><p>Schedule not generated yet.</p></div></td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    {% include 'loans/loan_detail_schedule_fragment.html' %}
 
     <!-- Payment history -->
-    <div class="card print-hide">
+    <div class="card print-hide" style="max-width:100%;overflow-x:auto;">
       <div class="card-header"><span class="card-title">Payment History</span></div>
       <div class="table-wrap">
         {% if payments %}
@@ -300,9 +284,10 @@
 
   <!-- Right column — client info -->
   <div>
-    <div class="card mb-3">
-      <div class="card-header"><span class="card-title">Client</span></div>
-      <div class="card-body" style="padding:0;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;">
+      <div class="card mb-3" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+        <div class="card-header"><span class="card-title">Client</span></div>
+        <div class="card-body" style="padding:0;">
         {% with loan.client as c %}
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
           <div style="font-weight:500;font-size:15px;">{{ c.full_name }}</div>
@@ -326,11 +311,11 @@
       </div>
     </div>
 
-    <div class="card mt-3">
-      <div class="card-header"><span class="card-title">Collateral</span></div>
-      {% with loan.collateral_items.all as items %}
-      {% if items %}
-      <div class="card-body" style="padding:0;">
+      <div class="card mt-3" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+        <div class="card-header"><span class="card-title">Collateral</span></div>
+        {% with loan.collateral_items.all as items %}
+        {% if items %}
+        <div class="card-body" style="padding:0;">
         {% for item in items %}
         <div style="display:flex;justify-content:space-between;padding:10px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
           <span class="text-sm">{{ item.description }}</span>
@@ -342,17 +327,41 @@
       <div class="empty-state" style="padding:16px;"><p class="text-sm">No collateral recorded.</p></div>
       {% endif %}
       {% endwith %}
-    </div>
+      </div>
 
-    <div class="card">
-      <div class="card-header"><span class="card-title">Loan Info</span></div>
-      <div class="card-body" style="padding:0;">
+      <div class="card" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+        <div class="card-header"><span class="card-title">Loan Info</span></div>
+        <div class="card-body" style="padding:0;">
         <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Applied By</span><span class="text-sm">{{ loan.applied_by.full_name|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Reviewed By</span><span class="text-sm">{{ loan.reviewed_by.full_name|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Approved</span><span class="text-sm">{{ loan.approval_date|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Disbursed</span><span class="text-sm">{{ loan.disbursement_date|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Matures</span><span class="text-sm">{{ loan.maturity_date|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;border-bottom:none;"><span class="receipt-label text-sm">Total Paid</span><span class="mono" style="color:var(--green-400)">{{ loan.total_paid|money }}</span></div>
+
+        {# Disbursement audit — show up to 3 recent changes #}
+        <div style="border-top:1px dashed var(--border);padding:12px 20px;font-size:13px;">
+          <div style="font-weight:600;margin-bottom:8px;">Disbursement changes</div>
+          {% if recent_disbursement_audits %}
+            <ul style="list-style:none;padding:0;margin:0;">
+              {% for a in recent_disbursement_audits %}
+              <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);">
+                <div style="min-width:0;">
+                  <div style="font-weight:600;font-size:13px;">{{ a.get_action_display }}</div>
+                  <div style="color:var(--text-muted);font-size:12px;">{{ a.changed_by.full_name|default:'System' }} • {{ a.created_at|date:"Y-m-d H:i" }}</div>
+                  <div style="font-size:13px;margin-top:6px;">{{ a.old_disbursement_date|default:'—' }} → {{ a.new_disbursement_date|default:'—' }}</div>
+                  {% if a.reason %}<div style="color:var(--text-muted);font-size:12px;margin-top:6px;">{{ a.reason|truncatechars:80 }}</div>{% endif %}
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% if disbursement_audits_total|default:0 > recent_disbursement_audits|length %}
+              <div style="text-align:right;margin-top:8px;font-size:12px;color:var(--text-muted);">+{{ disbursement_audits_total|add:-3 }} more</div>
+            {% endif %}
+          {% else %}
+            <div class="text-sm text-muted">No disbursement date changes recorded.</div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

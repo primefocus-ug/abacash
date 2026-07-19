@@ -1,0 +1,56 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Features | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Platform capabilities</div>
+    <h1 class="hero-title">Everything you need to manage loans confidently.</h1>
+    <p class="hero-copy">Explore the full feature set designed to support every step of the lending lifecycle: application, approval, repayment, reporting, and reminders.</p>
+  </section>
+
+  <section class="section-heading" style="margin-top: 2rem;">
+    <div class="section-label">Features</div>
+    <h2>Built for modern lending workflows</h2>
+  </section>
+
+  <div class="grid feature-grid">
+    {% for feature in feature_list %}
+      <article class="feature-card card">
+        <div class="feature-icon">{{ feature.icon }}</div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </article>
+    {% endfor %}
+  </div>
+
+  <section class="section-card" style="margin-top: 2.5rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Navigation</div>
+      <h2>Jump to another page</h2>
+    </div>
+    <div class="page-link-list">
+      <div class="page-link-item">
+        <div>
+          <strong>Pricing</strong>
+          <small>Compare plans and pricing tiers.</small>
+        </div>
+        <a href="{% url 'tenants:pricing' %}" class="btn btn-secondary">Pricing</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Register</strong>
+          <small>Apply for your account and begin setup.</small>
+        </div>
+        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Help</strong>
+          <small>Contact support or onboarding to get assistance.</small>
+        </div>
+        <a href="{% url 'tenants:support' %}" class="btn btn-secondary">Get Help</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Combined Receipts{% endblock %}
+{% block page_title %}Receipts - Print{% endblock %}
+
+{% block content %}
+<div style="max-width:760px;margin:12px auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <h3 style="margin:0;">Receipts</h3>
+    <div>
+      <button onclick="window.print()" class="btn btn-primary">Print</button>
+      <a href="{% url 'payments:list' %}" class="btn btn-secondary">Done</a>
+    </div>
+  </div>
+
+  {% for r in receipts %}
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Receipt {{ r.receipt_number }}</span></div>
+    <div class="card-body">
+      <div><strong>Loan:</strong> {{ r.payment.loan.loan_number }} — {{ r.payment.loan.client.full_name }}</div>
+      <div><strong>Amount:</strong> {{ r.amount_received|money }}</div>
+      <div><strong>Principal paid:</strong> {{ r.principal_paid|money }}</div>
+      <div><strong>Interest paid:</strong> {{ r.interest_paid|money }}</div>
+      <div><strong>Penalty paid:</strong> {{ r.penalty_paid|money }}</div>
+      <div><strong>Balance before:</strong> {{ r.balance_before|money }}</div>
+      <div><strong>Balance after:</strong> {{ r.balance_after|money }}</div>
+      <div style="margin-top:8px;color:var(--text-muted);font-size:13px;">Issued at: {{ r.issued_at }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if auto_print %}
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    try { window.print(); } catch(e) {}
+  });
+</script>
+{% endif %}
+
+{% endblock %}

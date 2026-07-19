@@ -1,0 +1,1139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}abacash — Loan Management{% endblock %}</title>
+  <meta name="description" content="Abacash loan management platform marketing pages. Explore features, pricing, support, and register your account.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/aba.css' %}">
+
+  <style>
+    :root {
+      --accent: #2563eb;
+      --accent-2: #0ea5e9;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --main-bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --surface-3: #e2e8f0;
+      --border: #031682;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --container-padding: clamp(1rem, 4vw, 3rem);
+      --nav-height: 120px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      background: var(--main-bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      padding-top: var(--nav-height);
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center; /* center the navigation */
+      gap: 0.75rem;
+      padding: 1rem var(--container-padding);
+      background: rgba(232, 233, 234, 0.62); /* more transparent */
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      position: fixed;
+      left: 0; right: 0; top: 0;
+      z-index: 100;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+      height: var(--nav-height);
+    }
+
+    /* Isolate logo on the left and center the nav links */
+    .logo {
+      position: absolute;
+      left: var(--container-padding);
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: clamp(1.2rem, 1.75vw, 1.85rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      white-space: nowrap;
+      z-index: 110;
+      background: rgba(255,255,255,0.0);
+      padding: 0.1rem 0.3rem;
+      border-radius: 8px;
+    }
+
+    .logo img {
+      display: block;
+      height: 128px; /* larger isolated logo */
+      width: auto;
+    }
+
+    .nav-list {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      gap: clamp(0.8rem, 1.5vw, 1.75rem);
+      list-style: none;
+      z-index: 105;
+    }
+
+    .nav-actions {
+      position: absolute;
+      right: var(--container-padding);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      align-items: center;
+      z-index: 110;
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        padding: 0.9rem 1rem;
+        justify-content: space-between;
+      }
+      .logo { position: static; transform: none; }
+      .nav-list { position: static; transform: none; justify-content:center; }
+      .nav-actions { position: static; transform: none; }
+    }
+
+    .hero {
+      padding: 4rem 0 2.5rem;
+      text-align: center;
+    }
+
+    .hero .hero-copy {
+      max-width: 760px;
+      margin: 0.75rem auto 1.75rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: clamp(1.2rem, 1.75vw, 1.85rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .logo img {
+      display: block;
+      height: 96px; /* increased logo size */
+      width: auto;
+    }
+
+    .brand-text {
+      display: inline-block;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      color: var(--text-primary);
+    }
+
+    .nav-list {
+      display: flex;
+      align-items: center;
+      gap: clamp(0.8rem, 1.5vw, 1.75rem);
+      flex-wrap: wrap;
+      list-style: none;
+    }
+
+    .nav-list a {
+      color: var(--text-primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.25s ease;
+      font-size: clamp(0.9rem, 0.95vw, 1rem);
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active {
+      color: var(--accent);
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active {
+      color: var(--accent);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn,
+    .link-card a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    .btn {
+      padding: 0.85rem 1.6rem;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: var(--radius-md);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(37, 99, 235, 0.18);
+      color: var(--accent);
+      padding: 0.8rem 1.2rem;
+    }
+
+    .btn:hover,
+    .link-card:hover {
+      transform: translateY(-2px);
+    }
+
+    main {
+      flex: 1 1 auto;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem var(--container-padding) 6rem 4rem;
+    }
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: clamp(1rem, 2vw, 2rem);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 700;
+      font-size: 0.78rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #F8FAFC, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-copy {
+      max-width: 720px;
+      margin: 0 auto 2rem;
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 1.3vw, 1.25rem);
+      line-height: 1.75;
+    }
+
+    .brand-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin-top: 1.75rem;
+      padding: 0 1rem;
+    }
+
+    .brand-logos img {
+      max-height: 96px; /* larger brand logo display */
+      width: auto;
+      display: block;
+      filter: brightness(1.05);
+    }
+
+    .grid {
+      display: grid;
+      gap: clamp(1.25rem, 2vw, 2rem);
+    }
+
+    .page-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .feature-grid,
+    .pricing-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .card,
+    .link-card,
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    }
+
+    .link-card:hover,
+    .card:hover,
+    .section-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(37, 99, 235, 0.25);
+      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .link-card {
+      display: block;
+      padding: 1.4rem;
+      color: var(--text-primary);
+      min-height: 190px;
+      justify-content: space-between;
+    }
+
+    .link-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .link-card p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .page-link-list {
+      display: grid;
+      gap: 1rem;
+      padding: 1rem 0 0;
+    }
+
+    .page-link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.1rem;
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+
+    .page-link-item strong,
+    .page-link-item a {
+      color: var(--text-primary);
+    }
+
+    .page-link-item small {
+      color: var(--text-secondary);
+    }
+
+    .section-label {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(96, 165, 250, 0.1);
+      color: var(--accent);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .feature-card h3,
+    .pricing-card h3,
+    .section-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .feature-card p,
+    .pricing-card p,
+    .section-card p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .pricing-card {
+      padding: 1.6rem;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 20px 50px rgba(96, 165, 250, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .pricing-name {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+
+    .pricing-price {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 0.85rem;
+      color: var(--accent);
+    }
+
+    .pricing-note {
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .pricing-features li:before {
+      content: '✓';
+      color: var(--success);
+      font-weight: 700;
+      min-width: 1.25rem;
+    }
+
+    .pricing-card .btn {
+      width: 100%;
+      margin-top: 1.3rem;
+    }
+
+    .registration-container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: clamp(1.8rem, 3vw, 3rem);
+      color: var(--text-primary);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius-md);
+      padding: 0.95rem 1rem;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--text-primary);
+      font-size: 1rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+    }
+
+    .form-group textarea { min-height: 120px; }
+
+    .field-note {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .error-text {
+      color: var(--danger);
+      font-size: 0.9rem;
+    }
+
+    .required { color: var(--danger); }
+
+    .popup-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 130;
+    }
+
+    .popup-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      width: min(92vw, 760px);
+      max-height: calc(100vh - 3rem);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 140;
+    }
+
+    .popup-modal.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    .popup-panel {
+      width: 100%;
+      min-height: 100px;
+      max-height: calc(100vh - 3.5rem);
+      overflow-y: auto;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.74);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.16);
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .popup-panel h2 {
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      line-height: 1.1;
+    }
+
+    .popup-close {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-primary);
+      font-size: 1.3rem;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .popup-close:hover {
+      background: rgba(15, 23, 42, 0.12);
+    }
+
+    .popup-form {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .popup-form .form-group input,
+    .popup-form .form-group select,
+    .popup-form .form-group textarea {
+      background: var(--surface-2);
+    }
+
+    .popup-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      justify-content: flex-end;
+    }
+
+    .contact-fab {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      z-index: 110;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contact-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.95rem 1.35rem;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 18px 35px rgba(37, 99, 235, 0.22);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .contact-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 22px 42px rgba(37, 99, 235, 0.24);
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    html[data-theme='dark'] .popup-panel {
+      background: rgba(15, 23, 42, 0.64);
+      border-color: rgba(148, 163, 184, 0.18);
+      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.32);
+    }
+
+    html[data-theme='dark'] .popup-close,
+    html[data-theme='dark'] .form-group input,
+    html[data-theme='dark'] .form-group select,
+    html[data-theme='dark'] .form-group textarea {
+      background: rgba(15, 23, 42, 0.55);
+      color: var(--text-primary);
+      border-color: rgba(148, 163, 184, 0.18);
+    }
+
+    html[data-theme='dark'] .contact-button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+
+    .footer {
+      margin-top: 3rem;
+      padding: 2rem var(--container-padding) 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: var(--surface-2);
+      border-radius: 24px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+      margin-top: auto; /* push footer to bottom when page content is short */
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      align-items: start;
+      justify-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-grid a {
+      display: block;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .footer-grid a:hover {
+      color: var(--accent);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Toast notifications (replaces message-list) */
+    .toast-container {
+      position: fixed;
+      right: 1rem;
+      bottom: 1.25rem;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      min-width: 280px;
+      max-width: 420px;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      box-shadow: 0 12px 30px rgba(2,6,23,0.12);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(.2,.9,.2,1), opacity 0.28s ease;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .toast .toast-icon { font-size: 1.2rem; margin-top: 2px; }
+    .toast .toast-content { flex: 1 1 auto; }
+    .toast .toast-title { font-weight: 700; font-size: 0.95rem; }
+    .toast .toast-body { font-size: 0.9rem; color: var(--text-secondary); }
+    .toast .toast-close { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted); }
+
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error   { border-left: 4px solid var(--danger); }
+    .toast-info    { border-left: 4px solid var(--accent); }
+
+    .toast-progress {
+      height: 3px;
+      background: linear-gradient(90deg, rgba(37,99,235,0.9), rgba(14,165,233,0.9));
+      border-radius: 2px;
+      margin-top: 8px;
+      width: 100%;
+      transform-origin: left;
+      animation: toast-progress 5s linear forwards;
+    }
+
+    @keyframes toast-progress {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+
+    /* Legacy message-list styles removed — toasts preferred */
+
+    @media (max-width: 900px) {
+      nav {
+        padding: 0.9rem 1rem;
+      }
+      .nav-actions {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .hero-title {
+        font-size: clamp(2rem, 7vw, 2.8rem);
+      }
+
+      .grid {
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .nav-list {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .nav-actions {
+        justify-content: center;
+      }
+
+      body { padding-top: 80px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="{% url 'tenants:landing' %}">
+      <img src="{% static 'images/logo.png' %}" alt="Abacash logo">
+      <span class="brand-text">ABACASH</span>
+    </a>
+    <ul class="nav-list">
+      <li><a href="{% url 'tenants:landing' %}">Home</a></li>
+      <li><a href="{% url 'tenants:features' %}">Features</a></li>
+      <li><a href="{% url 'tenants:pricing' %}">Pricing</a></li>
+      <li><a href="{% url 'tenants:support' %}">Support</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" data-modal-target="login-modal-template" class="btn btn-secondary">Login</a>
+      <a href="#" data-modal-target="register-modal-template" class="btn btn-primary">Register</a>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Toast container for success/info/error messages -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // Toast system: create visually pleasing notifications for Django messages
+    (function(){
+      const container = document.getElementById('toast-container');
+      function makeToast(type, title, body, timeout=5000){
+        const el = document.createElement('div');
+        el.className = 'toast ' + (type ? 'toast-'+type : 'toast-info');
+
+        const icon = document.createElement('div');
+        icon.className = 'toast-icon';
+        icon.textContent = type === 'success' ? '✓' : (type === 'error' ? '!' : 'i');
+
+        const content = document.createElement('div');
+        content.className = 'toast-content';
+        const t = document.createElement('div'); t.className = 'toast-title'; t.textContent = title || '';
+        const b = document.createElement('div'); b.className = 'toast-body'; b.textContent = body || '';
+        content.appendChild(t); content.appendChild(b);
+
+        const close = document.createElement('button');
+        close.className = 'toast-close';
+        close.setAttribute('aria-label','Close notification');
+        close.innerHTML = '&times;';
+        close.onclick = () => { finish(); };
+
+        el.appendChild(icon);
+        el.appendChild(content);
+        el.appendChild(close);
+
+        const progress = document.createElement('div');
+        progress.className = 'toast-progress';
+        el.appendChild(progress);
+
+        let hideTimeout = null;
+        function finish(){
+          el.classList.remove('show');
+          setTimeout(()=> el.remove(), 350);
+          clearTimeout(hideTimeout);
+        }
+
+        container.appendChild(el);
+        // small timeout to allow transition
+        requestAnimationFrame(()=> setTimeout(()=> el.classList.add('show'), 10));
+        hideTimeout = setTimeout(finish, timeout);
+
+        return {el, finish};
+      }
+
+      // Render server messages passed by Django
+      document.addEventListener('DOMContentLoaded', function(){
+        try{
+          const serverMessages = [];
+          {% if messages %}
+            {% for message in messages %}
+              serverMessages.push({
+                level: '{{ message.tags|default:"info" }}',
+                text: `{{ message|escapejs }}`
+              });
+            {% endfor %}
+          {% endif %}
+          serverMessages.forEach(m => {
+            const lvl = (m.level && m.level.indexOf('error')!==-1) ? 'error' : ((m.level && m.level.indexOf('success')!==-1)? 'success':'info');
+            makeToast(lvl, lvl.charAt(0).toUpperCase()+lvl.slice(1), m.text, 6000);
+          });
+        }catch(e){ /* be silent on template parse issues */ }
+      });
+
+      // Expose simple API
+      window.AbacashToasts = { show: makeToast };
+    })();
+  </script>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <h4>Pages</h4>
+        <a href="{% url 'tenants:landing' %}">Home</a>
+        <a href="{% url 'tenants:features' %}">Features</a>
+        <a href="{% url 'tenants:pricing' %}">Pricing</a>
+        <a href="{% url 'tenants:support' %}">Support</a>
+        <a href="{% url 'tenants:public_register' %}">Register</a>
+        <a href="{% url 'tenants:public_login' %}">Login</a>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Support</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>support@abacash.loan</p>
+        <p>+256 700 000 000</p>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Abacash. All rights reserved.</div>
+  </footer>
+
+  <div id="popup-backdrop" class="popup-backdrop" onclick="closePopup()"></div>
+  <div id="popup-modal" class="popup-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+    <div id="popup-content">
+      {% block popup_content %}{% endblock %}
+    </div>
+    <button type="button" class="popup-close" onclick="closePopup()" aria-label="Close popup">&times;</button>
+  </div>
+
+  <template id="contact-modal-template">
+    <div class="popup-panel">
+      <span class="eyebrow">Contact Abacash</span>
+      <h2 id="popup-title">Start a support conversation</h2>
+      <p class="hero-copy">Send your question directly to the Abacash support team. We'll route your request to our onboarding and technical specialists.</p>
+      <form id="contact-popup-form" class="popup-form" onsubmit="submitContactForm(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="contact_name">Full name</label>
+            <input id="contact_name" name="name" type="text" placeholder="Your full name" required>
+          </div>
+          <div class="form-group">
+            <label for="contact_email">Email address</label>
+            <input id="contact_email" name="email" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="contact_message">Message</label>
+            <textarea id="contact_message" name="message" placeholder="How can we help you today?" required></textarea>
+          </div>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Send request</button>
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="register-modal-template">
+    <div class="popup-panel">
+      <span class="eyebrow">Register</span>
+      <h2 id="popup-title">Start your Abacash onboarding</h2>
+      <p class="hero-copy">Complete the secure registration popup and get an onboarding specialist to reach out within 24 hours.</p>
+      <form method="POST" action="{% url 'tenants:public_register' %}" class="popup-form">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="register_company_name">Company name</label>
+            <input id="register_company_name" name="company_name" type="text" placeholder="Your organization name" required value="{{ request.POST.company_name|default:'' }}">
+          </div>
+          <div class="form-group">
+            <label for="register_contact_name">Contact person</label>
+            <input id="register_contact_name" name="contact_name" type="text" placeholder="Your full name" required value="{{ request.POST.contact_name|default:'' }}">
+          </div>
+          <div class="form-group">
+            <label for="register_email">Email address</label>
+            <input id="register_email" name="email" type="email" placeholder="you@example.com" required value="{{ request.POST.email|default:'' }}">
+          </div>
+          <div class="form-group">
+            <label for="register_phone">Phone number</label>
+            <input id="register_phone" name="phone" type="tel" placeholder="+256..." required value="{{ request.POST.phone|default:'' }}">
+          </div>
+          <div class="form-group">
+            <label for="register_country">Country</label>
+            <select id="register_country" name="country">
+              <option value="Uganda" {% if request.POST.country == 'Uganda' %}selected{% endif %}>Uganda</option>
+              <option value="Kenya" {% if request.POST.country == 'Kenya' %}selected{% endif %}>Kenya</option>
+              <option value="Tanzania" {% if request.POST.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
+              <option value="Rwanda" {% if request.POST.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
+              <option value="Other" {% if request.POST.country == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="register_city">City</label>
+            <input id="register_city" name="city" type="text" placeholder="Your city" value="{{ request.POST.city|default:'' }}">
+          </div>
+          <div class="form-group">
+            <label for="register_plan">Pricing plan</label>
+            <select id="register_plan" name="plan">
+              <option value="STARTER" {% if request.POST.plan == 'STARTER' %}selected{% endif %}>Starter</option>
+              <option value="PROFESSIONAL" {% if request.POST.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional</option>
+              <option value="ENTERPRISE" {% if request.POST.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="register_message">Message</label>
+          <textarea id="register_message" name="message" placeholder="Tell us about your lending operation...">{{ request.POST.message|default:'' }}</textarea>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Start registration</button>
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="login-modal-template">
+    <div class="popup-panel">
+      <span class="eyebrow">Tenant login</span>
+      <h2 id="popup-title">Open your Abacash tenant</h2>
+      <p class="hero-copy">Use your company slug to go directly to your secure tenant login page.</p>
+      <form method="POST" action="{% url 'tenants:public_login' %}" class="popup-form">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="login_tenant_slug">Company slug</label>
+            <input id="login_tenant_slug" name="tenant_slug" type="text" placeholder="your-company" required value="{{ request.POST.tenant_slug|default:'' }}">
+          </div>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Go to login</button>
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <div class="contact-fab">
+    <button type="button" class="contact-button" onclick="openContactPopup()">Contact us</button>
+  </div>
+
+  <script>
+    const popupBackdrop = document.getElementById('popup-backdrop');
+    const popupModal = document.getElementById('popup-modal');
+    const popupContent = document.getElementById('popup-content');
+    const contactTemplate = document.getElementById('contact-modal-template');
+
+    function openPopup() {
+      document.body.classList.add('modal-open');
+      popupBackdrop.classList.add('active');
+      popupModal.classList.add('active');
+      popupModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePopup() {
+      document.body.classList.remove('modal-open');
+      popupBackdrop.classList.remove('active');
+      popupModal.classList.remove('active');
+      popupModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function openContactPopup() {
+      if (!contactTemplate) return;
+      popupContent.innerHTML = contactTemplate.innerHTML;
+      popupContent.querySelector('input, textarea')?.focus();
+      openPopup();
+    }
+
+    function submitContactForm(event) {
+      event.preventDefault();
+      const form = event.target;
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+      if (!name || !email || !message) {
+        return;
+      }
+      const body = `Name: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0A${encodeURIComponent(message)}`;
+      window.location.href = `mailto:support@abacash.loan?subject=${encodeURIComponent('Abacash support request')}&body=${body}`;
+      closePopup();
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && popupModal.classList.contains('active')) {
+        closePopup();
+      }
+    });
+
+    document.querySelectorAll('[data-modal-target]').forEach(button => {
+      button.addEventListener('click', event => {
+        const target = button.dataset.modalTarget;
+        if (!target) return;
+        event.preventDefault();
+        const element = document.getElementById(target);
+        if (!element) return;
+        popupContent.innerHTML = element.innerHTML;
+        openPopup();
+      });
+    });
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const targetId = this.getAttribute('href');
+        if (targetId.length <= 1) return;
+        const target = document.querySelector(targetId);
+        if (!target) return;
+        e.preventDefault();
+        const offset = document.querySelector('nav').offsetHeight;
+        const top = target.getBoundingClientRect().top + window.pageYOffset - offset - 16;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  </script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

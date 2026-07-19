@@ -1,0 +1,14 @@
+<div style="padding:12px 16px;">
+  <form method="post" hx-post="{% url 'loans:regenerate_schedule' loan.pk %}" hx-target="#schedule-print-card" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div style="margin-bottom:8px;">
+      <label for="disbursement_date" style="display:block;font-weight:600;margin-bottom:6px;">Disbursement Date</label>
+      <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" required />
+      <div class="text-sm text-muted" style="margin-top:6px;">Adjust the disbursement date to regenerate due dates. CEOs may back-date.</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn btn-primary btn-sm">Regenerate</button>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="hideModal();">Cancel</button>
+    </div>
+  </form>
+</div>

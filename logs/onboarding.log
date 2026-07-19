@@ -1,0 +1,6 @@
+2026-07-17 14:22:53 [INFO] tenants.views: Onboarding job started for registration 6: schema=danmak, domain=danmak.abacash.loan, log_file=C:\Users\aggyd\Desktop\tenant\logs\onboard_danmak.log
+2026-07-17 14:23:10 [INFO] tenants.management.commands.onboard_tenant: Sent password reset email for tenant danmak to derickstd24@gmail.com
+2026-07-17 18:30:17 [INFO] tenants.views: Onboarding job started for registration 7: schema=suzie_financial_business, domain=suzie_financial_business.abacash.loan, log_file=C:\Users\aggyd\Desktop\tenant\logs\onboard_suzie_financial_business.log
+2026-07-17 18:30:34 [INFO] tenants.management.commands.onboard_tenant: Sent password reset email for tenant suzie_financial_business to taxmanissues.go@gmail.com
+2026-07-19 09:21:13 [INFO] tenants.views: Onboarding job started for registration 1: schema=suzie_financial_business, domain=suzie_financial_business.abacash.loan, log_file=C:\Users\aggyd\Desktop\tenant\logs\onboard_suzie_financial_business.log
+2026-07-19 09:21:27 [INFO] tenants.management.commands.onboard_tenant: Sent password reset email for tenant suzie_financial_business to taxmanissues.go@gmail.com

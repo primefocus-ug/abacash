@@ -99,8 +99,132 @@ def record_payment(request, loan_pk=None):
             # Snapshot balance before payment
             balance_before = selected_loan.outstanding_balance
 
+            # prepare transfer variables
+            transfer_payment = None
+            transfer_receipt = None
+
             with transaction.atomic():
                 client = selected_loan.client
+
+                # Optional: transfer existing client credit to another loan before applying it to this payment
+                transfer_target_id = request.POST.get('transfer_target_loan')
+                transfer_amount_str = request.POST.get('transfer_amount', '').strip()
+                transfer_payment = None
+                transfer_receipt = None
+                if transfer_target_id:
+                    try:
+                        target_loan = get_object_or_404(Loan, pk=transfer_target_id, status=Loan.Status.ACTIVE, client=client)
+                        credit_available = client.credit_balance
+                        if transfer_amount_str:
+                            transfer_amount = Decimal(transfer_amount_str)
+                        else:
+                            transfer_amount = credit_available
+                        transfer_amount = max(Decimal('0'), min(transfer_amount, credit_available))
+                        if transfer_amount > 0:
+                            # Allocate the transferred credit to the target loan's pending schedule entries
+                            remaining_transfer = transfer_amount
+                            t_interest_paid = Decimal('0')
+                            t_principal_paid = Decimal('0')
+                            t_penalty_paid = Decimal('0')
+
+                            target_pending = LoanSchedule.objects.filter(
+                                loan=target_loan,
+                                status__in=["PENDING", "OVERDUE", "PARTIAL"],
+                            ).order_by('period_number')
+
+                            for t_entry in target_pending:
+                                if remaining_transfer <= 0:
+                                    break
+                                t_amount_due = t_entry.total_payment + t_entry.penalty_due - t_entry.amount_paid
+                                if remaining_transfer >= t_amount_due:
+                                    t_interest_paid += t_entry.interest_due
+                                    t_principal_paid += t_entry.principal_due
+                                    t_penalty_paid += t_entry.penalty_due
+                                    remaining_transfer -= t_amount_due
+                                    t_entry.amount_paid = t_entry.total_payment + t_entry.penalty_due
+                                    t_entry.status = LoanSchedule.Status.PAID
+                                    t_entry.paid_date = pay_date
+                                else:
+                                    allocated = remaining_transfer
+                                    if remaining_transfer >= t_entry.penalty_due:
+                                        t_penalty_paid += t_entry.penalty_due
+                                        remaining_transfer -= t_entry.penalty_due
+                                    else:
+                                        t_penalty_paid += remaining_transfer
+                                        remaining_transfer = Decimal('0')
+                                    if remaining_transfer >= t_entry.interest_due:
+                                        t_interest_paid += t_entry.interest_due
+                                        remaining_transfer -= t_entry.interest_due
+                                    else:
+                                        t_interest_paid += remaining_transfer
+                                        remaining_transfer = Decimal('0')
+                                    t_principal_paid += remaining_transfer
+                                    remaining_transfer = Decimal('0')
+                                    t_entry.amount_paid += allocated
+                                    t_entry.status = LoanSchedule.Status.PARTIAL
+                                t_entry.save()
+
+                            applied = transfer_amount - remaining_transfer
+                            # Update target loan totals
+                            target_balance_before = target_loan.outstanding_balance
+                            target_loan.total_paid += applied
+                            target_loan.outstanding_balance = max(target_loan.outstanding_balance - applied, Decimal('0'))
+                            if target_loan.outstanding_balance == 0:
+                                target_loan.status = Loan.Status.COMPLETED
+                                target_loan.completion_date = pay_date
+                            target_loan.save()
+
+                            if applied > 0:
+                                try:
+                                    # create transfer payment & receipt for audit
+                                    transfer_payment = Payment.objects.create(
+                                        loan=target_loan,
+                                        client=client,
+                                        recorded_by=request.user,
+                                        amount_received=applied,
+                                        principal_paid=t_principal_paid,
+                                        interest_paid=t_interest_paid,
+                                        penalty_paid=t_penalty_paid,
+                                        overpayment=Decimal('0'),
+                                        payment_method=Payment.PaymentMethod.OTHER,
+                                        reference_number=f"CREDIT_TRANSFER:{request.user.pk}",
+                                        payment_date=pay_date,
+                                        status=Payment.Status.ALLOCATED,
+                                    )
+
+                                    transfer_receipt = Receipt.objects.create(
+                                        payment=transfer_payment,
+                                        balance_before=target_balance_before,
+                                        balance_after=target_loan.outstanding_balance,
+                                        amount_received=transfer_payment.amount_received,
+                                        principal_paid=transfer_payment.principal_paid,
+                                        interest_paid=transfer_payment.interest_paid,
+                                        penalty_paid=transfer_payment.penalty_paid,
+                                        overpayment=transfer_payment.overpayment,
+                                    )
+
+                                    # adjust client credit balance and ledger
+                                    client.credit_balance = credit_available - applied
+                                    client.save(update_fields=['credit_balance'])
+
+                                    CreditTransaction.objects.create(
+                                        client=client,
+                                        tx_type=CreditTransaction.TxType.APPLIED,
+                                        amount=-applied,
+                                        balance_after=client.credit_balance,
+                                        loan=target_loan,
+                                        payment=transfer_payment,
+                                        created_by=request.user,
+                                        notes=f"Transferred to loan {target_loan.loan_number} by {request.user.get_full_name()}",
+                                    )
+                                except Exception:
+                                    # If anything in recording transfer records fails, log but continue the main flow
+                                    logger.exception("Failed to record transfer payment/receipt for client=%s target=%s", client, target_loan.pk)
+                    except Exception:
+                        # Fail softly: do not block the main payment flow for transfer errors
+                        logger.exception("Credit transfer failed for client=%s target=%s", client, transfer_target_id)
+
+                # After optional transfer, auto-apply remaining client credit to this payment
                 credit_before = client.credit_balance
                 credit_to_use = min(credit_before, amount)
                 if credit_to_use > 0:
@@ -215,7 +339,7 @@ def record_payment(request, loan_pk=None):
                     selected_loan.completion_date = pay_date
                 selected_loan.save()
 
-                # Create receipt (snapshot allocation values so receipt remains accurate)
+                    # Create receipt (snapshot allocation values so receipt remains accurate)
                 receipt = Receipt.objects.create(
                     payment        = payment,
                     balance_before = balance_before,
@@ -235,6 +359,18 @@ def record_payment(request, loan_pk=None):
                                 "principal": str(principal_paid), "interest": str(interest_paid),
                                 "penalty": str(penalty_paid), "receipt": receipt.receipt_number},
                        remarks=f"Payment recorded by {request.user.full_name}")
+
+            # If a transfer occurred and produced a transfer_receipt, render a combined receipt view
+            try:
+                if transfer_receipt is not None:
+                    # Render combined receipts for printing/viewing
+                    return render(request, "payments/combined_receipt.html", {
+                        "receipts": [transfer_receipt, receipt],
+                        "auto_print": True,
+                    })
+            except Exception:
+                # If something goes wrong rendering combined receipts, fall back to single receipt redirect
+                logger.exception("Failed to render combined receipt for payment=%s", payment.pk)
 
             return redirect("payments:receipt", pk=receipt.pk)
 
@@ -266,10 +402,20 @@ def record_payment(request, loan_pk=None):
                 "posted_amount": request.POST.get("amount", ""),
             })
 
+    # Prepare client other loans list for the transfer UI (only when a loan is selected)
+    client_other_loans = []
+    if selected_loan or loan:
+        l = selected_loan or loan
+        try:
+            client_other_loans = l.client.loans.filter(status=Loan.Status.ACTIVE).exclude(pk=l.pk).select_related('product').order_by('created_at')
+        except Exception:
+            client_other_loans = []
+
     return render(request, "payments/record_payment.html", {
         "loan":         selected_loan or loan,
         "active_loans": active_loans,
         "today":        date.today(),
+        "client_other_loans": client_other_loans,
     })
 
 

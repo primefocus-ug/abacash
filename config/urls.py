@@ -16,6 +16,7 @@ urlpatterns = [
     path("payments/", include("payments.urls")),
     path("reports/", include("reports.urls")),
     path("platform/", include("tenants.urls")),
+    
 ]
 
 if settings.DEBUG:

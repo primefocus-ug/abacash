@@ -1,0 +1,31 @@
+{% extends "tenants/landing_base.html" %}
+{% block title %}Public Admin Login | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Platform operator sign in</div>
+    <h1 class="hero-title">Public Admin Login</h1>
+    <p class="hero-copy">Sign in with your platform credentials to manage onboarding and subscriptions.</p>
+  </section>
+
+  <section class="registration-container" style="margin-top: 2rem; max-width:520px;">
+    {% if error %}
+      <div class="message message-error">{{ error }}</div>
+    {% endif %}
+    <form method="post" class="form-grid" style="margin-top:1rem;">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="admin_user">Username</label>
+        <input id="admin_user" name="username" type="text" placeholder="admin" required>
+      </div>
+      <div class="form-group">
+        <label for="admin_pass">Password</label>
+        <input id="admin_pass" name="password" type="password" placeholder="Password" required>
+      </div>
+      <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1rem;">
+        <button class="btn btn-primary" type="submit">Sign in</button>
+        <a class="btn btn-secondary" href="{% url 'tenants:landing' %}">Cancel</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Support | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Customer support</div>
+    <h1 class="hero-title">We're here to help your lending business thrive.</h1>
+    <p class="hero-copy">Reach out to Abacash support for onboarding, account questions, or technical assistance. We are available by email, phone, and live chat.</p>
+    <p class="field-note">Use the contact button at the bottom right to open the support popup and send your request instantly.</p>
+  </section>
+
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Contact support</div>
+      <h2>Need help? Choose a channel.</h2>
+    </div>
+
+    <div class="grid page-grid">
+      <article class="card">
+        <h3>Email support</h3>
+        <p>Send your request to the Abacash team and expect a response within one business day.</p>
+        <p><strong>Email:</strong> <a href="mailto:support@abacash.loan">support@abacash.loan</a></p>
+      </article>
+      <article class="card">
+        <h3>Phone support</h3>
+        <p>Call our customer success desk for account setup and urgent platform support.</p>
+        <p><strong>Phone:</strong> +256 700 000 000</p>
+      </article>
+      <article class="card">
+        <h3>Resource center</h3>
+        <p>Browse support guides, tutorials, and FAQs to get instant answers to common questions.</p>
+        <p><strong>Available:</strong> 24/7 knowledge base access.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">FAQ</div>
+      <h2>Quick answers for Abacash users</h2>
+    </div>
+    <div class="page-link-list">
+      <div class="page-link-item">
+        <div>
+          <strong>How do I register?</strong>
+          <small>Submit a registration form and we will onboard your company.</small>
+        </div>
+        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Where do I login?</strong>
+          <small>Access the login form for returning users.</small>
+        </div>
+        <a href="{% url 'tenants:public_login' %}" class="btn btn-secondary">Login</a>
+      </div>
+      <div class="page-link-item">
+        <div>
+          <strong>Need urgent support?</strong>
+          <small>Contact our team directly by phone or email.</small>
+        </div>
+        <a href="mailto:support@abacash.loan" class="btn btn-secondary">Email us</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

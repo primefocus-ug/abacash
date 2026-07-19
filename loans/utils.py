@@ -221,6 +221,54 @@ def generate_schedule(
     return schedule, totals
 
 
+def build_loan_schedule_context(
+    principal: Decimal,
+    product,
+    term_months: int,
+    frequency: str,
+    start_date: date | None = None,
+    include_processing_fee: bool = True,
+    company_settings=None,
+) -> tuple[list[dict], dict, Decimal, Decimal, str]:
+    """Build a schedule and the fee/totals context used across the app.
+
+    The processing fee is charged separately from the repayment schedule. The
+    schedule totals therefore represent principal + interest only. """
+    principal = Decimal(str(principal or "0"))
+    start_date = start_date or date.today()
+    annual_rate = Decimal(str(getattr(product, "interest_rate_monthly", "0") or "0")) * Decimal("12")
+    method = getattr(product, "interest_method", "FLAT")
+
+    schedule_rows, totals = generate_schedule(
+        principal=principal,
+        annual_rate=annual_rate,
+        term_months=term_months,
+        start_date=start_date,
+        method=method,
+        frequency=frequency,
+    )
+
+    processing_fee = calculate_processing_fee_amount(
+        principal,
+        product=product,
+        company_settings=company_settings,
+    )
+    fee_percent = resolve_processing_fee_rate(product, company_settings)
+    fee_source = (
+        "Company settings (range)"
+        if (processing_fee and not fee_percent)
+        else (product.name if fee_percent else "Company settings")
+    )
+
+    totals = dict(totals)
+    totals["processing_fee"] = processing_fee
+    totals["total_repayable_exclusive"] = totals.get("total_repayable", Decimal("0"))
+    # Processing fee is charged separately; total repayable measures principal + interest only.
+    totals["total_repayable_inclusive"] = totals["total_repayable_exclusive"]
+    totals["grand_total"] = totals["total_repayable_inclusive"]
+    return schedule_rows, totals, processing_fee, fee_percent, fee_source
+
+
 def _flat_rate_schedule(
     principal, monthly_rate, term_months, num_periods, start_date, frequency
 ):
@@ -271,6 +319,8 @@ def _flat_rate_schedule(
         running_total_p    += p
         running_total_i    += interest
 
+    total_repayable = _round(sum(row["total_payment"] for row in schedule))
+    total_interest = _round(sum(row["interest_due"] for row in schedule))
     totals = {
         "total_repayable": total_repayable,
         "total_interest":  total_interest,
@@ -331,13 +381,12 @@ def _reducing_balance_schedule(
         total_interest    += interest
         running_total_paid += payment
 
-    # Override total interest to be principal × monthly_rate × term_months
-    total_interest_calc = _round(principal * monthly_rate * Decimal(str(term_months)))
-    total_repayable = _round(principal + total_interest_calc)
+    total_repayable = _round(running_total_paid)
+    total_interest = _round(total_interest)
 
     totals = {
         "total_repayable": total_repayable,
-        "total_interest":  total_interest_calc,
+        "total_interest":  total_interest,
         "effective_apr":   _round(monthly_rate * Decimal("12") * Decimal("100")),
     }
     return schedule, totals

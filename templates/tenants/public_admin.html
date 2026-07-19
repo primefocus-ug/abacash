@@ -1,0 +1,287 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Public Admin | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Public Admin</div>
+    <h1 class="hero-title">Onboard tenants, assign roles, and manage subscriptions from one control center.</h1>
+    <p class="hero-copy">This admin portal is designed to help Abacash platform operators provision new tenant companies, update subscription plans, and grant user roles without leaving the public schema.</p>
+  </section>
+
+  <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+    <a class="btn btn-secondary" href="{% url 'tenants:public_admin_logout' %}">Sign out</a>
+  </div>
+
+  <style>
+    /* Small action tiles for quick navigation on the public-admin page */
+    .action-grid {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-top: 1.25rem;
+    }
+    .action-tile {
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+      justify-content: space-between;
+      min-height: 96px;
+    }
+    .action-tile h4 { margin: 0; font-size: 1rem; }
+    .action-tile p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
+    .action-tile .tile-actions { margin-top: 0.5rem; align-self: stretch; display:flex; justify-content:space-between; gap:0.5rem }
+    @media (max-width: 640px) { .action-tile { min-height: 84px; padding: 0.75rem } }
+  </style>
+
+  <section class="action-grid" aria-label="Quick actions">
+    <a class="action-tile" href="#onboard">
+      <div>
+        <h4>Onboard tenant</h4>
+        <p>Create a new tenant schema, map domain and seed defaults.</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span><span class="required">{{ tenants|length }} tenants</span></div>
+    </a>
+    <a class="action-tile" href="#roles">
+      <div>
+        <h4>Assign role</h4>
+        <p>Grant Cashier, Manager or CEO roles inside a tenant.</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span></div>
+    </a>
+    <a class="action-tile" href="#subscription">
+      <div>
+        <h4>Update subscription</h4>
+        <p>Change plan tiers quickly for any tenant.</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span></div>
+    </a>
+    <a class="action-tile" href="#overview">
+      <div>
+        <h4>Tenant overview</h4>
+        <p>Browse tenant list and domains.</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span></div>
+    </a>
+    <a class="action-tile" href="#leads">
+      <div>
+        <h4>Recent leads</h4>
+        <p>Review and onboard registration requests.</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span><span class="required">{{ recent_registrations|length }}</span></div>
+    </a>
+    <a class="action-tile" href="#output">
+      <div>
+        <h4>Provisioning output</h4>
+        <p>View last onboarding command results (if any).</p>
+      </div>
+      <div class="tile-actions"><span class="btn btn-secondary">Open</span></div>
+    </a>
+  </section>
+
+  <section id="onboard" class="section-card" style="margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">New tenant</div>
+      <h2>Onboard a new company</h2>
+    </div>
+    <p class="hero-copy">Create a tenant schema, map a domain, seed default loan products, and register the first admin user in one step.</p>
+    <form class="registration-container" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="onboard_tenant">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="company_name">Company name <span class="required">*</span></label>
+          <input id="company_name" name="company_name" type="text" placeholder="e.g. Acme Finance" required>
+        </div>
+        <div class="form-group">
+          <label for="tenant_slug">Tenant slug <span class="required">*</span></label>
+          <input id="tenant_slug" name="tenant_slug" type="text" placeholder="acme-finance" required>
+          <small class="field-note">Used for the schema name and default subdomain.</small>
+        </div>
+        <div class="form-group">
+          <label for="tenant_domain">Custom tenant domain</label>
+          <input id="tenant_domain" name="tenant_domain" type="text" placeholder="acme.abacash.loan">
+          <small class="field-note">Leave blank to use the tenant slug with the default domain root.</small>
+        </div>
+        <div class="form-group">
+          <label for="plan">Subscription plan</label>
+          <select id="plan" name="plan">
+            {% for value, label in plan_choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="admin_email">Admin email <span class="required">*</span></label>
+          <input id="admin_email" name="admin_email" type="email" placeholder="admin@acme.com" required>
+        </div>
+        <div class="form-group">
+          <label for="company_email">Company contact email</label>
+          <input id="company_email" name="company_email" type="email" placeholder="contact@acme.com">
+          <small class="field-note">Used for company settings if different from the tenant admin login.</small>
+        </div>
+        <div class="form-group">
+          <label for="admin_password">Admin password</label>
+          <input id="admin_password" name="admin_password" type="password" placeholder="Set a secure password">
+          <small class="field-note">If empty, a secure default password will be generated.</small>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="+256 700 000000">
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input id="address" name="address" type="text" placeholder="City, Country">
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" name="notify"> Send credentials to company contact by email</label>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Provision tenant</button>
+          <button type="reset" class="btn btn-secondary">Clear</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section id="roles" class="section-card" style="margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Role management</div>
+      <h2>Assign user roles inside a tenant</h2>
+    </div>
+    <p class="hero-copy">Grant Cashier, Manager or CEO access to users in an existing tenant schema.</p>
+    <form class="registration-container" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="assign_role">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="role_tenant_schema">Tenant schema <span class="required">*</span></label>
+          <input id="role_tenant_schema" name="tenant_schema" type="text" placeholder="acme_finance" required>
+        </div>
+        <div class="form-group">
+          <label for="role_email">User email <span class="required">*</span></label>
+          <input id="role_email" name="role_email" type="email" placeholder="user@acme.com" required>
+        </div>
+        <div class="form-group">
+          <label for="role">Role</label>
+          <select id="role" name="role">
+            <option value="CASHIER">Cashier</option>
+            <option value="MANAGER">Manager</option>
+            <option value="CEO">CEO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="role_password">Password</label>
+          <input id="role_password" name="role_password" type="password" placeholder="Optional password for new user">
+          <small class="field-note">If the user does not exist, a new account will be created.</small>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Assign role</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section id="subscription" class="section-card" style="margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Subscription control</div>
+      <h2>Update tenant plans</h2>
+    </div>
+    <p class="hero-copy">Change the active subscription plan for an onboarded tenant with a single update.</p>
+    <form class="registration-container" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="update_subscription">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="subscription_tenant_schema">Tenant schema <span class="required">*</span></label>
+          <input id="subscription_tenant_schema" name="subscription_tenant_schema" type="text" placeholder="acme_finance" required>
+        </div>
+        <div class="form-group">
+          <label for="subscription_plan">Plan</label>
+          <select id="subscription_plan" name="subscription_plan">
+            {% for value, label in plan_choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="popup-actions">
+          <button type="submit" class="btn btn-primary">Update subscription</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section id="overview" class="section-card" style="margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Tenant overview</div>
+      <h2>Existing companies</h2>
+    </div>
+    {% if tenants %}
+      <div class="page-link-list">
+        {% for item in tenants %}
+          <div class="page-link-item">
+            <div>
+              <strong>{{ item.company.name }}</strong>
+              <small>Schema: {{ item.company.schema_name }} · Plan: {{ item.company.plan }}</small>
+            </div>
+            <div>
+              {% if item.domains %}
+                <small>{{ item.domains|join:", " }}</small>
+              {% else %}
+                <small>No domain mapped</small>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="hero-copy">No tenant companies have been provisioned yet.</p>
+    {% endif %}
+  </section>
+
+  <section id="leads" class="section-card" style="margin-top: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Recent lead activity</div>
+      <h2>Incoming registration requests</h2>
+    </div>
+    {% if recent_registrations %}
+      <div class="page-link-list">
+        {% for registration in recent_registrations %}
+          <div class="page-link-item">
+            <div>
+              <strong>{{ registration.company_name }}</strong>
+              <small>{{ registration.contact_name }} · {{ registration.email }} · {{ registration.get_status_display }}</small>
+            </div>
+            {% if registration.status == "ONBOARDED" %}
+              <button type="button" class="btn btn-secondary" disabled>Already onboarded</button>
+            {% else %}
+              <form method="post" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="onboard_registration">
+                <input type="hidden" name="registration_id" value="{{ registration.id }}">
+                <button type="submit" class="btn btn-primary">Onboard lead</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="hero-copy">No recent registration leads to display yet.</p>
+    {% endif %}
+  </section>
+
+  {% if command_output %}
+    <section id="output" class="section-card" style="margin-top: 2rem;">
+      <div class="section-heading">
+        <div class="section-label">Provisioning output</div>
+        <h2>Onboarding command details</h2>
+      </div>
+      <pre style="white-space: pre-wrap; background: var(--surface-2); padding: 1rem; border-radius: 16px; overflow-x: auto;">{{ command_output }}</pre>
+    </section>
+  {% endif %}
+{% endblock %}

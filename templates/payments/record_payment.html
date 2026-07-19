@@ -54,6 +54,33 @@
                  placeholder="e.g. 250000" required autofocus class="form-control" value="{{ loan.next_due_amount|default_if_none:'' }}">
           <small class="text-muted">Enter any amount received from the client</small>
           <div id="payment-balance-summary" class="text-muted text-sm mt-2"></div>
+
+          {% if loan and client_other_loans and loan.client.credit_balance and loan.client.credit_balance > 0 %}
+          <div class="form-group mt-3">
+            <label style="font-weight:600;">Client Credit Balance: {{ loan.client.credit_balance|money }}</label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+              <input type="checkbox" id="enable-transfer" name="enable_transfer" />
+              <label for="enable-transfer" style="margin:0;">Transfer client credit to another loan</label>
+            </div>
+            <div id="transfer-section" style="display:none;margin-top:10px;">
+              <div style="margin-bottom:8px;">
+                <label>Target loan</label>
+                <select name="transfer_target_loan" id="transfer_target_loan">
+                  <option value="">— Select target loan —</option>
+                  {% for t in client_other_loans %}
+                  <option value="{{ t.pk }}">{{ t.loan_number }} — {{ t.product.name }} — {{ t.outstanding_balance|money }} outstanding</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label>Amount to transfer (max {{ loan.client.credit_balance|money }})</label>
+                <input type="number" name="transfer_amount" id="transfer_amount" min="0" step="0.01" value="{{ loan.client.credit_balance }}" />
+              </div>
+              <div class="form-hint">Transferring credit will immediately reduce the client's stored credit and apply the amount to the selected loan.</div>
+            </div>
+          </div>
+          {% endif %}
+
           <div id="payment-warning" class="mt-3">
             <div class="payment-warning-shell" role="status" aria-live="polite" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:#f8fafc;">
               <div class="payment-battery" style="border-color:rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);">
@@ -92,7 +119,7 @@
 
         <div class="flex gap-2 mt-3">
           <button type="submit" class="btn btn-primary btn-lg">Record Payment & Print Receipt</button>
-          <a href="{% url 'loans:list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="button" id="payment-cancel-btn" class="btn btn-secondary">Cancel</button>
         </div>
       </form>
         </div>
@@ -147,11 +174,13 @@
     const balanceSummary = document.getElementById('payment-balance-summary');
 
     closeBtn?.addEventListener('click', function () {
-      window.location.href = '{% url "payments:list" %}';
+      // Hide the modal instead of immediately navigating away — prevents accidental redirects
+      if (modal) modal.style.display = 'none';
     });
     modal?.addEventListener('click', function (event) {
+      // Only hide modal when clicking the backdrop itself
       if (event.target === modal) {
-        window.location.href = '{% url "payments:list" %}';
+        if (modal) modal.style.display = 'none';
       }
     });
 
@@ -233,16 +262,55 @@
 
     if (amountInput) {
       amountInput.addEventListener('input', updatePaymentWarning);
+      // Prevent clicks/double-clicks on the amount input from bubbling to the modal backdrop
+      amountInput.addEventListener('click', function(e){ e.stopPropagation(); });
+      amountInput.addEventListener('dblclick', function(e){ e.stopPropagation(); });
+      amountInput.addEventListener('mousedown', function(e){ e.stopPropagation(); });
     }
 
     if (loanElement) {
       loanElement.addEventListener('change', updatePaymentWarning);
+      // stop propagation on loan select so interactions don't close the modal
+      loanElement.addEventListener('click', function(e){ e.stopPropagation(); });
+      loanElement.addEventListener('mousedown', function(e){ e.stopPropagation(); });
     }
 
     const paymentDateInput = document.getElementById('payment_date');
     if (paymentDateInput && !paymentDateInput.value) {
       const today = new Date().toISOString().split('T')[0];
       paymentDateInput.value = today;
+    }
+
+    // Stop propagation for other interactive fields inside the modal to avoid accidental backdrop clicks
+    document.querySelectorAll('#payment-modal input, #payment-modal select, #payment-modal textarea, #payment-modal .select2-init').forEach(function(el){
+      el.addEventListener('click', function(e){ e.stopPropagation(); });
+      el.addEventListener('dblclick', function(e){ e.stopPropagation(); });
+      el.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+    });
+
+    // Wire the Cancel button to hide the modal (rather than navigate away)
+    const paymentCancelBtn = document.getElementById('payment-cancel-btn');
+    paymentCancelBtn?.addEventListener('click', function(){ if (modal) modal.style.display = 'none'; });
+
+    // Transfer credit UI wiring (if present)
+    const enableTransferCheckbox = document.getElementById('enable-transfer');
+    const transferSection = document.getElementById('transfer-section');
+    const transferAmountInput = document.getElementById('transfer_amount');
+    const transferTargetSelect = document.getElementById('transfer_target_loan');
+    if (enableTransferCheckbox) {
+      enableTransferCheckbox.addEventListener('change', function(){ if (transferSection) transferSection.style.display = this.checked ? 'block' : 'none'; });
+      enableTransferCheckbox.addEventListener('click', function(e){ e.stopPropagation(); });
+      if (transferAmountInput) {
+        // use the initial value as the max allowed transfer
+        try { transferAmountInput.max = transferAmountInput.value || '0'; } catch(e){}
+        transferAmountInput.addEventListener('input', function(){ if (this.max && Number(this.value) > Number(this.max)) this.value = this.max; });
+        transferAmountInput.addEventListener('click', function(e){ e.stopPropagation(); });
+        transferAmountInput.addEventListener('dblclick', function(e){ e.stopPropagation(); });
+      }
+      if (transferTargetSelect) {
+        transferTargetSelect.addEventListener('click', function(e){ e.stopPropagation(); });
+        transferTargetSelect.addEventListener('mousedown', function(e){ e.stopPropagation(); });
+      }
     }
 
     // Always render the battery-style coverage indicator once the form is ready.

@@ -2,8 +2,15 @@ from django.db import models
 from django_tenants.models import TenantMixin, DomainMixin
 
 
+class Plan(models.TextChoices):
+    STARTER = "STARTER", "Starter — up to 500 clients"
+    PROFESSIONAL = "PROFESSIONAL", "Professional — up to 2,000 clients"
+    ENTERPRISE = "ENTERPRISE", "Enterprise — unlimited"
+
+
 class Company(TenantMixin):
     name = models.CharField(max_length=200)
+    plan = models.CharField(max_length=20, choices=Plan.choices, default=Plan.STARTER)
     created_on = models.DateField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
@@ -28,10 +35,7 @@ class CompanyRegistration(models.Model):
     Lives in the public schema — no tenant context needed.
     """
 
-    class Plan(models.TextChoices):
-        STARTER      = "STARTER",      "Starter — up to 500 clients"
-        PROFESSIONAL = "PROFESSIONAL",  "Professional — up to 2,000 clients"
-        ENTERPRISE   = "ENTERPRISE",    "Enterprise — unlimited"
+    Plan = Plan
 
     class Status(models.TextChoices):
         PENDING    = "PENDING",    "Pending Review"

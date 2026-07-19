@@ -1,0 +1,50 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Pages | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Site map</div>
+    <h1 class="hero-title">All marketing pages in one place.</h1>
+    <p class="hero-copy">Use this page to navigate the public landing experience and discover every page on the site.</p>
+  </section>
+
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Link list</div>
+      <h2>Available pages</h2>
+    </div>
+    <div class="page-link-list">
+      {% for page in pages %}
+        <div class="page-link-item">
+          <div>
+            <strong>{{ page.title }}</strong>
+            <small>{{ page.description }}</small>
+          </div>
+          <a href="{% url page.url_name %}" class="btn btn-secondary">Go</a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top: 2.5rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">Recommended</div>
+      <h2>Key pages to explore first</h2>
+    </div>
+    <div class="grid page-grid">
+      <a class="link-card" href="{% url 'tenants:features' %}">
+        <h3>Features</h3>
+        <p>Review the product capabilities that support your lending operations.</p>
+      </a>
+      <a class="link-card" href="{% url 'tenants:pricing' %}">
+        <h3>Pricing</h3>
+        <p>Compare our subscription packages and choose the right plan.</p>
+      </a>
+      <a class="link-card" href="{% url 'tenants:public_register' %}">
+        <h3>Register</h3>
+        <p>Complete an application to start using Abacash today.</p>
+      </a>
+    </div>
+  </section>
+{% endblock %}

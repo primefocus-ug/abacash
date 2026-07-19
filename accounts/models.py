@@ -222,7 +222,7 @@ class CompanySettings(models.Model):
     Only one row should ever exist — use CompanySettings.get() to access it.
     """
     # Company Information
-    company_name            = models.CharField(max_length=200, default="ABA Uganda")
+    company_name            = models.CharField(max_length=200, default="Abacash")
     currency_symbol         = models.CharField(max_length=10, default="UGX",
                                                help_text=_("Currency symbol displayed with amounts."))
     company_address         = models.TextField(blank=True)

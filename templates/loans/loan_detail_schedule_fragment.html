@@ -1,0 +1,49 @@
+{% load humanize aba_filters %}
+<div class="card mb-3" id="schedule-print-card">
+  <div class="print-only" style="display:none; margin-bottom:10px; font-size:18px; font-weight:600;">Repayment Schedule — {{ loan.loan_number }}</div>
+  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+    <span><span class="card-title">Repayment Schedule</span></span>
+    <span style="display:flex;gap:8px;align-items:center;">
+      {% if user == loan.applied_by or user.is_manager or user.is_ceo or user.can_approve_loans %}
+      <button type="button" class="btn btn-secondary btn-sm" 
+              hx-get="{% url 'loans:regenerate_schedule' loan.pk %}"
+              hx-target="#modal-body" hx-swap="innerHTML"
+              onclick="openModal();">
+        Regenerate Schedule
+      </button>
+      {% endif %}
+    </span>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table schedule-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Due Date</th><th>Opening Bal.</th>
+          <th>Principal</th><th>Interest</th><th>Penalty</th>
+          <th>Total Due</th><th>Paid</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in schedule %}
+        <tr class="{% if entry.status == 'PAID' %}paid-row{% elif entry.status == 'OVERDUE' %}overdue-row{% endif %}">
+          <td class="text-muted">{{ entry.period_number }}</td>
+          <td>{{ entry.due_date }}</td>
+          <td class="mono">{{ entry.opening_balance|floatformat:0|intcomma }}</td>
+          <td class="mono">{{ entry.principal_due|floatformat:0|intcomma }}</td>
+          <td class="mono">{{ entry.interest_due|floatformat:0|intcomma }}</td>
+          <td class="mono {% if entry.penalty_due > 0 %}style="color:var(--red-400)"{% endif %}">{% if entry.penalty_due > 0 %}{{ entry.penalty_due|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
+          <td class="mono fw-500">{{ entry.total_payment|floatformat:0|intcomma }}</td>
+          <td class="mono" style="color:var(--green-400)">{% if entry.amount_paid > 0 %}{{ entry.amount_paid|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
+          <td>
+            <span class="badge {% if entry.status == 'PAID' %}badge-green{% elif entry.status == 'OVERDUE' %}badge-red{% elif entry.status == 'PARTIAL' %}badge-amber{% else %}badge-muted{% endif %}">
+              {{ entry.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9"><div class="empty-state"><p>Schedule not generated yet.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -2,6 +2,32 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
+
+
+def _add_local_venv_site_packages():
+    project_root = Path(__file__).resolve().parent
+    candidates = []
+    if os.name == "nt":
+        candidates.append(project_root / "venv" / "Lib" / "site-packages")
+    else:
+        candidates.append(
+            project_root
+            / "venv"
+            / "lib"
+            / f"python{sys.version_info.major}.{sys.version_info.minor}"
+            / "site-packages"
+        )
+
+    for path in candidates:
+        if path.exists():
+            site_path = str(path)
+            if site_path not in sys.path:
+                sys.path.insert(0, site_path)
+            break
+
+
+_add_local_venv_site_packages()
 
 
 def main():

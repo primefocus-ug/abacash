@@ -303,3 +303,21 @@ Traceback (most recent call last):
 django.db.utils.IntegrityError: duplicate key value violates unique constraint "payments_receipt_receipt_number_key"
 DETAIL:  Key (receipt_number)=(REC-2026-00001) already exists.
 
+2026-07-19 15:06:32 [ERROR] payments: Payment recording failed for loan=b226b2db-39f5-47f6-8367-3d15cd57b9e3 user=admin (CEO) amount=548000
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\shortcuts.py", line 86, in get_object_or_404
+    return queryset.get(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\db\models\query.py", line 649, in get
+    raise self.model.DoesNotExist(
+loans.models.Loan.DoesNotExist: Loan matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\tenant\payments\views.py", line 70, in record_payment
+    selected_loan = get_object_or_404(Loan, pk=loan_id, status=Loan.Status.ACTIVE)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\tenant\venv\Lib\site-packages\django\shortcuts.py", line 88, in get_object_or_404
+    raise Http404(
+django.http.response.Http404: No Loan matches the given query.

@@ -1,0 +1,183 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Registration Successful | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Application received</div>
+    <h1 class="hero-title">Thank you for registering with Abacash.</h1>
+    <p class="hero-copy">Your registration has been submitted and we're provisioning your tenant environment.</p>
+  </section>
+
+  <!-- Fallback info section -->
+  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
+    <div class="section-heading">
+      <div class="section-label">What's happening</div>
+      <h2>Provisioning steps</h2>
+    </div>
+    <ol class="page-link-list" style="list-style: disc; padding-left: 1.5rem;">
+      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We create your isolated tenant schema in our database.</li>
+      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We run Django migrations to set up all required tables.</li>
+      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We seed default loan products and configuration.</li>
+      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We send you a password reset link via email.</li>
+      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">You reset your password and start using Abacash.</li>
+    </ol>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Show provisioning modal on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    showProvisioningModal();
+  });
+
+  function showProvisioningModal() {
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'provisioning-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    `;
+
+    // Create modal content
+    const modal = document.createElement('div');
+    modal.id = 'provisioning-modal';
+    modal.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      animation: slideUp 0.4s ease-out;
+    `;
+
+    modal.innerHTML = `
+      <div style="margin-bottom: 2rem;">
+        <!-- Abacash Logo Spinner -->
+        <div style="display: inline-block; position: relative; width: 120px; height: 120px;">
+          <svg style="width: 100%; height: 100%; animation: spin 2s linear infinite; transform-origin: center;"
+               viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Simple circle logo that rotates -->
+            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent, #2563eb)" stroke-width="2"/>
+            <circle cx="50" cy="50" r="35" fill="none" stroke="var(--accent, #2563eb)" stroke-width="1" opacity="0.5"/>
+            <path d="M 50 15 A 35 35 0 0 1 85 50" fill="none" stroke="var(--primary, #2563eb)" stroke-width="3" stroke-linecap="round"/>
+            <text x="50" y="55" font-size="20" font-weight="bold" text-anchor="middle" fill="var(--primary, #2563eb)">A</text>
+          </svg>
+        </div>
+      </div>
+
+      <h2 style="margin: 1.5rem 0; color: var(--text-primary, #1f2937); font-size: 1.5rem; font-weight: 600;">
+        Setting up your Abacash tenant...
+      </h2>
+      <p style="color: var(--text-secondary, #6b7280); margin-bottom: 2rem; font-size: 1rem;">
+        Please hold on while we provision your environment. This typically takes 1-2 minutes.
+      </p>
+      
+      <div style="margin: 2rem 0; max-width: 100%;">
+        <div style="background: var(--border, #e5e7eb); border-radius: 8px; overflow: hidden; height: 8px;">
+          <div class="progress-bar" 
+               style="height: 100%; background: linear-gradient(90deg, var(--accent, #2563eb), var(--primary, #2563eb)); width: 0%; animation: progress 3s ease-in-out infinite; border-radius: 8px;">
+          </div>
+        </div>
+      </div>
+
+      <ul style="text-align: left; display: inline-block; margin: 2rem 0; list-style: none; padding: 0;">
+        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
+          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: var(--accent, #2563eb); color: white; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 0.9rem;">✓</span>
+          <span>Creating tenant schema</span>
+        </li>
+        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
+          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: var(--accent, #2563eb); color: white; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 0.9rem;">⏳</span>
+          <span>Running database migrations</span>
+        </li>
+        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
+          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: #d1d5db; color: #6b7280; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">•</span>
+          <span>Seeding default data</span>
+        </li>
+        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
+          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: #d1d5db; color: #6b7280; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">•</span>
+          <span>Sending access instructions</span>
+        </li>
+      </ul>
+
+      <p style="color: #999; margin-top: 2rem; font-size: 0.9rem;">
+        A password reset link will be sent to your email address shortly.
+      </p>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes progress {
+        0% { width: 0%; }
+        50% { width: 100%; }
+        100% { width: 0%; }
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 640px) {
+        #provisioning-modal {
+          padding: 2rem;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Auto-close modal after provisioning completes
+    setTimeout(() => {
+      closeProvisioningModal();
+    }, 120000); // Close after 2 minutes (provisioning usually done by then)
+  }
+
+  function closeProvisioningModal() {
+    const overlay = document.getElementById('provisioning-overlay');
+    if (overlay) {
+      overlay.style.animation = 'fadeOut 0.3s ease-out';
+      setTimeout(() => {
+        overlay.remove();
+      }, 300);
+    }
+  }
+</script>
+
+<style>
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+</style>
+{% endblock %}

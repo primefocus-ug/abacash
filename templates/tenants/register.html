@@ -1,0 +1,98 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Register | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Register</div>
+    <h1 class="hero-title">Apply for your Abacash account.</h1>
+    <p class="hero-copy">Share your details below so we can onboard your lending team with secure access and support.</p>
+  </section>
+{% endblock %}
+
+{% block popup_content %}
+  <div class="popup-panel">
+    <span class="eyebrow">Register</span>
+    <h2 id="popup-title">Start your Abacash onboarding</h2>
+    <p class="hero-copy">Complete the secure registration popup and get an onboarding specialist to reach out within 24 hours.</p>
+
+    {% if messages %}
+      <div class="page-link-list" style="margin-bottom: 1rem;">
+        {% for message in messages %}
+          <div class="page-link-item" style="border-left-color: var(--accent); background: rgba(96, 165, 250, 0.08);">
+            <div>
+              <strong>{{ message.tags|default:"Notice"|title }}</strong>
+              <p style="margin-top:0.4rem; color: var(--text-secondary);">{{ message }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'tenants:public_register' %}" class="popup-form">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="company_name">Company Name <span class="required">*</span></label>
+          <input id="company_name" name="company_name" type="text" required value="{{ form_data.company_name }}" placeholder="Your organization name">
+          {% if errors.company_name %}<div class="error-text">{{ errors.company_name }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="contact_name">Contact Person <span class="required">*</span></label>
+          <input id="contact_name" name="contact_name" type="text" required value="{{ form_data.contact_name }}" placeholder="Your full name">
+          {% if errors.contact_name %}<div class="error-text">{{ errors.contact_name }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input id="email" name="email" type="email" required value="{{ form_data.email }}" placeholder="your@email.com">
+          {% if errors.email %}<div class="error-text">{{ errors.email }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input id="phone" name="phone" type="tel" required value="{{ form_data.phone }}" placeholder="+256...">
+          {% if errors.phone %}<div class="error-text">{{ errors.phone }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option value="Uganda" {% if form_data.country == 'Uganda' %}selected{% endif %}>Uganda</option>
+            <option value="Kenya" {% if form_data.country == 'Kenya' %}selected{% endif %}>Kenya</option>
+            <option value="Tanzania" {% if form_data.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
+            <option value="Rwanda" {% if form_data.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
+            <option value="Other" {% if form_data.country == 'Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="city">City</label>
+          <input id="city" name="city" type="text" value="{{ form_data.city }}" placeholder="Your city">
+        </div>
+        <div class="form-group">
+          <label for="plan">Pricing Plan</label>
+          <select id="plan" name="plan">
+            <option value="STARTER" {% if form_data.plan == 'STARTER' %}selected{% endif %}>Starter (Free)</option>
+            <option value="PROFESSIONAL" {% if form_data.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional</option>
+            <option value="ENTERPRISE" {% if form_data.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us about your lending operation...">{{ form_data.message }}</textarea>
+      </div>
+
+      <div class="popup-actions">
+        <button type="submit" class="btn btn-primary">Start registration</button>
+        <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    openPopup();
+  });
+</script>
+{% endblock %}

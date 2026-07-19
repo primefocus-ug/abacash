@@ -35,6 +35,11 @@
             {% endfor %}
           </select>
         </div>
+        <div>
+          <label>Disbursement Date</label>
+          <input type="date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" />
+          <div class="text-muted text-sm">CEOs may back-date the disbursement date.</div>
+        </div>
       </div>
 
       <div class="form-row-2 gap-3 mt-3">

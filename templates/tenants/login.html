@@ -1,0 +1,54 @@
+{% extends "tenants/landing_base.html" %}
+
+{% block title %}Login | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Login</div>
+    <h1 class="hero-title">Sign in through your environment.</h1>
+    <p class="hero-copy">Enter your company slug below, and we will redirect you to your secure login page.</p>
+  </section>
+{% endblock %}
+
+{% block popup_content %}
+  <div class="popup-panel">
+    <span class="eyebrow">Login</span>
+    <h2 id="popup-title">Open your Abacash tenant</h2>
+    <p class="hero-copy">Use your company slug to go directly to the correct tenant login page for your organization.</p>
+
+    <form method="POST" action="{% url 'tenants:public_login' %}" class="popup-form">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tenant_slug">Company slug</label>
+          <input id="tenant_slug" name="tenant_slug" type="text" required placeholder="your-company" value="{{ request.POST.tenant_slug|default_if_none:'' }}">
+          {% if form_error %}
+            <div class="error-text">{{ form_error }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="popup-actions">
+        <button type="submit" class="btn btn-primary">Go to login</button>
+        <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+      </div>
+    </form>
+
+    <div class="section-card" style="margin-top: 1.5rem; padding: 1.5rem;">
+      <div class="section-heading">
+        <div class="section-label">Example</div>
+        <h2>How it works</h2>
+      </div>
+      <p class="hero-copy">Abacash will redirect you to your domain once you enter the correct slug.</p>
+      <p class="field-note" style="margin-top: 0.5rem;">Example tenant URL: <strong>https://your-company.abacash.loans/</strong></p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    openPopup();
+  });
+</script>
+{% endblock %}

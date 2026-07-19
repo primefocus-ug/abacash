@@ -13,8 +13,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--domain",
-            default="localhost",
-            help="Primary domain for the public tenant (default: localhost)",
+            default="abacash.loan",
+            help="Primary domain for the public tenant (default: abacash.loan)",
         )
         parser.add_argument(
             "--name",

@@ -11,18 +11,8 @@ from django.urls import include, path
 from tenants import views as tenant_views
 
 urlpatterns = [
-    # Marketing landing page at the root
-    path("",          tenant_views.landing,  name="public_landing"),
-    path("register/", tenant_views.register, name="public_register"),
-    path("success/",  tenant_views.success,  name="public_success"),
-
+    path("", include(("tenants.urls", "tenants"), namespace="tenants")),
     # robots.txt and sitemap served from views
-    path("robots.txt", tenant_views.robots_txt,  name="robots_txt"),
-    path("sitemap.xml",tenant_views.sitemap_xml, name="sitemap_xml"),
-
-    # Django admin still accessible on public domain for super-admins
-    path("admin/", admin.site.urls),
-
-    # Tenant management platform
-    path("platform/", include("tenants.urls")),
+    path("robots.txt", tenant_views.robots_txt, name="robots_txt"),
+    path("sitemap.xml", tenant_views.sitemap_xml, name="sitemap_xml"),
 ]

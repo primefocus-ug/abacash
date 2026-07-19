@@ -27,8 +27,16 @@ from .models import (
     CollateralItem,
     Guarantor,
     LoanGuarantee,
+    LoanDisbursementAudit,
 )
-from .utils import generate_schedule, calculate_eligibility, collateral_minimum, resolve_processing_fee_rate, calculate_processing_fee_amount
+from .utils import (
+    build_loan_schedule_context,
+    calculate_eligibility,
+    calculate_processing_fee_amount,
+    collateral_minimum,
+    generate_schedule,
+    resolve_processing_fee_rate,
+)
 from payments.models import Payment
 
 
@@ -229,23 +237,20 @@ def loan_apply_step2(request, client_id):
             loan.repayment_frequency = frequency
             loan.purpose = purpose
 
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=principal,
-                annual_rate=product.interest_rate_monthly * 12,
+                product=product,
                 term_months=term_months,
-                start_date=date.today(),
-                method=product.interest_method,
                 frequency=frequency,
+                start_date=date.today(),
+                include_processing_fee=True,
             )
-            processing_fee = calculate_processing_fee_amount(principal, product=product)
-            fee_percent = resolve_processing_fee_rate(product)
-            fee_source = "Company settings (range)" if (processing_fee and not fee_percent) else (product.name if fee_percent else "Company settings")
             processing_fee_percent = fee_percent
 
             loan.processing_fee = processing_fee
             loan.processing_fee_percent = fee_percent if fee_percent else None
             loan.total_interest = totals["total_interest"]
-            loan.total_repayable = totals["total_repayable"] + processing_fee
+            loan.total_repayable = totals["total_repayable_exclusive"]
             loan.outstanding_balance = loan.total_repayable
             loan.save()
 
@@ -267,17 +272,14 @@ def loan_apply_step2(request, client_id):
 
     elif loan and loan.product and loan.principal_amount and loan.term_months:
         try:
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=loan.principal_amount,
-                annual_rate=loan.product.interest_rate_monthly * 12,
+                product=loan.product,
                 term_months=loan.term_months,
-                start_date=date.today(),
-                method=loan.interest_method,
                 frequency=loan.repayment_frequency,
+                start_date=date.today(),
+                include_processing_fee=True,
             )
-            processing_fee = calculate_processing_fee_amount(loan.principal_amount, product=loan.product)
-            fee_percent = resolve_processing_fee_rate(loan.product)
-            fee_source = "Company settings (range)" if (processing_fee and not fee_percent) else (loan.product.name if fee_percent else "Company settings")
             processing_fee_percent = fee_percent
             form_data = _build_loan_basic_data(loan)
         except Exception as e:
@@ -465,19 +467,18 @@ def loan_apply_step3(request, client_id):
     totals = {}
     processing_fee = Decimal("0")
     fee_percent = Decimal("0")
+    fee_source = "Company settings"
 
     if loan.product and loan.principal_amount and loan.term_months:
         try:
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=loan.principal_amount,
-                annual_rate=loan.product.interest_rate_monthly * 12,
+                product=loan.product,
                 term_months=loan.term_months,
-                start_date=date.today(),
-                method=loan.interest_method,
                 frequency=loan.repayment_frequency,
+                start_date=date.today(),
+                include_processing_fee=True,
             )
-            processing_fee = calculate_processing_fee_amount(loan.principal_amount, product=loan.product)
-            fee_percent = resolve_processing_fee_rate(loan.product)
         except Exception:
             pass
 
@@ -598,18 +599,17 @@ def loan_apply_review(request, client_id):
     totals = {}
     processing_fee = Decimal("0")
     fee_percent = Decimal("0")
+    fee_source = "Company settings"
     if loan.product and loan.principal_amount and loan.term_months:
         try:
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=loan.principal_amount,
-                annual_rate=loan.product.interest_rate_monthly * 12,
+                product=loan.product,
                 term_months=loan.term_months,
-                start_date=date.today(),
-                method=loan.interest_method,
                 frequency=loan.repayment_frequency,
+                start_date=date.today(),
+                include_processing_fee=True,
             )
-            processing_fee = calculate_processing_fee_amount(loan.principal_amount, product=loan.product)
-            fee_percent = resolve_processing_fee_rate(loan.product)
         except Exception:
             pass
 
@@ -633,18 +633,18 @@ def loan_apply_review(request, client_id):
                     raise ValueError(
                         f"Loan amount must be between UGX {loan.product.min_amount:,.0f} and {loan.product.max_amount:,.0f}."
                     )
-                schedule_rows, totals = generate_schedule(
+                schedule_rows, totals, processing_fee, _, _ = build_loan_schedule_context(
                     principal=loan.principal_amount,
-                    annual_rate=loan.product.interest_rate_monthly * 12,
+                    product=loan.product,
                     term_months=loan.term_months,
-                    start_date=date.today(),
-                    method=loan.interest_method,
                     frequency=loan.repayment_frequency,
+                    start_date=date.today(),
+                    include_processing_fee=True,
                 )
 
-                loan.total_repayable = totals["total_repayable"] + processing_fee
+                loan.total_repayable = totals["total_repayable_exclusive"]
                 loan.total_interest = totals["total_interest"]
-                loan.outstanding_balance = totals["total_repayable"] + processing_fee
+                loan.outstanding_balance = totals["total_repayable_exclusive"]
                 loan.status = Loan.Status.PENDING
                 loan.save()
 
@@ -758,13 +758,13 @@ def loan_edit(request, pk):
                     f"Loan term must be between {product.min_term_months} and {product.max_term_months} months for this product."
                 )
 
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, processing_fee, _, _ = build_loan_schedule_context(
                 principal=principal,
-                annual_rate=product.interest_rate_monthly * 12,
+                product=product,
                 term_months=term_months,
-                start_date=date.today(),
-                method=product.interest_method,
                 frequency=frequency,
+                start_date=date.today(),
+                include_processing_fee=True,
             )
 
             guarantor_ids = data.getlist("guarantor_id")
@@ -782,11 +782,11 @@ def loan_edit(request, pk):
                 loan.repayment_frequency = frequency
                 fee_percent = resolve_processing_fee_rate(product)
                 loan.processing_fee_percent = fee_percent if fee_percent else None
-                loan.processing_fee = calculate_processing_fee_amount(principal, product=product)
-                loan.total_repayable = totals["total_repayable"] + loan.effective_processing_fee
+                loan.processing_fee = processing_fee
+                loan.total_repayable = totals["total_repayable_exclusive"]
                 loan.total_interest = totals["total_interest"]
                 loan.outstanding_balance = loan.total_repayable
-                loan.total_fees = loan.effective_processing_fee
+                loan.total_fees = processing_fee
                 loan.purpose = purpose
                 loan.applied_by = request.user if not loan.applied_by else loan.applied_by
                 loan.save()
@@ -877,21 +877,269 @@ def loan_detail(request, pk):
     payments  = loan.payments.order_by("-payment_date")
     renewals  = loan.renewal_records.select_related("new_loan").order_by("-renewal_date")
 
+    # Attempt to fetch recent disbursement audits; tolerate missing table (migrations not yet applied)
+    recent_audits = []
+    audits_total = 0
+    try:
+        from django.db import ProgrammingError, OperationalError
+        recent_qs = LoanDisbursementAudit.objects.filter(loan=loan).order_by('-created_at')
+        recent_audits = list(recent_qs[:3])
+        audits_total = recent_qs.count()
+    except (Exception,) as e:
+        # Catch broad exceptions to avoid breaking the loan detail view before migrations.
+        # Specifically ProgrammingError/OperationalError may occur when table doesn't exist.
+        import logging
+        logging.debug('Could not fetch disbursement audit entries: %s', e)
+        recent_audits = []
+        audits_total = 0
+
     return render(request, "loans/loan_detail.html", {
         "loan":     loan,
         "schedule": schedule,
         "payments": payments,
         "renewals": renewals,
+        "today":    date.today(),
+        "recent_disbursement_audits": recent_audits,
+        "disbursement_audits_total": audits_total,
     })
 
 @_require_role("MANAGER", "CEO")
 def loan_reschedule(request, pk):
-    """Handle payment rescheduling separately from renewals."""
+    """Handle payment rescheduling separately from renewals.
+
+    This view accepts both regular and HTMX requests. When requested
+    via HTMX it returns the small form fragment (renew_loan_fragment.html)
+    suitable for modal display. On POST it validates input, optionally
+    accepts a disbursement_date (CEOs may back-date), regenerates the
+    repayment schedule for the outstanding balance and replaces the
+    loan's schedule rows.
+    """
     loan = get_object_or_404(
         Loan.objects.select_related("client", "product"),
         pk=pk,
         status=Loan.Status.ACTIVE,
     )
+
+    # If a POST request, handle the reschedule submission
+    if request.method == "POST":
+        try:
+            term_months = int(request.POST.get("term_months", loan.term_months) or loan.term_months)
+            frequency = request.POST.get("frequency", loan.repayment_frequency)
+            reason = request.POST.get("reason", "").strip()
+
+            if not reason:
+                raise ValueError("Rescheduling reason is required.")
+
+            if term_months < loan.product.min_term_months or term_months > loan.product.max_term_months:
+                raise ValueError(
+                    f"Term must be between {loan.product.min_term_months} and {loan.product.max_term_months} months."
+                )
+
+            if frequency not in dict(Loan.RepaymentFrequency.choices):
+                raise ValueError("Invalid repayment frequency selected.")
+
+            outstanding_amount = loan.outstanding_balance
+            if outstanding_amount <= Decimal("0"):
+                raise ValueError("Loan has no outstanding balance to reschedule.")
+
+            # Allow optional disbursement_date from the form (CEOs may back-date)
+            provided_disb = request.POST.get('disbursement_date', '').strip()
+            if provided_disb:
+                try:
+                    chosen_disbursement = date.fromisoformat(provided_disb)
+                except Exception:
+                    raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
+                if chosen_disbursement < date.today() and not request.user.is_ceo:
+                    raise ValueError("Only the CEO may set a past disbursement date.")
+            else:
+                chosen_disbursement = date.today()
+
+            # Generate new schedule
+            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+                principal=outstanding_amount,
+                product=loan.product,
+                term_months=term_months,
+                frequency=frequency,
+                start_date=chosen_disbursement,
+                include_processing_fee=False,
+            )
+
+            # Update the loan's schedule instead of creating a new loan
+            old_date = loan.disbursement_date
+            loan.term_months = term_months
+            loan.repayment_frequency = frequency
+            loan.disbursement_date = chosen_disbursement
+            loan.maturity_date = schedule_rows[-1]["due_date"]
+            loan.total_repayable = totals["total_repayable_exclusive"]
+            loan.total_interest = totals["total_interest"]
+            loan.outstanding_balance = totals["total_repayable_exclusive"]
+            loan.save()
+
+            # Create an audit record if the disbursement date changed
+            try:
+                if old_date != loan.disbursement_date:
+                    LoanDisbursementAudit.objects.create(
+                        loan=loan,
+                        changed_by=request.user,
+                        old_disbursement_date=old_date,
+                        new_disbursement_date=loan.disbursement_date,
+                        action='reschedule',
+                        reason=reason[:2000],
+                    )
+            except Exception:
+                import logging
+                logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
+
+            # Delete old schedule and create new one
+            LoanSchedule.objects.filter(loan=loan).delete()
+            LoanSchedule.objects.bulk_create([
+                LoanSchedule(
+                    loan=loan,
+                    period_number=row["period_number"],
+                    due_date=row["due_date"],
+                    opening_balance=row["opening_balance"],
+                    principal_due=row["principal_due"],
+                    interest_due=row["interest_due"],
+                    total_payment=row["total_payment"],
+                    closing_balance=row["closing_balance"],
+                )
+                for row in schedule_rows
+            ])
+
+            messages.success(request, f"Loan {loan.loan_number} has been rescheduled.")
+            # HTMX: return small fragment to close modal and refresh
+            if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
+                from django.urls import reverse
+                return render(request, 'loans/htmx_success.html', {
+                    'message': f'Loan {loan.loan_number} has been rescheduled.',
+                    'redirect': '"' + reverse('loans:detail', kwargs={'pk': loan.pk}) + '"',
+                })
+            return redirect("loans:detail", pk=loan.pk)
+
+        except Exception as e:
+            messages.error(request, f"Rescheduling Error: {e}")
+
+    # For GET (or after errors), render the form (fragment for HTMX)
+    frequency_choices = Loan.RepaymentFrequency.choices
+    context = {
+        "loan": loan,
+        "frequency_choices": frequency_choices,
+        "default_term": loan.term_months,
+        "min_term": loan.product.min_term_months,
+        "max_term": loan.product.max_term_months,
+        "is_reschedule": True,
+        "action_title": "Reschedule Loan",
+        "submit_label": "Reschedule Loan",
+        "helper_text": "This creates a new repayment schedule for the existing loan.",
+        "today": date.today(),
+    }
+    if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
+        return render(request, 'loans/renew_loan_fragment.html', context)
+    return render(request, "loans/renew_loan.html", context)
+
+
+@login_required
+def loan_regenerate_schedule(request, pk):
+    """HTMX endpoint to GET a small form and POST to regenerate the repayment schedule.
+
+    GET: returns a small fragment with a date input (modal body)
+    POST: regenerates schedule using the provided disbursement_date and returns the updated
+          schedule card fragment so the page can update via HTMX.
+    """
+    loan = get_object_or_404(Loan.objects.select_related("product", "client"), pk=pk)
+
+    # GET -> return the small form fragment
+    if request.method == "GET":
+        return render(request, "loans/htmx_regenerate_schedule_form.html", {
+            "loan": loan,
+            "today": date.today(),
+        })
+
+    # POST -> perform regeneration
+    if request.method == "POST":
+        provided = request.POST.get("disbursement_date", "").strip()
+        if not provided:
+            messages.error(request, "Please provide a disbursement date.")
+            return redirect("loans:detail", pk=loan.pk)
+
+        try:
+            parsed = date.fromisoformat(provided)
+        except Exception:
+            messages.error(request, "Invalid disbursement date format. Use YYYY-MM-DD.")
+            return redirect("loans:detail", pk=loan.pk)
+
+        # Non-CEOs may not back-date; CEOs may
+        if not request.user.is_ceo and parsed < date.today():
+            messages.error(request, "Only the CEO may set a past disbursement date.")
+            return redirect("loans:detail", pk=loan.pk)
+
+        # Decide principal: for ACTIVE loans use outstanding_balance, otherwise use principal_amount
+        principal_to_use = loan.outstanding_balance if loan.status == Loan.Status.ACTIVE else loan.principal_amount
+
+        try:
+            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+                principal=principal_to_use,
+                product=loan.product,
+                term_months=loan.term_months,
+                frequency=loan.repayment_frequency,
+                start_date=parsed,
+                include_processing_fee=False,
+            )
+
+            # Replace schedule rows
+            LoanSchedule.objects.filter(loan=loan).delete()
+            LoanSchedule.objects.bulk_create([
+                LoanSchedule(
+                    loan=loan,
+                    period_number=row["period_number"],
+                    due_date=row["due_date"],
+                    opening_balance=row["opening_balance"],
+                    principal_due=row["principal_due"],
+                    interest_due=row["interest_due"],
+                    total_payment=row["total_payment"],
+                    closing_balance=row["closing_balance"],
+                )
+                for row in schedule_rows
+            ])
+
+            old_date = loan.disbursement_date
+            loan.disbursement_date = parsed
+            loan.first_repayment_date = schedule_rows[0]["due_date"]
+            loan.maturity_date = schedule_rows[-1]["due_date"]
+            loan.total_repayable = totals.get("total_repayable", loan.total_repayable)
+            loan.total_interest = totals.get("total_interest", loan.total_interest)
+            loan.outstanding_balance = loan.total_repayable
+            loan.save()
+
+            # Create an audit record if the disbursement date changed
+            try:
+                if old_date != loan.disbursement_date:
+                    LoanDisbursementAudit.objects.create(
+                        loan=loan,
+                        changed_by=request.user,
+                        old_disbursement_date=old_date,
+                        new_disbursement_date=loan.disbursement_date,
+                        action='regenerate',
+                        reason=request.POST.get('reason', '')[:2000],
+                    )
+            except Exception:
+                # Never raise audit failures to the user flow
+                import logging
+                logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
+
+            # Return updated schedule fragment so HTMX can replace the card
+            schedule = loan.schedule.order_by("period_number")
+            return render(request, "loans/loan_detail_schedule_fragment.html", {
+                "loan": loan,
+                "schedule": schedule,
+                "user": request.user,
+            })
+
+        except Exception as e:
+            import logging
+            logging.exception("Failed to regenerate schedule for loan %s: %s", loan.pk, e)
+            messages.error(request, "Failed to regenerate schedule. See logs.")
+            return redirect("loans:detail", pk=loan.pk)
 
     if loan.outstanding_balance <= Decimal("0"):
         messages.error(request, "This loan has no outstanding balance to reschedule.")
@@ -918,22 +1166,35 @@ def loan_reschedule(request, pk):
             if outstanding_amount <= Decimal("0"):
                 raise ValueError("Loan has no outstanding balance to reschedule.")
 
+            # Allow optional disbursement_date from the form (CEOs may back-date)
+            provided_disb = request.POST.get('disbursement_date', '').strip()
+            if provided_disb:
+                try:
+                    chosen_disbursement = date.fromisoformat(provided_disb)
+                except Exception:
+                    raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
+                if chosen_disbursement < date.today() and not request.user.is_ceo:
+                    raise ValueError("Only the CEO may set a past disbursement date.")
+            else:
+                chosen_disbursement = date.today()
+
             # Generate new schedule
-            schedule_rows, totals = generate_schedule(
+            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
                 principal=outstanding_amount,
-                annual_rate=loan.product.interest_rate_monthly * 12,
+                product=loan.product,
                 term_months=term_months,
-                start_date=date.today(),
-                method=loan.product.interest_method,
                 frequency=frequency,
+                start_date=chosen_disbursement,
+                include_processing_fee=False,
             )
 
             # Update the loan's schedule instead of creating a new loan
             loan.term_months = term_months
             loan.repayment_frequency = frequency
             loan.maturity_date = schedule_rows[-1]["due_date"]
-            loan.total_repayable = totals["total_repayable"]
-            loan.outstanding_balance = totals["total_repayable"]
+            loan.total_repayable = totals["total_repayable_exclusive"]
+            loan.total_interest = totals["total_interest"]
+            loan.outstanding_balance = totals["total_repayable_exclusive"]
             loan.save()
 
             # Delete old schedule and create new one
@@ -976,6 +1237,7 @@ def loan_reschedule(request, pk):
         "action_title": "Reschedule Loan",
         "submit_label": "Reschedule Loan",
         "helper_text": "This creates a new repayment schedule for the existing loan.",
+        "today": date.today(),
     }
     if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
         return render(request, 'loans/renew_loan_fragment.html', context)
@@ -1027,17 +1289,26 @@ def loan_renew(request, pk):
             if total_new_principal <= Decimal("0"):
                 raise ValueError("Total new principal must be greater than zero.")
 
-            schedule_rows, totals = generate_schedule(
-                principal=total_new_principal,
-                annual_rate=loan.product.interest_rate_monthly * 12,
-                term_months=term_months,
-                start_date=date.today(),
-                method=loan.product.interest_method,
-                frequency=frequency,
-            )
+            # Allow optional disbursement_date from the form (CEOs may back-date)
+            provided_disb = request.POST.get('disbursement_date', '').strip()
+            if provided_disb:
+                try:
+                    chosen_disbursement = date.fromisoformat(provided_disb)
+                except Exception:
+                    raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
+                if chosen_disbursement < date.today() and not request.user.is_ceo:
+                    raise ValueError("Only the CEO may set a past disbursement date.")
+            else:
+                chosen_disbursement = date.today()
 
-            processing_fee = (total_new_principal * loan.product.processing_fee_percent / Decimal("100"))
-            processing_fee = processing_fee.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            schedule_rows, totals, processing_fee, _, _ = build_loan_schedule_context(
+                principal=total_new_principal,
+                product=loan.product,
+                term_months=term_months,
+                frequency=frequency,
+                start_date=chosen_disbursement,
+                include_processing_fee=True,
+            )
 
             new_loan = Loan.objects.create(
                 client=loan.client,
@@ -1047,7 +1318,7 @@ def loan_renew(request, pk):
                 disbursed_by=request.user,
                 application_date=date.today(),
                 approval_date=date.today(),
-                disbursement_date=date.today(),
+                disbursement_date=chosen_disbursement,
                 first_repayment_date=schedule_rows[0]["due_date"],
                 maturity_date=schedule_rows[-1]["due_date"],
                 principal_amount=total_new_principal,
@@ -1056,10 +1327,10 @@ def loan_renew(request, pk):
                 penalty_rate_monthly=loan.product.penalty_rate_monthly,
                 term_months=term_months,
                 repayment_frequency=frequency,
-                total_repayable=totals["total_repayable"] + processing_fee,
+                total_repayable=totals["total_repayable_exclusive"],
                 total_interest=totals["total_interest"],
-                outstanding_balance=totals["total_repayable"] + processing_fee,
-                total_fees=Decimal("0"),
+                outstanding_balance=totals["total_repayable_exclusive"],
+                total_fees=processing_fee,
                 processing_fee=processing_fee,
                 purpose=f"Renewal of {loan.loan_number}. {reason}",
                 status=Loan.Status.ACTIVE,
@@ -1081,6 +1352,20 @@ def loan_renew(request, pk):
                 )
                 for row in schedule_rows
             ])
+
+            # Audit: record the disbursement date for the newly-created renewal loan
+            try:
+                LoanDisbursementAudit.objects.create(
+                    loan=new_loan,
+                    changed_by=request.user,
+                    old_disbursement_date=None,
+                    new_disbursement_date=new_loan.disbursement_date,
+                    action='renew',
+                    reason=reason[:2000],
+                )
+            except Exception:
+                import logging
+                logging.exception('Failed to create disbursement audit for new renewed loan %s', getattr(new_loan, 'pk', None))
 
             LoanRenewal.objects.create(
                 original_loan=loan,
@@ -1124,6 +1409,7 @@ def loan_renew(request, pk):
         "action_title": "Reschedule Loan" if is_reschedule else "Renew Loan",
         "submit_label": "Create Rescheduled Loan" if is_reschedule else "Create Renewal Loan",
         "helper_text": "This creates a new loan using the full outstanding balance as the new principal." if is_reschedule else "This creates a new loan using the outstanding balance as the new principal.",
+        "today": date.today(),
     }
 
     # If requested via HTMX, return only the form fragment suitable for modal
@@ -1150,9 +1436,27 @@ def loan_approve(request, pk):
         messages.error(request, f"Loans above UGX {limit:,.0f} require CEO approval.")
         return redirect("loans:detail", pk=pk)
 
+    # Default to today; allow CEOs to override via POST disbursement_date field.
     disbursement_date = date.today()
-    loan.reviewed_by       = user
-    loan.approval_date     = date.today()
+    loan.reviewed_by = user
+    loan.approval_date = date.today()
+
+    # If a disbursement_date was provided and user is CEO, validate and apply it
+    provided = request.POST.get("disbursement_date", "").strip() if request.POST else ""
+    if provided:
+        if not user.is_ceo:
+            messages.error(request, "Only the CEO may set a custom disbursement date.")
+            return redirect("loans:detail", pk=pk)
+        try:
+            parsed = date.fromisoformat(provided)
+        except Exception:
+            messages.error(request, "Invalid disbursement date format. Use YYYY-MM-DD.")
+            return redirect("loans:detail", pk=pk)
+        # CEOs are allowed to back-date disbursement; accept the provided date as-is
+        disbursement_date = parsed
+
+    # Capture old disbursement date for auditing
+    old_disb_date = loan.disbursement_date
     loan.disbursement_date = disbursement_date
 
     # Product business rule: some products require at least one guarantor.
@@ -1160,16 +1464,73 @@ def loan_approve(request, pk):
         messages.error(request, "This loan needs at least one active guarantor before this product can be approved.")
         return redirect("loans:detail", pk=pk)
 
+    # Ensure a schedule exists (we can regenerate below when CEO changes disbursement date)
     if not loan.schedule.exists():
         messages.error(request, "Schedule not generated yet. Re-open the loan application to generate a schedule.")
         return redirect("loans:detail", pk=pk)
 
-    loan.first_repayment_date = loan.schedule.order_by("period_number").first().due_date
-    loan.maturity_date        = loan.schedule.order_by("-period_number").first().due_date
-    loan.outstanding_balance  = loan.total_repayable
-    # Immediately activate since disbursement is same-day by default
+    # If the disbursement date is different from the schedule's start, regenerate schedule rows so due dates align
+    try:
+        from .utils import build_loan_schedule_context
+        # Build schedule using outstanding principal snapshot (full principal at approval time)
+        schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+            principal=loan.principal_amount,
+            product=loan.product,
+            term_months=loan.term_months,
+            frequency=loan.repayment_frequency,
+            start_date=disbursement_date,
+            include_processing_fee=False,
+        )
+
+        # Replace existing schedule with new dates/payments
+        LoanSchedule.objects.filter(loan=loan).delete()
+        LoanSchedule.objects.bulk_create([
+            LoanSchedule(
+                loan=loan,
+                period_number=row["period_number"],
+                due_date=row["due_date"],
+                opening_balance=row["opening_balance"],
+                principal_due=row["principal_due"],
+                interest_due=row["interest_due"],
+                total_payment=row["total_payment"],
+                closing_balance=row["closing_balance"],
+            )
+            for row in schedule_rows
+        ])
+
+        # Update loan totals/dates from regenerated schedule
+        loan.first_repayment_date = schedule_rows[0]["due_date"]
+        loan.maturity_date = schedule_rows[-1]["due_date"]
+        loan.total_repayable = totals.get("total_repayable", loan.total_repayable)
+        loan.total_interest = totals.get("total_interest", loan.total_interest)
+        loan.outstanding_balance = loan.total_repayable
+
+    except Exception as e:
+        # If regeneration fails, fall back to using existing schedule dates
+        import logging
+        logging.exception("Failed to regenerate schedule on approval for loan %s: %s", loan.pk, e)
+        loan.first_repayment_date = loan.schedule.order_by("period_number").first().due_date
+        loan.maturity_date = loan.schedule.order_by("-period_number").first().due_date
+        loan.outstanding_balance = loan.total_repayable
+
+    # Immediately activate
     loan.status = Loan.Status.ACTIVE
     loan.save()
+
+    # Audit disbursement date change on approval
+    try:
+        if old_disb_date != loan.disbursement_date:
+            LoanDisbursementAudit.objects.create(
+                loan=loan,
+                changed_by=request.user,
+                old_disbursement_date=old_disb_date,
+                new_disbursement_date=loan.disbursement_date,
+                action='approve',
+                reason='Approved and disbursed via approval form',
+            )
+    except Exception:
+        import logging
+        logging.exception('Failed to create disbursement audit for loan %s on approval', loan.pk)
 
     messages.success(request, f"Loan {loan.loan_number} approved and activated.")
     return redirect("loans:detail", pk=pk)
@@ -1282,15 +1643,14 @@ def schedule_preview_pdf(request, client_id):
 
         # Mirror the calculation used to render the on-screen preview in
         # loan_apply_step2 so the PDF always matches what the user sees.
-        schedule_rows, totals = _generate_schedule_correct(
+        schedule_rows, totals, fee_amount, _, fee_source = build_loan_schedule_context(
             principal=principal,
-            monthly_rate=product.interest_rate_monthly / Decimal("100"),
+            product=product,
             term_months=term_months,
-            start_date=date.today(),
-            method=product.interest_method,
             frequency=frequency,
+            start_date=date.today(),
+            include_processing_fee=True,
         )
-        fee_amount, _fee_percent, fee_source = _calculate_loan_fees(principal, product)
 
         pdf_bytes = generate_schedule_preview_pdf(
             client=client,

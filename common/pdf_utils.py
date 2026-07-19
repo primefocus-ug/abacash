@@ -66,6 +66,24 @@ def _make_receipt_story(receipt, guarantees, collateral_items):
     ]))
     story.append(table)
 
+    summary_table_data = [
+        [Paragraph("<b>Loan Summary</b>", normal), Paragraph("<b>Value</b>", normal)],
+        ["Principal + Interest", _format_money(receipt.payment.loan.total_repayable)],
+        ["Processing Fee", _format_money(receipt.payment.loan.effective_processing_fee)],
+        ["Outstanding Balance", _format_money(receipt.payment.loan.outstanding_balance)],
+    ]
+    summary_table = Table(summary_table_data, colWidths=[90*mm, 80*mm])
+    summary_table.setStyle(TableStyle([
+        ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
+        ("ALIGN", (0,0), (0,-1), "LEFT"),
+        ("ALIGN", (1,0), (1,-1), "RIGHT"),
+        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+    ]))
+    story.append(Spacer(1, 10))
+    story.append(summary_table)
+
     if guarantees:
         story.append(Spacer(1, 12))
         story.append(Paragraph("<b>Guarantors</b>", styles["Heading3"]))
