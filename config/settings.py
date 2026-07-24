@@ -277,7 +277,7 @@ AT_SENDER_ID = config("AT_SENDER_ID", default="ABAUGANDA")
 # ------------------------------------------------------------------ #
 TWILIO_ACCOUNT_SID = config("TWILIO_ACCOUNT_SID", default="")
 TWILIO_AUTH_TOKEN = config("TWILIO_AUTH_TOKEN", default="")
-TWILIO_WHATSAPP_FROM = config("TWILIO_WHATSAPP_FROM", default="whatsapp:+14155238886")
+TWILIO_WHATSAPP_FROM = config("TWILIO_WHATSAPP_FROM", default="whatsapp:+256785230670")
 
 # ------------------------------------------------------------------ #
 # Email (error alerts / contact form)                                  #

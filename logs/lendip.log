@@ -8248,3 +8248,879 @@ LINE 1: ..., "loans_loandisbursementaudit"."created_at" FROM "loans_loa...
 2026-07-19 16:12:50 [INFO] django.server: "GET /clients/7cba5b63-8cae-432f-98a4-934092ee8499/ HTTP/1.1" 200 60284
 2026-07-19 16:12:51 [WARNING] django.request: Not Found: /media/aba/photos/client_7cba5b63-8cae-432f-98a4-934092ee8499/WhatsApp_Image_2026-07-04_at_1.46.36_PM.jpeg
 2026-07-19 16:12:51 [WARNING] django.server: "GET /media/aba/photos/client_7cba5b63-8cae-432f-98a4-934092ee8499/WhatsApp_Image_2026-07-04_at_1.46.36_PM.jpeg HTTP/1.1" 404 3206
+2026-07-20 12:24:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-20 15:42:05 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-20 15:42:06 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 50938
+2026-07-20 15:42:06 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-07-20 15:42:09 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-20 15:42:09 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-20 15:42:10 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-07-20 15:42:13 [INFO] django.server: "GET /features/ HTTP/1.1" 200 35335
+2026-07-20 15:42:23 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 35723
+2026-07-20 15:42:30 [INFO] django.server: "GET /register/ HTTP/1.1" 200 35614
+2026-07-20 15:42:48 [INFO] django.server: "GET /features/ HTTP/1.1" 200 35335
+2026-07-20 15:42:53 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-20 15:43:03 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-20 15:44:20 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-22 07:50:39 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 07:51:10 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-22 07:51:11 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 50938
+2026-07-22 07:51:11 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-07-22 07:51:12 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-07-22 07:51:12 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-22 07:51:12 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-22 07:51:14 [WARNING] django.request: Not Found: /sw.js
+2026-07-22 07:51:14 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-22 07:51:20 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-22 07:51:22 [WARNING] django.request: Not Found: /sw.js
+2026-07-22 07:51:22 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-22 07:51:33 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-22 07:52:04 [WARNING] django.request: Not Found: /sw.js
+2026-07-22 07:52:04 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-22 08:01:58 [WARNING] django.request: Not Found: /sw.js
+2026-07-22 08:01:58 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-22 08:07:23 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\views.py changed, reloading.
+2026-07-22 08:07:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:07:40 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\views.py changed, reloading.
+2026-07-22 08:07:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:19:19 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\views.py changed, reloading.
+2026-07-22 08:19:22 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:19:28 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\views.py changed, reloading.
+2026-07-22 08:19:30 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:25:02 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:25:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:25:38 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:25:40 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:28:06 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:28:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:28:52 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:28:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:32:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:43:35 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:43:35 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash local\loans\models.py changed, reloading.
+2026-07-22 08:43:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:43:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-22 08:45:59 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-22 08:45:59 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 304 0
+2026-07-22 08:45:59 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-07-22 08:45:59 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 304 0
+2026-07-22 08:45:59 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-22 08:45:59 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-22 08:46:12 [INFO] django.server: "GET / HTTP/1.1" 200 11128
+2026-07-22 08:46:13 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 50938
+2026-07-22 08:46:14 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-22 08:46:14 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-07-22 08:46:30 [INFO] django.server: "POST / HTTP/1.1" 200 11302
+2026-07-22 08:46:49 [INFO] django.server: "POST / HTTP/1.1" 200 11302
+2026-07-22 08:47:04 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-07-22 08:47:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 67384
+2026-07-22 08:47:05 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-07-22 08:47:05 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-07-22 08:47:12 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 71123
+2026-07-22 08:47:15 [INFO] django.server: "GET /loans/16629d57-767a-46ca-8e55-151d2b19a56b/ HTTP/1.1" 200 63276
+2026-07-22 08:47:20 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 71123
+2026-07-22 08:47:22 [INFO] django.server: "GET /loans/46ccea48-f5ed-415b-a1f1-a4894c4cf580/ HTTP/1.1" 200 65802
+2026-07-22 08:47:26 [INFO] django.server: "GET /loans/46ccea48-f5ed-415b-a1f1-a4894c4cf580/reschedule/ HTTP/1.1" 200 4124
+2026-07-22 08:47:33 [INFO] django.server: "POST /loans/46ccea48-f5ed-415b-a1f1-a4894c4cf580/reschedule/ HTTP/1.1" 200 719
+2026-07-22 08:47:34 [INFO] django.server: "GET /loans/46ccea48-f5ed-415b-a1f1-a4894c4cf580/ HTTP/1.1" 200 66193
+2026-07-22 08:47:41 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 71123
+2026-07-22 08:47:47 [INFO] django.server: "GET /loans/967f59a8-1c89-43e5-80ef-148c10979be7/ HTTP/1.1" 200 78389
+2026-07-22 08:47:57 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 63766
+2026-07-22 08:48:01 [INFO] django.server: "GET /clients/ce556585-184d-498e-87a3-7f45a11ad4b9/ HTTP/1.1" 200 58913
+2026-07-22 08:48:01 [WARNING] django.request: Not Found: /media/aba/photos/client_ce556585-184d-498e-87a3-7f45a11ad4b9/part_11.jpg
+2026-07-22 08:48:01 [WARNING] django.server: "GET /media/aba/photos/client_ce556585-184d-498e-87a3-7f45a11ad4b9/part_11.jpg HTTP/1.1" 404 3107
+2026-07-22 08:48:03 [INFO] django.server: "GET /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/ HTTP/1.1" 200 61328
+2026-07-22 08:48:13 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=x04sDvTo9z2nS0yz307n1cT3AcCqSQhl8uIP05hEtdXXx3eR3CL7QKCreYDy0zjz&product=1&principal=200000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4478
+2026-07-22 08:48:15 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=x04sDvTo9z2nS0yz307n1cT3AcCqSQhl8uIP05hEtdXXx3eR3CL7QKCreYDy0zjz&product=1&principal=200000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3187
+2026-07-22 08:48:35 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=x04sDvTo9z2nS0yz307n1cT3AcCqSQhl8uIP05hEtdXXx3eR3CL7QKCreYDy0zjz&product=1&principal=1000000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3197
+2026-07-22 08:49:02 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=x04sDvTo9z2nS0yz307n1cT3AcCqSQhl8uIP05hEtdXXx3eR3CL7QKCreYDy0zjz&product=1&principal=100000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3180
+2026-07-22 08:49:12 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=x04sDvTo9z2nS0yz307n1cT3AcCqSQhl8uIP05hEtdXXx3eR3CL7QKCreYDy0zjz&product=1&principal=100000&term_months=1&frequency=MONTHLY&purpose= HTTP/1.1" 200 2859
+2026-07-22 08:49:28 [INFO] django.server: "POST /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/ HTTP/1.1" 302 0
+2026-07-22 08:49:28 [INFO] django.server: "GET /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/step3/ HTTP/1.1" 200 63623
+2026-07-22 08:49:30 [INFO] django.server: "POST /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/step3/ HTTP/1.1" 302 0
+2026-07-22 08:49:30 [INFO] django.server: "GET /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/review/?draft_id=af915c4c-bda3-4a92-8ade-8d2b86dc9ecb HTTP/1.1" 200 60374
+2026-07-22 08:49:34 [INFO] django.server: "POST /loans/apply/ce556585-184d-498e-87a3-7f45a11ad4b9/review/?draft_id=af915c4c-bda3-4a92-8ade-8d2b86dc9ecb HTTP/1.1" 302 0
+2026-07-22 08:49:34 [INFO] django.server: "GET /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/ HTTP/1.1" 200 63512
+2026-07-22 08:49:40 [INFO] django.server: "POST /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/approve/ HTTP/1.1" 302 0
+2026-07-22 08:49:40 [INFO] django.server: "GET /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/ HTTP/1.1" 200 63470
+2026-07-22 08:49:45 [INFO] django.server: "GET /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/reschedule/ HTTP/1.1" 200 4124
+2026-07-22 08:49:50 [INFO] django.server: "POST /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/reschedule/ HTTP/1.1" 200 719
+2026-07-22 08:49:51 [INFO] django.server: "GET /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/ HTTP/1.1" 200 63468
+2026-07-22 08:50:54 [INFO] django.server: "GET /loans/af915c4c-bda3-4a92-8ade-8d2b86dc9ecb/reschedule/ HTTP/1.1" 200 4124
+2026-07-23 18:50:48 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-23 18:56:59 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-23 18:57:02 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-23 19:00:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-23 19:03:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:01:18 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:12:42 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\loans\views.py changed, reloading.
+2026-07-24 09:13:00 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:15:46 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-24 09:15:48 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:16:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:16:56 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-24 09:16:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:20:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:20:54 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-24 09:20:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 09:21:07 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-24 09:21:07 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 304 0
+2026-07-24 09:21:07 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-07-24 09:21:08 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 304 0
+2026-07-24 09:21:08 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-24 09:21:08 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-24 09:21:19 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:21:19 [ERROR] django.server: "GET / HTTP/1.1" 500 196703
+2026-07-24 09:21:20 [ERROR] django.request: Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:21:20 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 196563
+2026-07-24 09:22:05 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:22:05 [ERROR] django.server: "GET / HTTP/1.1" 500 196831
+2026-07-24 09:22:06 [ERROR] django.request: Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:22:06 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 196554
+2026-07-24 09:22:13 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:22:13 [ERROR] django.server: "GET / HTTP/1.1" 500 196840
+2026-07-24 09:22:14 [ERROR] django.request: Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:22:14 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 196563
+2026-07-24 09:24:45 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:24:45 [ERROR] django.server: "GET / HTTP/1.1" 500 196840
+2026-07-24 09:24:46 [ERROR] django.request: Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-24 09:24:46 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 196563
+2026-07-24 11:12:46 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\tenants\models.py changed, reloading.
+2026-07-24 11:12:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-24 14:14:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader

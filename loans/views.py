@@ -954,57 +954,66 @@ def loan_reschedule(request, pk):
             else:
                 chosen_disbursement = date.today()
 
-            # Generate new schedule
-            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
-                principal=outstanding_amount,
-                product=loan.product,
-                term_months=term_months,
-                frequency=frequency,
-                start_date=chosen_disbursement,
-                include_processing_fee=False,
+            same_terms = (
+                term_months == loan.term_months
+                and frequency == loan.repayment_frequency
+                and chosen_disbursement == loan.disbursement_date
             )
 
-            # Update the loan's schedule instead of creating a new loan
-            old_date = loan.disbursement_date
-            loan.term_months = term_months
-            loan.repayment_frequency = frequency
-            loan.disbursement_date = chosen_disbursement
-            loan.maturity_date = schedule_rows[-1]["due_date"]
-            loan.total_repayable = totals["total_repayable_exclusive"]
-            loan.total_interest = totals["total_interest"]
-            loan.outstanding_balance = totals["total_repayable_exclusive"]
-            loan.save()
-
-            # Create an audit record if the disbursement date changed
-            try:
-                if old_date != loan.disbursement_date:
-                    LoanDisbursementAudit.objects.create(
-                        loan=loan,
-                        changed_by=request.user,
-                        old_disbursement_date=old_date,
-                        new_disbursement_date=loan.disbursement_date,
-                        action='reschedule',
-                        reason=reason[:2000],
-                    )
-            except Exception:
-                import logging
-                logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
-
-            # Delete old schedule and create new one
-            LoanSchedule.objects.filter(loan=loan).delete()
-            LoanSchedule.objects.bulk_create([
-                LoanSchedule(
-                    loan=loan,
-                    period_number=row["period_number"],
-                    due_date=row["due_date"],
-                    opening_balance=row["opening_balance"],
-                    principal_due=row["principal_due"],
-                    interest_due=row["interest_due"],
-                    total_payment=row["total_payment"],
-                    closing_balance=row["closing_balance"],
+            if same_terms:
+                loan.save(update_fields=["updated_at"]) if hasattr(loan, "updated_at") else None
+            else:
+                # Generate new schedule only when the repayment settings actually change.
+                schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+                    principal=outstanding_amount,
+                    product=loan.product,
+                    term_months=term_months,
+                    frequency=frequency,
+                    start_date=chosen_disbursement,
+                    include_processing_fee=False,
                 )
-                for row in schedule_rows
-            ])
+
+                # Update the loan's schedule instead of creating a new loan
+                old_date = loan.disbursement_date
+                loan.term_months = term_months
+                loan.repayment_frequency = frequency
+                loan.disbursement_date = chosen_disbursement
+                loan.maturity_date = schedule_rows[-1]["due_date"]
+                loan.total_repayable = totals["total_repayable_exclusive"]
+                loan.total_interest = totals["total_interest"]
+                loan.outstanding_balance = outstanding_amount
+                loan.save()
+
+                # Create an audit record if the disbursement date changed
+                try:
+                    if old_date != loan.disbursement_date:
+                        LoanDisbursementAudit.objects.create(
+                            loan=loan,
+                            changed_by=request.user,
+                            old_disbursement_date=old_date,
+                            new_disbursement_date=loan.disbursement_date,
+                            action='reschedule',
+                            reason=reason[:2000],
+                        )
+                except Exception:
+                    import logging
+                    logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
+
+                # Delete old schedule and create new one
+                LoanSchedule.objects.filter(loan=loan).delete()
+                LoanSchedule.objects.bulk_create([
+                    LoanSchedule(
+                        loan=loan,
+                        period_number=row["period_number"],
+                        due_date=row["due_date"],
+                        opening_balance=row["opening_balance"],
+                        principal_due=row["principal_due"],
+                        interest_due=row["interest_due"],
+                        total_payment=row["total_payment"],
+                        closing_balance=row["closing_balance"],
+                    )
+                    for row in schedule_rows
+                ])
 
             messages.success(request, f"Loan {loan.loan_number} has been rescheduled.")
             # HTMX: return small fragment to close modal and refresh
@@ -1194,7 +1203,7 @@ def loan_regenerate_schedule(request, pk):
             loan.maturity_date = schedule_rows[-1]["due_date"]
             loan.total_repayable = totals["total_repayable_exclusive"]
             loan.total_interest = totals["total_interest"]
-            loan.outstanding_balance = totals["total_repayable_exclusive"]
+            loan.outstanding_balance = outstanding_amount
             loan.save()
 
             # Delete old schedule and create new one

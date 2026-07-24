@@ -38,7 +38,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -440,37 +440,76 @@ class Loan(models.Model):
     # Methods                                                              #
     # ------------------------------------------------------------------ #
 
+    def _generate_loan_number(self, year: int) -> str:
+        """Generate a unique loan number for the given year using a locked sequence."""
+        for _ in range(100):
+            try:
+                with transaction.atomic():
+                    seq_name = f"loan_number_{year}"
+                    seq, _ = LoanSequence.objects.select_for_update().get_or_create(
+                        name=seq_name,
+                        defaults={"last": 0},
+                    )
+
+                    existing_max = 0
+                    for loan_number in Loan.objects.filter(loan_number__startswith=f"LN-{year}-").values_list("loan_number", flat=True):
+                        try:
+                            suffix = str(loan_number).rsplit("-", 1)[-1]
+                            existing_max = max(existing_max, int(suffix))
+                        except (ValueError, TypeError):
+                            continue
+
+                    if seq.last < existing_max:
+                        seq.last = existing_max
+
+                    seq.last = seq.last + 1
+                    seq.save(update_fields=["last"])
+                    candidate = f"LN-{year}-{seq.last:05d}"
+                    if not Loan.objects.filter(loan_number=candidate).exists():
+                        return candidate
+            except IntegrityError:
+                continue
+
+        raise IntegrityError(f"Unable to generate a unique loan number for {year}.")
+
     def save(self, *args, **kwargs):
         """Auto-generate loan_number and core_id before first save."""
-        if not self.loan_number:
-            year = timezone.now().year
-            count = Loan.objects.filter(
-                application_date__year=year
-            ).count() + 1
-            self.loan_number = f"LN-{year}-{count:05d}"
+        for _ in range(100):
+            if not self.loan_number:
+                year = timezone.now().year
+                self.loan_number = self._generate_loan_number(year)
 
-        if not self.core_id:
-            with transaction.atomic():
-                seq, _ = LoanSequence.objects.select_for_update().get_or_create(
-                    name="loans",
-                    defaults={"last": 0},
-                )
-                seq.last = seq.last + 1
-                seq.save()
-                self.core_id = f"LN{seq.last:08d}"
+            if not self.core_id:
+                with transaction.atomic():
+                    seq, _ = LoanSequence.objects.select_for_update().get_or_create(
+                        name="loans",
+                        defaults={"last": 0},
+                    )
+                    seq.last = seq.last + 1
+                    seq.save(update_fields=["last"])
+                    self.core_id = f"LN{seq.last:08d}"
 
-        # Compute processing fee from CompanySettings (primary source) if not
-        # already set by the view layer.
-        if self.processing_fee == Decimal("0") and self.product_id and self.principal_amount:
+            # Compute processing fee from CompanySettings (primary source) if not
+            # already set by the view layer.
+            if self.processing_fee == Decimal("0") and self.product_id and self.principal_amount:
+                try:
+                    from loans.utils import calculate_processing_fee_amount
+                    self.processing_fee = calculate_processing_fee_amount(
+                        self.principal_amount, product=self.product
+                    )
+                except Exception:
+                    pass
+
             try:
-                from loans.utils import calculate_processing_fee_amount
-                self.processing_fee = calculate_processing_fee_amount(
-                    self.principal_amount, product=self.product
-                )
-            except Exception:
-                pass
+                super().save(*args, **kwargs)
+                return
+            except IntegrityError as exc:
+                if "loan_number" not in str(exc).lower():
+                    raise
+                self.loan_number = None
+                self.core_id = None
 
-        super().save(*args, **kwargs)
+        raise IntegrityError("Unable to save loan with a unique loan number.")
 
     @property
     def effective_processing_fee(self):

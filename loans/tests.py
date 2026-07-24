@@ -1,12 +1,15 @@
+from datetime import date
 from decimal import Decimal
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
-from django.test import SimpleTestCase, TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
+from unittest.mock import patch
 
 from accounts.models import CompanySettings
 from clients.models import Client
+from loans import views as loan_views
 from loans.models import Loan, LoanProduct
 from loans.utils import resolve_processing_fee_rate
 
@@ -173,6 +176,150 @@ class LoanOutstandingBalanceTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(loan.total_repayable, expected_total_repayable)
         self.assertEqual(loan.outstanding_balance, expected_total_repayable)
+
+
+class LoanRescheduleTests(SimpleTestCase):
+    def test_reschedule_sets_outstanding_balance_from_first_schedule_row(self):
+        class DummyUser:
+            role = "MANAGER"
+            is_authenticated = True
+            username = "manager"
+            first_name = "Manager"
+            last_name = "Test"
+
+            @property
+            def is_ceo(self):
+                return False
+
+        class DummyLoan:
+            pk = "12345678-1234-1234-1234-123456789abc"
+            loan_number = "LN-001"
+            term_months = 6
+            repayment_frequency = Loan.RepaymentFrequency.MONTHLY
+            outstanding_balance = Decimal("1000000")
+            disbursement_date = date(2024, 1, 1)
+            product = SimpleNamespace(min_term_months=1, max_term_months=12)
+            status = Loan.Status.ACTIVE
+
+            def __init__(self):
+                self.saved = False
+                self.schedule_rows = []
+
+            def save(self):
+                self.saved = True
+
+        class DummyScheduleManager:
+            def __init__(self):
+                self.deleted = False
+                self.created_rows = []
+
+            def filter(self, **kwargs):
+                return self
+
+            def delete(self):
+                self.deleted = True
+
+            def bulk_create(self, rows):
+                self.created_rows = rows
+
+        loan = DummyLoan()
+        request = RequestFactory().post(
+            reverse("loans:reschedule", kwargs={"pk": loan.pk}),
+            {
+                "term_months": "4",
+                "frequency": Loan.RepaymentFrequency.MONTHLY,
+                "reason": "Need a shorter schedule",
+            },
+        )
+        request.user = DummyUser()
+        schedule_manager = DummyScheduleManager()
+        schedule_rows = [
+            {"period_number": 1, "due_date": date(2024, 2, 1), "opening_balance": Decimal("500000"), "principal_due": Decimal("400000"), "interest_due": Decimal("100000"), "total_payment": Decimal("500000"), "closing_balance": Decimal("0")},
+        ]
+        totals = {"total_repayable_exclusive": Decimal("500000"), "total_interest": Decimal("100000")}
+
+        with patch("loans.views.get_object_or_404", return_value=loan), \
+             patch("loans.views.build_loan_schedule_context", return_value=(schedule_rows, totals, None, None, None)), \
+             patch("loans.views.messages.success"), \
+             patch("loans.views.messages.error"), \
+             patch("loans.views.LoanSchedule.objects", new=schedule_manager), \
+             patch("loans.views.LoanDisbursementAudit.objects.create", return_value=None):
+            response = loan_views.loan_reschedule(request, "loan-1")
+
+        self.assertIn(response.status_code, (200, 302))
+        self.assertTrue(loan.saved)
+        self.assertEqual(loan.outstanding_balance, Decimal("1000000"))
+
+    def test_reschedule_keeps_existing_schedule_when_no_settings_change(self):
+        class DummyUser:
+            role = "MANAGER"
+            is_authenticated = True
+            username = "manager"
+            first_name = "Manager"
+            last_name = "Test"
+
+            @property
+            def is_ceo(self):
+                return False
+
+        class DummyLoan:
+            pk = "12345678-1234-1234-1234-123456789abc"
+            loan_number = "LN-001"
+            term_months = 6
+            repayment_frequency = Loan.RepaymentFrequency.MONTHLY
+            outstanding_balance = Decimal("1000000")
+            disbursement_date = date(2024, 1, 1)
+            product = SimpleNamespace(min_term_months=1, max_term_months=12)
+            status = Loan.Status.ACTIVE
+            total_repayable = Decimal("1200000")
+            total_interest = Decimal("200000")
+            maturity_date = date(2024, 7, 1)
+
+            def __init__(self):
+                self.saved = False
+
+            def save(self):
+                self.saved = True
+
+        class DummyScheduleManager:
+            def __init__(self):
+                self.deleted = False
+                self.created_rows = []
+
+            def filter(self, **kwargs):
+                return self
+
+            def delete(self):
+                self.deleted = True
+
+            def bulk_create(self, rows):
+                self.created_rows = rows
+
+        loan = DummyLoan()
+        request = RequestFactory().post(
+            reverse("loans:reschedule", kwargs={"pk": loan.pk}),
+            {
+                "term_months": "6",
+                "frequency": Loan.RepaymentFrequency.MONTHLY,
+                "reason": "No change needed",
+                "disbursement_date": "2024-01-01",
+            },
+        )
+        request.user = DummyUser()
+        schedule_manager = DummyScheduleManager()
+
+        with patch("loans.views.get_object_or_404", return_value=loan), \
+             patch("loans.views.build_loan_schedule_context", side_effect=AssertionError("build_loan_schedule_context should not run when settings are unchanged")), \
+             patch("loans.views.messages.success"), \
+             patch("loans.views.messages.error"), \
+             patch("loans.views.LoanSchedule.objects", new=schedule_manager), \
+             patch("loans.views.LoanDisbursementAudit.objects.create", return_value=None):
+            response = loan_views.loan_reschedule(request, "loan-1")
+
+        self.assertIn(response.status_code, (200, 302))
+        self.assertFalse(loan.saved)
+        self.assertFalse(schedule_manager.deleted)
+        self.assertEqual(schedule_manager.created_rows, [])
 
 
 class LoanScheduleContextTests(SimpleTestCase):
