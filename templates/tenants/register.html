@@ -11,6 +11,24 @@
 {% endblock %}
 
 {% block popup_content %}
+  <style>
+    .slug-inline { display: flex; gap: 0.6rem; align-items: center; }
+    .slug-inline input { flex: 1; }
+    .btn-sm { padding: 0.65rem 0.95rem; font-size: 0.9rem; }
+    .suggestion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.45rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--accent);
+      font-size: 0.9rem;
+      width: fit-content;
+    }
+  </style>
+
   <div class="popup-panel">
     <span class="eyebrow">Register</span>
     <h2 id="popup-title">Start your Abacash onboarding</h2>
@@ -74,6 +92,15 @@
             <option value="ENTERPRISE" {% if form_data.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
           </select>
         </div>
+        <div class="form-group">
+          <label for="tenant_slug">Tenant slug <span class="required">*</span></label>
+          <div class="slug-inline">
+            <input id="tenant_slug" name="tenant_slug" type="text" required value="{{ form_data.tenant_slug|default:'' }}" placeholder="acme-finance">
+            <button type="button" class="btn btn-secondary btn-sm" id="use-suggested-slug">Use suggestion</button>
+          </div>
+          <div class="field-note">A slug is suggested from your company name and can be edited before submission.</div>
+          <div class="suggestion-pill">Suggested: <strong id="slug-preview">company-name</strong></div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -91,8 +118,44 @@
 
 {% block extra_js %}
 <script>
+  function slugify(value) {
+    return (value || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     openPopup();
+
+    const companyNameInput = document.getElementById('company_name');
+    const slugInput = document.getElementById('tenant_slug');
+    const slugPreview = document.getElementById('slug-preview');
+    const useSuggestedButton = document.getElementById('use-suggested-slug');
+
+    if (!companyNameInput || !slugInput || !slugPreview || !useSuggestedButton) {
+      return;
+    }
+
+    function syncSlug() {
+      const value = slugify(companyNameInput.value);
+      slugPreview.textContent = value || 'company-name';
+      if (!slugInput.value || slugInput.dataset.userEdited !== 'true') {
+        slugInput.value = value;
+      }
+    }
+
+    companyNameInput.addEventListener('input', syncSlug);
+    slugInput.addEventListener('input', function() {
+      slugInput.dataset.userEdited = slugInput.value.trim() !== '' ? 'true' : 'false';
+    });
+    useSuggestedButton.addEventListener('click', function() {
+      slugInput.value = slugify(companyNameInput.value);
+      slugInput.dataset.userEdited = 'true';
+    });
+
+    syncSlug();
   });
 </script>
 {% endblock %}

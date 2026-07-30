@@ -2,7 +2,7 @@ from io import StringIO
 
 from django.contrib import messages
 from django.core import management
-from django.core.mail import mail_admins
+from django.core.mail import mail_admins, send_mail
 from django.conf import settings as django_settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -238,9 +238,12 @@ def public_admin(request):
 
     recent_registrations = CompanyRegistration.objects.order_by("-submitted_at")[:6]
     tenants = []
+    active_tenant_count = 0
     # Use only() to avoid referencing columns that may not exist until migrations run (e.g. plan)
-    for company in Company.objects.only('name', 'schema_name').order_by("name"):
+    for company in Company.objects.only('name', 'schema_name', 'is_active').order_by("name"):
         domains = [domain.domain for domain in getattr(company, "domain_set", []).all()] if hasattr(company, "domain_set") else []
+        if company.is_active:
+            active_tenant_count += 1
         tenants.append({
             "company": company,
             "domains": domains,
@@ -251,6 +254,10 @@ def public_admin(request):
         "plan_choices": CompanyRegistration.Plan.choices,
         "recent_registrations": recent_registrations,
         "tenants": tenants,
+        "tenant_count": len(tenants),
+        "active_tenant_count": active_tenant_count,
+        "inactive_tenant_count": len(tenants) - active_tenant_count,
+        "lead_count": recent_registrations.count(),
         "tenant_domain_root": getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan"),
     }
 
@@ -394,6 +401,81 @@ def public_admin(request):
 
             return redirect("tenants:public_admin")
 
+        if action == "reset_tenant_access":
+            tenant_schema = request.POST.get("reset_tenant_schema", "").strip().lower().replace("-", "_")
+            user_email = request.POST.get("reset_email", "").strip()
+            if not tenant_schema or not user_email:
+                messages.error(request, "Tenant schema and user email are required to reset access.")
+                return render(request, "tenants/public_admin.html", admin_context)
+
+            if not Company.objects.filter(schema_name=tenant_schema).exists():
+                messages.error(request, f"Tenant schema '{tenant_schema}' does not exist.")
+                return render(request, "tenants/public_admin.html", admin_context)
+
+            from accounts.models import User
+            from django.contrib.auth.tokens import default_token_generator
+            from django.utils.encoding import force_bytes
+            from django.utils.http import urlsafe_base64_encode
+
+            try:
+                with schema_context(tenant_schema):
+                    user = User.objects.filter(email=user_email).first()
+                    if not user:
+                        messages.error(request, f"No user with email '{user_email}' was found in tenant '{tenant_schema}'.")
+                        return render(request, "tenants/public_admin.html", admin_context)
+
+                    tenant_domain_root = getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan")
+                    tenant_domain = None
+                    company = Company.objects.get(schema_name=tenant_schema)
+                    domain_queryset = getattr(company, "domain_set", None)
+                    if domain_queryset is not None:
+                        primary_domain = domain_queryset.filter(is_primary=True).first() or domain_queryset.first()
+                        if primary_domain:
+                            tenant_domain = primary_domain.domain
+                    if not tenant_domain:
+                        tenant_domain = f"{tenant_schema}.{tenant_domain_root}"
+
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = default_token_generator.make_token(user)
+                    reset_url = f"https://{tenant_domain}/accounts/reset/{uid}/{token}/"
+                    send_mail(
+                        subject=f"Abacash access reset for {tenant_schema}",
+                        message=(
+                            f"Hello {user.get_full_name() or user.username},\n\n"
+                            f"A platform operator requested a password reset for your Abacash account in tenant '{tenant_schema}'.\n"
+                            f"Use the following secure link to complete setup: {reset_url}\n\n"
+                            "If you did not request this, contact support immediately."
+                        ),
+                        from_email=getattr(django_settings, "DEFAULT_FROM_EMAIL", "support@abacash.loan"),
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, f"Password reset instructions were sent to {user.email} for tenant '{tenant_schema}'.")
+            except Exception as exc:
+                messages.error(request, f"Access reset failed: {exc}")
+                return render(request, "tenants/public_admin.html", admin_context)
+
+            return redirect("tenants:public_admin")
+
+        if action == "suspend_tenant":
+            tenant_schema = request.POST.get("suspend_tenant_schema", "").strip().lower().replace("-", "_")
+            if not tenant_schema:
+                messages.error(request, "Tenant schema is required to suspend or activate a tenant.")
+                return render(request, "tenants/public_admin.html", admin_context)
+
+            try:
+                company = Company.objects.get(schema_name=tenant_schema)
+                company.is_active = not company.is_active
+                company.save()
+                status_label = "suspended" if not company.is_active else "activated"
+                messages.success(request, f"Tenant '{tenant_schema}' was {status_label} successfully.")
+            except Company.DoesNotExist:
+                messages.error(request, f"Tenant schema '{tenant_schema}' does not exist.")
+            except Exception as exc:
+                messages.error(request, f"Tenant status update failed: {exc}")
+
+            return redirect("tenants:public_admin")
+
         if action == "update_subscription":
             tenant_schema = request.POST.get("subscription_tenant_schema", "").strip().lower().replace("-", "_")
             plan = request.POST.get("subscription_plan", "STARTER").strip().upper()
@@ -479,10 +561,16 @@ def register(request):
 
         # --- Launch provisioning in background (detached) so registrations become direct onboarding ---
         try:
-            # Build schema, domain and a generated admin password
-            schema = slugify(reg.company_name).lower().replace('-', '_')
+            # Build schema, domain and a generated admin password.
+            # NOTE: Postgres schema names use underscores (hyphens require
+            # quoting), but hostnames must NOT contain underscores — Django's
+            # get_host() validates against RFC 1034/1035 and will raise
+            # DisallowedHost for any underscore in the Host header, regardless
+            # of ALLOWED_HOSTS. Keep these two derived separately.
+            slug = slugify(reg.company_name).lower()
+            schema = slug.replace('-', '_')
             tenant_domain_root = getattr(django_settings, 'TENANT_PUBLIC_DOMAIN', 'abacash.loan')
-            domain = f"{schema}.{tenant_domain_root}"
+            domain = f"{slug}.{tenant_domain_root}"
             admin_password = secrets.token_urlsafe(10)
 
             # Locate manage.py
@@ -517,14 +605,19 @@ def register(request):
             os.makedirs(logs_dir, exist_ok=True)
             log_file = os.path.join(logs_dir, f"onboard_{schema}.log")
             
+            # Write onboarding output (including tracebacks on failure) to a
+            # per-tenant log file instead of discarding it — previously all
+            # output went to DEVNULL, so a partially-failed onboarding left
+            # zero trace anywhere (no log file, no journalctl entry).
+            log_fh = open(log_file, "ab", buffering=0)
             DEVNULL = subprocess.DEVNULL
             if sys.platform.startswith('win'):
                 DETACHED_PROCESS = 0x00000008
                 CREATE_NEW_PROCESS_GROUP = 0x00000200
                 creationflags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
-                subprocess.Popen(cmd, stdout=DEVNULL, stderr=DEVNULL, stdin=DEVNULL, creationflags=creationflags, close_fds=True)
+                subprocess.Popen(cmd, stdout=log_fh, stderr=log_fh, stdin=DEVNULL, creationflags=creationflags, close_fds=True)
             else:
-                subprocess.Popen(cmd, stdout=DEVNULL, stderr=DEVNULL, stdin=DEVNULL, close_fds=True)
+                subprocess.Popen(cmd, stdout=log_fh, stderr=log_fh, stdin=DEVNULL, close_fds=True)
 
             # Record provisioning start in registration notes (do NOT store password)
             reg.notes = (reg.notes + f"\n[onboard-started] schema:{schema}, domain:{domain}, timestamp:{__import__('datetime').datetime.now().isoformat()}").strip()

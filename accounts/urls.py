@@ -93,8 +93,17 @@ urlpatterns = [
     path("admin-panel/parameters/<int:pk>/delete/", views.system_parameter_delete, name="system_parameter_delete"),
 
     # Password reset helper views for tenant and registration onboarding flow
-    path("password_reset/", auth_views.PasswordResetView.as_view(
-        template_name="accounts/password_reset_form.html"), name="password_reset"),
+    path(
+    "password_reset/",
+    auth_views.PasswordResetView.as_view(
+        template_name="accounts/password_reset_form.html",
+        email_template_name="accounts/password_reset_email.txt",
+        html_email_template_name="accounts/password_reset_email.html",
+        subject_template_name="accounts/password_reset_subject.txt",
+        success_url=reverse_lazy("accounts:password_reset_done"),
+    ),
+    name="password_reset",
+),
     path("password_reset/done/", auth_views.PasswordResetDoneView.as_view(
         template_name="accounts/password_reset_done.html"), name="password_reset_done"),
     path("reset/<uidb64>/<token>/", TenantPasswordResetConfirmView.as_view(), name="password_reset_confirm"),

@@ -9124,3 +9124,559 @@ LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
 2026-07-24 11:12:46 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\tenants\models.py changed, reloading.
 2026-07-24 11:12:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-07-24 14:14:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-27 10:24:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-27 10:25:00 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-27 10:25:22 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-27 10:25:22 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-27 10:25:23 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:23 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:25:31 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:35 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:36 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:36 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:25:38 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:39 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:39 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:25:43 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:44 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:44 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:25:48 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:49 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:49 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:25:51 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-27 10:25:52 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:25:52 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:26:07 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-27 10:26:07 [ERROR] django.server: "GET / HTTP/1.1" 500 196688
+2026-07-27 10:26:07 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:26:07 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-27 10:26:07 [ERROR] django.request: Internal Server Error: /favicon.ico
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 187, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 53, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 192, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 42, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 32, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "django_session" does not exist
+LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
+                                                             ^
+
+2026-07-27 10:26:07 [ERROR] django.server: "GET /favicon.ico HTTP/1.1" 500 196548
+2026-07-27 10:26:22 [WARNING] django.request: Not Found: /sw.js
+2026-07-27 10:26:22 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4192
+2026-07-30 12:23:21 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 12:24:07 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-30 12:24:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 12:24:18 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-30 12:24:18 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:24:18 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:24:18 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:24:18 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:24:19 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:24:19 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:24:19 [WARNING] django.request: Not Found: /static/images/aba.png
+2026-07-30 12:24:19 [WARNING] django.server: "GET /static/images/aba.png HTTP/1.1" 404 179
+2026-07-30 12:24:21 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 12:24:21 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 12:24:50 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-30 12:25:46 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 12:25:46 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 12:39:38 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\tenants\views.py changed, reloading.
+2026-07-30 12:39:41 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 12:46:09 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\tenants\views.py changed, reloading.
+2026-07-30 12:46:13 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 12:46:28 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-30 12:46:28 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:46:28 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:46:28 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:46:28 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:46:29 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:46:29 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:46:29 [WARNING] django.request: Not Found: /static/images/aba.png
+2026-07-30 12:46:29 [WARNING] django.server: "GET /static/images/aba.png HTTP/1.1" 404 179
+2026-07-30 12:46:30 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 12:46:30 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 12:46:37 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-07-30 12:47:13 [WARNING] django.request: Not Found: /public-admin
+2026-07-30 12:47:13 [WARNING] django.server: "GET /public-admin HTTP/1.1" 404 0
+2026-07-30 12:47:24 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-07-30 12:47:24 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-07-30 12:47:24 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 33505
+2026-07-30 12:47:24 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:47:24 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:47:24 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:47:24 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:47:26 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-30 12:47:26 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-07-30 12:47:42 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 33578
+2026-07-30 12:47:42 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:47:42 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:47:42 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:47:42 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:47:58 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-07-30 12:47:58 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 50941
+2026-07-30 12:47:59 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:47:59 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:47:59 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:47:59 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:50:47 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 50941
+2026-07-30 12:50:47 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:50:47 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:50:47 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:50:47 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:50:52 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 50941
+2026-07-30 12:50:52 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:50:52 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:50:52 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:50:52 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:50:54 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 50941
+2026-07-30 12:50:54 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 12:50:54 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 12:50:54 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 12:50:54 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 12:53:19 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 12:53:19 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 13:27:20 [WARNING] django.request: Not Found: /
+2026-07-30 13:27:20 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 13:28:20 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 13:28:30 [WARNING] django.request: Not Found: /
+2026-07-30 13:28:30 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 13:28:40 [WARNING] django.request: Not Found: /
+2026-07-30 13:28:40 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 13:28:46 [WARNING] django.request: Not Found: /
+2026-07-30 13:28:46 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 13:29:00 [INFO] django.server: code 400, message Bad request version ('å®PÑmù')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:01 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x07\x00\x01\x00\x06ü\x03\x03cZÿðª')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:01 [INFO] django.server: code 400, message Bad request version ('£nÇ¯L\x9cB¥6:Å\x90vA\x99îyì\x8eø¬b')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:01 [INFO] django.server: code 400, message Bad request version ('\x00\x02\x01\x00\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x12\x00\x00\x00')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:01 [INFO] django.server: code 400, message Bad request version ('ºº\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06S')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:01 [INFO] django.server: code 400, message Bad request version ('ª\x0eÉ)\x9a\x9fYjO\x9c')
+2026-07-30 13:29:01 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:02 [INFO] django.server: code 400, message Bad request version ('¹@\x08fz9ù3\x0e¹/®Ù\x02\x03É/d\x06\x10=ðo\x97')
+2026-07-30 13:29:02 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:02 [INFO] django.server: code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x06À\x01\x00\x06¼\x03\x03r>áîi6OççÇ\x06\x82gïýì@9Ó\x8fâ\x94<4')
+2026-07-30 13:29:02 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 13:29:03 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 13:29:03 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 13:29:51 [WARNING] django.request: Not Found: /
+2026-07-30 13:29:51 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 14:58:04 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 14:58:16 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-30 14:58:17 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-07-30 14:58:17 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 14:58:17 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-07-30 14:58:17 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 14:58:18 [WARNING] django.request: Not Found: /static/images/aba.png
+2026-07-30 14:58:18 [WARNING] django.server: "GET /static/images/aba.png HTTP/1.1" 404 179
+2026-07-30 14:58:18 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-07-30 14:58:18 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-07-30 14:58:18 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-30 14:58:18 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-07-30 14:58:20 [WARNING] django.request: Not Found: /sw.js
+2026-07-30 14:58:20 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 179
+2026-07-30 15:36:15 [WARNING] django.request: Not Found: /
+2026-07-30 15:36:15 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:36:38 [INFO] django.server: code 400, message Bad request version ('\x00\x12\x00\x10\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x00')
+2026-07-30 15:36:38 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 15:36:38 [INFO] django.server: code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07\x00\x01\x00\x06ü\x03\x03\x0e¯\x12Â\x81\x9frÏ¸½â\x18([ÈN?(jH\x14\x177\x07\x1aC\x17\x96jrâq')
+2026-07-30 15:36:38 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-07-30 15:37:13 [WARNING] django.request: Not Found: /
+2026-07-30 15:37:13 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:37:33 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-30 15:37:35 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:37:42 [WARNING] django.request: Not Found: /
+2026-07-30 15:37:42 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:37:54 [WARNING] django.request: Not Found: /
+2026-07-30 15:37:54 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:38:40 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:38:46 [WARNING] django.request: Not Found: /
+2026-07-30 15:38:46 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:38:48 [WARNING] django.request: Not Found: /
+2026-07-30 15:38:48 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:39:02 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-07-30 15:39:03 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 50938
+2026-07-30 15:39:03 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-07-30 15:39:03 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-07-30 15:39:04 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-30 15:39:04 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4210
+2026-07-30 15:39:21 [WARNING] django.request: Not Found: /
+2026-07-30 15:39:21 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:39:30 [WARNING] django.request: Not Found: /
+2026-07-30 15:39:30 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:42:25 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:42:35 [WARNING] django.request: Not Found: /
+2026-07-30 15:42:35 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:42:37 [WARNING] django.request: Not Found: /
+2026-07-30 15:42:37 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:47:37 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:47:45 [WARNING] django.request: Not Found: /
+2026-07-30 15:47:45 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:55:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:56:17 [WARNING] django.request: Not Found: /
+2026-07-30 15:56:17 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:58:25 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 15:58:31 [WARNING] django.request: Not Found: /
+2026-07-30 15:58:31 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 15:58:37 [WARNING] django.request: Not Found: /login
+2026-07-30 15:58:37 [WARNING] django.server: "GET /login HTTP/1.1" 404 0
+2026-07-30 16:10:30 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:10:38 [WARNING] django.request: Not Found: /
+2026-07-30 16:10:38 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-07-30 16:10:53 [WARNING] django.request: Not Found: /accounts/login/
+2026-07-30 16:10:53 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-07-30 16:15:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:15:37 [WARNING] django.request: Not Found: /login
+2026-07-30 16:15:37 [WARNING] django.server: "GET /login HTTP/1.1" 404 2906
+2026-07-30 16:15:37 [WARNING] django.request: Not Found: /favicon.ico
+2026-07-30 16:15:37 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-07-30 16:15:49 [INFO] django.server: "GET / HTTP/1.1" 200 11128
+2026-07-30 16:15:49 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 50938
+2026-07-30 16:15:53 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:18:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:18:31 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:18:41 [ERROR] django.request: Internal Server Error: /accounts/password_reset/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\views.py", line 227, in dispatch
+    return super().dispatch(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\edit.py", line 151, in post
+    return self.form_valid(form)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\views.py", line 240, in form_valid
+    form.save(**opts)
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\forms.py", line 376, in save
+    self.send_mail(
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\forms.py", line 310, in send_mail
+    body = loader.render_to_string(email_template_name, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\defaulttags.py", line 54, in render
+    output = self.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\loader_tags.py", line 56, in render
+    result = self.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\template\defaulttags.py", line 479, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\urls\resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'password_reset_confirm' not found. 'password_reset_confirm' is not a valid view function or pattern name.
+2026-07-30 16:18:41 [ERROR] django.server: "POST /accounts/password_reset/ HTTP/1.1" 500 219204
+2026-07-30 16:25:59 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\accounts\urls.py changed, reloading.
+2026-07-30 16:26:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:29:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:29:55 [ERROR] django.request: Internal Server Error: /accounts/password_reset/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\views.py", line 227, in dispatch
+    return super().dispatch(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\base.py", line 143, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\edit.py", line 151, in post
+    return self.form_valid(form)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\contrib\auth\views.py", line 241, in form_valid
+    return super().form_valid(form)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\edit.py", line 63, in form_valid
+    return HttpResponseRedirect(self.get_success_url())
+                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\views\generic\edit.py", line 57, in get_success_url
+    if not self.success_url:
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\utils\functional.py", line 187, in __wrapper__
+    result = func(*self._args, **self._kw)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Desktop\abacash\venv\Lib\site-packages\django\urls\resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'password_reset_done' not found. 'password_reset_done' is not a valid view function or pattern name.
+2026-07-30 16:29:55 [ERROR] django.server: "POST /accounts/password_reset/ HTTP/1.1" 500 154690
+2026-07-30 16:31:01 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\accounts\urls.py changed, reloading.
+2026-07-30 16:31:03 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:31:13 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:31:13 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:33:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:33:36 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\config\settings.py changed, reloading.
+2026-07-30 16:33:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:34:07 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:34:09 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:34:19 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:34:19 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:36:06 [INFO] django.utils.autoreload: C:\Users\aggyd\Desktop\abacash\accounts\urls.py changed, reloading.
+2026-07-30 16:36:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:37:14 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:37:18 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:37:29 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:37:29 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:38:03 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:38:06 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:38:17 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:38:17 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:38:23 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:47:04 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:47:20 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:47:20 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:48:34 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:48:36 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:49:01 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:49:01 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-07-30 16:49:44 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-07-30 16:50:06 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 11128
+2026-07-30 16:50:12 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-07-30 16:50:36 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-07-30 16:50:36 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
