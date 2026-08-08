@@ -12,6 +12,7 @@ from tenants import views as tenant_views
 
 urlpatterns = [
     path("", include(("tenants.urls", "tenants"), namespace="tenants")),
+    path("platform/", include("platform_admin.urls")),
     # robots.txt and sitemap served from views
     path("robots.txt", tenant_views.robots_txt, name="robots_txt"),
     path("sitemap.xml", tenant_views.sitemap_xml, name="sitemap_xml"),

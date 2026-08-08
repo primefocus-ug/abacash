@@ -1,31 +1,478 @@
-{% extends "tenants/landing_base.html" %}
-{% block title %}Public Admin Login | Abacash{% endblock %}
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Platform Admin Login — Abacash{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --login-bg-start: #0F172A;
+    --login-bg-end: #1E293B;
+    --login-card-bg: var(--surface);
+    --login-card-border: var(--border);
+    --login-text-primary: var(--text-primary);
+    --login-text-secondary: var(--text-secondary);
+    --login-text-muted: var(--text-muted);
+    --login-input-bg: var(--surface-2);
+    --login-input-border: var(--border);
+    --login-input-focus: #3B82F6;
+    --login-btn-bg: linear-gradient(135deg, #3B82F6, #2563EB);
+    --login-btn-hover: linear-gradient(135deg, #60A5FA, #3B82F6);
+    --login-error-bg: rgba(239, 68, 68, 0.1);
+    --login-error-border: rgba(239, 68, 68, 0.2);
+    --login-error-color: #dc2626;
+    --login-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+    --login-radius: 16px;
+    --login-transition: 0.25s ease;
+  }
+
+  [data-theme="dark"] {
+    --login-bg-start: #020617;
+    --login-bg-end: #0F172A;
+    --login-card-bg: #111827;
+    --login-card-border: #334155;
+    --login-text-primary: #F8FAFC;
+    --login-text-secondary: #94A3B8;
+    --login-text-muted: #64748B;
+    --login-input-bg: #1E293B;
+    --login-input-border: #334155;
+    --login-error-bg: rgba(248, 113, 113, 0.15);
+    --login-error-border: rgba(248, 113, 113, 0.25);
+    --login-error-color: #F87171;
+    --login-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  }
+
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--login-bg-start) 0%, var(--login-bg-end) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(45, 212, 191, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--login-card-bg);
+    border-radius: var(--login-radius);
+    padding: 48px 36px 40px;
+    box-shadow: var(--login-shadow);
+    border: 1px solid var(--login-card-border);
+    position: relative;
+    z-index: 1;
+    transition: background var(--login-transition), border-color var(--login-transition), box-shadow var(--login-transition);
+  }
+
+  .login-brand {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .login-brand-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #3B82F6, #2DD4BF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    box-shadow: 0 12px 40px rgba(37, 99, 235, 0.3);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .login-brand-icon:hover {
+    box-shadow: 0 16px 56px rgba(37, 99, 235, 0.4);
+  }
+
+  .login-brand h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--login-text-primary);
+    margin: 0 0 4px;
+    transition: color var(--login-transition);
+  }
+
+  .login-brand p {
+    font-size: 14px;
+    color: var(--login-text-muted);
+    margin: 0;
+    transition: color var(--login-transition);
+  }
+
+  .login-error {
+    background: var(--login-error-bg);
+    border: 1px solid var(--login-error-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    color: var(--login-error-color);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background var(--login-transition), border-color var(--login-transition), color var(--login-transition);
+  }
+
+  .login-error svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+  }
+
+  .login-form-group {
+    margin-bottom: 18px;
+  }
+
+  .login-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--login-text-secondary);
+    margin-bottom: 5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    transition: color var(--login-transition);
+  }
+
+  .login-form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid var(--login-input-border);
+    border-radius: var(--radius-sm);
+    background: var(--login-input-bg);
+    color: var(--login-text-primary);
+    font-size: 14px;
+    font-family: var(--font-body);
+    transition: border-color 0.2s, box-shadow 0.2s, background var(--login-transition), color var(--login-transition);
+    outline: none;
+  }
+
+  .login-form-group input:focus {
+    border-color: var(--login-input-focus);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  }
+
+  .login-form-group input::placeholder {
+    color: var(--login-text-muted);
+    opacity: 0.7;
+  }
+
+  .login-form-group input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--login-input-bg) inset !important;
+    -webkit-text-fill-color: var(--login-text-primary) !important;
+  }
+
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--login-btn-bg);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.25s, background 0.3s;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.35);
+    background: var(--login-btn-hover);
+  }
+
+  .login-btn:active {
+    transform: scale(0.97);
+  }
+
+  .login-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
+  }
+
+  .login-divider {
+    margin: 24px 0 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--login-card-border);
+    text-align: center;
+    transition: border-color var(--login-transition);
+  }
+
+  .login-divider a {
+    font-size: 13px;
+    color: var(--login-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .login-divider a:hover {
+    color: var(--login-input-focus);
+  }
+
+  .login-footer-text {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--login-text-muted);
+    transition: color var(--login-transition);
+  }
+
+  .login-footer-text span {
+    display: inline-block;
+    margin: 0 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .login-card {
+      padding: 32px 20px 28px;
+      border-radius: 12px;
+    }
+
+    .login-brand-icon {
+      width: 52px;
+      height: 52px;
+      font-size: 18px;
+      border-radius: 14px;
+    }
+
+    .login-brand h1 {
+      font-size: 19px;
+    }
+
+    .login-brand p {
+      font-size: 13px;
+    }
+
+    .login-form-group input {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .login-btn {
+      padding: 11px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .login-card {
+      padding: 24px 14px 20px;
+    }
+
+    .login-brand-icon {
+      width: 44px;
+      height: 44px;
+      font-size: 15px;
+    }
+
+    .login-brand h1 {
+      font-size: 17px;
+    }
+  }
+
+  @media (min-height: 800px) {
+    .login-page {
+      padding: 40px;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .login-btn {
+      transition: none;
+    }
+    .login-btn:hover {
+      transform: none;
+    }
+    .login-brand-icon {
+      transition: none;
+    }
+    .login-brand-icon:hover {
+      box-shadow: 0 12px 40px rgba(37, 99, 235, 0.3);
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .login-page {
+      background: #fff !important;
+      padding: 20px !important;
+    }
+    .login-card {
+      box-shadow: none !important;
+      border: 1px solid #ddd !important;
+    }
+    .login-btn {
+      display: none !important;
+    }
+    .login-error {
+      border: 1px solid #ccc !important;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <div class="eyebrow">Platform operator sign in</div>
-    <h1 class="hero-title">Public Admin Login</h1>
-    <p class="hero-copy">Sign in with your platform credentials to manage onboarding and subscriptions.</p>
-  </section>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-icon">AB</div>
+      <h1>Platform Admin</h1>
+      <p>Secure control panel access</p>
+    </div>
 
-  <section class="registration-container" style="margin-top: 2rem; max-width:520px;">
     {% if error %}
-      <div class="message message-error">{{ error }}</div>
+    <div class="login-error" role="alert">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>{{ error }}</span>
+    </div>
     {% endif %}
-    <form method="post" class="form-grid" style="margin-top:1rem;">
+
+    <form method="post" autocomplete="off" novalidate>
       {% csrf_token %}
-      <div class="form-group">
-        <label for="admin_user">Username</label>
-        <input id="admin_user" name="username" type="text" placeholder="admin" required>
+
+      <div class="login-form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Enter your username"
+          required
+          autofocus
+          autocomplete="username"
+          value="{{ request.POST.username|default:'' }}"
+        >
       </div>
-      <div class="form-group">
-        <label for="admin_pass">Password</label>
-        <input id="admin_pass" name="password" type="password" placeholder="Password" required>
+
+      <div class="login-form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        >
       </div>
-      <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1rem;">
-        <button class="btn btn-primary" type="submit">Sign in</button>
-        <a class="btn btn-secondary" href="{% url 'tenants:landing' %}">Cancel</a>
-      </div>
+
+      <button type="submit" class="login-btn">
+        <span>Sign In</span>
+      </button>
     </form>
-  </section>
+
+    <div class="login-divider">
+      <a href="{% url 'tenants:landing' %}">← Back to Home</a>
+    </div>
+
+    <div class="login-footer-text">
+      <span>🔒</span>
+      <span>Secure • HTTPS</span>
+      <span>•</span>
+      <span>v2.0</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    'use strict';
+
+    // Auto-focus handling with delay for better UX
+    document.addEventListener('DOMContentLoaded', function() {
+      var usernameInput = document.getElementById('username');
+      if (usernameInput && !usernameInput.value) {
+        setTimeout(function() {
+          usernameInput.focus();
+        }, 100);
+      }
+
+      // Password visibility toggle (optional enhancement)
+      var passwordInput = document.getElementById('password');
+      if (passwordInput) {
+        // Add a subtle hint for caps lock
+        passwordInput.addEventListener('keydown', function(e) {
+          if (e.getModifierState && e.getModifierState('CapsLock')) {
+            // Could show a small indicator, but keeping it simple
+          }
+        });
+      }
+    });
+
+    // Handle form submission errors gracefully
+    var form = document.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        var username = document.getElementById('username');
+        var password = document.getElementById('password');
+
+        if (!username.value.trim()) {
+          e.preventDefault();
+          username.focus();
+          username.style.borderColor = '#dc2626';
+          return false;
+        }
+
+        if (!password.value.trim()) {
+          e.preventDefault();
+          password.focus();
+          password.style.borderColor = '#dc2626';
+          return false;
+        }
+
+        // Reset border colors
+        username.style.borderColor = '';
+        password.style.borderColor = '';
+        return true;
+      });
+
+      // Clear error styling on input
+      form.querySelectorAll('input').forEach(function(input) {
+        input.addEventListener('input', function() {
+          this.style.borderColor = '';
+        });
+      });
+    }
+
+    // Keyboard shortcut: Escape to go back
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        window.location.href = '{% url "tenants:landing" %}';
+      }
+    });
+
+  })();
+</script>
 {% endblock %}

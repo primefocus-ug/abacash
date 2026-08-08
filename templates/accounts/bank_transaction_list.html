@@ -13,7 +13,7 @@
 {% block content %}
 <div class="card mb-3">
   <div class="card-body" style="padding:14px 20px;">
-    <form method="get" class="flex gap-2" style="align-items:flex-end;flex-wrap:wrap;">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
       <div>
         <label style="display:block;margin-bottom:4px;font-size:12px;">Branch</label>
         <select name="branch" style="width:180px;margin-bottom:0;">
@@ -42,7 +42,7 @@
       </div>
       <div>
         <label style="display:block;margin-bottom:4px;font-size:12px;">Search</label>
-        <input type="search" name="q" value="{{ q }}" placeholder="Category, branch, ref..." style="width:200px;margin-bottom:0;">
+        <input type="search" name="q" value="{{ q }}" placeholder="Category, branch, ref..." style="margin-bottom:0;width:200px;">
       </div>
       <button type="submit" class="btn btn-primary btn-sm">Filter</button>
       {% if branch_filter or type_filter or date_from or date_to or q %}
@@ -52,7 +52,7 @@
   </div>
 </div>
 
-<div class="metrics-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:20px;">
+<div class="metrics-grid" style="margin-bottom:20px;">
   <div class="metric-card blue" style="cursor:default;">
     <div class="metric-label">Total Amount</div>
     <div class="metric-value blue">{{ total_amount|ugx }}</div>

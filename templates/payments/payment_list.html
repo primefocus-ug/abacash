@@ -100,8 +100,16 @@
   <div class="card-header">
     <form method="get" class="search-filter-bar">
       <input type="text" name="q" value="{{ search }}" placeholder="Search loan # or client…" style="width:280px">
+      {% if branches %}
+      <select name="branch" onchange="this.form.submit()">
+        <option value="" {% if not selected_branch %}selected{% endif %}>All branches</option>
+        {% for b in branches %}
+        <option value="{{ b.pk }}" {% if selected_branch == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+      {% endif %}
       <button type="submit" class="btn btn-secondary btn-sm">Search</button>
-      {% if search %}<a href="{% url 'payments:list' %}" class="btn btn-secondary btn-sm">Clear</a>{% endif %}
+      {% if search or selected_branch %}<a href="{% url 'payments:list' %}" class="btn btn-secondary btn-sm">Clear</a>{% endif %}
     </form>
   </div>
   <div class="table-wrap">

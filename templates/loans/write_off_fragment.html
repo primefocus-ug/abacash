@@ -1,0 +1,56 @@
+{% load humanize aba_filters %}
+<div style="padding:0;">
+
+  {# ── Header info strip ── #}
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0;border-bottom:1px solid var(--border);background:var(--bg-raised);">
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Loan</div>
+      <div style="font-family:var(--font-mono);font-weight:600;font-size:14px;">{{ loan.loan_number }}</div>
+    </div>
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Outstanding</div>
+      <div style="font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--red-400);">{{ loan.outstanding_balance|money }}</div>
+    </div>
+    <div style="padding:12px 18px;border-right:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Days Overdue</div>
+      <div style="font-size:13px;font-weight:500;">{{ loan.days_overdue }} days</div>
+    </div>
+    <div style="padding:12px 18px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:4px;">Client</div>
+      <div style="font-size:13px;font-weight:500;">{{ loan.client.full_name }}</div>
+    </div>
+  </div>
+
+  {# ── Helper note ── #}
+  <div style="margin:16px 20px 0;padding:10px 14px;background:var(--red-dim);border-radius:var(--radius-sm);font-size:12.5px;color:var(--red-400);border-left:3px solid var(--red-400);">
+    This loan is {{ loan.days_overdue }} days overdue, past the {{ write_off_threshold_days }}-day auto-write-off threshold, and hasn't been written off yet. Writing it off moves it to <strong>Written Off</strong>, waives the remaining schedule (UGX {{ loan.outstanding_balance|floatformat:0|intcomma }} outstanding), and stops collection reminders. If the client later settles or agrees new terms, it can be reinstated from the loan's detail page.
+  </div>
+
+  {# ── Form ── #}
+  <form method="post"
+        hx-post="{{ request.path }}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        style="padding:20px;">
+
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Write-off Reason <span style="color:var(--red-400);">*</span></label>
+      <textarea name="write_off_reason" rows="4" required
+                placeholder="Explain why this loan is being written off…"></textarea>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:4px;border-top:1px solid var(--border);margin-top:4px;">
+      <button type="button" class="btn btn-secondary" onclick="hideModal();">
+        Cancel
+      </button>
+      <button type="submit" class="btn btn-danger" style="gap:6px;"
+              hx-confirm="Write off {{ loan.loan_number }}? The client's remaining schedule will be waived.">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Write Off Loan
+      </button>
+    </div>
+
+  </form>
+</div>

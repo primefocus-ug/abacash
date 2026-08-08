@@ -1,7 +1,4 @@
-from io import StringIO
-
 from django.contrib import messages
-from django.core import management
 from django.core.mail import mail_admins, send_mail
 from django.conf import settings as django_settings
 from django.http import HttpResponse, JsonResponse
@@ -11,16 +8,13 @@ from django.utils.text import slugify
 
 from django_tenants.utils import schema_context
 
-import os
-import sys
-import subprocess
 import secrets
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-from .models import Company, CompanyRegistration
+from .models import Company, CompanyRegistration, Domain
 
 PAGE_LINKS = [
     {"label": "Home", "url_name": "landing"},
@@ -151,42 +145,39 @@ def pages(request):
 
 
 def public_admin_login(request):
-    """Public-admin login using a signed cookie so the public schema does not
-    require the django_session table. This avoids depending on DB sessions
-    while still providing a short-lived authenticated experience for the
-    platform onboarding UI.
+    """Public-admin login for the /public-admin/ control panel.
+
+    Authenticates against real, individually-hashed PlatformAdmin rows (see
+    tenants.auth and tenants.models.PlatformAdmin) rather than a single shared
+    credential pair — that legacy scheme has been retired (see settings.py).
+    Uses a normal server-side session (django.contrib.sessions is enabled on
+    the public schema — see settings.py) rather than a hand-signed cookie.
     """
-    from django.conf import settings as django_settings
-    from django.shortcuts import render, redirect
-    from django.core import signing
-    from django.core.signing import BadSignature, SignatureExpired
+    from tenants.auth import authenticate_platform_admin, login_platform_admin
 
     error = None
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
-        expected_user = getattr(django_settings, 'PUBLIC_ADMIN_USERNAME', 'admin')
-        expected_pass = getattr(django_settings, 'PUBLIC_ADMIN_PASSWORD', '@Developer25')
-        cookie_age = getattr(django_settings, 'PUBLIC_ADMIN_COOKIE_AGE', 86400)
-        signer = signing.TimestampSigner()
 
-        if username == expected_user and password == expected_pass:
-            signed = signer.sign(username)
-            response = redirect('tenants:public_admin')
-            # Secure flags: HttpOnly and SameSite=lax – leave Secure off for local dev
-            response.set_cookie('public_admin_auth', signed, max_age=cookie_age, httponly=True, samesite='Lax')
-            return response
+        admin = authenticate_platform_admin(username, password)
+        if admin is not None:
+            login_platform_admin(request, admin)
+            return redirect('platform_admin:dashboard')
         else:
+            # Deliberately vague: don't reveal whether the username or
+            # password was wrong.
             error = 'Invalid credentials.'
 
     return render(request, 'tenants/public_admin_login.html', { 'error': error })
 
 
 def public_admin_logout(request):
-    """Clear the public-admin authentication cookie and redirect to the landing page."""
-    response = redirect('tenants:landing')
-    response.delete_cookie('public_admin_auth')
-    return response
+    """End the platform admin's session and redirect to the landing page."""
+    from tenants.auth import logout_platform_admin
+
+    logout_platform_admin(request)
+    return redirect('tenants:landing')
 
 
 def public_login(request):
@@ -217,30 +208,20 @@ def support(request):
 
 
 def public_admin(request):
-    # Basic protection: require platform operator authentication via signed cookie.
-    # Using a signed timestamped cookie avoids touching request.session and therefore
-    # the django_session table which may not exist in public until migrations run.
-    from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
-    cookie = request.COOKIES.get('public_admin_auth')
-    signer = TimestampSigner()
-    authenticated = False
-    if cookie:
-        try:
-            signer.unsign(cookie, max_age=getattr(django_settings, 'PUBLIC_ADMIN_COOKIE_AGE', 86400))
-            authenticated = True
-        except (BadSignature, SignatureExpired):
-            authenticated = False
+    # Require a logged-in PlatformAdmin (see tenants.auth). Attaches
+    # request.platform_admin for use in the view/template below.
+    from tenants.auth import get_platform_admin
 
-    if not authenticated:
-        from django.shortcuts import redirect
+    admin = get_platform_admin(request)
+    if admin is None:
         return redirect('tenants:public_admin_login')
+    request.platform_admin = admin
 
 
     recent_registrations = CompanyRegistration.objects.order_by("-submitted_at")[:6]
     tenants = []
     active_tenant_count = 0
-    # Use only() to avoid referencing columns that may not exist until migrations run (e.g. plan)
-    for company in Company.objects.only('name', 'schema_name', 'is_active').order_by("name"):
+    for company in Company.objects.order_by("name"):
         domains = [domain.domain for domain in getattr(company, "domain_set", []).all()] if hasattr(company, "domain_set") else []
         if company.is_active:
             active_tenant_count += 1
@@ -251,6 +232,7 @@ def public_admin(request):
 
     admin_context = {
         "page_links": PAGE_LINKS,
+        "platform_admin": admin,
         "plan_choices": CompanyRegistration.Plan.choices,
         "recent_registrations": recent_registrations,
         "tenants": tenants,
@@ -268,7 +250,8 @@ def public_admin(request):
             schema = request.POST.get("tenant_slug", "").strip().lower().replace("-", "_")
             plan = request.POST.get("plan", "STARTER")
             admin_email = request.POST.get("admin_email", "").strip()
-            admin_password = request.POST.get("admin_password", "").strip() or "ChangeMe123!"
+            admin_password_input = request.POST.get("admin_password", "").strip()
+            admin_password = admin_password_input or secrets.token_urlsafe(10)
             tenant_domain_root = request.POST.get("tenant_domain_root", getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan")).strip()
             requested_domain = request.POST.get("tenant_domain", "").strip()
             domain = requested_domain or f"{schema}.{tenant_domain_root}"
@@ -281,37 +264,42 @@ def public_admin(request):
                 messages.error(request, f"Tenant schema '{schema}' already exists. Choose a different slug.")
                 return render(request, "tenants/public_admin.html", admin_context)
 
-            output = StringIO()
             try:
-                management.call_command(
-                    "onboard_tenant",
-                    schema=schema,
-                    name=name,
-                    domain=domain,
-                    email=admin_email,
-                    
-                    notify=(request.POST.get('notify') == 'on'),
-                    password=admin_password,
-                    plan=plan,
+                from tenants.tasks import provision_tenant_task
+
+                company = Company.objects.create(schema_name=schema, name=name, is_active=True, plan=plan)
+                Domain.objects.create(domain=domain, tenant=company, is_primary=True)
+
+                provision_tenant_task.delay(
+                    company.id, domain, admin_email,
+                    password=admin_password, plan=plan,
                     phone=request.POST.get("phone", "").strip(),
                     address=request.POST.get("address", "").strip(),
                     company_email=request.POST.get("company_email", "").strip() or admin_email,
-                    stdout=output,
-                    stderr=output,
+                    notify=(request.POST.get('notify') == 'on'),
                 )
-                company = Company.objects.get(schema_name=schema)
-                company.plan = plan
-                company.save()
-                messages.success(request, f"Tenant '{name}' has been provisioned successfully.")
-                return redirect("tenants:public_admin")
+
+                if admin_password_input:
+                    messages.success(request, f"Provisioning '{name}' has started — check its status below.")
+                else:
+                    messages.success(
+                        request,
+                        f"Provisioning '{name}' has started — check its status below. "
+                        f"Generated admin password: {admin_password} — save this now, it won't be shown again."
+                    )
+                try:
+                    return redirect("platform_admin:company_detail", schema_name=schema)
+                except Exception:
+                    # platform_admin may not be wired in yet — fall back gracefully
+                    return redirect("tenants:public_admin")
             except Exception as exc:
-                messages.error(request, f"Tenant onboarding failed: {exc}")
-                admin_context["command_output"] = output.getvalue()
+                messages.error(request, f"Could not start onboarding: {exc}")
                 return render(request, "tenants/public_admin.html", admin_context)
 
         if action == "onboard_registration":
             registration_id = request.POST.get("registration_id")
-            password = request.POST.get("admin_password", "").strip() or "ChangeMe123!"
+            password_input = request.POST.get("admin_password", "").strip()
+            password = password_input or secrets.token_urlsafe(10)
             try:
                 registration = CompanyRegistration.objects.get(pk=registration_id)
             except CompanyRegistration.DoesNotExist:
@@ -328,38 +316,45 @@ def public_admin(request):
                                " Choose a different slug or update the registration record.")
                 return render(request, "tenants/public_admin.html", admin_context)
 
-            output = StringIO()
             try:
-                management.call_command(
-                    "onboard_tenant",
-                    schema=schema,
-                    name=registration.company_name,
-                    domain=domain,
-                    email=registration.email,
-                    
-                    notify=(request.POST.get('notify') == 'on'),
-                    password=password,
-                    plan=plan,
+                from tenants.tasks import provision_tenant_task
+
+                company = Company.objects.create(schema_name=schema, name=registration.company_name, is_active=True, plan=plan)
+                Domain.objects.create(domain=domain, tenant=company, is_primary=True)
+
+                provision_tenant_task.delay(
+                    company.id, domain, registration.email,
+                    password=password, plan=plan,
                     phone=registration.phone,
                     address=f"{registration.city}, {registration.country}" if registration.city or registration.country else "",
                     company_email=registration.email,
-                    stdout=output,
-                    stderr=output,
+                    notify=(request.POST.get('notify') == 'on'),
                 )
+
                 registration.status = CompanyRegistration.Status.ONBOARDED
                 registration.save()
-                messages.success(request, f"Registration '{registration.company_name}' has been onboarded as '{schema}'.")
-                return redirect("tenants:public_admin")
+                if password_input:
+                    messages.success(request, f"Provisioning for '{registration.company_name}' has started as '{schema}' — check its status below.")
+                else:
+                    messages.success(
+                        request,
+                        f"Provisioning for '{registration.company_name}' has started as '{schema}' — check its status below. "
+                        f"Generated admin password: {password} — save this now, it won't be shown again."
+                    )
+                try:
+                    return redirect("platform_admin:company_detail", schema_name=schema)
+                except Exception:
+                    return redirect("tenants:public_admin")
             except Exception as exc:
-                messages.error(request, f"Onboarding registration failed: {exc}")
-                admin_context["command_output"] = output.getvalue()
+                messages.error(request, f"Could not start onboarding: {exc}")
                 return render(request, "tenants/public_admin.html", admin_context)
 
         if action == "assign_role":
             tenant_schema = request.POST.get("tenant_schema", "").strip().lower().replace("-", "_")
             user_email = request.POST.get("role_email", "").strip()
             role = request.POST.get("role", "CASHIER").strip().upper()
-            password = request.POST.get("role_password", "").strip() or "ChangeMe123!"
+            password_input = request.POST.get("role_password", "").strip()
+            password = password_input or secrets.token_urlsafe(10)
 
             if not tenant_schema or not user_email:
                 messages.error(request, "Tenant schema and user email are required to assign a role.")
@@ -394,7 +389,14 @@ def public_admin(request):
                             is_staff=True,
                             is_superuser=(role == "CEO"),
                         )
-                        messages.success(request, f"Created user {user_email} with role {role} in tenant '{tenant_schema}'.")
+                        if password_input:
+                            messages.success(request, f"Created user {user_email} with role {role} in tenant '{tenant_schema}'.")
+                        else:
+                            messages.success(
+                                request,
+                                f"Created user {user_email} with role {role} in tenant '{tenant_schema}'. "
+                                f"Generated password: {password} — save this now, it won't be shown again."
+                            )
             except Exception as exc:
                 messages.error(request, f"Role assignment failed: {exc}")
                 return render(request, "tenants/public_admin.html", admin_context)
@@ -559,9 +561,11 @@ def register(request):
         except Exception:
             pass
 
-        # --- Launch provisioning in background (detached) so registrations become direct onboarding ---
+        # --- Launch provisioning in the background via Celery ---
         try:
-            # Build schema, domain and a generated admin password.
+            from tenants.models import Company, Domain
+            from tenants.tasks import provision_tenant_task
+
             # NOTE: Postgres schema names use underscores (hyphens require
             # quoting), but hostnames must NOT contain underscores — Django's
             # get_host() validates against RFC 1034/1035 and will raise
@@ -573,57 +577,26 @@ def register(request):
             domain = f"{slug}.{tenant_domain_root}"
             admin_password = secrets.token_urlsafe(10)
 
-            # Locate manage.py
-            manage_py = None
-            base_dir = getattr(django_settings, 'BASE_DIR', None)
-            if base_dir:
-                candidate = os.path.join(base_dir, 'manage.py')
-                if os.path.exists(candidate):
-                    manage_py = candidate
-            if not manage_py:
-                manage_py = os.path.join(os.getcwd(), 'manage.py')
+            if Company.objects.filter(schema_name=schema).exists():
+                raise ValueError(f"Schema '{schema}' already exists — pick a different company name or onboard manually.")
 
-            cmd = [
-                sys.executable,
-                manage_py,
-                'onboard_tenant',
-                '--schema', schema,
-                '--name', reg.company_name,
-                '--domain', domain,
-                '--email', reg.email,
-                '--password', admin_password,
-                '--plan', reg.plan,
-                '--phone', reg.phone or '',
-                '--address', (f"{reg.city}, {reg.country}" if (reg.city or reg.country) else ''),
-                '--company-email', reg.email,
-                '--notify',
-            ]
+            company = Company.objects.create(schema_name=schema, name=reg.company_name, is_active=True, plan=reg.plan)
+            Domain.objects.create(domain=domain, tenant=company, is_primary=True)
 
-            # Run detached on Windows using DETACHED_PROCESS flag; on other platforms start a background process
-            from django.conf import settings
-            logs_dir = getattr(settings, 'LOGS_DIR', os.path.join(getattr(settings, 'BASE_DIR', os.getcwd()), 'logs'))
-            os.makedirs(logs_dir, exist_ok=True)
-            log_file = os.path.join(logs_dir, f"onboard_{schema}.log")
-            
-            # Write onboarding output (including tracebacks on failure) to a
-            # per-tenant log file instead of discarding it — previously all
-            # output went to DEVNULL, so a partially-failed onboarding left
-            # zero trace anywhere (no log file, no journalctl entry).
-            log_fh = open(log_file, "ab", buffering=0)
-            DEVNULL = subprocess.DEVNULL
-            if sys.platform.startswith('win'):
-                DETACHED_PROCESS = 0x00000008
-                CREATE_NEW_PROCESS_GROUP = 0x00000200
-                creationflags = DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
-                subprocess.Popen(cmd, stdout=log_fh, stderr=log_fh, stdin=DEVNULL, creationflags=creationflags, close_fds=True)
-            else:
-                subprocess.Popen(cmd, stdout=log_fh, stderr=log_fh, stdin=DEVNULL, close_fds=True)
+            provision_tenant_task.delay(
+                company.id, domain, reg.email,
+                password=admin_password, plan=reg.plan,
+                phone=reg.phone or '',
+                address=(f"{reg.city}, {reg.country}" if (reg.city or reg.country) else ''),
+                company_email=reg.email,
+                notify=True,
+            )
 
             # Record provisioning start in registration notes (do NOT store password)
-            reg.notes = (reg.notes + f"\n[onboard-started] schema:{schema}, domain:{domain}, timestamp:{__import__('datetime').datetime.now().isoformat()}").strip()
+            reg.notes = (reg.notes + f"\n[onboard-started] schema:{schema}, domain:{domain}, company_id:{company.id}, timestamp:{__import__('datetime').datetime.now().isoformat()}").strip()
             reg.save()
-            
-            logger.info(f"Onboarding job started for registration {reg.id}: schema={schema}, domain={domain}, log_file={log_file}")
+
+            logger.info(f"Onboarding task queued for registration {reg.id}: schema={schema}, domain={domain}, company_id={company.id}")
 
         except Exception as exc:
             # If background provisioning cannot be started, record the error and proceed

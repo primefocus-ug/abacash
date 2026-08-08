@@ -13,7 +13,7 @@
 {% block content %}
 <div class="card mb-3">
   <div class="card-body" style="padding:14px 20px;">
-    <form method="get" class="flex gap-2" style="align-items:flex-end;">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
       <div>
         <label style="display:block;margin-bottom:4px;">From</label>
         <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
@@ -68,6 +68,14 @@
   .cf-bk span   { font-size:14px; font-weight:600; font-family:var(--font-mono); color:var(--text-primary); }
   .cf-loan-link { display:inline-flex; align-items:center; gap:7px; margin-top:16px; padding:9px 16px; border-radius:var(--radius-md); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:600; border:1px solid transparent; transition:background .15s; }
   .cf-loan-link:hover { background:var(--accent-active-bg); }
+
+  /* Phones: stack the two-column detail grid and let the popup
+     header wrap instead of squeezing the amount off-screen. */
+  @media (max-width: 480px) {
+    .cf-popup-header { flex-wrap: wrap; gap: 10px; }
+    .cf-detail-grid { grid-template-columns: 1fr; gap: 12px; }
+    .cf-breakdown { gap: 8px; }
+  }
 </style>
 
 <div class="card mb-3">

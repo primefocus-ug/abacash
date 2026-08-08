@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}{{ client.full_name }}{% endblock %}
+{% block page_title %}{{ client.full_name }}{% endblock %}
+
+{% block topbar_actions %}
+  {% if user.is_manager or user.is_ceo %}
+    <a href="{% url 'clients:edit' client.pk %}" class="btn btn-secondary btn-sm">Edit Client</a>
+  {% endif %}
+  {% if not client.is_blacklisted %}
+    <a href="{% url 'loans:apply_step2' client.pk %}" class="btn btn-primary btn-sm">New Loan</a>
+  {% endif %}
+  <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-sm">Back</a>
+{% endblock %}
+
+{% block content %}
+
+{% if client.is_blacklisted %}
+<div class="alert alert-danger">
+  <strong>Blacklisted:</strong> {{ client.blacklist_reason|default:"No reason provided." }}
+  This client cannot apply for new loans.
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+
+  <!-- Left column -->
+  <div>
+
+    <!-- Personal info -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="card-title">Personal Information</span>
+        <span class="badge {% if client.is_blacklisted %}badge-red{% elif client.is_active %}badge-green{% else %}badge-muted{% endif %}">
+          {% if client.is_blacklisted %}Blacklisted{% elif client.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
+      </div>
+      <div class="card-body" style="padding:0;">
+
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;">
+          {% if client.passport_photo %}
+          <img src="{{ client.passport_photo.url }}" alt="{{ client.full_name }}"
+               style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid var(--teal-600);flex-shrink:0;">
+          {% else %}
+          <div style="width:64px;height:64px;border-radius:50%;background:var(--teal-600);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#fff;flex-shrink:0;">
+            {{ client.first_name|first|upper }}{{ client.last_name|first|upper }}
+          </div>
+          {% endif %}
+          <div>
+            <div style="font-size:17px;font-weight:600;">{{ client.full_name }}</div>
+            <div class="mono text-muted text-sm">{{ client.client_number }}</div>
+          </div>
+        </div>
+
+        {% for label, val in rows %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">{{ label }}</span>
+          <span style="font-size:13.5px;text-align:right;max-width:60%;">{{ val }}</span>
+        </div>
+        {% empty %}
+        {# Fallback: render fields directly if no rows context var #}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">NIN</span>
+          <span class="mono" style="font-size:13px;">{{ client.nin }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Gender</span>
+          <span style="font-size:13.5px;">{{ client.get_gender_display }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Date of Birth</span>
+          <span style="font-size:13.5px;">{{ client.date_of_birth }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Marital Status</span>
+          <span style="font-size:13.5px;">{{ client.get_marital_status_display }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Phone (Primary)</span>
+          <span style="font-size:13.5px;">{{ client.phone_primary }}</span>
+        </div>
+        {% if client.phone_secondary %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Phone (Secondary)</span>
+          <span style="font-size:13.5px;">{{ client.phone_secondary }}</span>
+        </div>
+        {% endif %}
+        {% if client.email %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Email</span>
+          <span style="font-size:13.5px;">{{ client.email }}</span>
+        </div>
+        {% endif %}
+        <div style="padding:10px 20px;border-bottom:1px solid var(--border);">
+          <div class="text-muted text-sm" style="margin-bottom:4px;">Address</div>
+          <div style="font-size:13.5px;">{{ client.physical_address }}, {{ client.district }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Employment -->
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Employment & Income</span></div>
+      <div class="card-body" style="padding:0;">
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Status</span>
+          <span>{{ client.get_employment_status_display }}</span>
+        </div>
+        {% if client.employer_name %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Employer</span>
+          <span>{{ client.employer_name }}</span>
+        </div>
+        {% endif %}
+        {% if client.job_title %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Job Title</span>
+          <span>{{ client.job_title }}</span>
+        </div>
+        {% endif %}
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Monthly Income</span>
+          <span class="mono" style="color:var(--teal-400);font-weight:500;">{{ client.monthly_income|ugx }}/month</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px;">
+          <span class="text-muted text-sm">Credit Balance</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="mono" style="color:var(--teal-400);font-weight:500;">{{ client.credit_balance|ugx }}</span>
+            {% if client.credit_balance > 0 and not user.is_cashier %}
+            <a href="{% url 'payments:credit_refund' client.pk %}" class="btn btn-secondary btn-sm">Refund</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if credit_transactions %}
+    <div class="card mb-3">
+      <div class="card-header"><span class="card-title">Credit Ledger</span></div>
+      <div class="table-wrap">
+        <table class="aba-table">
+          <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Notes</th></tr></thead>
+          <tbody>
+            {% for tx in credit_transactions %}
+            <tr>
+              <td class="text-sm">{{ tx.created_at|date:"d M Y" }}</td>
+              <td><span class="badge {% if tx.tx_type == 'OVERPAYMENT' %}badge-teal{% elif tx.tx_type == 'APPLIED' %}badge-green{% elif tx.tx_type == 'REFUNDED' %}badge-amber{% else %}badge-muted{% endif %}">{{ tx.get_tx_type_display }}</span></td>
+              <td class="mono" style="color:{% if tx.amount > 0 %}var(--teal-400){% else %}var(--amber-400){% endif %};">UGX {{ tx.amount|floatformat:0|intcomma }}</td>
+              <td class="mono">UGX {{ tx.balance_after|floatformat:0|intcomma }}</td>
+              <td class="text-sm text-muted">{{ tx.notes|truncatechars:40 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Next of kin -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Next of Kin / Guarantors</span></div>
+      {% if kin %}
+      <div class="card-body" style="padding:0;">
+        {% for k in kin %}
+        <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-weight:500;">{{ k.full_name }}</span>
+            <span class="badge badge-muted">{{ k.relationship }}</span>
+            {% if k.is_guarantor %}<span class="badge badge-teal">Guarantor</span>{% endif %}
+          </div>
+          <div class="text-sm text-muted">{{ k.phone_primary }}{% if k.phone_secondary %} · {{ k.phone_secondary }}{% endif %}</div>
+          <div class="text-sm text-muted">{{ k.physical_address }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No next of kin registered.</p></div>
+      {% endif %}
+    </div>
+
+  </div><!-- left col -->
+
+  <!-- Right column — loans -->
+  <div>
+    <div class="card mb-3">
+      <div class="card-header">
+        <span class="card-title">Loan History</span>
+        <span class="badge badge-muted">{{ loans.count }}</span>
+      </div>
+      <div class="table-wrap">
+        {% if loans %}
+        <table class="aba-table">
+          <thead>
+            <tr>
+              <th>Loan #</th>
+              <th>Product</th>
+              <th>Principal</th>
+              <th>Outstanding</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in loans %}
+            <tr>
+              <td class="mono">
+                <a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a>
+              </td>
+              <td class="text-sm">{{ loan.product.name }}</td>
+              <td class="mono text-sm">{{ loan.principal_amount|ugx_plain }}</td>
+              <td class="mono text-sm"
+                  style="color:{% if loan.outstanding_balance > 0 %}var(--amber-400){% else %}var(--green-400){% endif %}">
+                {{ loan.outstanding_balance|ugx_plain }}
+              </td>
+              <td>
+                <span class="badge
+                  {% if loan.status == 'ACTIVE' %}badge-green
+                  {% elif loan.status == 'PENDING' %}badge-amber
+                  {% elif loan.status == 'COMPLETED' %}badge-teal
+                  {% elif loan.status == 'REJECTED' or loan.status == 'DEFAULTED' %}badge-red
+                  {% else %}badge-muted{% endif %}">
+                  {{ loan.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <a href="{% url 'loans:detail' loan.pk %}" class="btn btn-secondary btn-sm">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+          <p>No loan history.</p>
+          {% if not client.is_blacklisted %}
+          <a href="{% url 'loans:apply_step2' client.pk %}" class="btn btn-primary btn-sm mt-2">Apply for First Loan</a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if client.notes %}
+    <div class="card">
+      <div class="card-header"><span class="card-title">Internal Notes</span></div>
+      <div class="card-body">
+        <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.7;">{{ client.notes }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card mt-3">
+      <div class="card-header"><span class="card-title">Record Info</span></div>
+      <div class="card-body" style="padding:0;">
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Registered By</span>
+          <span class="text-sm">{{ client.registered_by.full_name|default:"—" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);">
+          <span class="text-muted text-sm">Registered On</span>
+          <span class="text-sm">{{ client.created_at|date:"d M Y H:i" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;">
+          <span class="text-muted text-sm">Last Updated</span>
+          <span class="text-sm">{{ client.updated_at|date:"d M Y H:i" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

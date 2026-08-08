@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="description" content="Abacash — Enterprise loan management platform for microfinance institutions and lenders.">
+    <title>{% block title %}Abacash — Loan Management Platform{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --surface: #FFFFFF;
+        --surface-2: #F8FAFC;
+        --surface-3: #EEF2F7;
+        --border: #E2E8F0;
+        --text-primary: #0F172A;
+        --text-secondary: #475569;
+        --text-muted: #94A3B8;
+        --accent: #3B82F6;
+        --accent-hover: #2563EB;
+        --accent-soft: rgba(59, 130, 246, 0.12);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-soft: 0 4px 24px rgba(15, 23, 42, 0.06);
+        --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --header-height: 68px;
+        --transition: 0.25s ease;
+      }
+
+      [data-theme="dark"] {
+        --surface: #111827;
+        --surface-2: #1E293B;
+        --surface-3: #273449;
+        --border: #334155;
+        --text-primary: #F8FAFC;
+        --text-secondary: #94A3B8;
+        --text-muted: #64748B;
+        --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: var(--font-body);
+        background: #F8FAFC;
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: background var(--transition), color var(--transition);
+      }
+      a { text-decoration: none; color: var(--accent); transition: color 0.2s; }
+      a:hover { color: var(--accent-hover); }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        width: 100%;
+      }
+
+      /* Header */
+      .public-header {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(16px);
+        background: rgba(var(--surface-rgb, 255,255,255), 0.92);
+        transition: background var(--transition), border-color var(--transition);
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+      }
+
+      .public-header-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .public-logo {
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+        transition: color var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .public-logo span {
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .public-nav {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .public-nav a {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: color 0.2s;
+        position: relative;
+      }
+
+      .public-nav a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--accent);
+        transition: width 0.25s ease;
+      }
+
+      .public-nav a:hover::after {
+        width: 100%;
+      }
+
+      .public-nav a:hover {
+        color: var(--text-primary);
+      }
+
+      .public-nav .btn-outline {
+        padding: 7px 18px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13px;
+        background: transparent;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+      }
+
+      .public-nav .btn-outline::after {
+        display: none;
+      }
+
+      .public-nav .btn-outline:hover {
+        background: var(--surface-2);
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+      }
+
+      .public-nav .btn-primary {
+        padding: 7px 20px;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+        transition: transform 0.15s, box-shadow 0.25s;
+        box-shadow: 0 2px 12px rgba(59, 130, 246, 0.2);
+      }
+
+      .public-nav .btn-primary::after {
+        display: none;
+      }
+
+      .public-nav .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        color: #fff;
+      }
+
+      .public-nav .btn-primary:active {
+        transform: scale(0.97);
+      }
+
+      .public-nav .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-primary);
+        padding: 4px;
+      }
+
+      /* Mobile nav overlay */
+      .mobile-nav-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 200;
+        backdrop-filter: blur(4px);
+      }
+
+      .mobile-nav-overlay.open {
+        display: block;
+      }
+
+      .mobile-nav-sheet {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 320px;
+        height: 100%;
+        background: var(--surface);
+        z-index: 201;
+        padding: 24px 20px;
+        transition: right 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        overflow-y: auto;
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .mobile-nav-sheet.open {
+        right: 0;
+      }
+
+      .mobile-nav-sheet .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-primary);
+        float: right;
+      }
+
+      .mobile-nav-sheet .mobile-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 40px;
+      }
+
+      .mobile-nav-sheet .mobile-nav-links a {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mobile-nav-sheet .mobile-nav-links a:hover {
+        color: var(--text-primary);
+      }
+
+      .mobile-nav-sheet .mobile-nav-links .btn-primary,
+      .mobile-nav-sheet .mobile-nav-links .btn-outline {
+        display: inline-block;
+        text-align: center;
+        padding: 10px 16px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 8px;
+      }
+
+      .mobile-nav-sheet .mobile-nav-links .btn-primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+      }
+
+      .mobile-nav-sheet .mobile-nav-links .btn-outline {
+        border: 1.5px solid var(--border);
+        color: var(--text-secondary);
+      }
+
+      /* Main content */
+      main {
+        flex: 1;
+        padding: 0;
+      }
+
+      /* Footer */
+      .public-footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 32px 0;
+        margin-top: auto;
+        transition: background var(--transition), border-color var(--transition);
+      }
+
+      .public-footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 13px;
+        color: var(--text-muted);
+        transition: color var(--transition);
+      }
+
+      .public-footer-links {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .public-footer-links a {
+        color: var(--text-muted);
+        font-size: 13px;
+        transition: color 0.2s;
+      }
+
+      .public-footer-links a:hover {
+        color: var(--text-primary);
+      }
+
+      .public-footer .social-links {
+        display: flex;
+        gap: 16px;
+      }
+
+      .public-footer .social-links a {
+        color: var(--text-muted);
+        font-size: 18px;
+        transition: color 0.2s;
+      }
+
+      .public-footer .social-links a:hover {
+        color: var(--text-primary);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 0 16px;
+        }
+
+        .public-nav a:not(.btn-outline):not(.btn-primary) {
+          display: none;
+        }
+
+        .public-nav .mobile-menu-btn {
+          display: block;
+        }
+
+        .public-header {
+          height: auto;
+          padding: 10px 0;
+        }
+
+        .public-logo {
+          font-size: 19px;
+        }
+
+        .public-nav .btn-outline,
+        .public-nav .btn-primary {
+          display: none;
+        }
+
+        .mobile-nav-overlay.open {
+          display: block;
+        }
+
+        .public-footer-inner {
+          flex-direction: column;
+          text-align: center;
+          gap: 12px;
+        }
+
+        .public-footer-links {
+          justify-content: center;
+          gap: 14px;
+        }
+
+        .public-footer .social-links {
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 0 12px;
+        }
+
+        .public-logo {
+          font-size: 17px;
+        }
+
+        .public-logo span {
+          font-size: 12px;
+          padding: 1px 6px;
+        }
+
+        .mobile-nav-sheet {
+          width: 85%;
+          padding: 20px 16px;
+        }
+
+        .mobile-nav-sheet .mobile-nav-links a {
+          font-size: 14px;
+          padding: 6px 0;
+        }
+      }
+
+      @media (min-width: 769px) {
+        .mobile-nav-overlay,
+        .mobile-nav-sheet,
+        .mobile-menu-btn {
+          display: none !important;
+        }
+      }
+
+      /* Print styles */
+      @media print {
+        .public-header {
+          position: static !important;
+          border-bottom: 1px solid #ddd !important;
+          background: #fff !important;
+        }
+        .public-nav {
+          display: none !important;
+        }
+        .public-footer {
+          display: none !important;
+        }
+        main {
+          padding: 20px !important;
+        }
+        .container {
+          max-width: 100% !important;
+          padding: 0 !important;
+        }
+      }
+
+      /* Utility classes */
+      .text-center { text-align: center; }
+      .text-muted { color: var(--text-muted); }
+      .mt-1 { margin-top: 8px; }
+      .mt-2 { margin-top: 16px; }
+      .mt-3 { margin-top: 24px; }
+      .mt-4 { margin-top: 32px; }
+      .mb-1 { margin-bottom: 8px; }
+      .mb-2 { margin-bottom: 16px; }
+      .mb-3 { margin-bottom: 24px; }
+      .mb-4 { margin-bottom: 32px; }
+      .flex { display: flex; }
+      .flex-center { display: flex; align-items: center; justify-content: center; }
+      .flex-between { display: flex; align-items: center; justify-content: space-between; }
+      .flex-wrap { flex-wrap: wrap; }
+      .gap-1 { gap: 4px; }
+      .gap-2 { gap: 8px; }
+      .gap-3 { gap: 12px; }
+      .gap-4 { gap: 16px; }
+      .w-100 { width: 100%; }
+      .d-none { display: none; }
+    </style>
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    <!-- Public Header -->
+    <header class="public-header" role="banner">
+      <div class="container public-header-inner">
+        <a href="{% url 'tenants:landing' %}" class="public-logo" aria-label="Abacash Home">
+          ABA<span>cash</span>
+        </a>
+        <nav class="public-nav" role="navigation" aria-label="Main Navigation">
+          <a href="{% url 'tenants:features' %}">Features</a>
+          <a href="{% url 'tenants:pricing' %}">Pricing</a>
+          <a href="{% url 'tenants:support' %}">Support</a>
+          <a href="{% url 'tenants:public_login' %}" class="btn-outline">Sign In</a>
+          <a href="{% url 'tenants:public_register' %}" class="btn-primary">Get Started</a>
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false">
+            ☰
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+      <div class="mobile-nav-sheet" id="mobileNavSheet">
+        <button class="close-btn" id="mobileNavClose" aria-label="Close menu">✕</button>
+        <nav class="mobile-nav-links">
+          <a href="{% url 'tenants:landing' %}">Home</a>
+          <a href="{% url 'tenants:features' %}">Features</a>
+          <a href="{% url 'tenants:pricing' %}">Pricing</a>
+          <a href="{% url 'tenants:support' %}">Support</a>
+          <a href="{% url 'tenants:public_login' %}" class="btn-outline">Sign In</a>
+          <a href="{% url 'tenants:public_register' %}" class="btn-primary">Get Started</a>
+          <a href="{% url 'tenants:public_admin' %}" style="font-size:12px;color:var(--text-muted);border-bottom:none;padding:4px 0;">Admin</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main role="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Public Footer -->
+    <footer class="public-footer" role="contentinfo">
+      <div class="container public-footer-inner">
+        <div>
+          &copy; {% now "Y" %} Abacash. All rights reserved.
+          <span style="display:block;font-size:11px;margin-top:4px;">Enterprise Loan Management Platform</span>
+        </div>
+        <div class="public-footer-links">
+          <a href="{% url 'tenants:landing' %}">Home</a>
+          <a href="{% url 'tenants:features' %}">Features</a>
+          <a href="{% url 'tenants:pricing' %}">Pricing</a>
+          <a href="{% url 'tenants:support' %}">Support</a>
+          <a href="{% url 'tenants:public_admin' %}">Admin</a>
+        </div>
+        <div class="social-links">
+          <a href="#" aria-label="Twitter">🐦</a>
+          <a href="#" aria-label="LinkedIn">🔗</a>
+          <a href="#" aria-label="GitHub">🐙</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Navigation Script -->
+    <script>
+      (function() {
+        'use strict';
+
+        var toggleBtn = document.getElementById('mobileMenuToggle');
+        var overlay = document.getElementById('mobileNavOverlay');
+        var sheet = document.getElementById('mobileNavSheet');
+        var closeBtn = document.getElementById('mobileNavClose');
+
+        function openMobileNav() {
+          overlay.classList.add('open');
+          sheet.classList.add('open');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileNav() {
+          overlay.classList.remove('open');
+          sheet.classList.remove('open');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        }
+
+        if (toggleBtn && overlay && sheet) {
+          toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (overlay.classList.contains('open')) {
+              closeMobileNav();
+            } else {
+              openMobileNav();
+            }
+          });
+
+          if (closeBtn) {
+            closeBtn.addEventListener('click', closeMobileNav);
+          }
+
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+              closeMobileNav();
+            }
+          });
+
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+              closeMobileNav();
+            }
+          });
+
+          // Close on window resize to desktop
+          var resizeTimer;
+          window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+              if (window.innerWidth >= 769 && overlay.classList.contains('open')) {
+                closeMobileNav();
+              }
+            }, 150);
+          });
+        }
+
+        // Theme toggle (optional enhancement)
+        // Can be extended to support dark mode toggle
+
+        // Analytics placeholder
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'page_view', {
+            'page_title': document.title,
+            'page_location': window.location.href
+          });
+        }
+
+        console.log('Abacash public site loaded.');
+
+      })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

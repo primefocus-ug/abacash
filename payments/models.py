@@ -190,7 +190,9 @@ class Receipt(models.Model):
                 seq_row.last += 1
                 seq_row.save(update_fields=["last"])
                 self.receipt_number = f"REC-{year}-{seq_row.last:05d}"
-        super().save(*args, **kwargs)
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.receipt_number} — {self.payment}"

@@ -25,7 +25,7 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
 
@@ -166,6 +166,14 @@ class Client(models.Model):
         blank=True,
     )
 
+    branch = models.ForeignKey(
+        "accounts.Branch",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="clients",
+        help_text=_("Branch this client is registered under."),
+    )
+
     passport_photo = models.ImageField(
         upload_to=client_photo_path,
         null=True,
@@ -182,13 +190,23 @@ class Client(models.Model):
     # ------------------------------------------------------------------ #
 
     def save(self, *args, **kwargs):
-        """Auto-generate client_number on first save."""
+        """Auto-generate client_number on first save.
+
+        The lookup, the lock, and the insert all happen inside the same
+        atomic block so a concurrent registration can't read the same
+        "last" number before this row is committed. The lock is taken on
+        the row with the highest *numeric* client_number (not the most
+        recently created row) so an out-of-order created_at value or an
+        imported record can't cause the sequence to be reused.
+        """
         if not self.client_number:
-            from django.db import transaction
             with transaction.atomic():
-                last = Client.objects.select_for_update().order_by("-created_at").filter(
-                    client_number__startswith="CLT-"
-                ).first()
+                last = (
+                    Client.objects.select_for_update()
+                    .filter(client_number__startswith="CLT-")
+                    .order_by("-client_number")
+                    .first()
+                )
                 if last:
                     try:
                         seq = int(last.client_number.split("-")[1]) + 1
@@ -197,7 +215,9 @@ class Client(models.Model):
                 else:
                     seq = 1
                 self.client_number = f"CLT-{seq:05d}"
-        super().save(*args, **kwargs)
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     @property
     def full_name(self):

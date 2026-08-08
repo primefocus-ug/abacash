@@ -1,0 +1,14 @@
+New company registration
+
+Company : {{ reg.company_name }}
+Contact : {{ reg.contact_name }}
+Email   : {{ reg.email }}
+Phone   : {{ reg.phone }}
+City    : {{ reg.city }}, {{ reg.country }}
+Plan    : {{ reg.get_plan_display }}
+Submitted: {{ reg.submitted_at }}
+
+Message:
+{{ reg.message|default:"—" }}
+
+Open in admin panel: {{ detail_url }}

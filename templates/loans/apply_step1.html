@@ -5,21 +5,188 @@
 {% block content %}
 <style>
   .wizard-progress { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; }
-  .wizard-chip { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-secondary); font-size:12px; font-weight:600; }
+  .wizard-chip { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-secondary); font-size:12px; font-weight:600; white-space:nowrap; }
   .wizard-chip.active { background:var(--accent-soft); color:var(--accent); border-color:rgba(37,99,235,0.24); }
-  .wizard-required { padding:10px 12px; border-left:3px solid var(--accent); background:var(--surface-2); border-radius:8px; margin-bottom:12px; }
+  .wizard-required { padding:10px 12px; border-left:3px solid var(--accent); background:var(--surface-2); border-radius:8px; margin-bottom:12px; overflow-wrap:break-word; word-break:break-word; }
   .wizard-required strong { display:block; margin-bottom:4px; }
-  .wizard-footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:12px; border-top:1px solid var(--border); margin-top:12px; }
-  .search-spinner { display:none; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; }
+  .wizard-footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:12px; border-top:1px solid var(--border); margin-top:12px; flex-wrap:wrap; }
+  .search-spinner { display:none; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; flex-shrink:0; }
   .htmx-request .search-spinner { display:inline-block; }
   @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Responsive fixes for the modal */
+  #loan-apply-modal {
+    padding: 8px;
+    align-items: flex-start;
+    padding-top: 8px;
+    overflow-y: auto;
+  }
+  #loan-apply-modal > div {
+    max-height: calc(100vh - 16px);
+    margin: auto;
+    border-radius: 12px;
+    overflow-y: auto;
+  }
+  #loan-apply-modal > div > div:first-child {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #loan-apply-modal > div > div:first-child h2 {
+    font-size: 16px;
+  }
+  #loan-apply-modal .wizard-progress {
+    gap: 4px;
+  }
+  #loan-apply-modal .wizard-chip {
+    font-size: 10px;
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+  #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
+    font-size: 10px;
+  }
+
+  @media (max-width: 640px) {
+    #loan-apply-modal {
+      padding: 4px;
+      padding-top: 4px;
+    }
+    #loan-apply-modal > div {
+      border-radius: 8px;
+      max-height: calc(100vh - 8px);
+    }
+    #loan-apply-modal > div > div:first-child {
+      padding: 12px 14px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    #loan-apply-modal > div > div:first-child h2 {
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+    #loan-apply-modal .wizard-progress {
+      gap: 2px;
+      flex-wrap: wrap;
+    }
+    #loan-apply-modal .wizard-chip {
+      font-size: 9px;
+      padding: 3px 6px;
+      gap: 4px;
+    }
+    #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
+      font-size: 9px;
+    }
+    #loan-apply-modal > div > div:first-child button {
+      align-self: flex-end;
+      margin-top: -4px;
+    }
+    #loan-apply-modal > div > div:nth-child(2) {
+      padding: 12px;
+    }
+    #loan-apply-modal .card-header {
+      padding: 12px 14px;
+    }
+    #loan-apply-modal .card-header .card-title {
+      font-size: 13px;
+    }
+    #loan-apply-modal .card-body {
+      padding: 12px 14px;
+    }
+    #loan-apply-modal .flex.gap-2 {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    #loan-apply-modal .flex.gap-2 input {
+      min-width: 0;
+      width: 100%;
+      font-size: 13px;
+      padding: 8px 10px;
+    }
+    #loan-apply-modal .wizard-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    #loan-apply-modal .wizard-footer a,
+    #loan-apply-modal .wizard-footer .btn {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+    #loan-apply-modal .mt-2.text-sm {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    #loan-apply-modal .wizard-chip {
+      font-size: 8px;
+      padding: 2px 5px;
+    }
+    #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
+      font-size: 8px;
+    }
+    #loan-apply-modal > div > div:first-child h2 {
+      font-size: 13px;
+    }
+    #loan-apply-modal .card-header .card-title {
+      font-size: 12px;
+    }
+    #loan-apply-modal .wizard-required {
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    #loan-apply-modal .wizard-required strong {
+      font-size: 12px;
+    }
+  }
+
+  /* Fix for client results table overflow */
+  #client-results {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  #client-results table {
+    min-width: 320px;
+    font-size: 12px;
+  }
+  #client-results table th,
+  #client-results table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  #client-results .empty-state {
+    padding: 24px 12px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    #client-results table {
+      min-width: 280px;
+      font-size: 11px;
+    }
+    #client-results table th,
+    #client-results table td {
+      padding: 6px 8px;
+      font-size: 11px;
+    }
+    #client-results .btn-sm {
+      font-size: 10px;
+      padding: 3px 6px;
+    }
+    #client-results .badge {
+      font-size: 9px;
+      padding: 2px 6px;
+    }
+  }
 </style>
 
-<div id="loan-apply-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
-  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:860px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
-      <div>
-        <h2 style="margin:0;">New Loan Application</h2>
+<div id="loan-apply-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;overflow-y:auto;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:860px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;">
+      <div style="min-width:0;max-width:100%;">
+        <h2 style="margin:0;font-size:18px;overflow-wrap:break-word;word-break:break-word;">New Loan Application</h2>
         <div class="wizard-progress">
           <span class="wizard-chip active">1. Client</span>
           <span>→</span>
@@ -30,19 +197,19 @@
           <span class="wizard-chip">4. Review</span>
         </div>
       </div>
-      <button type="button" id="loan-apply-modal-close" class="btn btn-secondary btn-sm">Close</button>
+      <button type="button" id="loan-apply-modal-close" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Close</button>
     </div>
 
     <div style="padding:20px;">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Step 1 of 4 · Select Client</span></div>
-        <div class="card-body">
+      <div class="card" style="max-width:100%;overflow:hidden;">
+        <div class="card-header" style="flex-wrap:wrap;gap:8px;"><span class="card-title" style="overflow-wrap:break-word;word-break:break-word;">Step 1 of 4 · Select Client</span></div>
+        <div class="card-body" style="max-width:100%;overflow-x:hidden;">
           <div class="wizard-required">
             <strong>Required before moving forward</strong>
-            Choose a client to continue the application. Search by name, NIN, or client number.
+            <span style="display:block;margin-top:2px;">Choose a client to continue the application. Search by name, NIN, or client number.</span>
           </div>
 
-          <div class="flex gap-2 mb-3" style="align-items:center;">
+          <div class="flex gap-2 mb-3" style="align-items:center;flex-wrap:wrap;width:100%;">
             <input
               type="search"
               id="client-search"
@@ -50,6 +217,7 @@
               class="form-control"
               placeholder="Type client name, NIN, or client number…"
               autocomplete="off"
+              style="flex:1;min-width:160px;width:100%;"
               hx-get="{% url 'loans:client_search' %}"
               hx-trigger="input changed delay:250ms, search"
               hx-target="#client-results"
@@ -61,20 +229,21 @@
           <div id="client-results"
                hx-get="{% url 'loans:client_search' %}"
                hx-trigger="load"
-               hx-target="#client-results">
+               hx-target="#client-results"
+               style="max-width:100%;overflow-x:auto;">
             <div class="empty-state"><p>Loading clients…</p></div>
           </div>
         </div>
 
-        <div class="card-footer">
+        <div class="card-footer" style="padding:16px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
           <div class="wizard-footer">
-            <a href="{% url 'loans:list' %}" class="btn btn-tertiary">← Back</a>
-            <a href="#" class="btn btn-primary" onclick="return false;">Next Step →</a>
+            <a href="{% url 'loans:list' %}" class="btn btn-tertiary" style="flex-shrink:0;">← Back</a>
+            <a href="#" class="btn btn-primary" onclick="return false;" style="flex-shrink:0;">Next Step →</a>
           </div>
         </div>
       </div>
 
-      <div class="mt-2 text-sm text-muted">
+      <div class="mt-2 text-sm text-muted" style="overflow-wrap:break-word;word-break:break-word;">
         Client not registered yet?
         <a href="{% url 'clients:create' %}">Register new client →</a>
       </div>

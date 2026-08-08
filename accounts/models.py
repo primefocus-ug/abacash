@@ -4,16 +4,116 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from decimal import Decimal
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 
-class User(AbstractUser):
+
+class UserManager(BaseUserManager):
+    """Custom user manager for the User model."""
+
+    def _create_user(self, email, password, **extra_fields):
+        """Create and save a user with the given email and password."""
+        if not email:
+            raise ValueError("The Email field must be set")
+        email = self.normalize_email(email)
+
+        # Generate username from email if not provided
+        username = extra_fields.pop('username', None)
+        if not username:
+            username = email.split('@')[0]
+            # Ensure uniqueness
+            base_username = username
+            counter = 1
+            while self.model.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            extra_fields['username'] = username
+
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", False)
+        extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault("role", User.Role.CASHIER)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Create a superuser with CEO role."""
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("role", User.Role.CEO)
+
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self._create_user(email, password, **extra_fields)
+
+    def create_ceo(self, email, password=None, **extra_fields):
+        """Create a CEO user (superuser by default)."""
+        return self.create_superuser(email, password, **extra_fields)
+
+    def create_cashier(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("role", User.Role.CASHIER)
+        return self.create_user(email, password, **extra_fields)
+
+    def create_manager(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("role", User.Role.MANAGER)
+        extra_fields.setdefault("is_staff", True)
+        return self.create_user(email, password, **extra_fields)
+
+    def get_by_natural_key(self, username):
+        """Allow login by email or username."""
+        try:
+            # Try by email first
+            return self.get(email__iexact=username)
+        except self.model.DoesNotExist:
+            try:
+                # Try by username
+                return self.get(username__iexact=username)
+            except self.model.DoesNotExist:
+                try:
+                    # Try by phone
+                    return self.get(phone=username)
+                except self.model.DoesNotExist:
+                    raise self.model.DoesNotExist(
+                        f"No user found with email, username, or phone: {username}"
+                    )
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    """Custom User model using email as the unique identifier."""
 
     class Role(models.TextChoices):
         CASHIER = "CASHIER", _("Cashier")
         MANAGER = "MANAGER", _("Manager")
-        CEO     = "CEO",     _("CEO")
+        CEO = "CEO", _("CEO")
 
-    # Every user must have exactly one role.
+    # Required fields for AbstractBaseUser
+    email = models.EmailField(_("email address"), unique=True)
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_("Optional username for login (can be email, phone, or custom)"),
+    )
+    # User information fields
+    first_name = models.CharField(_("first name"), max_length=150, blank=True)
+    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+
+    # Role and permissions
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
@@ -21,16 +121,28 @@ class User(AbstractUser):
         help_text=_("Controls which parts of the system this user can access."),
     )
 
-    # Override email to make it required and unique.
-    email = models.EmailField(_("email address"), unique=True)
+    # Required for admin interface
+    is_active = models.BooleanField(
+        _("active"),
+        default=True,
+        help_text=_(
+            "Designates whether this user should be treated as active. "
+            "Unselect this instead of deleting accounts."
+        ),
+    )
+    is_staff = models.BooleanField(
+        _("staff status"),
+        default=False,
+        help_text=_("Designates whether the user can log into this admin site."),
+    )
 
+    # Additional fields
     phone = models.CharField(
         max_length=20,
         blank=True,
         help_text=_("Staff contact number, e.g. +256700123456"),
     )
 
-    # Branch assignment for multi-branch operations
     branch = models.ForeignKey(
         "accounts.Branch",
         on_delete=models.SET_NULL,
@@ -39,7 +151,6 @@ class User(AbstractUser):
         help_text=_("Branch where this user is stationed."),
     )
 
-    # Commission rate for performance tracking (percentage)
     commission_rate = models.DecimalField(
         max_digits=5, decimal_places=2,
         default=Decimal("0.00"),
@@ -47,8 +158,14 @@ class User(AbstractUser):
         help_text=_("Commission rate as a percentage (e.g., 2.50 for 2.5%)."),
     )
 
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]
 
     # ------------------------------------------------------------------ #
     # Convenience properties used in templates and views                   #
@@ -73,7 +190,16 @@ class User(AbstractUser):
 
     @property
     def full_name(self):
-        return self.get_full_name() or self.username
+        """Return the user's full name or email if not set."""
+        if self.first_name or self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        return self.email
+
+    def get_full_name(self):
+        return self.full_name
+
+    def get_short_name(self):
+        return self.first_name or self.email
 
     def __str__(self):
         branch_info = f" - {self.branch.name}" if self.branch else ""

@@ -1,0 +1,27 @@
+{% extends "emails/_base.html" %}
+{% block subject %}New registration: {{ reg.company_name }}{% endblock %}
+{% block body %}
+  <h2 style="margin:0 0 12px; font-size:20px;">New company registration</h2>
+  <p style="margin:0 0 20px; color:#475569;">A new lead just came in through the public registration form.</p>
+
+  <table role="presentation" width="100%" cellpadding="6" cellspacing="0" style="font-size:14px; border-collapse:collapse;">
+    <tr><td style="color:#64748b; width:140px;">Company</td><td style="font-weight:600;">{{ reg.company_name }}</td></tr>
+    <tr><td style="color:#64748b;">Contact</td><td>{{ reg.contact_name }}</td></tr>
+    <tr><td style="color:#64748b;">Email</td><td>{{ reg.email }}</td></tr>
+    <tr><td style="color:#64748b;">Phone</td><td>{{ reg.phone }}</td></tr>
+    <tr><td style="color:#64748b;">Location</td><td>{{ reg.city }}{% if reg.city and reg.country %}, {% endif %}{{ reg.country }}</td></tr>
+    <tr><td style="color:#64748b;">Plan</td><td>{{ reg.get_plan_display }}</td></tr>
+    <tr><td style="color:#64748b;">Submitted</td><td>{{ reg.submitted_at }}</td></tr>
+  </table>
+
+  {% if reg.message %}
+    <p style="margin:20px 0 4px; color:#64748b; font-size:13px;">Message</p>
+    <p style="margin:0; padding:12px; background:#f8fafc; border-radius:10px; font-size:14px;">{{ reg.message }}</p>
+  {% endif %}
+
+  <p style="margin:24px 0 0;">
+    <a href="{{ detail_url }}" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; padding:10px 18px; border-radius:10px; font-weight:600; font-size:14px;">
+      Open in admin panel
+    </a>
+  </p>
+{% endblock %}

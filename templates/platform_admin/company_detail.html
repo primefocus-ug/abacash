@@ -1,0 +1,992 @@
+{% extends "platform_admin/base_admin.html" %}
+{% load static %}
+
+{% block title %}{{ company.name }} — Company Detail{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --detail-bg: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+    --detail-surface: var(--surface);
+    --detail-border: var(--border);
+    --detail-text-primary: var(--text-primary);
+    --detail-text-secondary: var(--text-secondary);
+    --detail-text-muted: var(--text-muted);
+    --detail-accent: #3B82F6;
+    --detail-success: #10B981;
+    --detail-danger: #EF4444;
+    --detail-warning: #F59E0B;
+    --detail-purple: #8B5CF6;
+    --detail-radius: 12px;
+    --detail-transition: 0.25s ease;
+    --detail-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --detail-bg: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+    --detail-surface: #111827;
+    --detail-border: #334155;
+    --detail-text-primary: #F8FAFC;
+    --detail-text-secondary: #94A3B8;
+    --detail-text-muted: #64748B;
+    --detail-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .detail-page {
+    min-height: 100vh;
+    background: var(--detail-bg);
+    transition: background var(--detail-transition);
+    padding: 24px;
+  }
+
+  .detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .detail-header .breadcrumb {
+    font-size: 13px;
+    color: var(--detail-text-muted);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-header .breadcrumb a {
+    color: var(--detail-accent);
+    text-decoration: none;
+  }
+
+  .detail-header .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .detail-header .breadcrumb i {
+    margin: 0 4px;
+    font-size: 10px;
+  }
+
+  .detail-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--detail-text-primary);
+    margin: 4px 0 0;
+    letter-spacing: -0.5px;
+    transition: color var(--detail-transition);
+  }
+
+  .detail-header h1 i {
+    margin-right: 8px;
+    color: var(--detail-accent);
+  }
+
+  .detail-header .subtitle {
+    font-size: 14px;
+    color: var(--detail-text-muted);
+    font-family: monospace;
+    transition: color var(--detail-transition);
+  }
+
+  .detail-header .subtitle i {
+    margin-right: 4px;
+  }
+
+  .detail-header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .detail-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--detail-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .detail-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .detail-btn:active {
+    transform: scale(0.97);
+  }
+
+  .detail-btn-primary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .detail-btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+    color: #fff;
+  }
+
+  .detail-btn-success {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .detail-btn-success:hover {
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    color: #fff;
+  }
+
+  .detail-btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .detail-btn-danger:hover {
+    background: #EF4444;
+    color: #fff;
+  }
+
+  .detail-btn-outline {
+    background: transparent;
+    color: var(--detail-text-secondary);
+    border: 1px solid var(--detail-border);
+  }
+
+  .detail-btn-outline:hover {
+    background: var(--detail-surface);
+    color: var(--detail-text-primary);
+  }
+
+  .detail-btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .detail-btn-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .detail-btn-warning:hover {
+    background: #F59E0B;
+    color: #fff;
+  }
+
+  .detail-card {
+    background: var(--detail-surface);
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: background var(--detail-transition), border-color var(--detail-transition);
+  }
+
+  .detail-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--detail-border);
+    background: var(--detail-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: background var(--detail-transition), border-color var(--detail-transition);
+  }
+
+  .detail-card-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--detail-text-primary);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-card-header h2 i {
+    margin-right: 6px;
+    color: var(--detail-text-muted);
+  }
+
+  .detail-card-header .badge-count {
+    font-size: 12px;
+    color: var(--detail-text-muted);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-card-header .badge-count i {
+    margin-right: 4px;
+  }
+
+  .detail-card-body {
+    padding: 20px;
+    transition: background var(--detail-transition);
+  }
+
+  .detail-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .detail-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--detail-border);
+    transition: border-color var(--detail-transition);
+  }
+
+  .detail-info-row:last-child {
+    border-bottom: none;
+  }
+
+  .detail-info-row .label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--detail-text-secondary);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-info-row .label i {
+    margin-right: 4px;
+    font-size: 12px;
+  }
+
+  .detail-info-row .value {
+    font-size: 13px;
+    color: var(--detail-text-primary);
+    text-align: right;
+    font-weight: 500;
+    transition: color var(--detail-transition);
+  }
+
+  .detail-info-row .value.mono {
+    font-family: monospace;
+  }
+
+  .detail-info-row .value .status-badge {
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .detail-info-row .value .status-badge i {
+    font-size: 10px;
+  }
+
+  .detail-info-row .value .status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+  }
+
+  .detail-info-row .value .status-badge.suspended {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .detail-info-row .value .status-badge.ready {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3B82F6;
+  }
+
+  .detail-info-row .value .status-badge.failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .detail-info-row .value .status-badge.running {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+  }
+
+  .detail-info-row .value .status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+  }
+
+  .detail-info-row .value .plan-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .detail-info-row .value .plan-badge.starter { border: 1px solid #94A3B8; color: #64748B; background: transparent; }
+  .detail-info-row .value .plan-badge.professional { border: 1px solid #3B82F6; color: #3B82F6; background: transparent; }
+  .detail-info-row .value .plan-badge.enterprise { border: 1px solid #8B5CF6; color: #8B5CF6; background: transparent; }
+
+  .detail-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .detail-stat-box {
+    background: var(--detail-surface);
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    padding: 14px 16px;
+    text-align: center;
+    transition: background var(--detail-transition), border-color var(--detail-transition);
+  }
+
+  .detail-stat-box .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--detail-text-muted);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-stat-box .stat-label i {
+    margin-right: 3px;
+  }
+
+  .detail-stat-box .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--detail-text-primary);
+    margin-top: 4px;
+    transition: color var(--detail-transition);
+  }
+
+  .detail-stat-box .stat-value.green { color: var(--detail-success); }
+  .detail-stat-box .stat-value.blue { color: var(--detail-accent); }
+  .detail-stat-box .stat-value.purple { color: var(--detail-purple); }
+  .detail-stat-box .stat-value.amber { color: var(--detail-warning); }
+  .detail-stat-box .stat-value.red { color: var(--detail-danger); }
+
+  .detail-domain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-domain-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--detail-surface);
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    transition: background var(--detail-transition), border-color var(--detail-transition);
+  }
+
+  .detail-domain-item .domain {
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--detail-text-primary);
+    transition: color var(--detail-transition);
+  }
+
+  .detail-domain-item .domain i {
+    margin-right: 6px;
+    color: var(--detail-text-muted);
+    font-size: 12px;
+  }
+
+  .detail-domain-item .primary-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #3B82F6;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .detail-form-group {
+    margin-bottom: 14px;
+  }
+
+  .detail-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--detail-text-secondary);
+    margin-bottom: 4px;
+    transition: color var(--detail-transition);
+  }
+
+  .detail-form-group label i {
+    margin-right: 4px;
+  }
+
+  .detail-form-group input,
+  .detail-form-group select,
+  .detail-form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--detail-border);
+    border-radius: var(--detail-radius);
+    background: var(--detail-surface);
+    color: var(--detail-text-primary);
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: border-color 0.2s, background var(--detail-transition), color var(--detail-transition);
+    outline: none;
+  }
+
+  .detail-form-group input:focus,
+  .detail-form-group select:focus,
+  .detail-form-group textarea:focus {
+    border-color: var(--detail-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+  }
+
+  .detail-form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .detail-form-group input[type="checkbox"] {
+    width: auto;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .detail-form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .detail-error-box {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--detail-radius);
+    padding: 12px 16px;
+    color: #dc2626;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-error-box i {
+    font-size: 16px;
+  }
+
+  .detail-message {
+    padding: 12px 16px;
+    border-radius: var(--detail-radius);
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .detail-message i {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+
+  .detail-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #059669;
+  }
+
+  .detail-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+  }
+
+  .detail-message.warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: #d97706;
+  }
+
+  .detail-message.info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #2563eb;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .detail-grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .detail-page {
+      padding: 16px;
+    }
+
+    .detail-header h1 {
+      font-size: 22px;
+    }
+
+    .detail-header-actions {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .detail-header-actions .detail-btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .detail-card-header {
+      padding: 12px 16px;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .detail-card-body {
+      padding: 14px;
+    }
+
+    .detail-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .detail-stat-box .stat-value {
+      font-size: 18px;
+    }
+
+    .detail-info-row {
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 0;
+    }
+
+    .detail-info-row .value {
+      text-align: left;
+    }
+
+    .detail-form-actions {
+      flex-direction: column;
+    }
+
+    .detail-form-actions .detail-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .detail-grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .detail-page {
+      padding: 10px;
+    }
+
+    .detail-header h1 {
+      font-size: 19px;
+    }
+
+    .detail-header .subtitle {
+      font-size: 12px;
+    }
+
+    .detail-stats-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .detail-stat-box {
+      padding: 10px 12px;
+    }
+
+    .detail-stat-box .stat-value {
+      font-size: 16px;
+    }
+
+    .detail-stat-box .stat-label {
+      font-size: 9px;
+    }
+
+    .detail-card-body {
+      padding: 10px;
+    }
+
+    .detail-domain-item {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      gap: 4px;
+      padding: 8px 12px;
+    }
+
+    .detail-info-row .label {
+      font-size: 12px;
+    }
+
+    .detail-info-row .value {
+      font-size: 12px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .detail-page {
+      padding: 20px !important;
+      background: #fff !important;
+    }
+    .detail-card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+    .detail-btn,
+    .detail-header-actions {
+      display: none !important;
+    }
+    .detail-form-group {
+      display: none !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <div class="detail-container">
+    <div class="detail-header">
+      <div>
+        <div class="breadcrumb">
+          <a href="{% url 'platform_admin:dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+          <i class="fas fa-chevron-right"></i>
+          <a href="{% url 'platform_admin:company_list' %}"><i class="fas fa-building"></i> Companies</a>
+          <i class="fas fa-chevron-right"></i>
+          <span>{{ company.name }}</span>
+        </div>
+        <h1><i class="fas fa-building"></i>{{ company.name }}</h1>
+        <div class="subtitle"><i class="fas fa-database"></i> {{ company.schema_name }}</div>
+      </div>
+      <div class="detail-header-actions">
+        <a href="{% url 'platform_admin:company_list' %}" class="detail-btn detail-btn-outline">
+          <i class="fas fa-arrow-left"></i> Back
+        </a>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for message in messages %}
+      <div class="detail-message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Company Info -->
+    <div class="detail-grid-2">
+      <div>
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <h2><i class="fas fa-info-circle"></i> Company Information</h2>
+            <span class="badge-count"><i class="fas fa-details"></i> Details</span>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-building"></i> Company Name</span>
+              <span class="value">{{ company.name }}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-database"></i> Schema Name</span>
+              <span class="value mono">{{ company.schema_name }}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-tag"></i> Plan</span>
+              <span class="value">
+                <span class="plan-badge {{ company.plan|lower }}">
+                  <i class="fas {% if company.plan == 'starter' %}fa-seedling{% elif company.plan == 'professional' %}fa-rocket{% elif company.plan == 'enterprise' %}fa-crown{% else %}fa-tag{% endif %}"></i>
+                  {{ company.plan|title }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-circle"></i> Status</span>
+              <span class="value">
+                <span class="status-badge {% if company.is_active %}active{% else %}suspended{% endif %}">
+                  <i class="fas {% if company.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                  {% if company.is_active %}Active{% else %}Suspended{% endif %}
+                </span>
+              </span>
+            </div>
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-sync-alt"></i> Provisioning Status</span>
+              <span class="value">
+                <span class="status-badge {% if company.provisioning_status == 'READY' %}ready{% elif company.provisioning_status == 'RUNNING' %}running{% elif company.provisioning_status == 'FAILED' %}failed{% else %}pending{% endif %}">
+                  <i class="fas {% if company.provisioning_status == 'READY' %}fa-check-circle{% elif company.provisioning_status == 'RUNNING' %}fa-spinner fa-spin{% elif company.provisioning_status == 'FAILED' %}fa-times-circle{% else %}fa-clock{% endif %}"></i>
+                  {{ company.get_provisioning_status_display }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-calendar-alt"></i> Provisioning Started</span>
+              <span class="value">{{ company.provisioning_started_at|default:"—"|date:"Y-m-d H:i:s" }}</span>
+            </div>
+            {% if company.provisioning_status == 'FAILED' and company.provisioning_error %}
+            <div class="detail-info-row">
+              <span class="label"><i class="fas fa-exclamation-triangle"></i> Error</span>
+              <span class="value" style="color:var(--detail-danger);font-size:12px;max-width:300px;word-break:break-word;">
+                {{ company.provisioning_error }}
+              </span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Domains -->
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <h2><i class="fas fa-globe"></i> Domains</h2>
+            <span class="badge-count"><i class="fas fa-list"></i> {{ domains|length }}</span>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-domain-list">
+              {% if domains %}
+                {% for domain in domains %}
+                <div class="detail-domain-item">
+                  <span class="domain"><i class="fas fa-link"></i> {{ domain.domain }}</span>
+                  {% if domain.is_primary %}
+                  <span class="primary-badge"><i class="fas fa-star"></i> Primary</span>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              {% else %}
+                <div style="text-align:center;color:var(--detail-text-muted);padding:12px 0;">
+                  <i class="fas fa-globe" style="display:block;font-size:24px;margin-bottom:8px;opacity:0.5;"></i>
+                  No domains configured.
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tenant Stats -->
+      <div>
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <h2><i class="fas fa-chart-bar"></i> Tenant Statistics</h2>
+            <span class="badge-count">{% if stats.ok %}<i class="fas fa-check-circle" style="color:var(--detail-success);"></i> Live{% else %}<i class="fas fa-times-circle" style="color:var(--detail-danger);"></i> Unavailable{% endif %}</span>
+          </div>
+          <div class="detail-card-body">
+            {% if stats.error %}
+            <div class="detail-error-box">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div><strong>Stats unavailable:</strong> {{ stats.error }}</div>
+            </div>
+            {% endif %}
+
+            <div class="detail-stats-grid">
+              <div class="detail-stat-box">
+                <div class="stat-label"><i class="fas fa-users"></i> Staff</div>
+                <div class="stat-value blue">{{ stats.staff_count|default:"—" }}</div>
+              </div>
+              <div class="detail-stat-box">
+                <div class="stat-label"><i class="fas fa-store"></i> Branches</div>
+                <div class="stat-value purple">{{ stats.branch_count|default:"—" }}</div>
+              </div>
+              <div class="detail-stat-box">
+                <div class="stat-label"><i class="fas fa-user-friends"></i> Clients</div>
+                <div class="stat-value green">{{ stats.client_count|default:"—" }}</div>
+              </div>
+              <div class="detail-stat-box">
+                <div class="stat-label"><i class="fas fa-hand-holding-usd"></i> Active Loans</div>
+                <div class="stat-value amber">{{ stats.active_loan_count|default:"—" }}</div>
+              </div>
+              <div class="detail-stat-box" style="grid-column:span 2;">
+                <div class="stat-label"><i class="fas fa-coins"></i> Portfolio Outstanding</div>
+                <div class="stat-value blue">{{ stats.portfolio_outstanding|default:"—" }}</div>
+              </div>
+              <div class="detail-stat-box" style="grid-column:span 2;">
+                <div class="stat-label"><i class="fas fa-calendar-check"></i> Collected This Month</div>
+                <div class="stat-value green">{{ stats.collected_this_month|default:"—" }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Management Actions -->
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <h2><i class="fas fa-cogs"></i> Management Actions</h2>
+        <span class="badge-count"><i class="fas fa-tools"></i> Controls</span>
+      </div>
+      <div class="detail-card-body">
+        <div class="detail-grid-2">
+          <!-- Toggle Active -->
+          <div>
+            <h3 style="font-size:14px;font-weight:600;color:var(--detail-text-primary);margin:0 0 8px;">
+              <i class="fas {% if company.is_active %}fa-pause-circle{% else %}fa-play-circle{% endif %}" style="color:var(--detail-accent);"></i>
+              {% if company.is_active %}Suspend{% else %}Activate{% endif %} Tenant
+            </h3>
+            <form method="post" action="{% url 'platform_admin:company_toggle_active' company.schema_name %}">
+              {% csrf_token %}
+              <p style="font-size:13px;color:var(--detail-text-muted);margin:0 0 12px;">
+                {% if company.is_active %}
+                  <i class="fas fa-info-circle"></i> Suspending will prevent access to this tenant until reactivated.
+                {% else %}
+                  <i class="fas fa-info-circle"></i> Activating will restore access to this tenant.
+                {% endif %}
+              </p>
+              <button type="submit" class="detail-btn {% if company.is_active %}detail-btn-danger{% else %}detail-btn-success{% endif %}">
+                <i class="fas {% if company.is_active %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+                {% if company.is_active %}Suspend{% else %}Activate{% endif %} {{ company.name }}
+              </button>
+            </form>
+          </div>
+
+          <!-- Update Plan -->
+          <div>
+            <h3 style="font-size:14px;font-weight:600;color:var(--detail-text-primary);margin:0 0 8px;">
+              <i class="fas fa-edit" style="color:var(--detail-accent);"></i> Update Subscription Plan
+            </h3>
+            <form method="post" action="{% url 'platform_admin:company_update_plan' company.schema_name %}">
+              {% csrf_token %}
+              <div class="detail-form-group">
+                <label for="plan-select"><i class="fas fa-tag"></i> Select Plan</label>
+                <select name="plan" id="plan-select">
+                  {% for plan_code, plan_label in plan_choices %}
+                  <option value="{{ plan_code }}" {% if company.plan == plan_code %}selected{% endif %}>
+                    {{ plan_label }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="submit" class="detail-btn detail-btn-primary">
+                <i class="fas fa-save"></i> Update Plan
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Retry Provisioning -->
+        {% if company.provisioning_status != 'READY' %}
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--detail-border);">
+          <h3 style="font-size:14px;font-weight:600;color:var(--detail-text-primary);margin:0 0 8px;">
+            <i class="fas fa-sync-alt" style="color:var(--detail-warning);"></i> Retry Provisioning
+          </h3>
+          <form method="post" action="{% url 'platform_admin:company_retry_provisioning' company.schema_name %}">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div class="detail-form-group">
+                <label for="retry-domain"><i class="fas fa-globe"></i> Domain</label>
+                {% with domains.first as primary_domain %}
+                <input type="text" name="domain" id="retry-domain" value="{{ primary_domain.domain|default:'' }}" placeholder="tenant.abacash.loan">
+                {% endwith %}
+              </div>
+              <div class="detail-form-group">
+                <label for="retry-email"><i class="fas fa-envelope"></i> Admin Email</label>
+                <input type="email" name="admin_email" id="retry-email" placeholder="admin@company.com">
+              </div>
+              <div class="detail-form-group">
+                <label for="retry-password"><i class="fas fa-lock"></i> Admin Password (optional)</label>
+                <input type="text" name="password" id="retry-password" placeholder="Leave blank to auto-generate">
+              </div>
+              <div class="detail-form-group">
+                <label for="retry-phone"><i class="fas fa-phone"></i> Phone</label>
+                <input type="text" name="phone" id="retry-phone" placeholder="+256 700 000000">
+              </div>
+              <div class="detail-form-group" style="grid-column:span 2;">
+                <label for="retry-address"><i class="fas fa-map-marker-alt"></i> Address</label>
+                <input type="text" name="address" id="retry-address" placeholder="Street, City">
+              </div>
+              <div class="detail-form-group" style="grid-column:span 2;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;">
+                  <input type="checkbox" name="notify" checked> <i class="fas fa-bell"></i> Notify user via email
+                </label>
+                <button type="submit" class="detail-btn detail-btn-warning">
+                  <i class="fas fa-sync-alt"></i> Retry Provisioning
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--detail-text-muted);">
+      <a href="{% url 'tenants:landing' %}" style="color:var(--detail-text-muted);text-decoration:none;">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+      <span style="margin:0 8px;">•</span>
+      <i class="fas fa-cube"></i> Abacash Platform Admin v2.0
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    'use strict';
+
+    // Confirm dangerous actions
+    document.querySelectorAll('[data-confirm]').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        if (!confirm(this.dataset.confirm || 'Are you sure?')) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // Auto-refresh stats every 60 seconds (optional)
+    // Uncomment to enable:
+    /*
+    setInterval(function() {
+      if (document.querySelector('.detail-stats-grid')) {
+        fetch(window.location.href, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+          // Update stats selectively
+        })
+        .catch(console.warn);
+      }
+    }, 60000);
+    */
+
+    console.log('Company detail loaded for {{ company.schema_name }}');
+
+  })();
+</script>
+{% endblock %}

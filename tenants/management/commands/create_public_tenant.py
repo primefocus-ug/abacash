@@ -44,5 +44,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("\nPublic tenant ready."))
         self.stdout.write(
             "  Next: python manage.py migrate_schemas --shared\n"
-            "  Then: python manage.py onboard_tenant --schema=<slug> --name=... --domain=... --email=... --password=..."
+            "  Then: python manage.py onboard_tenant --schema=<slug> --name=... --domain=... --email=... --notify"
         )

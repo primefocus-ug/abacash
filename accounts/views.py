@@ -26,6 +26,7 @@ from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
+from .branch_scope import scope_to_branch
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
 
@@ -175,11 +176,11 @@ def dashboard(request):
 
 def _cashier_dashboard(request, today):
     # Loans with payments due today
-    due_today = LoanSchedule.objects.filter(
+    due_today = scope_to_branch(LoanSchedule.objects.filter(
         due_date=today,
         status__in=["PENDING", "OVERDUE"],
         loan__status__in=["ACTIVE", "RESTRUCTURED"],
-    ).select_related("loan__client").order_by("loan__client__last_name")[:20]
+    ), request.user, "loan__branch").select_related("loan__client").order_by("loan__client__last_name")[:20]
 
     # Recent payments recorded by this cashier
     recent_payments = Payment.objects.filter(
@@ -210,37 +211,40 @@ def _cashier_dashboard(request, today):
 
 def _manager_dashboard(request, today):
     # Pending approvals
-    pending_loans = Loan.objects.filter(
+    pending_loans = scope_to_branch(Loan.objects.filter(
         status="PENDING"
-    ).select_related("client", "product", "applied_by").order_by("application_date")[:20]
+    ), request.user).select_related("client", "product", "applied_by").order_by("application_date")[:20]
 
     # Overdue loans
-    overdue_schedules = LoanSchedule.objects.filter(
+    overdue_schedules = scope_to_branch(LoanSchedule.objects.filter(
         due_date__lt=today,
         status__in=["PENDING", "OVERDUE"],
         loan__status__in=["ACTIVE", "RESTRUCTURED"],
-    ).select_related("loan__client").order_by("due_date")[:20]
+    ), request.user, "loan__branch").select_related("loan__client").order_by("due_date")[:20]
 
     # Portfolio metrics
-    active_loans       = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
+    active_loans       = scope_to_branch(Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"]), request.user)
     total_portfolio    = active_loans.aggregate(total=Sum("principal_amount"))["total"] or 0
     total_outstanding  = active_loans.aggregate(total=Sum("outstanding_balance"))["total"] or 0
 
     month_start = today.replace(day=1)
-    collected_month = Payment.objects.filter(
+    collected_month = scope_to_branch(Payment.objects.filter(
         payment_date__gte=month_start,
         status="ALLOCATED",
-    ).aggregate(total=Sum("amount_received"))["total"] or 0
+    ), request.user, "loan__branch").aggregate(total=Sum("amount_received"))["total"] or 0
 
     # Risk metrics
-    par_30_count = Loan.objects.filter(
+    par_30_count = scope_to_branch(Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
         schedule__due_date__lt=today,
         schedule__status__in=["PENDING", "OVERDUE"],
-    ).distinct().count()
+    ), request.user).distinct().count()
 
     staff_performance = []
-    for staff in User.objects.filter(is_active=True).order_by("first_name", "last_name", "username"):
+    branch_staff = User.objects.filter(is_active=True)
+    if not request.user.is_ceo:
+        branch_staff = branch_staff.filter(branch_id=request.user.branch_id) if request.user.branch_id else branch_staff.none()
+    for staff in branch_staff.order_by("first_name", "last_name", "username"):
         if staff.is_ceo:
             continue
         applied_loans = Loan.objects.filter(applied_by=staff)
@@ -672,6 +676,84 @@ def branch_edit(request, pk):
         "action": "edit",
         "branch": branch,
         "managers": User.objects.filter(is_active=True, role__in=["MANAGER", "CEO"]),
+    })
+
+
+@_ceo_required
+def branch_detail(request, pk):
+    """CEO-only detail/summary page for a single branch."""
+    branch = get_object_or_404(Branch, pk=pk)
+    from datetime import date
+    today = date.today()
+    month_start = today.replace(day=1)
+
+    staff = User.objects.filter(branch=branch, is_active=True).order_by("first_name", "last_name", "username")
+
+    active_loans = Loan.objects.filter(branch=branch, status__in=["ACTIVE", "RESTRUCTURED"])
+    portfolio_amount    = active_loans.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
+    portfolio_outstanding = active_loans.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
+    active_loan_count   = active_loans.count()
+    client_count        = Client.objects.filter(branch=branch, is_active=True).count()
+
+    pending_loans = Loan.objects.filter(branch=branch, status="PENDING").select_related("client", "product").order_by("application_date")[:10]
+
+    overdue_schedules = LoanSchedule.objects.filter(
+        due_date__lt=today,
+        status__in=["PENDING", "OVERDUE"],
+        loan__branch=branch,
+        loan__status__in=["ACTIVE", "RESTRUCTURED"],
+    ).select_related("loan__client").order_by("due_date")[:20]
+    overdue_count = LoanSchedule.objects.filter(
+        due_date__lt=today, status__in=["PENDING", "OVERDUE"],
+        loan__branch=branch, loan__status__in=["ACTIVE", "RESTRUCTURED"],
+    ).count()
+
+    par_30_count = active_loans.filter(
+        schedule__due_date__lt=today,
+        schedule__status__in=["PENDING", "OVERDUE"],
+    ).distinct().count()
+
+    collected_month = Payment.objects.filter(
+        loan__branch=branch, payment_date__gte=month_start, status="ALLOCATED",
+    ).aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
+
+    expenses_month = Expense.objects.filter(
+        branch=branch, expense_date__gte=month_start,
+    ).aggregate(t=Sum("amount"))["t"] or Decimal("0")
+
+    written_off_count = Loan.objects.filter(branch=branch, status="WRITTEN_OFF").count()
+
+    staff_performance = []
+    for s in staff:
+        if s.is_ceo:
+            continue
+        applied_loans = Loan.objects.filter(applied_by=s)
+        collections_this_month = Payment.objects.filter(
+            recorded_by=s, payment_date__gte=month_start, status="ALLOCATED",
+        ).aggregate(total=Sum("amount_received"))["total"] or Decimal("0")
+        staff_performance.append({
+            "user": s,
+            "applications_count": applied_loans.count(),
+            "active_loans_count": applied_loans.filter(status__in=["ACTIVE", "RESTRUCTURED"]).count(),
+            "collections_this_month": collections_this_month,
+        })
+
+    return render(request, "accounts/branch_detail.html", {
+        "branch": branch,
+        "today": today,
+        "staff": staff,
+        "staff_performance": staff_performance,
+        "portfolio_amount": portfolio_amount,
+        "portfolio_outstanding": portfolio_outstanding,
+        "active_loan_count": active_loan_count,
+        "client_count": client_count,
+        "pending_loans": pending_loans,
+        "overdue_schedules": overdue_schedules,
+        "overdue_count": overdue_count,
+        "par_30_count": par_30_count,
+        "collected_month": collected_month,
+        "expenses_month": expenses_month,
+        "written_off_count": written_off_count,
     })
 
 
@@ -1283,7 +1365,7 @@ def expense_list(request):
     form_data = {
         "category": "", "expense_type": "", "amount": "",
         "expense_date": timezone.localdate().isoformat(),
-        "vendor": "", "payment_method": "CASH", "receipt_number": "", "description": "",
+        "vendor": "", "payment_method": "CASH", "receipt_number": "", "description": "", "branch": "",
     }
     show_modal = False
 
@@ -1300,6 +1382,7 @@ def expense_list(request):
             Expense.objects.create(
                 category_id=form_data["category"] or None,
                 expense_type_id=form_data["expense_type"] or None,
+                branch_id=form_data["branch"] or None,
                 amount=amount_val,
                 expense_date=exp_date,
                 vendor=form_data["vendor"],
@@ -1350,6 +1433,7 @@ def expense_list(request):
         "color_choices": ["teal", "amber", "red", "green", "blue", "purple"],
         "status_choices": Expense.Status.choices,
         "payment_method_choices": Expense.PaymentMethod.choices,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 
@@ -1371,6 +1455,7 @@ def expense_create(request):
             expense = Expense.objects.create(
                 category_id=d.get("category") or None,
                 expense_type_id=d.get("expense_type") or None,
+                branch_id=d.get("branch") or None,
                 amount=amount_val,
                 expense_date=expense_date,
                 vendor=d.get("vendor", "").strip(),
@@ -1392,6 +1477,7 @@ def expense_create(request):
         "title": "Record Expense", "action": "create",
         "categories": categories,
         "payment_method_choices": Expense.PaymentMethod.choices,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 
@@ -1413,6 +1499,7 @@ def expense_edit(request, pk):
             from datetime import date as _date
             expense.category_id = d.get("category") or None
             expense.expense_type_id = d.get("expense_type") or None
+            expense.branch_id = d.get("branch") or None
             expense.amount = amount_val
             expense.expense_date = _date.fromisoformat(d["expense_date"])
             expense.vendor = d.get("vendor", "").strip()
@@ -1431,6 +1518,7 @@ def expense_edit(request, pk):
         "expense": expense,
         "categories": categories,
         "payment_method_choices": Expense.PaymentMethod.choices,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 
@@ -1759,3 +1847,31 @@ def bank_transaction_edit(request, pk):
         "transaction": transaction,
         "now": timezone.localtime(),
     })
+
+# ------------------------------------------------------------------ #
+# CEO branch filter (nav switcher)                                     #
+# ------------------------------------------------------------------ #
+
+@login_required
+def set_branch_filter(request):
+    """Set/clear the CEO's nav-switcher branch default for this session.
+
+    Only meaningful for CEOs (branch_scope.effective_branch_id ignores the
+    session entirely for everyone else), but any authenticated user posting
+    here just gets redirected back — no error, since it's a no-op for them.
+    """
+    from .branch_scope import SESSION_KEY
+
+    if request.method == "POST":
+        branch_id = request.POST.get("branch", "").strip()
+        if branch_id and branch_id.isdigit() and Branch.objects.filter(pk=branch_id, is_active=True).exists():
+            request.session[SESSION_KEY] = branch_id
+        else:
+            request.session.pop(SESSION_KEY, None)
+
+    next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
+    # Avoid redirect loops back to a page carrying a stale ?branch= override
+    # from before the switch — safest is to just drop any query string.
+    from urllib.parse import urlsplit
+    next_url = urlsplit(next_url).path or "/"
+    return redirect(next_url)

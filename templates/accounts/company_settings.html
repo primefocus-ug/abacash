@@ -321,6 +321,7 @@
   <div class="card mb-3">
     <div class="card-header"><span class="card-title">Role Permissions Reference</span></div>
     <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
       <table class="aba-table">
         <thead>
           <tr><th>Permission</th><th>Cashier</th><th>Manager</th><th>CEO</th></tr>
@@ -340,10 +341,11 @@
           <tr><td>Write-off loans</td><td>—</td><td>—</td><td>✓</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 
-  <div class="flex gap-2 mb-4">
+  <div class="flex gap-2 mb-4" style="flex-wrap:wrap;">
     <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
     <a href="{% url 'accounts:admin_dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
   </div>

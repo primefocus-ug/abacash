@@ -50,6 +50,7 @@
           <div>
             <div style="font-size:17px;font-weight:600;">{{ client.full_name }}</div>
             <div class="mono text-muted text-sm">{{ client.client_number }}</div>
+            {% if client.branch %}<div class="text-muted text-sm" style="margin-top:2px;">{{ client.branch.name }}</div>{% endif %}
           </div>
         </div>
 

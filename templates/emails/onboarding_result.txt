@@ -1,0 +1,14 @@
+{% if success %}Onboarding complete for {{ reg.company_name }}{% else %}Onboarding FAILED for {{ reg.company_name }}{% endif %}
+
+{% if success %}
+Schema: {{ reg.schema_name }}
+Domain: {{ reg.domain }}
+{% else %}
+This registration is now marked Failed and can be retried from the admin panel.
+{% if error %}
+Error:
+{{ error }}
+{% endif %}
+{% endif %}
+
+Open registration: {{ detail_url }}

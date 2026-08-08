@@ -124,11 +124,20 @@ def _check_due_payments_for_tenant():
     """Runs entirely inside a single tenant's schema (see tenant_context above)."""
     from loans.models import LoanSchedule
     from reminders.models import ReminderLog, ReminderSetting
+    from accounts.models import CompanySettings
+
+    company_settings = CompanySettings.get()
+    if not company_settings.sms_reminders_enabled:
+        return {"skipped": "sms_reminders_enabled is off in CompanySettings"}
 
     today = timezone.localdate()
+    grace = company_settings.grace_period_days
+    lead_days = company_settings.reminder_days_before
 
     triggers = [
-        ("DUE_3D",    today + timedelta(days=3), "SMS"),
+        # Label kept as DUE_3D (the fixed choice in ReminderLog.TriggerType)
+        # even though the lead time is configurable via reminder_days_before.
+        ("DUE_3D",    today + timedelta(days=lead_days), "SMS"),
         ("DUE_1D",    today + timedelta(days=1), "SMS"),
         ("DUE_TODAY", today,                     "SMS"),
     ]
@@ -158,7 +167,7 @@ def _check_due_payments_for_tenant():
                 pass
 
             phone   = client.phone_primary
-            amount  = f"UGX {int(entry.total_payment - entry.amount_paid):,}"
+            amount  = f"UGX {int(entry.total_payment + entry.penalty_due - entry.amount_paid):,}"
             due_str = entry.due_date.strftime("%d %b %Y")
 
             message = (
@@ -181,15 +190,16 @@ def _check_due_payments_for_tenant():
                 failed_count += 1
 
     # Overdue entries — SMS + WhatsApp
+    overdue_cutoff = today - timedelta(days=grace)
     overdue_entries = list(LoanSchedule.objects.filter(
-        due_date__lt=today,
+        due_date__lt=overdue_cutoff,
         status__in=["PENDING", "PARTIAL", "OVERDUE"],
         loan__status="ACTIVE",
     ).select_related("loan__client", "loan"))
 
     # Mark pending entries as OVERDUE now that we have the list
     LoanSchedule.objects.filter(
-        due_date__lt=today,
+        due_date__lt=overdue_cutoff,
         status="PENDING",
         loan__status="ACTIVE",
     ).update(status="OVERDUE")
@@ -204,12 +214,13 @@ def _check_due_payments_for_tenant():
                 continue
             if setting.suppressed_until and setting.suppressed_until >= today:
                 continue
-        except Exception:
+        except ReminderSetting.DoesNotExist:
             pass
 
         days_late = (today - entry.due_date).days
         phone     = client.phone_primary
-        amount    = f"UGX {int(entry.total_payment - entry.amount_paid):,}"
+        amount    = f"UGX {int(entry.total_payment + entry.penalty_due - entry.amount_paid):,}"
+        trigger_type = "OVD_7D" if days_late >= 7 else "OVD_1D"
 
         # SMS
         sms_body = (
@@ -218,7 +229,7 @@ def _check_due_payments_for_tenant():
             f"Please pay immediately to avoid further penalties. ABA Uganda."
         )
         success, pid = _send_sms(phone, sms_body)
-        _log_reminder(loan, client, entry, "SMS", "OVD_1D",
+        _log_reminder(loan, client, entry, "SMS", trigger_type,
                       phone, sms_body, success, pid, "" if success else pid)
         if success:
             sent_count += 1
@@ -237,7 +248,7 @@ def _check_due_payments_for_tenant():
                 f"ABA Uganda — 0700000000"
             )
             success, pid = _send_whatsapp(phone, wa_body)
-            _log_reminder(loan, client, entry, "WHATSAPP", "OVD_1D",
+            _log_reminder(loan, client, entry, "WHATSAPP", trigger_type,
                           phone, wa_body, success, pid, "" if success else pid)
             if success:
                 sent_count += 1

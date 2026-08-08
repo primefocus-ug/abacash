@@ -1,0 +1,99 @@
+{% extends "tenants/landing_base.html" %}
+{% block title %}{{ company.name }} | Tenant | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Public Admin</div>
+    <h1 class="hero-title">{{ company.name }}</h1>
+    <p class="hero-copy">Schema <code>{{ company.schema_name }}</code> · provisioned {{ company.created_on|date:"M j, Y" }}.</p>
+  </section>
+
+  <div class="dashboard-header" style="margin-top:1rem;">
+    <a class="btn btn-secondary" href="{% url 'tenants:tenants_list' %}">&larr; Back to tenants</a>
+    <span class="badge">{% if company.is_active %}Active{% else %}Suspended{% endif %}</span>
+  </div>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Overview</div>
+        <h2>Tenant details</h2>
+      </div>
+    </div>
+    <div class="stack-list">
+      <div class="stack-item"><div><strong>Plan</strong><small>{{ company.get_plan_display }}</small></div></div>
+      <div class="stack-item">
+        <div>
+          <strong>Domains</strong>
+          <small>{% if domains %}{{ domains|join:", " }}{% else %}No domain mapped{% endif %}</small>
+        </div>
+      </div>
+      {% if registration %}
+        <div class="stack-item">
+          <div>
+            <strong>Originating lead</strong>
+            <small>{{ registration.contact_name }} · {{ registration.email }}</small>
+          </div>
+          <a class="btn btn-secondary btn-sm" href="{% url 'tenants:registration_detail' registration.pk %}">View lead</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Manage</div>
+        <h2>Quick actions</h2>
+      </div>
+    </div>
+    <div class="panel-grid">
+      <form method="post" action="{% url 'tenants:public_admin' %}" class="inline-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="suspend_tenant">
+        <input type="hidden" name="suspend_tenant_schema" value="{{ company.schema_name }}">
+        <button type="submit" class="btn btn-secondary">
+          {% if company.is_active %}Suspend tenant{% else %}Activate tenant{% endif %}
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'tenants:public_admin' %}" class="form-grid">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_subscription">
+        <input type="hidden" name="subscription_tenant_schema" value="{{ company.schema_name }}">
+        <div class="form-group">
+          <label for="subscription_plan">Change plan</label>
+          <select id="subscription_plan" name="subscription_plan">
+            {% for value, label in plan_choices %}
+              <option value="{{ value }}" {% if company.plan == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Update plan</button>
+      </form>
+    </div>
+    <p class="hero-copy" style="margin-top:0.8rem;">Role assignment and password resets for this tenant's users are available from the main dashboard.</p>
+  </section>
+
+  {% if attempts %}
+    <section class="section-card" style="margin-top:1rem;">
+      <div class="section-heading">
+        <div>
+          <div class="section-label">History</div>
+          <h2>Onboarding attempts</h2>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for attempt in attempts %}
+          <div class="stack-item">
+            <div>
+              <strong>{{ attempt.get_triggered_by_display }}</strong>
+              <small>{{ attempt.started_at|date:"M j, Y H:i" }}</small>
+            </div>
+            <span class="badge">{% if attempt.success is None %}Pending{% elif attempt.success %}Succeeded{% else %}Failed{% endif %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

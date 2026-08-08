@@ -373,7 +373,16 @@ img { max-width: 100%; display: block; }
   min-width:    0;
   width:        100%;
   box-sizing:   border-box;
-  max-width:    calc(100vw - var(--sidebar-w));
+}
+
+/* max-width only makes sense on desktop, where the sidebar is a fixed
+   element that eats into the viewport. On mobile --sidebar-w becomes
+   100%, which made this resolve to max-width: 0 and clipped all page
+   content to nothing. */
+@media (min-width: 769px) {
+  .page-body {
+    max-width: calc(100vw - var(--sidebar-w));
+  }
 }
 
 /* Top bar */
@@ -399,12 +408,6 @@ img { max-width: 100%; display: block; }
 }
 
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
-
-/* Page body */
-.page-body {
-  padding:    28px;
-  flex:       1;
-}
 
 .dashboard-grid {
   display: grid;
@@ -895,17 +898,17 @@ textarea { resize: vertical; min-height: 90px; }
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
-  .sidebar { 
-    width: 100%; 
+  .sidebar {
+    width: 100%;
     max-width: 280px;
     transition: transform .25s ease;
   }
-  .sidebar-nav { 
+  .sidebar-nav {
     padding: 12px 8px;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
   }
-  .topbar { 
+  .topbar {
     padding: 0 12px;
     height: 52px;
   }
@@ -922,7 +925,7 @@ textarea { resize: vertical; min-height: 90px; }
   .card { margin-bottom: 12px; }
   .form-row { grid-template-columns: 1fr !important; }
   [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
-  .table-wrap { 
+  .table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
@@ -931,8 +934,8 @@ textarea { resize: vertical; min-height: 90px; }
   .btn-sm { padding: 6px 10px; font-size: 11px; }
   .card-body { padding: 14px; }
   .card-header { padding: 12px 14px; }
-  .nav-link { 
-    padding: 8px 8px; 
+  .nav-link {
+    padding: 8px 8px;
     font-size: 12.5px;
     gap: 8px;
   }
@@ -1202,7 +1205,7 @@ textarea { resize: vertical; min-height: 90px; }
   padding: 12px;
 }
 
-.select2-container--default .select2-results__option:hover, 
+.select2-container--default .select2-results__option:hover,
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
   background-color: var(--bg-hover);
   color: var(--text-primary);
@@ -1733,7 +1736,7 @@ textarea { resize: vertical; min-height: 90px; }
     padding: 10px 12px;
     font-size: 13px;
   }
-  
+
   .filter-field input {
     min-width: 160px !important;
   }
@@ -1744,32 +1747,32 @@ textarea { resize: vertical; min-height: 90px; }
   :root {
     --sidebar-w: 240px;
   }
-  
+
   .page-body {
     padding: 20px;
   }
-  
+
   .aba-table {
     font-size: 12.5px;
   }
-  
+
   .aba-table th,
   .aba-table td {
     padding: 8px 10px;
   }
-  
+
   .card-header {
     padding: 14px 16px;
   }
-  
+
   .card-body {
     padding: 16px;
   }
-  
+
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .metrics-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1780,85 +1783,86 @@ textarea { resize: vertical; min-height: 90px; }
   :root {
     --sidebar-w: 100%;
   }
-  
+
   .page-body {
     padding: 16px;
+    max-width: none;
   }
-  
+
   /* Stack tables horizontally scrollable */
   .table-wrap {
     margin: 0 -16px;
     padding: 0 16px;
   }
-  
+
   /* Ensure filter bars are fully scrollable */
   .filter-bar-single-row {
     -webkit-overflow-scrolling: touch;
     padding-bottom: 8px;
   }
-  
+
   .filter-bar-single-row input,
   .filter-bar-single-row select {
     flex-shrink: 0;
     max-width: 200px;
   }
-  
+
   /* Stack stat cards */
   .stat-grid,
   .metrics-grid {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-  
+
   /* Adjust card layouts */
   .card-header-content {
     flex-direction: column !important;
     align-items: stretch !important;
   }
-  
+
   .card-header-title {
     margin-bottom: 8px;
   }
-  
+
   /* Smaller table text */
   .aba-table {
     font-size: 12px;
   }
-  
+
   .aba-table th {
     font-size: 10px;
     padding: 8px 8px;
   }
-  
+
   .aba-table td {
     padding: 8px 8px;
   }
-  
+
   /* Adjust buttons */
   .btn {
     padding: 8px 12px;
     font-size: 13px;
   }
-  
+
   .btn-sm {
     padding: 6px 10px;
     font-size: 12px;
   }
-  
+
   /* Modal adjustments */
   .modal {
     width: 95% !important;
     max-height: 80vh;
   }
-  
+
   .modal-header {
     padding: 14px 16px;
   }
-  
+
   .modal-body {
     padding: 16px;
   }
-  
+
   .modal-footer {
     padding: 12px 16px;
   }
@@ -1869,99 +1873,99 @@ textarea { resize: vertical; min-height: 90px; }
   .page-body {
     padding: 12px;
   }
-  
+
   /* Single column stats */
   .stat-grid,
   .metrics-grid {
     grid-template-columns: 1fr !important;
   }
-  
+
   /* Full-width filter inputs */
   .filter-bar-single-row {
     gap: 6px;
   }
-  
+
   .filter-bar-single-row input {
     min-width: 120px !important;
     flex: 1 1 100% !important;
   }
-  
+
   .filter-bar-single-row select {
     flex: 1 1 100% !important;
   }
-  
+
   .filter-actions {
     flex: 1 1 100% !important;
     justify-content: flex-end;
   }
-  
+
   .filter-actions .btn {
     flex: 0 0 auto;
   }
-  
+
   /* Compact table */
   .aba-table th,
   .aba-table td {
     padding: 6px 8px;
     font-size: 11px;
   }
-  
+
   .aba-table th {
     font-size: 9px;
     letter-spacing: 0.04em;
   }
-  
+
   /* Smaller badges */
   .badge {
     padding: 3px 8px;
     font-size: 10px;
   }
-  
+
   /* Modal full screen */
   .modal {
     width: 98% !important;
     max-height: 90vh;
     border-radius: var(--radius-md);
   }
-  
+
   .modal-header {
     padding: 12px 14px;
   }
-  
+
   .modal-title {
     font-size: 15px;
   }
-  
+
   .modal-body {
     padding: 14px;
   }
-  
+
   .modal-footer {
     padding: 10px 14px;
     flex-wrap: wrap;
     gap: 8px;
   }
-  
+
   .modal-footer .btn {
     flex: 1 1 auto;
     min-width: 100px;
   }
-  
+
   /* Topbar adjustments */
   .topbar {
     padding: 0 12px;
     height: 52px;
   }
-  
+
   .topbar-title {
     font-size: 14px;
     font-weight: 600;
   }
-  
+
   .topbar-actions {
     gap: 6px;
   }
-  
+
   .topbar-actions .btn {
     padding: 6px 10px;
     font-size: 12px;
@@ -1973,25 +1977,25 @@ textarea { resize: vertical; min-height: 90px; }
   .page-body {
     padding: 8px;
   }
-  
+
   .card {
     border-radius: var(--radius-md);
   }
-  
+
   .card-header {
     padding: 12px 14px;
   }
-  
+
   .card-body {
     padding: 12px;
   }
-  
+
   .aba-table th,
   .aba-table td {
     padding: 5px 6px;
     font-size: 10px;
   }
-  
+
   .btn {
     padding: 7px 10px;
     font-size: 11px;
@@ -2003,11 +2007,11 @@ textarea { resize: vertical; min-height: 90px; }
   .modal {
     max-height: 90vh;
   }
-  
+
   .modal-body {
     max-height: 60vh;
   }
-  
+
   .page-body {
     padding: 12px;
   }
@@ -2031,11 +2035,11 @@ textarea { resize: vertical; min-height: 90px; }
   .modal-overlay {
     display: none !important;
   }
-  
+
   .aba-table {
     font-size: 10px;
   }
-  
+
   .aba-table th,
   .aba-table td {
     padding: 4px 6px;
@@ -2052,11 +2056,11 @@ textarea { resize: vertical; min-height: 90px; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   .clickable-row:hover {
     box-shadow: none !important;
   }
-  
+
   .clickable-row[data-href]:hover td:last-child::after {
     animation: none !important;
     opacity: 1;
@@ -2068,7 +2072,7 @@ textarea { resize: vertical; min-height: 90px; }
   [data-theme="dark"] .filter-bar-single-row::-webkit-scrollbar-thumb {
     background: var(--surface-3);
   }
-  
+
   [data-theme="dark"] .modal-overlay {
     background: rgba(2, 6, 23, 0.85);
   }

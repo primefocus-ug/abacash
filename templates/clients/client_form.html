@@ -73,6 +73,24 @@
     </div>
   </div>
 
+  {% if user.is_ceo %}
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Branch <span style="color:var(--red-400)">*</span></span></div>
+    <div class="card-body">
+      <div class="form-group">
+        <label for="branch">Register under branch</label>
+        <select name="branch" id="branch" required>
+          <option value="">— Select branch —</option>
+          {% for b in branches %}
+          <option value="{{ b.pk }}" {% if client.branch_id == b.pk %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
+          {% endfor %}
+        </select>
+        <div class="form-hint">As CEO you're not tied to a single branch, so pick which branch this client belongs to.</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Personal Information -->
   <div class="card mb-3">
     <div class="card-header"><span class="card-title">Personal Information</span></div>

@@ -1,0 +1,28 @@
+{% extends "emails/_base.html" %}
+{% block subject %}{% if success %}Onboarded{% else %}Onboarding failed{% endif %}: {{ reg.company_name }}{% endblock %}
+{% block body %}
+  {% if success %}
+    <h2 style="margin:0 0 12px; font-size:20px; color:#16a34a;">✅ Onboarding complete</h2>
+    <p style="margin:0 0 20px; color:#475569;">
+      <strong>{{ reg.company_name }}</strong> has been provisioned successfully
+      {% if reg.schema_name %}as schema <code>{{ reg.schema_name }}</code>{% endif %}
+      {% if reg.domain %}on <code>{{ reg.domain }}</code>{% endif %}.
+    </p>
+  {% else %}
+    <h2 style="margin:0 0 12px; font-size:20px; color:#ef4444;">⚠️ Onboarding failed</h2>
+    <p style="margin:0 0 12px; color:#475569;">
+      Provisioning for <strong>{{ reg.company_name }}</strong> did not complete. This registration
+      needs attention — it now shows as <strong>Failed</strong> and can be retried from the admin panel.
+    </p>
+    {% if error %}
+      <p style="margin:0 0 4px; color:#64748b; font-size:13px;">Error</p>
+      <p style="margin:0; padding:12px; background:#fef2f2; color:#991b1b; border-radius:10px; font-size:13px; font-family:monospace;">{{ error }}</p>
+    {% endif %}
+  {% endif %}
+
+  <p style="margin:24px 0 0;">
+    <a href="{{ detail_url }}" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; padding:10px 18px; border-radius:10px; font-weight:600; font-size:14px;">
+      Open registration
+    </a>
+  </p>
+{% endblock %}

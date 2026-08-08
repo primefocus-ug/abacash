@@ -31,8 +31,8 @@
 
 {% if client %}
 <div class="card">
-  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
-    <div>
+  <div class="card-header card-header-content">
+    <div class="card-header-title">
       <div class="card-title">{{ client.full_name }}</div>
       <div class="text-sm text-muted">{{ client.client_number }} &nbsp;|&nbsp; {{ client.phone_primary }} &nbsp;|&nbsp; {{ client.district }}</div>
     </div>
@@ -40,7 +40,7 @@
   </div>
 
   <div class="card-body">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="metrics-grid" style="margin-bottom:20px;">
       <div class="metric-card teal"><div class="metric-label">Total Loans</div><div class="metric-value teal">{{ loans|length }}</div></div>
       <div class="metric-card green"><div class="metric-label">Active Loans</div><div class="metric-value green">{{ client.active_loan_count }}</div></div>
       <div class="metric-card blue"><div class="metric-label">Total Payments</div><div class="metric-value">{{ payments|length }}</div></div>

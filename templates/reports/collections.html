@@ -14,7 +14,7 @@
 <!-- Date filter -->
 <div class="card mb-3">
   <div class="card-body" style="padding:14px 20px;">
-    <form method="get" class="flex gap-2" style="align-items:flex-end;">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
       <div>
         <label style="display:block;margin-bottom:4px;">From</label>
         <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
@@ -47,8 +47,8 @@
 
 {% for row in cashier_totals %}
 <div class="card mb-3">
-  <div class="card-header">
-    <div>
+    <div class="card-header card-header-content">
+    <div class="card-header-title">
       <div style="font-weight:600;">{{ row.user.full_name }}</div>
       <div class="text-sm text-muted">{{ row.user.get_role_display }}</div>
     </div>

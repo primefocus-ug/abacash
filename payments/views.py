@@ -16,8 +16,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from loans.models import Loan, LoanSchedule
-from accounts.models import AuditLog
+from accounts.models import AuditLog, Branch
 from accounts.audit import log_action
+from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
 from common.pdf_utils import render_pdf_response
 from clients.models import CreditTransaction
 from .models import Payment, Receipt
@@ -32,20 +33,23 @@ def payment_list(request):
         return record_payment(request)
 
     qs = Payment.objects.select_related("loan__client", "recorded_by").order_by("-payment_date")
-    if request.user.is_cashier:
-        qs = qs.filter(recorded_by=request.user)
+    qs = scope_to_branch_request(qs, request, "loan__branch")
 
     search = request.GET.get("q", "").strip()
     if search:
         qs = qs.filter(loan__loan_number__icontains=search) | \
              qs.filter(loan__client__last_name__icontains=search)
 
-    active_loans = Loan.objects.filter(status="ACTIVE").select_related("client").order_by("client__last_name")
+    active_loans = scope_to_branch(
+        Loan.objects.filter(status="ACTIVE"), request.user
+    ).select_related("client").order_by("client__last_name")
     return render(request, "payments/payment_list.html", {
         "payments": qs[:100],
         "search": search,
         "active_loans": active_loans,
         "today": date.today(),
+        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
+        "selected_branch": request.GET.get("branch", ""),
     })
 
 
@@ -55,8 +59,13 @@ def record_payment(request, loan_pk=None):
     loan = None
     if loan_pk:
         loan = get_object_or_404(Loan, pk=loan_pk, status=Loan.Status.ACTIVE)
+        if not can_access_branch_object(request.user, loan):
+            messages.error(request, "That loan belongs to a different branch.")
+            return redirect("payments:list")
 
-    active_loans = Loan.objects.filter(status="ACTIVE").select_related("client").order_by("client__last_name")
+    active_loans = scope_to_branch(
+        Loan.objects.filter(status="ACTIVE"), request.user
+    ).select_related("client").order_by("client__last_name")
     selected_loan = None
 
     if request.method == "POST":
@@ -66,8 +75,6 @@ def record_payment(request, loan_pk=None):
             # Validate loan selection
             if not loan_id:
                 raise ValueError("Please select a loan.")
-
-            selected_loan = get_object_or_404(Loan, pk=loan_id, status=Loan.Status.ACTIVE)
 
             amount_str  = request.POST.get("amount", "0").strip()
             method      = request.POST.get("payment_method", "CASH")
@@ -94,16 +101,24 @@ def record_payment(request, loan_pk=None):
             except Exception:
                 raise ValueError(f"Invalid date format: '{pay_date_str}'.")
 
-            selected_loan = get_object_or_404(Loan, pk=loan_id, status=Loan.Status.ACTIVE)
-
-            # Snapshot balance before payment
-            balance_before = selected_loan.outstanding_balance
-
             # prepare transfer variables
             transfer_payment = None
             transfer_receipt = None
 
             with transaction.atomic():
+                # Lock the loan row for the life of this transaction. Without
+                # this, two payments recorded at the same time on the same
+                # loan can both read the same outstanding_balance and pending
+                # schedule entries, then both write back their own version —
+                # a classic lost-update race that would silently drop money
+                # from the ledger.
+                selected_loan = get_object_or_404(
+                    Loan.objects.select_for_update(), pk=loan_id, status=Loan.Status.ACTIVE
+                )
+                if not can_access_branch_object(request.user, selected_loan):
+                    raise ValueError("That loan belongs to a different branch.")
+                # Snapshot balance before payment
+                balance_before = selected_loan.outstanding_balance
                 client = selected_loan.client
 
                 # Optional: transfer existing client credit to another loan before applying it to this payment
@@ -240,7 +255,7 @@ def record_payment(request, loan_pk=None):
                         notes=f"Applied to payment on {pay_date}",
                     )
 
-                amount_to_apply = amount - credit_to_use
+                amount_to_apply = amount + credit_to_use
 
                 # Create the payment record
                 payment = Payment.objects.create(
@@ -390,9 +405,10 @@ def record_payment(request, loan_pk=None):
         # If submitted from the list-page modal, re-render the list with the modal open
         if request.POST.get("_from_list"):
             qs = Payment.objects.select_related("loan__client", "recorded_by").order_by("-payment_date")
-            if request.user.is_cashier:
-                qs = qs.filter(recorded_by=request.user)
-            active_loans = Loan.objects.filter(status="ACTIVE").select_related("client").order_by("client__last_name")
+            qs = scope_to_branch(qs, request.user, "loan__branch")
+            active_loans = scope_to_branch(
+                Loan.objects.filter(status="ACTIVE"), request.user
+            ).select_related("client").order_by("client__last_name")
             return render(request, "payments/payment_list.html", {
                 "payments": qs[:100],
                 "search": "",
@@ -425,11 +441,15 @@ def receipt_view(request, pk):
         Receipt.objects.select_related(
             "payment__loan__client",
             "payment__loan__product",
+            "payment__loan__branch",
             "payment__recorded_by",
         ),
         pk=pk,
     )
     loan = receipt.payment.loan
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That receipt belongs to a different branch.")
+        return redirect("payments:list")
     guarantees = loan.guarantees.select_related('guarantor').all()
     collateral_items = loan.collateral_items.all()
     context = {
@@ -446,6 +466,9 @@ def receipt_view(request, pk):
 @login_required
 def payment_history(request, loan_pk):
     loan     = get_object_or_404(Loan, pk=loan_pk)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("payments:list")
     payments = Payment.objects.filter(loan=loan).select_related("recorded_by").order_by("-payment_date")
     return render(request, "payments/payment_history.html", {"loan": loan, "payments": payments})
 
@@ -459,6 +482,9 @@ def credit_refund(request, client_pk):
         return redirect("clients:detail", pk=client_pk)
 
     client = get_object_or_404(Client, pk=client_pk)
+    if not can_access_branch_object(request.user, client):
+        messages.error(request, "That client belongs to a different branch.")
+        return redirect("clients:list")
 
     if request.method == "POST":
         try:

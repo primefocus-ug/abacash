@@ -4,13 +4,49 @@ from . import views
 
 app_name = "accounts"
 
+
+class TenantPasswordResetView(auth_views.PasswordResetView):
+    """
+    Same as Django's stock PasswordResetView, except the reset email is
+    built using the *actual request host* (e.g. acme.abacash.loan) rather
+    than django.contrib.sites. Sites has no concept of django-tenants
+    schemas/domains, so get_current_site() falls back to whatever generic
+    row exists in django_site (usually "example.com"), which is why the
+    emailed link was pointing at the wrong domain.
+    """
+    template_name = "accounts/password_reset_form.html"
+    email_template_name = "accounts/password_reset_email.txt"
+    html_email_template_name = "accounts/password_reset_email.html"
+    subject_template_name = "accounts/password_reset_subject.txt"
+    success_url = reverse_lazy("accounts:password_reset_done")
+
+    def form_valid(self, form):
+        opts = {
+            "use_https": self.request.is_secure(),
+            "token_generator": self.token_generator,
+            "from_email": self.from_email,
+            "email_template_name": self.email_template_name,
+            "subject_template_name": self.subject_template_name,
+            "request": self.request,
+            "html_email_template_name": self.html_email_template_name,
+            "extra_email_context": self.extra_email_context,
+            # The key fix: use the tenant's real host instead of Sites.
+            "domain_override": self.request.get_host(),
+        }
+        form.save(**opts)
+        # Skip PasswordResetView.form_valid (it recomputes opts using Sites)
+        # and go straight to FormView.form_valid, which just redirects.
+        return super(auth_views.PasswordResetView, self).form_valid(form)
+
+
 class TenantPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     template_name = "accounts/password_reset_confirm.html"
-    success_url = reverse_lazy("password_reset_complete")
+    success_url = reverse_lazy("accounts:password_reset_complete")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["reset_username"] = getattr(self, "reset_user", None).username if getattr(self, "reset_user", None) else ""
+        reset_user = getattr(self, "user", None)
+        context["reset_username"] = reset_user.username if reset_user else ""
         return context
 
 urlpatterns = [
@@ -34,6 +70,9 @@ urlpatterns = [
     path("admin-panel/branches/",           views.branch_list,          name="branch_list"),
     path("admin-panel/branches/new/",       views.branch_create,        name="branch_create"),
     path("admin-panel/branches/<int:pk>/edit/", views.branch_edit,      name="branch_edit"),
+    path("admin-panel/branches/<int:pk>/", views.branch_detail,        name="branch_detail"),
+
+    path("branch-filter/",                  views.set_branch_filter,   name="set_branch_filter"),
 
     # Fee Type Management
     path("admin-panel/fee-types/",          views.fee_type_list,        name="fee_type_list"),
@@ -94,16 +133,10 @@ urlpatterns = [
 
     # Password reset helper views for tenant and registration onboarding flow
     path(
-    "password_reset/",
-    auth_views.PasswordResetView.as_view(
-        template_name="accounts/password_reset_form.html",
-        email_template_name="accounts/password_reset_email.txt",
-        html_email_template_name="accounts/password_reset_email.html",
-        subject_template_name="accounts/password_reset_subject.txt",
-        success_url=reverse_lazy("accounts:password_reset_done"),
+        "password_reset/",
+        TenantPasswordResetView.as_view(),
+        name="password_reset",
     ),
-    name="password_reset",
-),
     path("password_reset/done/", auth_views.PasswordResetDoneView.as_view(
         template_name="accounts/password_reset_done.html"), name="password_reset_done"),
     path("reset/<uidb64>/<token>/", TenantPasswordResetConfirmView.as_view(), name="password_reset_confirm"),

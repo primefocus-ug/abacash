@@ -1,0 +1,95 @@
+{% extends "tenants/landing_base.html" %}
+{% block title %}{{ reg.company_name }} | Registration | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Public Admin</div>
+    <h1 class="hero-title">{{ reg.company_name }}</h1>
+    <p class="hero-copy">Registration lead submitted {{ reg.submitted_at|date:"M j, Y H:i" }}.</p>
+  </section>
+
+  <div class="dashboard-header" style="margin-top:1rem;">
+    <a class="btn btn-secondary" href="{% url 'tenants:registrations_list' %}">&larr; Back to registrations</a>
+    <span class="badge">{{ reg.get_status_display }}</span>
+  </div>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Contact</div>
+        <h2>Lead details</h2>
+      </div>
+    </div>
+    <div class="stack-list">
+      <div class="stack-item"><div><strong>Contact name</strong><small>{{ reg.contact_name }}</small></div></div>
+      <div class="stack-item"><div><strong>Email</strong><small>{{ reg.email }}</small></div></div>
+      <div class="stack-item"><div><strong>Phone</strong><small>{{ reg.phone }}</small></div></div>
+      <div class="stack-item"><div><strong>Location</strong><small>{{ reg.city }}{% if reg.city and reg.country %}, {% endif %}{{ reg.country }}</small></div></div>
+      <div class="stack-item"><div><strong>Plan</strong><small>{{ reg.get_plan_display }}</small></div></div>
+      {% if reg.message %}
+        <div class="stack-item"><div><strong>Message</strong><small>{{ reg.message }}</small></div></div>
+      {% endif %}
+      {% if reg.schema_name %}
+        <div class="stack-item">
+          <div>
+            <strong>Provisioned as</strong>
+            <small>{{ reg.schema_name }}{% if reg.domain %} · {{ reg.domain }}{% endif %}</small>
+          </div>
+          <a class="btn btn-secondary btn-sm" href="{% url 'tenants:tenant_detail' reg.schema_name %}">View tenant</a>
+        </div>
+      {% endif %}
+      {% if reg.last_error %}
+        <div class="stack-item"><div><strong>Last error</strong><small>{{ reg.last_error }}</small></div></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Update</div>
+        <h2>Status &amp; notes</h2>
+      </div>
+    </div>
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if reg.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="notes">Internal notes</label>
+        <textarea id="notes" name="notes" rows="4">{{ reg.notes }}</textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-primary" type="submit">Save</button>
+      </div>
+    </form>
+  </section>
+
+  {% if attempts %}
+    <section class="section-card" style="margin-top:1rem;">
+      <div class="section-heading">
+        <div>
+          <div class="section-label">History</div>
+          <h2>Onboarding attempts</h2>
+        </div>
+      </div>
+      <div class="stack-list">
+        {% for attempt in attempts %}
+          <div class="stack-item">
+            <div>
+              <strong>{{ attempt.get_triggered_by_display }}</strong>
+              <small>{{ attempt.started_at|date:"M j, Y H:i" }}{% if attempt.finished_at %} — {{ attempt.finished_at|date:"M j, Y H:i" }}{% endif %}</small>
+            </div>
+            <span class="badge">{% if attempt.success is None %}Pending{% elif attempt.success %}Succeeded{% else %}Failed{% endif %}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

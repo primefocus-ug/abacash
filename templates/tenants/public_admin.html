@@ -1,466 +1,881 @@
-{% extends "tenants/landing_base.html" %}
+{% extends "base_public.html" %}
+{% load static %}
 
-{% block title %}Public Admin | Abacash{% endblock %}
+{% block title %}Platform Admin — Abacash{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --admin-bg: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+    --admin-surface: var(--surface);
+    --admin-border: var(--border);
+    --admin-text-primary: var(--text-primary);
+    --admin-text-secondary: var(--text-secondary);
+    --admin-text-muted: var(--text-muted);
+    --admin-input-bg: var(--surface-2);
+    --admin-input-border: var(--border);
+    --admin-input-focus: #3B82F6;
+    --admin-success: #10B981;
+    --admin-danger: #EF4444;
+    --admin-warning: #F59E0B;
+    --admin-accent: #3B82F6;
+    --admin-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    --admin-radius: 12px;
+    --admin-transition: 0.25s ease;
+  }
+
+  [data-theme="dark"] {
+    --admin-bg: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+    --admin-surface: #111827;
+    --admin-border: #334155;
+    --admin-text-primary: #F8FAFC;
+    --admin-text-secondary: #94A3B8;
+    --admin-text-muted: #64748B;
+    --admin-input-bg: #1E293B;
+    --admin-input-border: #334155;
+    --admin-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .admin-page {
+    min-height: 100vh;
+    background: var(--admin-bg);
+    transition: background var(--admin-transition);
+  }
+
+  .admin-topbar {
+    background: var(--admin-surface);
+    border-bottom: 1px solid var(--admin-border);
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background var(--admin-transition), border-color var(--admin-transition);
+    backdrop-filter: blur(12px);
+    background: rgba(var(--admin-surface-rgb, 255,255,255), 0.92);
+  }
+
+  .admin-topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-topbar-brand .logo {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--admin-text-primary);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-topbar-brand .badge {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--admin-input-bg);
+    color: var(--admin-accent);
+    font-weight: 600;
+    border: 1px solid var(--admin-border);
+    transition: background var(--admin-transition), color var(--admin-transition), border-color var(--admin-transition);
+  }
+
+  .admin-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .admin-topbar-actions .tenant-count {
+    font-size: 13px;
+    color: var(--admin-text-muted);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-topbar-actions .logout-btn {
+    font-size: 13px;
+    color: var(--admin-danger);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .admin-topbar-actions .logout-btn:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .admin-stat {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    padding: 18px 22px;
+    transition: background var(--admin-transition), border-color var(--admin-transition), box-shadow 0.2s;
+  }
+
+  .admin-stat:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  }
+
+  .admin-stat .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-stat .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+    margin-top: 4px;
+    transition: color var(--admin-transition);
+  }
+
+  .admin-stat .value.green { color: var(--admin-success); }
+  .admin-stat .value.red { color: var(--admin-danger); }
+  .admin-stat .value.blue { color: var(--admin-accent); }
+  .admin-stat .value.purple { color: #8B5CF6; }
+
+  .admin-message {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: #059669;
+  }
+
+  .admin-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+  }
+
+  .admin-message.info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    color: #2563eb;
+  }
+
+  .admin-card {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    overflow: hidden;
+    margin-bottom: 28px;
+    transition: background var(--admin-transition), border-color var(--admin-transition);
+  }
+
+  .admin-card-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--admin-border);
+    background: var(--admin-input-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: background var(--admin-transition), border-color var(--admin-transition);
+  }
+
+  .admin-card-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-card-header .badge-count {
+    font-size: 12px;
+    color: var(--admin-text-muted);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-card-body {
+    padding: 20px 22px;
+    transition: background var(--admin-transition);
+  }
+
+  .admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .admin-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+    margin-bottom: 4px;
+    transition: color var(--admin-transition);
+  }
+
+  .admin-form-group label .required {
+    color: var(--admin-danger);
+  }
+
+  .admin-form-group input,
+  .admin-form-group select,
+  .admin-form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--admin-input-border);
+    border-radius: var(--radius-sm);
+    background: var(--admin-input-bg);
+    color: var(--admin-text-primary);
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: border-color 0.2s, box-shadow 0.2s, background var(--admin-transition), color var(--admin-transition);
+    outline: none;
+  }
+
+  .admin-form-group input:focus,
+  .admin-form-group select:focus,
+  .admin-form-group textarea:focus {
+    border-color: var(--admin-input-focus);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+  }
+
+  .admin-form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .admin-form-group input[type="checkbox"] {
+    width: auto;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .admin-btn {
+    padding: 9px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+  }
+
+  .admin-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .admin-btn:active {
+    transform: scale(0.97);
+  }
+
+  .admin-btn-primary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .admin-btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+  }
+
+  .admin-btn-success {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .admin-btn-success:hover {
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  .admin-btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .admin-btn-danger:hover {
+    background: #EF4444;
+    color: #fff;
+  }
+
+  .admin-btn-outline {
+    background: transparent;
+    color: var(--admin-text-secondary);
+    border: 1px solid var(--admin-border);
+  }
+
+  .admin-btn-outline:hover {
+    background: var(--admin-input-bg);
+    color: var(--admin-text-primary);
+  }
+
+  .admin-btn-sm {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .admin-btn-xs {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .admin-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 24px;
+  }
+
+  .admin-list-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--admin-border);
+    transition: background 0.15s, border-color var(--admin-transition);
+  }
+
+  .admin-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .admin-list-item:hover {
+    background: var(--admin-input-bg);
+  }
+
+  .admin-list-item .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .admin-list-item .top .name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--admin-text-primary);
+    transition: color var(--admin-transition);
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .admin-list-item .top .meta {
+    font-size: 12px;
+    color: var(--admin-text-muted);
+    transition: color var(--admin-transition);
+  }
+
+  .admin-list-item .details {
+    font-size: 12px;
+    color: var(--admin-text-muted);
+    margin-top: 4px;
+    transition: color var(--admin-transition);
+  }
+
+  .admin-list-item .actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .admin-status-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .admin-status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+  }
+
+  .admin-status-badge.inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .admin-status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+  }
+
+  .admin-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--admin-text-muted);
+    font-size: 14px;
+    transition: color var(--admin-transition);
+  }
+
+  .admin-scrollable {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .admin-scrollable::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .admin-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .admin-scrollable::-webkit-scrollbar-thumb {
+    background: var(--admin-border);
+    border-radius: 3px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .admin-grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .admin-topbar {
+      padding: 10px 16px;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .admin-topbar-actions {
+      justify-content: center;
+    }
+
+    .admin-container {
+      padding: 16px;
+    }
+
+    .admin-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .admin-stat .value {
+      font-size: 22px;
+    }
+
+    .admin-card-body {
+      padding: 14px 16px;
+    }
+
+    .admin-form-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .admin-card-header {
+      padding: 12px 16px;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .admin-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .admin-stat {
+      padding: 12px 14px;
+    }
+
+    .admin-stat .value {
+      font-size: 19px;
+    }
+
+    .admin-list-item {
+      padding: 10px 14px;
+    }
+
+    .admin-list-item .top {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+
+    .admin-list-item .top .meta {
+      text-align: left;
+    }
+
+    .admin-list-item .actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .admin-btn-sm,
+    .admin-btn-xs {
+      width: 100%;
+      text-align: center;
+    }
+
+    .admin-form-group input,
+    .admin-form-group select {
+      font-size: 12px;
+      padding: 7px 10px;
+    }
+
+    .admin-container {
+      padding: 10px;
+    }
+
+    .admin-topbar-brand .logo {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .admin-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-stat .value {
+      font-size: 18px;
+    }
+
+    .admin-card-body {
+      padding: 10px 12px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .admin-page {
+      background: #fff !important;
+    }
+    .admin-topbar {
+      position: static !important;
+      border-bottom: 1px solid #ddd !important;
+    }
+    .admin-btn,
+    .admin-btn-primary,
+    .admin-btn-success,
+    .admin-btn-danger {
+      display: none !important;
+    }
+    .admin-card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+    .admin-scrollable {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <style>
-    .dashboard-shell { display: grid; gap: 1.1rem; margin-top: 1rem; }
-    .dashboard-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.9rem; }
-    .stat-card, .panel-card, .section-card, .stack-item {
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
-      border: 1px solid rgba(37, 99, 235, 0.12);
-      border-radius: 18px;
-      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-    }
-    .stat-card { padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.2rem; }
-    .stat-card .stat-value { font-size: 1.45rem; font-weight: 800; color: var(--accent); }
-    .stat-card .stat-label { color: var(--text-secondary); font-size: 0.92rem; }
-    .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.9rem; }
-    .panel-card { padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
-    .panel-card:hover { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08); border-color: rgba(37, 99, 235, 0.18); }
-    .panel-card h3 { font-size: 1.04rem; margin: 0; }
-    .panel-card p { color: var(--text-secondary); margin: 0; }
-    .panel-card button { cursor: pointer; }
-    .guide-list { list-style: none; display: grid; gap: 0.45rem; padding: 0; margin: 0; }
-    .guide-list li { display: flex; gap: 0.45rem; color: var(--text-secondary); font-size: 0.9rem; }
-    .guide-list li::before { content: '•'; color: var(--accent); font-weight: 700; }
-    .panel-actions { display: flex; justify-content: space-between; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
-    .badge { display: inline-flex; align-items: center; padding: 0.3rem 0.6rem; border-radius: 999px; background: rgba(22, 163, 74, 0.12); color: var(--success); font-size: 0.8rem; font-weight: 700; }
-    .section-card { padding: 1rem; margin-top: 0.5rem; }
-    .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.6rem; }
-    .stack-list { display: grid; gap: 0.7rem; }
-    .stack-item { padding: 0.9rem 1rem; display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; }
-    .stack-item strong { display: block; }
-    .inline-form { display: inline-flex; }
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: none; align-items: center; justify-content: center; padding: 1rem; z-index: 300; }
-    .modal-backdrop.is-open { display: flex; }
-    .modal-card { width: min(720px, 100%); background: var(--surface); border-radius: 24px; box-shadow: 0 30px 60px rgba(15, 23, 42, 0.25); padding: 1.2rem; max-height: 90vh; overflow: auto; }
-    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.9rem; }
-    .modal-close { border: none; background: transparent; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary); }
-    .modal-grid { display: grid; gap: 0.8rem; }
-    .slug-inline { display: flex; gap: 0.6rem; align-items: center; }
-    .slug-inline input { flex: 1; }
-    .btn-sm { padding: 0.65rem 0.95rem; font-size: 0.9rem; }
-    .suggestion-pill { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.45rem; padding: 0.42rem 0.7rem; border-radius: 999px; background: rgba(37, 99, 235, 0.08); color: var(--accent); font-size: 0.9rem; width: fit-content; }
-    @media (max-width: 640px) { .stack-item, .section-heading, .modal-header { align-items: flex-start; flex-direction: column; } }
-  </style>
-
-  <section class="hero">
-    <div class="eyebrow">Public Admin</div>
-    <h1 class="hero-title">A calmer control center for onboarding, users, resets, and suspensions.</h1>
-    <p class="hero-copy">Use guided cards to provision tenants, manage users, reset access, and keep your platform tidy without repeating the same long forms.</p>
-  </section>
-
-  <div class="dashboard-header">
-    <div class="eyebrow">Operations overview</div>
-    <a class="btn btn-secondary" href="{% url 'tenants:public_admin_logout' %}">Sign out</a>
+<div class="admin-page">
+  <!-- Top Bar -->
+  <div class="admin-topbar">
+    <div class="admin-topbar-brand">
+      <span class="logo">🔧 Admin</span>
+      <span class="badge">{{ platform_admin.username }}</span>
+    </div>
+    <div class="admin-topbar-actions">
+      <span class="tenant-count">{{ tenant_count }} tenants</span>
+      <a href="{% url 'tenants:public_admin_logout' %}" class="logout-btn">Sign Out</a>
+    </div>
   </div>
 
-  <div class="dashboard-shell">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <span class="stat-value">{{ tenant_count }}</span>
-        <span class="stat-label">Tenants</span>
+  <div class="admin-container">
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="label">Total Tenants</div>
+        <div class="value">{{ tenant_count }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ active_tenant_count }}</span>
-        <span class="stat-label">Active tenants</span>
+      <div class="admin-stat">
+        <div class="label">Active</div>
+        <div class="value green">{{ active_tenant_count }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ inactive_tenant_count }}</span>
-        <span class="stat-label">Suspended</span>
+      <div class="admin-stat">
+        <div class="label">Inactive</div>
+        <div class="value red">{{ inactive_tenant_count }}</div>
       </div>
-      <div class="stat-card">
-        <span class="stat-value">{{ lead_count }}</span>
-        <span class="stat-label">Pending leads</span>
+      <div class="admin-stat">
+        <div class="label">Recent Leads</div>
+        <div class="value purple">{{ lead_count }}</div>
       </div>
     </div>
 
-    <div class="panel-grid">
-      <article class="panel-card" data-target="onboard-modal">
-        <div class="panel-actions">
-          <div>
-            <div class="section-label">New tenant</div>
-            <h3>Provision a company</h3>
-          </div>
-          <button type="button" class="btn btn-primary modal-trigger" data-target="onboard-modal">Open</button>
-        </div>
-        <p>Create a schema, domain, admin account and defaults in one guided step.</p>
-        <ul class="guide-list">
-          <li>Pick a clean tenant slug</li>
-          <li>Use the suggested subdomain</li>
-          <li>Send credentials if needed</li>
-        </ul>
-      </article>
+    <!-- Flash Messages -->
+    {% if messages %}
+      {% for message in messages %}
+      <div class="admin-message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}">
+        <span>{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% else %}ℹ{% endif %}</span>
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
 
-      <article class="panel-card" data-target="users-modal">
-        <div class="panel-actions">
-          <div>
-            <div class="section-label">Users</div>
-            <h3>Manage tenant users</h3>
-          </div>
-          <button type="button" class="btn btn-secondary modal-trigger" data-target="users-modal">Open</button>
-        </div>
-        <p>Assign Cashier, Manager or CEO roles in an existing tenant.</p>
-        <ul class="guide-list">
-          <li>Use the tenant schema</li>
-          <li>Create a new account if missing</li>
-          <li>Set the correct role immediately</li>
-        </ul>
-      </article>
+    <!-- Onboard New Tenant -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2>🚀 Onboard New Tenant</h2>
+        <span class="badge-count">Create a new tenant instance</span>
+      </div>
+      <div class="admin-card-body">
+        <form method="post" class="admin-form-grid">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="onboard_tenant">
 
-      <article class="panel-card" data-target="reset-modal">
-        <div class="panel-actions">
-          <div>
-            <div class="section-label">Access</div>
-            <h3>Reset access quickly</h3>
+          <div class="admin-form-group">
+            <label>Company Name <span class="required">*</span></label>
+            <input type="text" name="company_name" required placeholder="e.g. GreenFields MFI">
           </div>
-          <button type="button" class="btn btn-secondary modal-trigger" data-target="reset-modal">Open</button>
-        </div>
-        <p>Send a secure reset link to a tenant user without re-entering their full onboarding details.</p>
-        <ul class="guide-list">
-          <li>Send to the correct email</li>
-          <li>Keep the workflow simple</li>
-          <li>Use existing tenant records</li>
-        </ul>
-      </article>
-
-      <article class="panel-card" data-target="suspend-modal">
-        <div class="panel-actions">
-          <div>
-            <div class="section-label">Control</div>
-            <h3>Suspend or activate</h3>
+          <div class="admin-form-group">
+            <label>Tenant Slug <span class="required">*</span></label>
+            <input type="text" name="tenant_slug" required placeholder="e.g. greenfields">
           </div>
-          <button type="button" class="btn btn-secondary modal-trigger" data-target="suspend-modal">Open</button>
-        </div>
-        <p>Toggle tenant availability without navigating to long settings screens.</p>
-        <ul class="guide-list">
-          <li>Quickly pause a tenant</li>
-          <li>Restore access later</li>
-          <li>Keep the operations list tidy</li>
-        </ul>
-      </article>
+          <div class="admin-form-group">
+            <label>Admin Email <span class="required">*</span></label>
+            <input type="email" name="admin_email" required placeholder="admin@company.com">
+          </div>
+          <div class="admin-form-group">
+            <label>Plan</label>
+            <select name="plan">
+              <option value="STARTER">STARTER</option>
+              <option value="PROFESSIONAL">PROFESSIONAL</option>
+              <option value="ENTERPRISE">ENTERPRISE</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>Admin Password (optional)</label>
+            <input type="text" name="admin_password" placeholder="Leave blank for auto-gen">
+          </div>
+          <div class="admin-form-group">
+            <label>Custom Domain (optional)</label>
+            <input type="text" name="tenant_domain" placeholder="e.g. greenfields.abacash.loan">
+          </div>
+          <div class="admin-form-group">
+            <label>Phone</label>
+            <input type="text" name="phone" placeholder="+256 700 000000">
+          </div>
+          <div class="admin-form-group">
+            <label>Address</label>
+            <input type="text" name="address" placeholder="Street, City">
+          </div>
+          <div class="admin-form-group" style="grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:4px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;">
+              <input type="checkbox" name="notify" checked> Notify user via email
+            </label>
+            <button type="submit" class="admin-btn admin-btn-primary">Create Tenant</button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <section class="section-card">
-      <div class="section-heading">
-        <div>
-          <div class="section-label">Tenant overview</div>
-          <h2>Existing companies</h2>
-        </div>
-        <span class="badge">{{ tenant_count }} companies</span>
-      </div>
-      {% if tenants %}
-        <div class="stack-list">
-          {% for item in tenants %}
-            <div class="stack-item">
-              <div>
-                <strong>{{ item.company.name }}</strong>
-                <small>Schema: {{ item.company.schema_name }} · Plan: {{ item.company.plan }}</small>
-              </div>
-              <div>
-                {% if item.domains %}
-                  <small>{{ item.domains|join:", " }}</small>
-                {% else %}
-                  <small>No domain mapped</small>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="hero-copy">No tenant companies have been provisioned yet.</p>
-      {% endif %}
-    </section>
+    <!-- Two-column layout: Registrations + Tenants -->
+    <div class="admin-grid-2">
 
-    <section class="section-card">
-      <div class="section-heading">
-        <div>
-          <div class="section-label">Recent leads</div>
-          <h2>Incoming registration requests</h2>
+      <!-- Recent Registrations / Leads -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2>📝 Recent Registrations</h2>
+          <span class="badge-count">{{ recent_registrations|length }} pending</span>
         </div>
-        <span class="badge">{{ recent_registrations|length }} leads</span>
-      </div>
-      {% if recent_registrations %}
-        <div class="stack-list">
-          {% for registration in recent_registrations %}
-            <div class="stack-item">
-              <div>
-                <strong>{{ registration.company_name }}</strong>
-                <small>{{ registration.contact_name }} · {{ registration.email }} · {{ registration.get_status_display }}</small>
+        <div class="admin-scrollable">
+          {% if recent_registrations %}
+            {% for reg in recent_registrations %}
+            <div class="admin-list-item">
+              <div class="top">
+                <span class="name">{{ reg.company_name }}</span>
+                <span class="meta">
+                  <span class="admin-status-badge pending">{{ reg.get_plan_display }}</span>
+                  <span style="display:block;font-size:10px;margin-top:2px;">{{ reg.submitted_at|date:"Y-m-d H:i" }}</span>
+                </span>
               </div>
-              {% if registration.status == "ONBOARDED" %}
-                <button type="button" class="btn btn-secondary" disabled>Already onboarded</button>
-              {% else %}
-                <form method="post" class="inline-form">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="onboard_registration">
-                  <input type="hidden" name="registration_id" value="{{ registration.id }}">
-                  <input type="hidden" name="tenant_slug" value="{{ registration.company_name|slugify }}">
-                  <button type="submit" class="btn btn-primary">Onboard</button>
-                </form>
+              <div class="details">
+                {{ reg.contact_name }} • {{ reg.email }}<br>
+                {{ reg.phone }} • {{ reg.city }}, {{ reg.country }}
+              </div>
+              <form method="post" class="actions">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="onboard_registration">
+                <input type="hidden" name="registration_id" value="{{ reg.id }}">
+                <input type="text" name="tenant_domain" placeholder="domain" value="{{ reg.company_name|slugify }}.{{ tenant_domain_root }}" style="flex:1;min-width:120px;padding:4px 8px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:11px;">
+                <input type="text" name="admin_password" placeholder="password (opt)" style="flex:0 1 100px;padding:4px 8px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:11px;">
+                <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+                  <input type="checkbox" name="notify" checked> Notify
+                </label>
+                <button type="submit" class="admin-btn admin-btn-success admin-btn-sm">Onboard →</button>
+              </form>
+              {% if reg.notes %}
+              <div class="details" style="margin-top:4px;font-size:10px;color:var(--admin-text-muted);overflow-wrap:break-word;">{{ reg.notes|truncatechars:80 }}</div>
               {% endif %}
             </div>
-          {% endfor %}
+            {% endfor %}
+          {% else %}
+            <div class="admin-empty-state">No registrations yet.</div>
+          {% endif %}
         </div>
-      {% else %}
-        <p class="hero-copy">No recent registration leads to display yet.</p>
-      {% endif %}
-    </section>
-
-    {% if command_output %}
-      <section class="section-card">
-        <div class="section-heading">
-          <div>
-            <div class="section-label">Provisioning output</div>
-            <h2>Latest onboarding details</h2>
-          </div>
-        </div>
-        <pre style="white-space: pre-wrap; background: var(--surface-2); padding: 1rem; border-radius: 16px; overflow-x: auto;">{{ command_output }}</pre>
-      </section>
-    {% endif %}
-  </div>
-
-  <div class="modal-backdrop" id="onboard-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="section-label">New tenant</div>
-          <h2>Provision a company</h2>
-        </div>
-        <button type="button" class="modal-close" data-close-modal="onboard-modal">×</button>
       </div>
-      <form class="modal-grid" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="onboard_tenant">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="modal_company_name">Company name <span class="required">*</span></label>
-            <input id="modal_company_name" name="company_name" type="text" placeholder="e.g. Acme Finance" required>
-          </div>
-          <div class="form-group">
-            <label for="modal_tenant_slug">Tenant slug <span class="required">*</span></label>
-            <div class="slug-inline">
-              <input id="modal_tenant_slug" name="tenant_slug" type="text" placeholder="acme-finance" required>
-              <button type="button" class="btn btn-secondary btn-sm" id="use-suggested-slug-admin">Use suggestion</button>
+
+      <!-- Tenants List -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2>🏢 Tenants</h2>
+          <span class="badge-count">{{ tenant_count }} total</span>
+        </div>
+        <div class="admin-scrollable">
+          {% if tenants %}
+            {% for t in tenants %}
+            <div class="admin-list-item">
+              <div class="top">
+                <span class="name">{{ t.company.name }}</span>
+                <span class="meta">
+                  <span class="admin-status-badge {% if t.company.is_active %}active{% else %}inactive{% endif %}">
+                    {% if t.company.is_active %}Active{% else %}Suspended{% endif %}
+                  </span>
+                  <span style="display:block;font-size:10px;margin-top:2px;">{{ t.company.plan }}</span>
+                </span>
+              </div>
+              <div class="details">
+                <span style="font-family:monospace;font-size:11px;">{{ t.company.schema_name }}</span>
+                <span style="font-size:11px;display:block;">{{ t.domains|join:", " }}</span>
+              </div>
+              <div class="actions">
+                <!-- Suspend/Activate -->
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="suspend_tenant">
+                  <input type="hidden" name="suspend_tenant_schema" value="{{ t.company.schema_name }}">
+                  <button type="submit" class="admin-btn admin-btn-outline admin-btn-xs">
+                    {% if t.company.is_active %}Suspend{% else %}Activate{% endif %}
+                  </button>
+                </form>
+
+                <!-- Update Plan -->
+                <form method="post" style="display:inline-flex;align-items:center;gap:4px;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="update_subscription">
+                  <input type="hidden" name="subscription_tenant_schema" value="{{ t.company.schema_name }}">
+                  <select name="subscription_plan" style="padding:2px 6px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:10px;">
+                    <option value="STARTER" {% if t.company.plan == 'STARTER' %}selected{% endif %}>STARTER</option>
+                    <option value="PROFESSIONAL" {% if t.company.plan == 'PROFESSIONAL' %}selected{% endif %}>PROFESSIONAL</option>
+                    <option value="ENTERPRISE" {% if t.company.plan == 'ENTERPRISE' %}selected{% endif %}>ENTERPRISE</option>
+                  </select>
+                  <button type="submit" class="admin-btn admin-btn-outline admin-btn-xs">Update</button>
+                </form>
+
+                <!-- Reset Access -->
+                <form method="post" style="display:inline-flex;align-items:center;gap:4px;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reset_tenant_access">
+                  <input type="hidden" name="reset_tenant_schema" value="{{ t.company.schema_name }}">
+                  <input type="email" name="reset_email" placeholder="user@email" style="width:100px;padding:2px 6px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:10px;">
+                  <button type="submit" class="admin-btn admin-btn-outline admin-btn-xs" style="color:#8B5CF6;">Reset</button>
+                </form>
+
+                <!-- Assign Role -->
+                <form method="post" style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="assign_role">
+                  <input type="hidden" name="tenant_schema" value="{{ t.company.schema_name }}">
+                  <input type="email" name="role_email" placeholder="user@email" style="width:100px;padding:2px 6px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:10px;">
+                  <select name="role" style="padding:2px 6px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:10px;">
+                    <option value="CASHIER">Cashier</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="CEO">CEO</option>
+                  </select>
+                  <input type="text" name="role_password" placeholder="pwd (opt)" style="width:70px;padding:2px 6px;border:1px solid var(--admin-border);border-radius:var(--radius-sm);background:var(--admin-input-bg);color:var(--admin-text-primary);font-size:10px;">
+                  <button type="submit" class="admin-btn admin-btn-outline admin-btn-xs" style="color:#3B82F6;">Assign</button>
+                </form>
+              </div>
             </div>
-            <div class="suggestion-pill">Suggested: <strong id="slug-preview-admin">company-name</strong></div>
-          </div>
-          <div class="form-group">
-            <label for="modal_tenant_domain">Custom tenant domain</label>
-            <input id="modal_tenant_domain" name="tenant_domain" type="text" placeholder="acme.abacash.loan">
-          </div>
-          <div class="form-group">
-            <label for="modal_plan">Subscription plan</label>
-            <select id="modal_plan" name="plan">
-              {% for value, label in plan_choices %}
-                <option value="{{ value }}">{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="modal_admin_email">Admin email <span class="required">*</span></label>
-            <input id="modal_admin_email" name="admin_email" type="email" placeholder="admin@acme.com" required>
-          </div>
-          <div class="form-group">
-            <label for="modal_company_email">Company contact email</label>
-            <input id="modal_company_email" name="company_email" type="email" placeholder="contact@acme.com">
-          </div>
-          <div class="form-group">
-            <label for="modal_admin_password">Admin password</label>
-            <input id="modal_admin_password" name="admin_password" type="password" placeholder="Set a secure password">
-          </div>
-          <div class="form-group">
-            <label for="modal_phone">Phone</label>
-            <input id="modal_phone" name="phone" type="tel" placeholder="+256 700 000000">
-          </div>
-          <div class="form-group">
-            <label for="modal_address">Address</label>
-            <input id="modal_address" name="address" type="text" placeholder="City, Country">
-          </div>
-          <div class="form-group">
-            <label><input type="checkbox" name="notify"> Send credentials to company contact by email</label>
-          </div>
+            {% endfor %}
+          {% else %}
+            <div class="admin-empty-state">No tenants created yet.</div>
+          {% endif %}
         </div>
-        <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Provision tenant</button>
-          <button type="button" class="btn btn-secondary" data-close-modal="onboard-modal">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="users-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="section-label">Users</div>
-          <h2>Assign a tenant role</h2>
-        </div>
-        <button type="button" class="modal-close" data-close-modal="users-modal">×</button>
       </div>
-      <form class="modal-grid" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="assign_role">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="role_tenant_schema">Tenant schema <span class="required">*</span></label>
-            <input id="role_tenant_schema" name="tenant_schema" type="text" placeholder="acme_finance" required>
-          </div>
-          <div class="form-group">
-            <label for="role_email">User email <span class="required">*</span></label>
-            <input id="role_email" name="role_email" type="email" placeholder="user@acme.com" required>
-          </div>
-          <div class="form-group">
-            <label for="role">Role</label>
-            <select id="role" name="role">
-              <option value="CASHIER">Cashier</option>
-              <option value="MANAGER">Manager</option>
-              <option value="CEO">CEO</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="role_password">Password</label>
-            <input id="role_password" name="role_password" type="password" placeholder="Optional password for new user">
-          </div>
-        </div>
-        <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Assign role</button>
-          <button type="button" class="btn btn-secondary" data-close-modal="users-modal">Cancel</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div class="modal-backdrop" id="reset-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="section-label">Access</div>
-          <h2>Reset a tenant user</h2>
-        </div>
-        <button type="button" class="modal-close" data-close-modal="reset-modal">×</button>
-      </div>
-      <form class="modal-grid" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="reset_tenant_access">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="reset_tenant_schema">Tenant schema <span class="required">*</span></label>
-            <input id="reset_tenant_schema" name="reset_tenant_schema" type="text" placeholder="acme_finance" required>
-          </div>
-          <div class="form-group">
-            <label for="reset_email">User email <span class="required">*</span></label>
-            <input id="reset_email" name="reset_email" type="email" placeholder="user@acme.com" required>
-          </div>
-        </div>
-        <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Send reset link</button>
-          <button type="button" class="btn btn-secondary" data-close-modal="reset-modal">Cancel</button>
-        </div>
-      </form>
+    <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--admin-text-muted);">
+      <a href="{% url 'tenants:landing' %}" style="color:var(--admin-text-muted);text-decoration:none;">← Back to Home</a>
+      <span style="margin:0 8px;">•</span>
+      <span>Abacash Platform</span>
     </div>
   </div>
-
-  <div class="modal-backdrop" id="suspend-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <div class="section-label">Control</div>
-          <h2>Suspend or reactivate</h2>
-        </div>
-        <button type="button" class="modal-close" data-close-modal="suspend-modal">×</button>
-      </div>
-      <form class="modal-grid" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="suspend_tenant">
-        <div class="form-group">
-          <label for="suspend_tenant_schema">Tenant schema <span class="required">*</span></label>
-          <input id="suspend_tenant_schema" name="suspend_tenant_schema" type="text" placeholder="acme_finance" required>
-        </div>
-        <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Toggle status</button>
-          <button type="button" class="btn btn-secondary" data-close-modal="suspend-modal">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  function slugify(value) {
-    return (value || '')
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
+  (function() {
+    'use strict';
 
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.modal-trigger').forEach(function(button) {
-      button.addEventListener('click', function() {
-        var target = document.getElementById(button.dataset.target);
-        if (target) {
-          target.classList.add('is-open');
+    // Form validation helpers
+    document.querySelectorAll('.admin-form-group input[required], .admin-form-group select[required]').forEach(function(input) {
+      input.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+          this.style.borderColor = '#dc2626';
+        } else {
+          this.style.borderColor = '';
+        }
+      });
+
+      input.addEventListener('input', function() {
+        if (this.value.trim()) {
+          this.style.borderColor = '';
         }
       });
     });
 
-    document.querySelectorAll('[data-close-modal]').forEach(function(button) {
-      button.addEventListener('click', function() {
-        var target = document.getElementById(button.dataset.closeModal);
-        if (target) {
-          target.classList.remove('is-open');
+    // Confirm dangerous actions
+    document.querySelectorAll('[data-confirm]').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        if (!confirm(this.dataset.confirm || 'Are you sure?')) {
+          e.preventDefault();
         }
       });
     });
 
-    document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
-      backdrop.addEventListener('click', function(event) {
-        if (event.target === backdrop) {
-          backdrop.classList.remove('is-open');
-        }
-      });
-    });
+    // Auto-refresh list after actions (polling placeholder)
+    // Could implement HTMX or simple interval for updates
 
-    document.querySelectorAll('.panel-card[data-target]').forEach(function(card) {
-      card.addEventListener('click', function(event) {
-        if (event.target.closest('button')) {
-          return;
-        }
-        var target = document.getElementById(card.dataset.target);
-        if (target) {
-          target.classList.add('is-open');
-        }
-      });
-    });
+    console.log('Platform Admin loaded successfully.');
 
-    var companyInput = document.getElementById('modal_company_name');
-    var slugInput = document.getElementById('modal_tenant_slug');
-    var slugPreview = document.getElementById('slug-preview-admin');
-    var useSuggestedButton = document.getElementById('use-suggested-slug-admin');
-
-    if (companyInput && slugInput && slugPreview && useSuggestedButton) {
-      function syncAdminSlug() {
-        var value = slugify(companyInput.value);
-        slugPreview.textContent = value || 'company-name';
-        if (!slugInput.value || slugInput.dataset.userEdited !== 'true') {
-          slugInput.value = value;
-        }
-      }
-
-      companyInput.addEventListener('input', syncAdminSlug);
-      slugInput.addEventListener('input', function() {
-        slugInput.dataset.userEdited = slugInput.value.trim() !== '' ? 'true' : 'false';
-      });
-      useSuggestedButton.addEventListener('click', function() {
-        slugInput.value = slugify(companyInput.value);
-        slugInput.dataset.userEdited = 'true';
-      });
-      syncAdminSlug();
-    }
-  });
+  })();
 </script>
 {% endblock %}

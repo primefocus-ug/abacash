@@ -1,0 +1,827 @@
+{% extends "platform_admin/base_admin.html" %}
+{% load static %}
+
+{% block title %}Companies — Platform Admin{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --list-bg: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+    --list-surface: var(--surface);
+    --list-border: var(--border);
+    --list-text-primary: var(--text-primary);
+    --list-text-secondary: var(--text-secondary);
+    --list-text-muted: var(--text-muted);
+    --list-accent: #3B82F6;
+    --list-success: #10B981;
+    --list-danger: #EF4444;
+    --list-warning: #F59E0B;
+    --list-purple: #8B5CF6;
+    --list-radius: 12px;
+    --list-transition: 0.25s ease;
+    --list-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --list-bg: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+    --list-surface: #111827;
+    --list-border: #334155;
+    --list-text-primary: #F8FAFC;
+    --list-text-secondary: #94A3B8;
+    --list-text-muted: #64748B;
+    --list-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .list-page {
+    min-height: 100vh;
+    background: var(--list-bg);
+    transition: background var(--list-transition);
+    padding: 24px;
+  }
+
+  .list-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .list-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--list-text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+    transition: color var(--list-transition);
+  }
+
+  .list-header h1 i {
+    margin-right: 8px;
+    color: var(--list-accent);
+  }
+
+  .list-header .subtitle {
+    font-size: 14px;
+    color: var(--list-text-muted);
+    transition: color var(--list-transition);
+  }
+
+  .list-header .subtitle i {
+    margin-right: 4px;
+  }
+
+  .list-header-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .list-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--list-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .list-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .list-btn:active {
+    transform: scale(0.97);
+  }
+
+  .list-btn-primary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .list-btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+    color: #fff;
+  }
+
+  .list-btn-outline {
+    background: transparent;
+    color: var(--list-text-secondary);
+    border: 1px solid var(--list-border);
+  }
+
+  .list-btn-outline:hover {
+    background: var(--list-surface);
+    color: var(--list-text-primary);
+  }
+
+  .list-btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .list-card {
+    background: var(--list-surface);
+    border: 1px solid var(--list-border);
+    border-radius: var(--list-radius);
+    overflow: hidden;
+    transition: background var(--list-transition), border-color var(--list-transition);
+  }
+
+  .list-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--list-border);
+    background: var(--list-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    transition: background var(--list-transition), border-color var(--list-transition);
+  }
+
+  .list-card-header .filter-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .list-card-header .filter-group input,
+  .list-card-header .filter-group select {
+    padding: 6px 12px;
+    border: 1px solid var(--list-border);
+    border-radius: var(--list-radius);
+    background: var(--list-surface);
+    color: var(--list-text-primary);
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: border-color 0.2s, background var(--list-transition), color var(--list-transition);
+    outline: none;
+    min-width: 140px;
+  }
+
+  .list-card-header .filter-group input:focus,
+  .list-card-header .filter-group select:focus {
+    border-color: var(--list-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+  }
+
+  .list-card-header .filter-group input::placeholder {
+    color: var(--list-text-muted);
+  }
+
+  .list-card-header .filter-group .filter-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: var(--list-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--list-accent);
+    color: #fff;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .list-card-header .filter-group .filter-btn:hover {
+    background: var(--list-accent);
+    opacity: 0.85;
+  }
+
+  .list-card-header .filter-group .filter-btn.clear {
+    background: transparent;
+    color: var(--list-text-muted);
+    border: 1px solid var(--list-border);
+  }
+
+  .list-card-header .filter-group .filter-btn.clear:hover {
+    background: var(--list-surface);
+    color: var(--list-text-primary);
+  }
+
+  .list-card-header .result-count {
+    font-size: 13px;
+    color: var(--list-text-muted);
+    transition: color var(--list-transition);
+  }
+
+  .list-card-header .result-count i {
+    margin-right: 4px;
+  }
+
+  /* Table */
+  .list-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .list-table thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--list-text-muted);
+    background: var(--list-surface);
+    border-bottom: 2px solid var(--list-border);
+    white-space: nowrap;
+    transition: color var(--list-transition), background var(--list-transition), border-color var(--list-transition);
+  }
+
+  .list-table thead th i {
+    margin-right: 4px;
+    font-size: 10px;
+  }
+
+  .list-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--list-border);
+    color: var(--list-text-primary);
+    vertical-align: middle;
+    transition: color var(--list-transition), border-color var(--list-transition);
+  }
+
+  .list-table tbody tr {
+    transition: background 0.15s;
+  }
+
+  .list-table tbody tr:hover {
+    background: var(--list-surface);
+  }
+
+  .list-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .list-table .company-name {
+    font-weight: 600;
+    color: var(--list-text-primary);
+    transition: color var(--list-transition);
+  }
+
+  .list-table .company-name a {
+    color: var(--list-text-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .list-table .company-name a:hover {
+    color: var(--list-accent);
+  }
+
+  .list-table .company-name a i {
+    font-size: 12px;
+    color: var(--list-text-muted);
+  }
+
+  .list-table .schema-name {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--list-text-muted);
+    transition: color var(--list-transition);
+  }
+
+  .list-table .schema-name i {
+    margin-right: 4px;
+  }
+
+  .list-table .plan-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    background: var(--list-surface);
+    border: 1px solid var(--list-border);
+    color: var(--list-text-secondary);
+    transition: background var(--list-transition), border-color var(--list-transition), color var(--list-transition);
+  }
+
+  .list-table .plan-badge i {
+    margin-right: 4px;
+  }
+
+  .list-table .plan-badge.starter { border-color: #94A3B8; color: #64748B; }
+  .list-table .plan-badge.professional { border-color: #3B82F6; color: #3B82F6; }
+  .list-table .plan-badge.enterprise { border-color: #8B5CF6; color: #8B5CF6; }
+
+  .list-status-badge {
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .list-status-badge i {
+    font-size: 10px;
+  }
+
+  .list-status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+  }
+
+  .list-status-badge.suspended {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .list-status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+  }
+
+  .list-status-badge.ready {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3B82F6;
+  }
+
+  .list-status-badge.failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .list-status-badge.running {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+  }
+
+  .list-table .actions-cell {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .list-table .actions-cell a {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: var(--list-radius);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .list-table .actions-cell .view-link {
+    color: var(--list-accent);
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  .list-table .actions-cell .view-link:hover {
+    background: rgba(59, 130, 246, 0.15);
+  }
+
+  .list-table .actions-cell .view-link i {
+    font-size: 10px;
+  }
+
+  /* Pagination */
+  .list-pagination {
+    padding: 16px 20px;
+    border-top: 1px solid var(--list-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    transition: border-color var(--list-transition);
+  }
+
+  .list-pagination .step-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .list-pagination .step-links a,
+  .list-pagination .step-links .current {
+    padding: 6px 12px;
+    border: 1px solid var(--list-border);
+    border-radius: var(--list-radius);
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--list-text-secondary);
+    transition: background 0.2s, color 0.2s, border-color var(--list-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .list-pagination .step-links a:hover {
+    background: var(--list-accent);
+    color: #fff;
+    border-color: var(--list-accent);
+  }
+
+  .list-pagination .step-links .current {
+    background: var(--list-accent);
+    color: #fff;
+    border-color: var(--list-accent);
+  }
+
+  .list-pagination .step-links .disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .list-pagination .info {
+    font-size: 13px;
+    color: var(--list-text-muted);
+    transition: color var(--list-transition);
+  }
+
+  .list-pagination .info i {
+    margin-right: 4px;
+  }
+
+  /* Empty State */
+  .list-empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--list-text-muted);
+    transition: color var(--list-transition);
+  }
+
+  .list-empty .icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .list-empty i {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .list-empty h3 {
+    font-size: 18px;
+    color: var(--list-text-primary);
+    margin: 0 0 4px;
+    transition: color var(--list-transition);
+  }
+
+  .list-empty p {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .list-card-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .list-card-header .filter-group {
+      flex-wrap: wrap;
+      justify-content: stretch;
+    }
+
+    .list-card-header .filter-group input,
+    .list-card-header .filter-group select {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .list-page {
+      padding: 16px;
+    }
+
+    .list-header h1 {
+      font-size: 22px;
+    }
+
+    .list-card-header {
+      padding: 12px 14px;
+    }
+
+    .list-card-header .filter-group input,
+    .list-card-header .filter-group select {
+      font-size: 12px;
+      padding: 5px 10px;
+      min-width: 100px;
+    }
+
+    .list-table thead th {
+      padding: 8px 10px;
+      font-size: 10px;
+    }
+
+    .list-table tbody td {
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .list-table .actions-cell {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .list-table .actions-cell a {
+      font-size: 11px;
+      padding: 3px 8px;
+      text-align: center;
+    }
+
+    .list-pagination {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .list-pagination .step-links {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .list-page {
+      padding: 10px;
+    }
+
+    .list-header {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .list-header-actions {
+      justify-content: center;
+    }
+
+    .list-card-header .filter-group {
+      flex-direction: column;
+    }
+
+    .list-card-header .filter-group input,
+    .list-card-header .filter-group select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .list-table {
+      font-size: 11px;
+    }
+
+    .list-table thead th {
+      padding: 6px 6px;
+      font-size: 9px;
+    }
+
+    .list-table tbody td {
+      padding: 6px 6px;
+      font-size: 11px;
+    }
+
+    .list-table .company-name {
+      font-size: 12px;
+    }
+
+    .list-status-badge {
+      font-size: 9px;
+      padding: 2px 8px;
+    }
+
+    .list-table .plan-badge {
+      font-size: 9px;
+      padding: 1px 6px;
+    }
+
+    .list-pagination .step-links a,
+    .list-pagination .step-links .current {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .list-page {
+      padding: 20px !important;
+      background: #fff !important;
+    }
+    .list-card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+    .list-btn,
+    .list-header-actions,
+    .list-table .actions-cell {
+      display: none !important;
+    }
+    .list-card-header .filter-group {
+      display: none !important;
+    }
+    .list-pagination {
+      display: none !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-page">
+  <div class="list-container">
+    <div class="list-header">
+      <div>
+        <h1><i class="fas fa-building"></i>Companies</h1>
+        <div class="subtitle"><i class="fas fa-globe"></i>Manage all tenant companies across the platform</div>
+      </div>
+      <div class="list-header-actions">
+        <a href="{% url 'platform_admin:dashboard' %}" class="list-btn list-btn-outline">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+      </div>
+    </div>
+
+    <div class="list-card">
+      <div class="list-card-header">
+        <form method="get" class="filter-group" style="flex:1;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input type="text" name="q" placeholder="🔍 Search by name or schema…" value="{{ q|default:'' }}">
+          <select name="status">
+            <option value="">All Status</option>
+            <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+            <option value="suspended" {% if status == 'suspended' %}selected{% endif %}>Suspended</option>
+          </select>
+          <select name="plan">
+            <option value="">All Plans</option>
+            {% for plan_code, plan_label in plan_choices %}
+            <option value="{{ plan_code }}" {% if plan == plan_code %}selected{% endif %}>{{ plan_label }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="filter-btn"><i class="fas fa-filter"></i> Filter</button>
+          {% if q or status or plan %}
+          <a href="{% url 'platform_admin:company_list' %}" class="filter-btn clear"><i class="fas fa-times"></i> Clear</a>
+          {% endif %}
+        </form>
+        <span class="result-count"><i class="fas fa-database"></i> {{ page_obj.paginator.count }} companies</span>
+      </div>
+
+      <div class="list-table-wrap">
+        <table class="list-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-building"></i> Company</th>
+              <th><i class="fas fa-database"></i> Schema</th>
+              <th><i class="fas fa-tag"></i> Plan</th>
+              <th><i class="fas fa-circle"></i> Status</th>
+              <th><i class="fas fa-sync-alt"></i> Provisioning</th>
+              <th><i class="fas fa-calendar-alt"></i> Created</th>
+              <th><i class="fas fa-cog"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if page_obj %}
+              {% for company in page_obj %}
+              <tr>
+                <td>
+                  <div class="company-name">
+                    <a href="{% url 'platform_admin:company_detail' company.schema_name %}">
+                      <i class="fas fa-building"></i>
+                      {{ company.name }}
+                    </a>
+                  </div>
+                </td>
+                <td>
+                  <span class="schema-name"><i class="fas fa-code"></i>{{ company.schema_name }}</span>
+                </td>
+                <td>
+                  <span class="plan-badge {{ company.plan|lower }}">
+                    <i class="fas {% if company.plan == 'starter' %}fa-seedling{% elif company.plan == 'professional' %}fa-rocket{% elif company.plan == 'enterprise' %}fa-crown{% else %}fa-tag{% endif %}"></i>
+                    {{ company.plan|title }}
+                  </span>
+                </td>
+                <td>
+                  <span class="list-status-badge {% if company.is_active %}active{% else %}suspended{% endif %}">
+                    <i class="fas {% if company.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                    {% if company.is_active %}Active{% else %}Suspended{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <span class="list-status-badge {% if company.provisioning_status == 'READY' %}ready{% elif company.provisioning_status == 'RUNNING' %}running{% elif company.provisioning_status == 'FAILED' %}failed{% else %}pending{% endif %}">
+                    <i class="fas {% if company.provisioning_status == 'READY' %}fa-check-circle{% elif company.provisioning_status == 'RUNNING' %}fa-spinner fa-spin{% elif company.provisioning_status == 'FAILED' %}fa-times-circle{% else %}fa-clock{% endif %}"></i>
+                    {{ company.get_provisioning_status_display }}
+                  </span>
+                </td>
+                <td style="font-size:12px;color:var(--list-text-muted);">
+                  <i class="fas fa-calendar-alt"></i> {{ company.created_on|date:"Y-m-d" }}
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <a href="{% url 'platform_admin:company_detail' company.schema_name %}" class="view-link">
+                      <i class="fas fa-eye"></i> View
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7">
+                  <div class="list-empty">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No companies found</h3>
+                    <p>Try adjusting your search or filters.</p>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj and page_obj.paginator.num_pages > 1 %}
+      <div class="list-pagination">
+        <div class="info">
+          <i class="fas fa-list"></i> Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }}
+        </div>
+        <div class="step-links">
+          {% if page_obj.has_previous %}
+            <a href="?page=1{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if plan %}&plan={{ plan }}{% endif %}"><i class="fas fa-angle-double-left"></i> First</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if plan %}&plan={{ plan }}{% endif %}"><i class="fas fa-angle-left"></i> Prev</a>
+          {% else %}
+            <span class="disabled"><i class="fas fa-angle-double-left"></i> First</span>
+            <span class="disabled"><i class="fas fa-angle-left"></i> Prev</span>
+          {% endif %}
+
+          <span class="current"><i class="fas fa-page"></i> Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if plan %}&plan={{ plan }}{% endif %}">Next <i class="fas fa-angle-right"></i></a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if plan %}&plan={{ plan }}{% endif %}">Last <i class="fas fa-angle-double-right"></i></a>
+          {% else %}
+            <span class="disabled">Next <i class="fas fa-angle-right"></i></span>
+            <span class="disabled">Last <i class="fas fa-angle-double-right"></i></span>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--list-text-muted);">
+      <a href="{% url 'tenants:landing' %}" style="color:var(--list-text-muted);text-decoration:none;">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+      <span style="margin:0 8px;">•</span>
+      <i class="fas fa-cube"></i> Abacash Platform Admin v2.0
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    'use strict';
+
+    // Auto-submit filter on enter key
+    var filterInputs = document.querySelectorAll('.filter-group input, .filter-group select');
+    filterInputs.forEach(function(input) {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          this.closest('form').submit();
+        }
+      });
+    });
+
+    // Preserve filter values on page load
+    console.log('Company list loaded with {{ page_obj.paginator.count }} companies.');
+
+  })();
+</script>
+{% endblock %}

@@ -2,14 +2,23 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Client, NextOfKin
 from accounts.audit import log_action
-from accounts.models import AuditLog
+from accounts.models import AuditLog, Branch
+from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+# Fields required to save a Client, used to validate POST data explicitly
+# instead of relying on KeyError from raw dict access.
+REQUIRED_CLIENT_FIELDS = [
+    "first_name", "last_name", "gender", "date_of_birth", "marital_status",
+    "nin", "phone_primary", "physical_address", "employment_status",
+]
 
 
 @login_required
@@ -22,14 +31,20 @@ def client_search(request):
     q = request.GET.get("q", "").strip()
     results = []
     if q:
-        from django.db.models import Q
         qs = Client.objects.filter(
             Q(first_name__icontains=q) |
             Q(last_name__icontains=q)  |
             Q(client_number__icontains=q) |
             Q(nin__icontains=q) |
             Q(phone_primary__icontains=q)
-        ).order_by("last_name")[:50]
+        )
+        qs = scope_to_branch(qs, request.user)
+        # Exclude blacklisted/inactive clients by default so they can't be
+        # picked up accidentally by pickers (e.g. new loan application).
+        # Pass include_inactive=1 to bypass (e.g. for an admin lookup screen).
+        if request.GET.get("include_inactive") != "1":
+            qs = qs.filter(is_active=True, is_blacklisted=False)
+        qs = qs.order_by("last_name")[:50]
         for c in qs:
             text = f"{c.client_number} — {c.full_name} ({c.phone_primary})"
             results.append({"id": str(c.pk), "text": text})
@@ -38,10 +53,10 @@ def client_search(request):
 
 @login_required
 def client_list(request):
-    qs = Client.objects.select_related("registered_by").order_by("-created_at")
+    qs = Client.objects.select_related("registered_by", "branch").order_by("-created_at")
+    qs = scope_to_branch_request(qs, request)
     search = request.GET.get("q", "").strip()
     if search:
-        from django.db.models import Q
         qs = qs.filter(
             Q(first_name__icontains=search) |
             Q(last_name__icontains=search)  |
@@ -81,16 +96,21 @@ def client_list(request):
         "page_obj": page_obj,
         "paginator": paginator,
         "querystring": querystring,
-        "total_count": qs.count(),
+        "total_count": paginator.count,
         "search": search,
         "status": status,
         "per_page": per_page,
+        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
+        "selected_branch": request.GET.get("branch", ""),
     })
 
 
 @login_required
 def client_detail(request, pk):
     client = get_object_or_404(Client, pk=pk)
+    if not can_access_branch_object(request.user, client):
+        messages.error(request, "That client belongs to a different branch.")
+        return redirect("clients:list")
     loans  = client.loans.select_related("product").order_by("-application_date")
     kin    = client.next_of_kin.all()
     docs   = client.documents.all()
@@ -130,6 +150,16 @@ def client_create(request):
             "notes":             d.get("notes", "").strip(),
         }
 
+        client_branch = None
+        branch_error = None
+        if request.user.is_ceo:
+            branch_id = d.get("branch", "").strip()
+            client_branch = Branch.objects.filter(pk=branch_id, is_active=True).first() if branch_id else None
+            if not client_branch:
+                branch_error = "Please select which branch this client belongs to."
+        else:
+            client_branch = request.user.branch
+
         duplicate_filter = Q(nin__iexact=client_data["nin"])
         if client_data["phone_primary"]:
             duplicate_filter |= Q(phone_primary=client_data["phone_primary"])
@@ -141,53 +171,73 @@ def client_create(request):
                 "A client with the same National ID or primary phone already exists. "
                 "Please edit the existing record or cancel registration."
             )
+        elif branch_error:
+            messages.error(request, branch_error)
+        elif not all(client_data.get(f) for f in
+                     ("first_name", "last_name", "gender", "date_of_birth",
+                      "marital_status", "nin", "phone_primary", "physical_address",
+                      "employment_status")):
+            messages.error(request, "Please fill in all required fields.")
+        elif not request.FILES.get("passport_photo"):
+            messages.error(request, "A passport photo is required to register a client.")
         else:
             try:
-                client = Client.objects.create(
-                    first_name        = client_data["first_name"],
-                    last_name         = client_data["last_name"],
-                    other_names       = client_data["other_names"],
-                    gender            = client_data["gender"],
-                    date_of_birth     = client_data["date_of_birth"],
-                    marital_status    = client_data["marital_status"],
-                    nin               = client_data["nin"],
-                    phone_primary     = client_data["phone_primary"],
-                    phone_secondary   = client_data["phone_secondary"],
-                    email             = client_data["email"],
-                    physical_address  = client_data["physical_address"],
-                    district          = client_data["district"],
-                    employment_status = client_data["employment_status"],
-                    employer_name     = client_data["employer_name"],
-                    employer_address  = client_data["employer_address"],
-                    job_title         = client_data["job_title"],
-                    monthly_income    = client_data["monthly_income"],
-                    notes             = client_data["notes"],
-                    registered_by     = request.user,
-                )
-                if request.FILES.get("passport_photo"):
-                    client.passport_photo = request.FILES["passport_photo"]
-                    client.save()
-                # Optional next of kin
-                kin_name  = d.get("kin_name", "").strip()
-                kin_phone = d.get("kin_phone", "").strip()
-                if kin_name and kin_phone:
-                    NextOfKin.objects.create(
-                        client           = client,
-                        full_name        = kin_name,
-                        relationship     = d.get("kin_relationship", "").strip(),
-                        phone_primary    = kin_phone,
-                        phone_secondary  = d.get("kin_phone2", "").strip(),
-                        physical_address = d.get("kin_address", "").strip(),
-                        is_guarantor     = d.get("kin_is_guarantor") == "on",
+                with transaction.atomic():
+                    client = Client.objects.create(
+                        first_name        = client_data["first_name"],
+                        last_name         = client_data["last_name"],
+                        other_names       = client_data["other_names"],
+                        gender            = client_data["gender"],
+                        date_of_birth     = client_data["date_of_birth"],
+                        marital_status    = client_data["marital_status"],
+                        nin               = client_data["nin"],
+                        phone_primary     = client_data["phone_primary"],
+                        phone_secondary   = client_data["phone_secondary"],
+                        email             = client_data["email"],
+                        physical_address  = client_data["physical_address"],
+                        district          = client_data["district"],
+                        employment_status = client_data["employment_status"],
+                        employer_name     = client_data["employer_name"],
+                        employer_address  = client_data["employer_address"],
+                        job_title         = client_data["job_title"],
+                        monthly_income    = client_data["monthly_income"],
+                        notes             = client_data["notes"],
+                        registered_by     = request.user,
+                        branch            = client_branch,
                     )
-                log_action(request.user, AuditLog.Action.CREATE, client, request=request,
-                           changes={"client_number": client.client_number, "name": client.full_name},
-                           remarks=f"Client {client.full_name} registered")
+                    if request.FILES.get("passport_photo"):
+                        client.passport_photo = request.FILES["passport_photo"]
+                        client.save()
+                    # Optional next of kin
+                    kin_name  = d.get("kin_name", "").strip()
+                    kin_phone = d.get("kin_phone", "").strip()
+                    if kin_name and kin_phone:
+                        NextOfKin.objects.create(
+                            client           = client,
+                            full_name        = kin_name,
+                            relationship     = d.get("kin_relationship", "").strip(),
+                            phone_primary    = kin_phone,
+                            phone_secondary  = d.get("kin_phone2", "").strip(),
+                            physical_address = d.get("kin_address", "").strip(),
+                            is_guarantor     = d.get("kin_is_guarantor") == "on",
+                        )
+                    log_action(request.user, AuditLog.Action.CREATE, client, request=request,
+                               changes={"client_number": client.client_number, "name": client.full_name},
+                               remarks=f"Client {client.full_name} registered")
                 messages.success(
                     request,
                     f"Client {client.full_name} registered. Reference: {client.client_number}"
                 )
                 return redirect("clients:detail", pk=client.pk)
+            except IntegrityError:
+                # Most likely a concurrent registration grabbed the same NIN,
+                # phone, or client_number between our duplicate check and the
+                # insert. Nothing was partially saved (atomic rolled it back).
+                messages.error(
+                    request,
+                    "Could not save this client — a matching record was created "
+                    "at the same time. Please search again before retrying."
+                )
             except Exception as e:
                 messages.error(request, f"Error saving client: {e}")
 
@@ -199,6 +249,7 @@ def client_create(request):
         "employment_choices": Client.EmploymentStatus.choices,
         "client":             client_data,
         "duplicates":        duplicates,
+        "branches":          Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 
@@ -210,40 +261,90 @@ def client_edit(request, pk):
         messages.error(request, "Only Managers and the CEO can edit client records.")
         return redirect("clients:detail", pk=pk)
 
+    if not can_access_branch_object(request.user, client):
+        messages.error(request, "That client belongs to a different branch.")
+        return redirect("clients:list")
+
     if request.method == "POST":
         d = request.POST
+
+        missing = [f for f in REQUIRED_CLIENT_FIELDS if not d.get(f, "").strip()]
+        if missing:
+            messages.error(request, "Please fill in all required fields: " + ", ".join(missing))
+            return render(request, "clients/client_form.html", {
+                "title":              f"Edit — {client.full_name}",
+                "action":             "edit",
+                "client":             client,
+                "gender_choices":     Client.Gender.choices,
+                "marital_choices":    Client.MaritalStatus.choices,
+                "employment_choices": Client.EmploymentStatus.choices,
+                "branches":           Branch.objects.filter(is_active=True).order_by("name"),
+            })
+
+        new_nin   = d["nin"].strip().upper()
+        new_phone = d["phone_primary"].strip()
+        duplicate_filter = Q(nin__iexact=new_nin)
+        if new_phone:
+            duplicate_filter |= Q(phone_primary=new_phone)
+        duplicates = list(Client.objects.filter(duplicate_filter).exclude(pk=client.pk))
+        if duplicates:
+            messages.error(
+                request,
+                "Another client already has this National ID or primary phone. "
+                f"Check {', '.join(dup.client_number for dup in duplicates)} before saving."
+            )
+            return render(request, "clients/client_form.html", {
+                "title":              f"Edit — {client.full_name}",
+                "action":             "edit",
+                "client":             client,
+                "gender_choices":     Client.Gender.choices,
+                "marital_choices":    Client.MaritalStatus.choices,
+                "employment_choices": Client.EmploymentStatus.choices,
+                "branches":           Branch.objects.filter(is_active=True).order_by("name"),
+            })
+
         try:
-            client.first_name        = d["first_name"].strip()
-            client.last_name         = d["last_name"].strip()
-            client.other_names       = d.get("other_names", "").strip()
-            client.gender            = d["gender"]
-            client.date_of_birth     = d["date_of_birth"]
-            client.marital_status    = d["marital_status"]
-            client.nin               = d["nin"].strip().upper()
-            client.phone_primary     = d["phone_primary"].strip()
-            client.phone_secondary   = d.get("phone_secondary", "").strip()
-            client.email             = d.get("email", "").strip()
-            client.physical_address  = d["physical_address"].strip()
-            client.district          = d.get("district", "Kampala").strip()
-            client.employment_status = d["employment_status"]
-            client.employer_name     = d.get("employer_name", "").strip()
-            client.employer_address  = d.get("employer_address", "").strip()
-            client.job_title         = d.get("job_title", "").strip()
-            client.monthly_income    = d.get("monthly_income") or 0
-            client.notes             = d.get("notes", "").strip()
-            if request.FILES.get("passport_photo"):
-                client.passport_photo = request.FILES["passport_photo"]
-            # CEO can toggle blacklist
-            if request.user.is_ceo:
-                client.is_blacklisted    = d.get("is_blacklisted") == "on"
-                client.blacklist_reason  = d.get("blacklist_reason", "").strip()
-                client.is_active         = d.get("is_active") == "on"
-            client.save()
-            log_action(request.user, AuditLog.Action.UPDATE, client, request=request,
-                       changes={"name": client.full_name},
-                       remarks=f"Client {client.full_name} updated")
+            with transaction.atomic():
+                client.first_name        = d["first_name"].strip()
+                client.last_name         = d["last_name"].strip()
+                client.other_names       = d.get("other_names", "").strip()
+                client.gender            = d["gender"]
+                client.date_of_birth     = d["date_of_birth"]
+                client.marital_status    = d["marital_status"]
+                client.nin               = new_nin
+                client.phone_primary     = new_phone
+                client.phone_secondary   = d.get("phone_secondary", "").strip()
+                client.email             = d.get("email", "").strip()
+                client.physical_address  = d["physical_address"].strip()
+                client.district          = d.get("district", "Kampala").strip()
+                client.employment_status = d["employment_status"]
+                client.employer_name     = d.get("employer_name", "").strip()
+                client.employer_address  = d.get("employer_address", "").strip()
+                client.job_title         = d.get("job_title", "").strip()
+                client.monthly_income    = d.get("monthly_income") or 0
+                client.notes             = d.get("notes", "").strip()
+                if request.FILES.get("passport_photo"):
+                    client.passport_photo = request.FILES["passport_photo"]
+                # CEO can toggle blacklist and reassign branch
+                if request.user.is_ceo:
+                    client.is_blacklisted    = d.get("is_blacklisted") == "on"
+                    client.blacklist_reason  = d.get("blacklist_reason", "").strip()
+                    client.is_active         = d.get("is_active") == "on"
+                    new_branch_id = d.get("branch", "").strip()
+                    if new_branch_id:
+                        client.branch = Branch.objects.filter(pk=new_branch_id, is_active=True).first() or client.branch
+                client.save()
+                log_action(request.user, AuditLog.Action.UPDATE, client, request=request,
+                           changes={"name": client.full_name},
+                           remarks=f"Client {client.full_name} updated")
             messages.success(request, f"Client {client.full_name} updated.")
             return redirect("clients:detail", pk=pk)
+        except IntegrityError:
+            messages.error(
+                request,
+                "Could not save — this National ID or phone number was just taken "
+                "by another record. Please refresh and try again."
+            )
         except Exception as e:
             messages.error(request, f"Error updating client: {e}")
 
@@ -254,4 +355,5 @@ def client_edit(request, pk):
         "gender_choices":     Client.Gender.choices,
         "marital_choices":    Client.MaritalStatus.choices,
         "employment_choices": Client.EmploymentStatus.choices,
+        "branches":           Branch.objects.filter(is_active=True).order_by("name"),
     })

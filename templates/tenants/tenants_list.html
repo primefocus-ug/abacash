@@ -1,0 +1,61 @@
+{% extends "tenants/landing_base.html" %}
+{% block title %}Tenants | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Public Admin</div>
+    <h1 class="hero-title">All tenants</h1>
+    <p class="hero-copy">Every provisioned company, searchable by name or schema.</p>
+  </section>
+
+  <div class="dashboard-header" style="margin-top:1rem;">
+    <a class="btn btn-secondary" href="{% url 'tenants:public_admin' %}">&larr; Back to dashboard</a>
+  </div>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <form method="get" class="form-grid" style="grid-template-columns: 2fr auto; align-items:end;">
+      <div class="form-group">
+        <label for="q">Search</label>
+        <input id="q" name="q" type="text" value="{{ query }}" placeholder="Company name or schema">
+      </div>
+      <button class="btn btn-primary" type="submit">Filter</button>
+    </form>
+  </section>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Tenants</div>
+        <h2>{{ page_obj.paginator.count }} compan{{ page_obj.paginator.count|pluralize:"y,ies" }}</h2>
+      </div>
+    </div>
+
+    {% if tenants %}
+      <div class="stack-list">
+        {% for item in tenants %}
+          <div class="stack-item">
+            <div>
+              <strong>{{ item.company.name }}</strong>
+              <small>Schema: {{ item.company.schema_name }} · Plan: {{ item.company.plan }} · {% if item.company.is_active %}Active{% else %}Suspended{% endif %}</small>
+            </div>
+            <a class="btn btn-secondary btn-sm" href="{% url 'tenants:tenant_detail' item.company.schema_name %}">View</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="hero-copy">No tenants match your search.</p>
+    {% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="panel-actions" style="margin-top:1rem;">
+        {% if page_obj.has_previous %}
+          <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a>
+        {% else %}<span></span>{% endif %}
+        <small>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+        {% if page_obj.has_next %}
+          <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

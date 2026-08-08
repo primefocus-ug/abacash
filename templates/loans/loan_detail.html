@@ -6,21 +6,20 @@
 
 {% block topbar_actions %}
 
-  {# ── Primary action ── #}
   {% if loan.status == 'ACTIVE' %}
-  <a href="{% url 'payments:record_for_loan' loan.pk %}" class="btn btn-primary btn-sm" style="gap:6px;">
+  <a href="{% url 'payments:record_for_loan' loan.pk %}" class="btn btn-primary btn-sm" style="gap:6px;flex-shrink:0;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Record Payment
   </a>
   {% endif %}
 
-  {# ── Manager / CEO loan operations dropdown ── #}
-  {% if loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
-  <div style="position:relative;display:inline-block;" id="loan-ops-wrap">
+
+  {% if can_write_off or loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
+  <div style="position:relative;display:inline-block;flex-shrink:0;" id="loan-ops-wrap">
     <button
       class="btn btn-secondary btn-sm"
       style="gap:6px;"
-      onclick="document.getElementById('loan-ops-menu').classList.toggle('open');"
+      onclick="toggleLoanOpsMenu(this);"
       id="loan-ops-btn"
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
@@ -28,12 +27,12 @@
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div id="loan-ops-menu" style="
-      display:none; position:absolute; top:calc(100% + 6px); right:0;
+      display:none; position:fixed; top:0; left:0;
       background:var(--bg-surface); border:1px solid var(--border);
       border-radius:var(--radius-md); box-shadow:0 8px 24px rgba(15,23,42,.12);
-      min-width:210px; z-index:200; overflow:hidden;
+      width:min(90vw, 260px); z-index:1200; overflow:hidden;
     ">
-      {# Reschedule #}
+      {% if loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
       <button
         type="button"
         class="loan-ops-item"
@@ -46,11 +45,10 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         </span>
         <span>
-          <span style="display:block;font-weight:600;font-size:13px;">Reschedule Payments</span>
-          <span style="display:block;font-size:11px;color:var(--text-muted);">Adjust repayment dates &amp; term</span>
+          <span class="loan-ops-item-title">Reschedule Payments</span>
+          <span class="loan-ops-item-subtitle">Adjust repayment dates &amp; term</span>
         </span>
       </button>
-      {# Renew — only if product allows it #}
       {% if loan.product.allows_renewal %}
       <button
         type="button"
@@ -64,8 +62,28 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"/></svg>
         </span>
         <span>
-          <span style="display:block;font-weight:600;font-size:13px;">Renew Loan</span>
-          <span style="display:block;font-size:11px;color:var(--text-muted);">Roll over outstanding balance</span>
+          <span class="loan-ops-item-title">Renew Loan</span>
+          <span class="loan-ops-item-subtitle">Roll over outstanding balance</span>
+        </span>
+      </button>
+      {% endif %}
+      {% endif %}
+
+      {% if can_write_off %}
+      <button
+        type="button"
+        class="loan-ops-item loan-ops-item-danger"
+        hx-get="{% url 'loans:write_off' loan.pk %}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        onclick="openModal(); document.getElementById('loan-ops-menu').classList.remove('open');"
+      >
+        <span class="loan-ops-icon" style="background:var(--red-dim);color:var(--red-400);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </span>
+        <span>
+          <span class="loan-ops-item-title" style="color:var(--red-400);">Write Off Loan</span>
+          <span class="loan-ops-item-subtitle">{{ loan.days_overdue }} days overdue — past the {{ write_off_threshold_days }}-day threshold</span>
         </span>
       </button>
       {% endif %}
@@ -73,25 +91,23 @@
   </div>
   {% endif %}
 
-  {# ── Recall (draft / rejected) ── #}
   {% if loan.status == 'REJECTED' or loan.status == 'DRAFT' %}
     {% if user == loan.applied_by or user.is_manager or user.is_ceo %}
-    <a href="{% url 'loans:recall' loan.pk %}" class="btn btn-secondary btn-sm"
+    <a href="{% url 'loans:recall' loan.pk %}" class="btn btn-secondary btn-sm flex-shrink-0"
        onclick="return confirm('Recall this application back to draft for editing?');">Recall</a>
     {% endif %}
   {% endif %}
 
-  {# ── Utility buttons ── #}
-  <div style="display:flex;gap:6px;align-items:center;border-left:1px solid var(--border);padding-left:10px;margin-left:2px;">
-    <a href="{% url 'loans:schedule_download' loan.pk %}" class="btn btn-secondary btn-sm" style="gap:5px;" title="Download schedule as PDF">
+  <div style="display:flex;gap:6px;align-items:center;border-left:1px solid var(--border);padding-left:10px;margin-left:2px;flex-shrink:0;">
+    <a href="{% url 'loans:schedule_download' loan.pk %}" class="btn btn-secondary btn-sm" style="gap:5px;flex-shrink:0;" title="Download schedule as PDF">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Download
     </a>
-    <a href="{% url 'loans:schedule_print' loan.pk %}" target="_blank" class="btn btn-secondary btn-sm" style="gap:5px;" title="Print repayment schedule">
+    <a href="{% url 'loans:schedule_print' loan.pk %}" target="_blank" class="btn btn-secondary btn-sm" style="gap:5px;flex-shrink:0;" title="Print repayment schedule">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Print
     </a>
-    <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm" style="gap:5px;">
+    <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm" style="gap:5px;flex-shrink:0;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       Back
     </a>
@@ -104,6 +120,8 @@
       background: transparent; border: none; cursor: pointer;
       text-align: left; transition: background var(--trans);
       border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: var(--font-body);
     }
     .loan-ops-item:last-child { border-bottom: none; }
     .loan-ops-item:hover { background: var(--bg-hover); }
@@ -112,15 +130,144 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
+    .loan-ops-item-title {
+      display: block; font-weight: 600; font-size: 13px;
+      color: var(--text-primary);
+    }
+    .loan-ops-item-subtitle {
+      display: block; font-size: 11px; color: var(--text-muted);
+    }
+    .loan-ops-item-danger:hover { background: var(--red-dim); }
     #loan-ops-menu.open { display: block !important; }
+
+    /* Responsive fixes for the topbar actions */
+    @media (max-width: 640px) {
+      .topbar-actions .btn {
+        font-size: 11px !important;
+        padding: 5px 8px !important;
+      }
+      .topbar-actions .btn svg {
+        width: 11px !important;
+        height: 11px !important;
+      }
+      .topbar-actions > div,
+      .topbar-actions > a,
+      .topbar-actions > form {
+        flex-shrink: 0 !important;
+      }
+      #loan-ops-btn {
+        font-size: 11px !important;
+        padding: 5px 8px !important;
+      }
+      #loan-ops-btn svg {
+        width: 11px !important;
+        height: 11px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-actions .btn {
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+      }
+      .topbar-actions .btn svg {
+        width: 10px !important;
+        height: 10px !important;
+      }
+      #loan-ops-btn {
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+      }
+      #loan-ops-btn svg {
+        width: 10px !important;
+        height: 10px !important;
+      }
+      .topbar-actions > div:last-child {
+        padding-left: 4px !important;
+        margin-left: 0 !important;
+        gap: 3px !important;
+      }
+    }
+
+    /* Prevent overflow in the responsive two-col grid */
+    .responsive-two-col-grid {
+      overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+    }
+    .responsive-two-col-grid > * {
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    /* Fix card overflow issues */
+    .card {
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .card-body {
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    /* Fix table overflow */
+    .table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .aba-table {
+      min-width: 420px;
+    }
+
+    /* Fix receipt rows on mobile */
+    .receipt-row {
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .receipt-row .receipt-label {
+      flex-shrink: 0;
+    }
+    .receipt-row > span:last-child {
+      word-break: break-word;
+      max-width: 100%;
+    }
   </style>
   <script>
+    /* The dropdown is position:fixed and positioned in JS (rather than
+       relying on an absolutely-positioned ancestor) because on narrow
+       screens .topbar-actions scrolls horizontally, and any container
+       with overflow-x:auto also clips overflow on the y-axis — that was
+       silently hiding this menu the moment it opened on mobile. */
+    function toggleLoanOpsMenu(btn) {
+      var menu = document.getElementById('loan-ops-menu');
+      var isOpen = menu.classList.contains('open');
+      if (isOpen) {
+        menu.classList.remove('open');
+        return;
+      }
+      var rect = btn.getBoundingClientRect();
+      var menuWidth = Math.min(window.innerWidth * 0.9, 260);
+      var left = Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8);
+      left = Math.max(left, 8);
+      menu.style.width = menuWidth + 'px';
+      menu.style.left = left + 'px';
+      menu.style.top = (rect.bottom + 6) + 'px';
+      menu.classList.add('open');
+    }
     document.addEventListener('click', function(e) {
       var wrap = document.getElementById('loan-ops-wrap');
       if (wrap && !wrap.contains(e.target)) {
         document.getElementById('loan-ops-menu').classList.remove('open');
       }
     });
+    window.addEventListener('resize', function() {
+      document.getElementById('loan-ops-menu').classList.remove('open');
+    });
+    window.addEventListener('scroll', function() {
+      document.getElementById('loan-ops-menu').classList.remove('open');
+    }, true);
     function openModal() {
       if (typeof showModal === 'function') { showModal(); } else if (typeof window.showModal === 'function') { window.showModal(); }
     }
@@ -133,14 +280,14 @@
 <div class="responsive-two-col-grid">
 
   <!-- Left column -->
-  <div>
+  <div style="min-width:0;max-width:100%;">
 
     <!-- Loan header card -->
     <div class="card mb-3 print-hide">
       <div class="card-body">
-        <div class="flex-between mb-2">
-          <div>
-            <div style="font-size:22px;font-weight:600;font-family:var(--font-mono);">{{ loan.loan_number }}</div>
+        <div class="flex-between mb-2" style="flex-wrap:wrap;gap:10px;">
+          <div style="min-width:0;max-width:100%;">
+            <div style="font-size:22px;font-weight:600;font-family:var(--font-mono);overflow-wrap:anywhere;word-break:break-all;">{{ loan.loan_number }}</div>
             <div class="text-muted text-sm">{{ loan.product.name }} — {{ loan.get_interest_method_display }}</div>
           </div>
           <span class="badge
@@ -149,7 +296,7 @@
             {% elif loan.status == 'APPROVED' %}badge-blue
             {% elif loan.status == 'COMPLETED' %}badge-teal
             {% elif loan.status == 'REJECTED' or loan.status == 'DEFAULTED' %}badge-red
-            {% else %}badge-muted{% endif %}">
+            {% else %}badge-muted{% endif %}" style="flex-shrink:0;">
             {{ loan.get_status_display }}
           </span>
         </div>
@@ -157,12 +304,12 @@
         {% if loan.purpose %}
         <div class="mt-2">
           <div class="text-muted text-sm">Purpose</div>
-          <div>{{ loan.purpose }}</div>
+          <div style="overflow-wrap:break-word;word-break:break-word;">{{ loan.purpose }}</div>
         </div>
         {% endif %}
 
         {% if loan.rejection_reason %}
-        <div class="alert alert-danger mt-2">
+        <div class="alert alert-danger mt-2" style="overflow-wrap:break-word;word-break:break-word;">
           <strong>Rejection reason:</strong> {{ loan.rejection_reason }}
         </div>
         {% endif %}
@@ -174,47 +321,47 @@
     <div class="card mb-3 print-hide" id="reject" style="border-color:var(--border);">
       <div class="card-header"><span class="card-title">Loan Decision</span></div>
       <div class="card-body" style="padding:12px;">
-        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;width:100%;">
 
           <!-- Approve column -->
-          <div style="flex:1 1 320px;min-width:260px;max-width:720px;">
-            <form method="post" action="{% url 'loans:approve' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="flex:1 1 280px;min-width:200px;max-width:100%;">
+            <form method="post" action="{% url 'loans:approve' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;width:100%;">
               {% csrf_token %}
 
-              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                <div style="flex:1;min-width:160px;">
+              <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;width:100%;">
+                <div style="flex:1;min-width:120px;">
                   <div style="font-size:13px;color:var(--text-muted);">Loan Amount</div>
                   <div style="font-weight:600;font-size:16px;">{{ loan.principal_amount|money }}</div>
                 </div>
 
-                <div style="flex:1;min-width:160px;">
+                <div style="flex:1;min-width:120px;">
                   <div style="font-size:13px;color:var(--text-muted);">Repayable (P+I)</div>
                   <div style="font-weight:600;font-size:16px;">{{ loan.total_repayable|money }}</div>
                 </div>
 
                 {% if user.is_ceo %}
-                <div style="min-width:180px;">
+                <div style="min-width:150px;flex:1;">
                   <label for="disbursement_date" style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Disbursement date</label>
-                  <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;" />
+                  <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;" />
                 </div>
                 {% endif %}
 
               </div>
 
-              <div style="display:flex;gap:10px;align-items:center;">
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <button type="submit" class="btn btn-success" style="padding:10px 16px;font-weight:600;" data-confirm="Approve this loan of {{ loan.principal_amount|money }}?">✓ Approve Loan</button>
-                <div style="color:var(--text-muted);font-size:13px;">Approving will activate the loan and set disbursement date above.</div>
+                <div style="color:var(--text-muted);font-size:13px;min-width:120px;">Approving will activate the loan and set disbursement date above.</div>
               </div>
             </form>
           </div>
 
           <!-- Reject column -->
-          <div style="flex:1 1 320px;min-width:260px;max-width:480px;">
-            <form method="post" action="{% url 'loans:reject' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="flex:1 1 280px;min-width:200px;max-width:100%;">
+            <form method="post" action="{% url 'loans:reject' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;width:100%;">
               {% csrf_token %}
               <label for="rejection_reason" style="font-weight:600;font-size:13px;color:var(--text-muted);">Rejection reason (required)</label>
-              <textarea name="rejection_reason" id="rejection_reason" rows="4" placeholder="Explain why this loan is being rejected…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
-              <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <textarea name="rejection_reason" id="rejection_reason" rows="4" placeholder="Explain why this loan is being rejected…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;"></textarea>
+              <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
                 <button type="submit" class="btn btn-danger" style="padding:10px 14px;font-weight:600;">Reject Loan</button>
               </div>
             </form>
@@ -225,14 +372,43 @@
     </div>
     {% endif %}
 
+    {% if user.is_ceo %}
+      {% if loan.status == 'WRITTEN_OFF' %}
+      <div class="card mb-3 print-hide" id="reinstate" style="border-color:var(--green-500);">
+        <div class="card-header"><span class="card-title">Reinstate Loan</span></div>
+        <div class="card-body" style="padding:12px;overflow-wrap:break-word;word-break:break-word;">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;overflow-wrap:break-word;word-break:break-word;">
+            <strong>Previously written off</strong> by {{ loan.write_off_approved_by.full_name|default:"—" }}: “{{ loan.write_off_reason }}”
+          </div>
+          <details style="max-width:100%;">
+            <summary style="cursor:pointer;font-weight:600;font-size:13px;color:var(--green-500);">
+              Client has settled or agreed new terms — reinstate this loan
+            </summary>
+            <form method="post" action="{% url 'loans:reinstate' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;margin-top:12px;max-width:100%;">
+              {% csrf_token %}
+              <div style="color:var(--text-muted);font-size:13px;overflow-wrap:break-word;word-break:break-word;">
+                This moves the loan back to <strong>Active</strong> and restores the schedule entries this write-off waived. The write-off record above is kept as history.
+              </div>
+              <label for="reinstatement_reason" style="font-weight:600;font-size:13px;color:var(--text-muted);">Reinstatement reason (required)</label>
+              <textarea name="reinstatement_reason" id="reinstatement_reason" rows="4" placeholder="Explain the agreement/settlement that justifies reinstating this loan…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;"></textarea>
+              <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-success" style="padding:10px 14px;font-weight:600;" data-confirm="Reinstate {{ loan.loan_number }}? It will become active again.">Reinstate Loan</button>
+              </div>
+            </form>
+          </details>
+        </div>
+      </div>
+      {% endif %}
+    {% endif %}
+
     {% include 'loans/loan_detail_schedule_fragment.html' %}
 
     <!-- Payment history -->
-    <div class="card print-hide" style="max-width:100%;overflow-x:auto;">
+    <div class="card print-hide" style="max-width:100%;overflow:hidden;">
       <div class="card-header"><span class="card-title">Payment History</span></div>
-      <div class="table-wrap">
+      <div class="table-wrap" style="max-width:100%;overflow-x:auto;">
         {% if payments %}
-        <table class="aba-table">
+        <table class="aba-table" style="min-width:420px;">
           <thead>
             <tr><th>Date</th><th>Amount</th><th>Principal</th><th>Interest</th><th>Method</th><th>Recorded By</th><th>Receipt</th></tr>
           </thead>
@@ -245,7 +421,7 @@
               <td class="mono">{{ p.interest_paid|floatformat:0|intcomma }}</td>
               <td><span class="badge badge-muted">{{ p.get_payment_method_display }}</span></td>
               <td class="text-sm text-muted">{{ p.recorded_by.full_name }}</td>
-              <td>{% if p.receipt %}<a href="{% url 'payments:receipt' p.receipt.pk %}" class="btn btn-secondary btn-sm">Receipt</a>{% endif %}</td>
+              <td>{% if p.receipt %}<a href="{% url 'payments:receipt' p.receipt.pk %}" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Receipt</a>{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -259,8 +435,8 @@
     {% if renewals %}
     <div class="card mb-3 print-hide">
       <div class="card-header"><span class="card-title">Renewal History</span></div>
-      <div class="table-wrap">
-        <table class="aba-table">
+      <div class="table-wrap" style="max-width:100%;overflow-x:auto;">
+        <table class="aba-table" style="min-width:420px;">
           <thead>
             <tr><th>Date</th><th>New Loan</th><th>Rolled Over</th><th>Additional</th><th>Reason</th></tr>
           </thead>
@@ -271,7 +447,7 @@
               <td><a href="{% url 'loans:detail' renewal.new_loan.pk %}">{{ renewal.new_loan.loan_number }}</a></td>
               <td class="mono">{{ renewal.outstanding_amount|ugx_plain }}</td>
               <td class="mono">{{ renewal.additional_amount|ugx_plain }}</td>
-              <td>{{ renewal.reason|truncatechars:50 }}</td>
+              <td style="overflow-wrap:break-word;word-break:break-word;max-width:150px;">{{ renewal.reason|truncatechars:50 }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -283,43 +459,42 @@
   </div><!-- left col -->
 
   <!-- Right column — client info -->
-  <div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;">
-      <div class="card mb-3" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+  <div style="min-width:0;max-width:100%;">
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
+      <div class="card mb-3" style="width:100%;max-width:100%;">
         <div class="card-header"><span class="card-title">Client</span></div>
-        <div class="card-body" style="padding:0;">
+        <div class="card-body" style="padding:0;overflow-x:auto;">
         {% with loan.client as c %}
-        <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);overflow-wrap:break-word;word-break:break-word;">
           <div style="font-weight:500;font-size:15px;">{{ c.full_name }}</div>
           <div class="text-muted text-sm">{{ c.client_number }}</div>
         </div>
         {% for label, val in client_rows %}
-        <div class="receipt-row" style="padding:10px 20px;">
-          <span class="receipt-label text-sm">{{ label }}</span>
-          <span class="text-sm">{{ val }}</span>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;">
+          <span class="receipt-label text-sm" style="flex-shrink:0;">{{ label }}</span>
+          <span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;max-width:100%;">{{ val }}</span>
         </div>
         {% empty %}
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Phone</span><span>{{ c.phone_primary }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">NIN</span><span class="mono text-sm">{{ c.nin }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Employment</span><span class="text-sm">{{ c.get_employment_status_display }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Income</span><span class="mono text-sm">{{ c.monthly_income|money }}/mo</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Phone</span><span style="overflow-wrap:break-word;word-break:break-word;">{{ c.phone_primary }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">NIN</span><span class="mono text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ c.nin }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Employment</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ c.get_employment_status_display }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Income</span><span class="mono text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ c.monthly_income|money }}/mo</span></div>
         {% endfor %}
         {% endwith %}
         <div style="padding:12px 20px;">
-          <a href="{% url 'clients:detail' loan.client.pk %}" class="btn btn-secondary btn-sm w-100" style="justify-content:center;">View Full Profile</a>
+          <a href="{% url 'clients:detail' loan.client.pk %}" class="btn btn-secondary btn-sm w-100" style="justify-content:center;display:flex;width:100%;">View Full Profile</a>
         </div>
       </div>
-    </div>
 
-      <div class="card mt-3" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+      <div class="card mt-3" style="width:100%;max-width:100%;">
         <div class="card-header"><span class="card-title">Collateral</span></div>
         {% with loan.collateral_items.all as items %}
         {% if items %}
-        <div class="card-body" style="padding:0;">
+        <div class="card-body" style="padding:0;overflow-x:auto;">
         {% for item in items %}
-        <div style="display:flex;justify-content:space-between;padding:10px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
-          <span class="text-sm">{{ item.description }}</span>
-          <span class="mono text-sm">{{ item.estimated_value|money }}</span>
+        <div style="display:flex;justify-content:space-between;padding:10px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %};flex-wrap:wrap;gap:4px;">
+          <span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;max-width:100%;">{{ item.description }}</span>
+          <span class="mono text-sm" style="flex-shrink:0;">{{ item.estimated_value|money }}</span>
         </div>
         {% endfor %}
       </div>
@@ -329,28 +504,27 @@
       {% endwith %}
       </div>
 
-      <div class="card" style="flex:1 1 260px;min-width:220px;max-width:360px;">
+      <div class="card" style="width:100%;max-width:100%;">
         <div class="card-header"><span class="card-title">Loan Info</span></div>
-        <div class="card-body" style="padding:0;">
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Applied By</span><span class="text-sm">{{ loan.applied_by.full_name|default:"—" }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Reviewed By</span><span class="text-sm">{{ loan.reviewed_by.full_name|default:"—" }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Approved</span><span class="text-sm">{{ loan.approval_date|default:"—" }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Disbursed</span><span class="text-sm">{{ loan.disbursement_date|default:"—" }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;"><span class="receipt-label text-sm">Matures</span><span class="text-sm">{{ loan.maturity_date|default:"—" }}</span></div>
-        <div class="receipt-row" style="padding:10px 20px;border-bottom:none;"><span class="receipt-label text-sm">Total Paid</span><span class="mono" style="color:var(--green-400)">{{ loan.total_paid|money }}</span></div>
+        <div class="card-body" style="padding:0;overflow-x:auto;">
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Applied By</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.applied_by.full_name|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Reviewed By</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.reviewed_by.full_name|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Approved</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.approval_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Disbursed</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.disbursement_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Matures</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.maturity_date|default:"—" }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;border-bottom:none;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Total Paid</span><span class="mono" style="color:var(--green-400);overflow-wrap:break-word;word-break:break-word;">{{ loan.total_paid|money }}</span></div>
 
-        {# Disbursement audit — show up to 3 recent changes #}
-        <div style="border-top:1px dashed var(--border);padding:12px 20px;font-size:13px;">
+        <div style="border-top:1px dashed var(--border);padding:12px 20px;font-size:13px;overflow-x:auto;">
           <div style="font-weight:600;margin-bottom:8px;">Disbursement changes</div>
           {% if recent_disbursement_audits %}
             <ul style="list-style:none;padding:0;margin:0;">
               {% for a in recent_disbursement_audits %}
-              <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);">
-                <div style="min-width:0;">
+              <li style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.03);flex-wrap:wrap;gap:4px;">
+                <div style="min-width:0;max-width:100%;">
                   <div style="font-weight:600;font-size:13px;">{{ a.get_action_display }}</div>
                   <div style="color:var(--text-muted);font-size:12px;">{{ a.changed_by.full_name|default:'System' }} • {{ a.created_at|date:"Y-m-d H:i" }}</div>
-                  <div style="font-size:13px;margin-top:6px;">{{ a.old_disbursement_date|default:'—' }} → {{ a.new_disbursement_date|default:'—' }}</div>
-                  {% if a.reason %}<div style="color:var(--text-muted);font-size:12px;margin-top:6px;">{{ a.reason|truncatechars:80 }}</div>{% endif %}
+                  <div style="font-size:13px;margin-top:6px;overflow-wrap:break-word;word-break:break-word;">{{ a.old_disbursement_date|default:'—' }} → {{ a.new_disbursement_date|default:'—' }}</div>
+                  {% if a.reason %}<div style="color:var(--text-muted);font-size:12px;margin-top:6px;overflow-wrap:break-word;word-break:break-word;">{{ a.reason|truncatechars:80 }}</div>{% endif %}
                 </div>
               </li>
               {% endfor %}
@@ -363,8 +537,8 @@
           {% endif %}
         </div>
       </div>
-    </div>
-  </div>
+    </div><!-- end flex-direction:column wrapper -->
+  </div><!-- end right col -->
 
 </div>
 {% endblock %}

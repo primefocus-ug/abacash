@@ -6,17 +6,41 @@ from decimal import Decimal
 from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.db.models import Sum
 from django.contrib.auth import get_user_model
+from reportlab.lib.units import mm
 
 from accounts.models import Branch, Expense
+from accounts.branch_scope import scope_to_branch, can_access_branch_object
 from loans.models import Loan, LoanSchedule, LoanProduct
 from payments.models import Payment
 from clients.models import Client
+from .pdf_utils import build_report_pdf, p, CELL_BOLD
 
 logger = logging.getLogger("reports")
+
+
+def _ugx(value):
+    return f"UGX {value:,.0f}"
+
+
+def _effective_branch_id(request):
+    """Resolve which branch a report should be scoped to.
+
+    CEO: the page's own ?branch= wins if present; otherwise falls back to
+    the nav switcher's session default; otherwise None (all branches).
+    Everyone else: always their own branch, regardless of any ?branch= in
+    the querystring — a Manager/Cashier can't page-hack their way into
+    another branch's numbers. If they have no branch assigned, -1 is
+    returned (truthy, so scoping still applies) which can never match a
+    real branch's auto-incrementing id — filtering on it safely yields an
+    empty queryset instead of raising on a non-numeric filter value or,
+    worse, silently returning unfiltered (all-branch) data.
+    """
+    from accounts.branch_scope import effective_branch_id
+    return effective_branch_id(request)
 
 
 
@@ -172,6 +196,9 @@ def collections_report(request):
         payment_date__lte=date_to,
         status="ALLOCATED",
     ).select_related("loan__client", "recorded_by").order_by("recorded_by__last_name", "-payment_date")
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        payments = payments.filter(loan__branch_id=branch_id)
 
     by_cashier = defaultdict(list)
     for p in payments:
@@ -207,6 +234,9 @@ def overdue_report(request):
         status__in=["PENDING", "PARTIAL"],
         loan__status="ACTIVE",
     ).select_related("loan__client", "loan__product").order_by("due_date")
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        overdue = overdue.filter(loan__branch_id=branch_id)
 
     # Annotate days overdue
     rows = []
@@ -248,16 +278,21 @@ def income_statement(request):
         status="ALLOCATED",
     )
 
-    total_received  = sum(p.amount_received for p in payments)
-    total_principal = sum(p.principal_paid  for p in payments)
-    total_interest  = sum(p.interest_paid   for p in payments)
-    total_penalties = sum(p.penalty_paid    for p in payments)
-
     # Loans disbursed this month
     disbursed = Loan.objects.filter(
         disbursement_date__gte=period_start,
         disbursement_date__lt=period_end,
     )
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        payments = payments.filter(loan__branch_id=branch_id)
+        disbursed = disbursed.filter(branch_id=branch_id)
+
+    total_received  = sum(p.amount_received for p in payments)
+    total_principal = sum(p.principal_paid  for p in payments)
+    total_interest  = sum(p.interest_paid   for p in payments)
+    total_penalties = sum(p.penalty_paid    for p in payments)
+
     total_disbursed = sum(l.principal_amount for l in disbursed)
 
     return render(request, "reports/income_statement.html", {
@@ -409,6 +444,10 @@ def disbursements_report(request):
     if product_id:
         qs = qs.filter(product_id=product_id)
 
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        qs = qs.filter(branch_id=branch_id)
+
     total_disbursed    = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
     total_interest_exp = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
     total_fees         = qs.aggregate(t=Sum("processing_fee"))["t"] or Decimal("0")
@@ -441,6 +480,10 @@ def repayments_report(request):
 
     if method:
         qs = qs.filter(payment_method=method)
+
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        qs = qs.filter(loan__branch_id=branch_id)
 
     total_received  = qs.aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
     total_principal = qs.aggregate(t=Sum("principal_paid"))["t"] or Decimal("0")
@@ -478,6 +521,11 @@ def defaulted_loans_report(request):
         par_category="PAR90",
     ).select_related("client", "product")
 
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        qs = qs.filter(branch_id=branch_id)
+        par90 = par90.filter(branch_id=branch_id)
+
     total_defaulted   = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
     total_outstanding = qs.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
     total_written_off = qs.filter(status="WRITTEN_OFF").aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
@@ -514,6 +562,10 @@ def closed_loans_report(request):
     if product_id:
         qs = qs.filter(product_id=product_id)
 
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        qs = qs.filter(branch_id=branch_id)
+
     total_principal = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
     total_interest  = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
     total_collected = qs.aggregate(t=Sum("total_paid"))["t"] or Decimal("0")
@@ -535,9 +587,12 @@ def closed_loans_report(request):
 def par_report(request):
     """Portfolio at Risk report — loans with overdue schedule entries."""
     today = date.today()
+    branch_id = _effective_branch_id(request)
 
     def _par_loans(days_min, days_max=None):
         qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
+        if branch_id:
+            qs = qs.filter(branch_id=branch_id)
         qs = qs.filter(
             schedule__due_date__lt=today,
             schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
@@ -572,7 +627,10 @@ def par_report(request):
 
     active_portfolio = Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"]
-    ).aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("1")
+    )
+    if branch_id:
+        active_portfolio = active_portfolio.filter(branch_id=branch_id)
+    active_portfolio = active_portfolio.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("1")
 
     def _total(rows):
         return sum(r["overdue_amount"] for r in rows)
@@ -605,11 +663,14 @@ def client_statement(request):
     loans     = []
     payments  = []
 
-    all_clients = Client.objects.filter(is_active=True).order_by("last_name", "first_name")
+    all_clients = scope_to_branch(Client.objects.filter(is_active=True), request.user).order_by("last_name", "first_name")
 
     if client_id:
         from django.shortcuts import get_object_or_404
         client   = get_object_or_404(Client, pk=client_id)
+        if not can_access_branch_object(request.user, client):
+            messages.error(request, "That client belongs to a different branch.")
+            return redirect("reports:client_statement")
         loans    = Loan.objects.filter(client=client).select_related("product").order_by("-application_date")
         payments = Payment.objects.filter(client=client).select_related("loan").order_by("-payment_date")
 
@@ -628,7 +689,7 @@ def staff_performance_report(request):
     today = date.today()
     date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
     date_to = request.GET.get("date_to", today.isoformat())
-    branch_id = request.GET.get("branch", "")
+    branch_id = _effective_branch_id(request)
     role = request.GET.get("role", "")
     staff_id = request.GET.get("staff", "")
 
@@ -683,7 +744,7 @@ def staff_performance_report(request):
             applied_by=user,
             status__in=[Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED],
             schedule__due_date__lt=today,
-            schedule__status__in=[Loan.Status.ACTIVE, "PENDING", "OVERDUE", "PARTIAL"],
+            schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
         ).distinct()
         if branch_id:
             overdue_loans = overdue_loans.filter(branch_id=branch_id)
@@ -732,39 +793,12 @@ def staff_performance_report(request):
         "date_to": date_to,
         "today": today,
         "branches": branches,
-        "selected_branch": branch_id,
+        "selected_branch": str(branch_id) if branch_id and branch_id != -1 else "",
         "roles": roles,
         "selected_role": role,
         "staff_members": all_staff,
         "selected_staff": staff_id,
     })
-
-"""
-views_additions.py
-===================
-Append everything below to the bottom of reports/views.py.
-
-Also add this import near the top of reports/views.py, with the other imports:
-
-    from reportlab.lib.units import mm
-    from .pdf_utils import build_report_pdf, p
-
-(You can remove the inline `from reportlab...` imports inside loan_book_download
-if you want — they still work fine left as-is, this just avoids duplicate imports.)
-
-Every function below mirrors the exact filtering logic already used by its
-matching page view (collections_report, overdue_report, etc.) so the PDF
-always matches what's on screen for the same querystring filters.
-"""
-
-from django.shortcuts import get_object_or_404
-from reportlab.lib.units import mm
-from .pdf_utils import build_report_pdf, p, CELL_BOLD
-
-
-def _ugx(value):
-    return f"UGX {value:,.0f}"
-
 
 # ---------------------------------------------------------------------------
 # Collections by Cashier
@@ -1322,7 +1356,7 @@ def staff_performance_download(request):
     today = date.today()
     date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
     date_to = request.GET.get("date_to", today.isoformat())
-    branch_id = request.GET.get("branch", "")
+    branch_id = _effective_branch_id(request)
     role = request.GET.get("role", "")
     staff_id = request.GET.get("staff", "")
 

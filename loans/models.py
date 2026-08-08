@@ -42,8 +42,6 @@ from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from django.db import transaction
-
 
 class LoanProduct(models.Model):
     """
@@ -344,6 +342,13 @@ class Loan(models.Model):
     total_penalties      = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
     total_fees           = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
     processing_fee       = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
+    processing_fee_manually_set = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True, processing_fee was set on purpose (e.g. waived to 0) and "
+            "must not be recalculated automatically on save."
+        ),
+    )
 
     # ------------------------------------------------------------------ #
     # Dates                                                                #
@@ -402,6 +407,18 @@ class Loan(models.Model):
         related_name="written_off_loans",
     )
 
+    # Reinstatement details (a written-off loan that's been revived after
+    # a settlement/agreement with the client). The write-off fields above
+    # are deliberately left in place as history when this happens.
+    reinstated_at = models.DateTimeField(null=True, blank=True)
+    reinstated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="reinstated_loans",
+    )
+    reinstatement_reason = models.TextField(blank=True)
+
     # Risk classification
     risk_rating = models.CharField(
         max_length=15,
@@ -442,11 +459,11 @@ class Loan(models.Model):
 
     def _generate_loan_number(self, year: int) -> str:
         """Generate a unique loan number for the given year using a locked sequence."""
-        for _ in range(100):
+        for _attempt in range(100):
             try:
                 with transaction.atomic():
                     seq_name = f"loan_number_{year}"
-                    seq, _ = LoanSequence.objects.select_for_update().get_or_create(
+                    seq, _created = LoanSequence.objects.select_for_update().get_or_create(
                         name=seq_name,
                         defaults={"last": 0},
                     )
@@ -474,14 +491,14 @@ class Loan(models.Model):
 
     def save(self, *args, **kwargs):
         """Auto-generate loan_number and core_id before first save."""
-        for _ in range(100):
+        for _attempt in range(100):
             if not self.loan_number:
                 year = timezone.now().year
                 self.loan_number = self._generate_loan_number(year)
 
             if not self.core_id:
                 with transaction.atomic():
-                    seq, _ = LoanSequence.objects.select_for_update().get_or_create(
+                    seq, _created = LoanSequence.objects.select_for_update().get_or_create(
                         name="loans",
                         defaults={"last": 0},
                     )
@@ -490,8 +507,14 @@ class Loan(models.Model):
                     self.core_id = f"LN{seq.last:08d}"
 
             # Compute processing fee from CompanySettings (primary source) if not
-            # already set by the view layer.
-            if self.processing_fee == Decimal("0") and self.product_id and self.principal_amount:
+            # already set by the view layer, and not intentionally overridden
+            # (e.g. waived to 0) via processing_fee_manually_set.
+            if (
+                not self.processing_fee_manually_set
+                and self.processing_fee == Decimal("0")
+                and self.product_id
+                and self.principal_amount
+            ):
                 try:
                     from loans.utils import calculate_processing_fee_amount
                     self.processing_fee = calculate_processing_fee_amount(
@@ -1051,6 +1074,14 @@ class LoanSchedule(models.Model):
         choices=Status.choices,
         default=Status.PENDING,
         db_index=True,
+    )
+    waived_by_writeoff = models.BooleanField(
+        default=False,
+        help_text=_(
+            "True if this entry was moved to WAIVED specifically by a loan "
+            "write-off (not an independent fee waiver). Lets reinstate() "
+            "restore exactly the entries it touched, and no others."
+        ),
     )
 
     # For tracking which payment covered this

@@ -10,12 +10,12 @@
 
 {% block content %}
 <div class="card">
-  <div class="card-header" style="flex-wrap:wrap;gap:12px;">
-    <div style="flex:1;min-width:160px;">
+  <div class="card-header card-header-content">
+    <div class="card-header-title" style="flex:1;min-width:160px;">
       <div class="card-title">Loans Disbursed</div>
       <div class="text-sm text-muted">{{ date_from }} — {{ date_to }}</div>
     </div>
-    <form method="get" class="filter-bar-single-row print-hide" style="gap:8px;flex-wrap:wrap;">
+    <form method="get" class="filter-bar-single-row print-hide" style="gap:8px;">
       <div class="filter-field"><input type="date" name="date_from" value="{{ date_from }}"></div>
       <div class="filter-field"><input type="date" name="date_to"   value="{{ date_to }}"></div>
       <div class="filter-field">
@@ -30,7 +30,7 @@
   </div>
 
   <div class="card-body" style="padding:0;">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 20px;">
+    <div class="metrics-grid" style="padding:16px 20px;margin-bottom:0;">
       <div class="metric-card teal"><div class="metric-label">Loans Disbursed</div><div class="metric-value teal">{{ loan_count }}</div></div>
       <div class="metric-card green"><div class="metric-label">Total Principal ({% currency_symbol %})</div><div class="metric-value green">{{ total_disbursed|ugx_plain }}</div></div>
       <div class="metric-card blue"><div class="metric-label">Expected Interest</div><div class="metric-value">{{ total_interest_exp|floatformat:0|intcomma }}</div></div>

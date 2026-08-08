@@ -1,0 +1,870 @@
+{% extends "platform_admin/base_admin.html" %}
+{% load static %}
+
+{% block title %}Platform Admin Dashboard — Abacash{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --dash-bg: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+    --dash-surface: var(--surface);
+    --dash-border: var(--border);
+    --dash-text-primary: var(--text-primary);
+    --dash-text-secondary: var(--text-secondary);
+    --dash-text-muted: var(--text-muted);
+    --dash-accent: #3B82F6;
+    --dash-success: #10B981;
+    --dash-danger: #EF4444;
+    --dash-warning: #F59E0B;
+    --dash-purple: #8B5CF6;
+    --dash-radius: 12px;
+    --dash-transition: 0.25s ease;
+    --dash-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="dark"] {
+    --dash-bg: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+    --dash-surface: #111827;
+    --dash-border: #334155;
+    --dash-text-primary: #F8FAFC;
+    --dash-text-secondary: #94A3B8;
+    --dash-text-muted: #64748B;
+    --dash-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .dash-page {
+    min-height: 100vh;
+    background: var(--dash-bg);
+    transition: background var(--dash-transition);
+    padding: 24px;
+  }
+
+  .dash-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .dash-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--dash-text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+    transition: color var(--dash-transition);
+  }
+
+  .dash-header .subtitle {
+    font-size: 14px;
+    color: var(--dash-text-muted);
+    transition: color var(--dash-transition);
+  }
+
+  .dash-header-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dash-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--dash-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dash-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .dash-btn:active {
+    transform: scale(0.97);
+  }
+
+  .dash-btn-primary {
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .dash-btn-primary:hover {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+    color: #fff;
+  }
+
+  .dash-btn-outline {
+    background: transparent;
+    color: var(--dash-text-secondary);
+    border: 1px solid var(--dash-border);
+  }
+
+  .dash-btn-outline:hover {
+    background: var(--dash-surface);
+    color: var(--dash-text-primary);
+  }
+
+  /* Stats Grid */
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .dash-stat {
+    background: var(--dash-surface);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius);
+    padding: 20px 24px;
+    transition: background var(--dash-transition), border-color var(--dash-transition), box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .dash-stat.blue::before { background: var(--dash-accent); }
+  .dash-stat.green::before { background: var(--dash-success); }
+  .dash-stat.red::before { background: var(--dash-danger); }
+  .dash-stat.purple::before { background: var(--dash-purple); }
+  .dash-stat.amber::before { background: var(--dash-warning); }
+
+  .dash-stat:hover {
+    box-shadow: var(--dash-shadow);
+  }
+
+  .dash-stat .label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dash-text-muted);
+    transition: color var(--dash-transition);
+  }
+
+  .dash-stat .value {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--dash-text-primary);
+    margin-top: 4px;
+    transition: color var(--dash-transition);
+  }
+
+  .dash-stat .value.blue { color: var(--dash-accent); }
+  .dash-stat .value.green { color: var(--dash-success); }
+  .dash-stat .value.red { color: var(--dash-danger); }
+  .dash-stat .value.purple { color: var(--dash-purple); }
+  .dash-stat .value.amber { color: var(--dash-warning); }
+
+  .dash-stat .sub {
+    font-size: 12px;
+    color: var(--dash-text-muted);
+    margin-top: 6px;
+    transition: color var(--dash-transition);
+  }
+
+  /* Grid Layout */
+  .dash-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .dash-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .dash-card {
+    background: var(--dash-surface);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius);
+    overflow: hidden;
+    transition: background var(--dash-transition), border-color var(--dash-transition);
+  }
+
+  .dash-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dash-border);
+    background: var(--dash-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: background var(--dash-transition), border-color var(--dash-transition);
+  }
+
+  .dash-card-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dash-text-primary);
+    transition: color var(--dash-transition);
+  }
+
+  .dash-card-header h2 i {
+    margin-right: 6px;
+    color: var(--dash-text-muted);
+  }
+
+  .dash-card-header .badge-count {
+    font-size: 12px;
+    color: var(--dash-text-muted);
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--dash-surface);
+    border: 1px solid var(--dash-border);
+    transition: color var(--dash-transition), background var(--dash-transition), border-color var(--dash-transition);
+  }
+
+  .dash-card-body {
+    padding: 16px 20px;
+    transition: background var(--dash-transition);
+  }
+
+  /* List Items */
+  .dash-list-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--dash-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: border-color var(--dash-transition);
+  }
+
+  .dash-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .dash-list-item .name {
+    font-weight: 500;
+    color: var(--dash-text-primary);
+    transition: color var(--dash-transition);
+  }
+
+  .dash-list-item .name a {
+    color: var(--dash-text-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .dash-list-item .name a:hover {
+    color: var(--dash-accent);
+  }
+
+  .dash-list-item .meta {
+    font-size: 12px;
+    color: var(--dash-text-muted);
+    transition: color var(--dash-transition);
+  }
+
+  .dash-list-item .meta i {
+    margin-right: 3px;
+    font-size: 10px;
+  }
+
+  .dash-list-item .right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .dash-status-badge {
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .dash-status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+  }
+
+  .dash-status-badge.suspended {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .dash-status-badge.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+  }
+
+  .dash-status-badge.ready {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3B82F6;
+  }
+
+  .dash-status-badge.failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+
+  .dash-status-badge.running {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+  }
+
+  /* Plan Breakdown */
+  .plan-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  .plan-bar .plan-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dash-text-secondary);
+    min-width: 100px;
+    transition: color var(--dash-transition);
+  }
+
+  .plan-bar .plan-label i {
+    margin-right: 6px;
+    font-size: 12px;
+  }
+
+  .plan-bar .plan-track {
+    flex: 1;
+    height: 8px;
+    background: var(--dash-border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: background var(--dash-transition);
+  }
+
+  .plan-bar .plan-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  .plan-bar .plan-fill.starter { background: #94A3B8; }
+  .plan-bar .plan-fill.professional { background: #3B82F6; }
+  .plan-bar .plan-fill.enterprise { background: #8B5CF6; }
+
+  .plan-bar .plan-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dash-text-primary);
+    min-width: 30px;
+    text-align: right;
+    transition: color var(--dash-transition);
+  }
+
+  /* Empty State */
+  .dash-empty {
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--dash-text-muted);
+    font-size: 14px;
+    transition: color var(--dash-transition);
+  }
+
+  .dash-empty .icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  .dash-empty i {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  /* Quick Actions */
+  .dash-action-btn {
+    padding: 10px 16px;
+    border-radius: var(--dash-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    border: none;
+  }
+
+  .dash-action-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .dash-action-btn:active {
+    transform: scale(0.97);
+  }
+
+  .dash-action-btn i {
+    font-size: 14px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .dash-grid-2 {
+      grid-template-columns: 1fr;
+    }
+    .dash-grid-3 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dash-page {
+      padding: 16px;
+    }
+
+    .dash-header h1 {
+      font-size: 22px;
+    }
+
+    .dash-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .dash-stat {
+      padding: 14px 16px;
+    }
+
+    .dash-stat .value {
+      font-size: 22px;
+    }
+
+    .dash-grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .dash-card-header {
+      padding: 12px 16px;
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .dash-card-body {
+      padding: 12px 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dash-page {
+      padding: 10px;
+    }
+
+    .dash-stats {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .dash-stat {
+      padding: 12px 14px;
+    }
+
+    .dash-stat .value {
+      font-size: 18px;
+    }
+
+    .dash-stat .label {
+      font-size: 10px;
+    }
+
+    .dash-header {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .dash-header-actions {
+      justify-content: center;
+    }
+
+    .dash-list-item {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+      gap: 4px;
+    }
+
+    .dash-list-item .right {
+      text-align: center;
+    }
+
+    .plan-bar {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .plan-bar .plan-label {
+      min-width: 80px;
+      font-size: 12px;
+    }
+
+    .plan-bar .plan-count {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .dash-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .dash-stat .value {
+      font-size: 20px;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .dash-page {
+      padding: 20px !important;
+      background: #fff !important;
+    }
+    .dash-card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+    .dash-btn,
+    .dash-header-actions {
+      display: none !important;
+    }
+    .dash-stat {
+      border: 1px solid #ddd !important;
+    }
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dash-stat {
+    animation: fadeInUp 0.4s ease both;
+  }
+
+  .dash-stat:nth-child(1) { animation-delay: 0.05s; }
+  .dash-stat:nth-child(2) { animation-delay: 0.10s; }
+  .dash-stat:nth-child(3) { animation-delay: 0.15s; }
+  .dash-stat:nth-child(4) { animation-delay: 0.20s; }
+  .dash-stat:nth-child(5) { animation-delay: 0.25s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-stat {
+      animation: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-page">
+  <div class="dash-container">
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <h1><i class="fas fa-chart-pie" style="color:var(--dash-accent);margin-right:8px;"></i>Platform Dashboard</h1>
+        <div class="subtitle"><i class="fas fa-globe" style="margin-right:4px;"></i>Overview of all tenants and system health</div>
+      </div>
+      <div class="dash-header-actions">
+        <a href="{% url 'platform_admin:company_list' %}" class="dash-btn dash-btn-primary">
+          <i class="fas fa-building"></i> View All Companies
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="dash-stats">
+      <div class="dash-stat blue">
+        <div class="label"><i class="fas fa-building"></i> Total Companies</div>
+        <div class="value blue">{{ total_companies }}</div>
+        <div class="sub"><i class="fas fa-layer-group"></i> Across all plans</div>
+      </div>
+      <div class="dash-stat green">
+        <div class="label"><i class="fas fa-check-circle"></i> Active</div>
+        <div class="value green">{{ active_companies }}</div>
+        <div class="sub"><i class="fas fa-calendar-plus"></i> {{ new_this_month }} new this month</div>
+      </div>
+      <div class="dash-stat red">
+        <div class="label"><i class="fas fa-ban"></i> Suspended</div>
+        <div class="value red">{{ suspended_companies }}</div>
+        <div class="sub"><i class="fas fa-clock"></i> Inactive tenants</div>
+      </div>
+      <div class="dash-stat purple">
+        <div class="label"><i class="fas fa-sync-alt"></i> Provisioning</div>
+        <div class="value purple">{{ in_progress_count }}</div>
+        <div class="sub"><i class="fas fa-exclamation-triangle"></i> {{ failed_count }} failed</div>
+      </div>
+      <div class="dash-stat amber">
+        <div class="label"><i class="fas fa-hourglass-half"></i> Pending Leads</div>
+        <div class="value amber">{{ pending_lead_count }}</div>
+        <div class="sub"><i class="fas fa-users"></i> Awaiting onboarding</div>
+      </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="dash-grid-2">
+      <!-- Recent Companies -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2><i class="fas fa-history"></i> Recent Companies</h2>
+          <span class="badge-count"><i class="fas fa-clock"></i> {{ recent_companies|length }} latest</span>
+        </div>
+        <div class="dash-card-body">
+          {% if recent_companies %}
+            {% for company in recent_companies %}
+            <div class="dash-list-item">
+              <div>
+                <div class="name">
+                  <a href="{% url 'platform_admin:company_detail' company.schema_name %}">
+                    <i class="fas fa-building" style="font-size:12px;color:var(--dash-text-muted);margin-right:4px;"></i>
+                    {{ company.name }}
+                  </a>
+                </div>
+                <div class="meta">
+                  <i class="fas fa-database"></i> {{ company.schema_name }} <i class="fas fa-calendar-alt" style="margin-left:8px;"></i> {{ company.created_on|date:"Y-m-d" }}
+                </div>
+              </div>
+              <div class="right">
+                <span class="dash-status-badge {% if company.is_active %}active{% else %}suspended{% endif %}">
+                  <i class="fas {% if company.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                  {% if company.is_active %}Active{% else %}Suspended{% endif %}
+                </span>
+                <span class="dash-status-badge {% if company.provisioning_status == 'READY' %}ready{% elif company.provisioning_status == 'RUNNING' %}running{% elif company.provisioning_status == 'FAILED' %}failed{% else %}pending{% endif %}">
+                  <i class="fas {% if company.provisioning_status == 'READY' %}fa-check-circle{% elif company.provisioning_status == 'RUNNING' %}fa-spinner fa-spin{% elif company.provisioning_status == 'FAILED' %}fa-times-circle{% else %}fa-clock{% endif %}"></i>
+                  {{ company.get_provisioning_status_display }}
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="dash-empty">
+              <i class="fas fa-inbox"></i>
+              No companies created yet.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Plan Breakdown -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2><i class="fas fa-chart-bar"></i> Plan Breakdown</h2>
+          <span class="badge-count"><i class="fas fa-list"></i> {{ plan_breakdown|length }} plans</span>
+        </div>
+        <div class="dash-card-body">
+          {% if plan_breakdown %}
+            {% with total=total_companies|default:1 %}
+              {% for item in plan_breakdown %}
+              <div class="plan-bar">
+                <span class="plan-label">
+                  <i class="fas {% if item.plan == 'starter' %}fa-seedling{% elif item.plan == 'professional' %}fa-rocket{% elif item.plan == 'enterprise' %}fa-crown{% else %}fa-tag{% endif %}"></i>
+                  {{ item.plan|title }}
+                </span>
+                <div class="plan-track">
+                  <div class="plan-fill {{ item.plan|lower }}" style="width: {% widthratio item.count total 100 %}%;"></div>
+                </div>
+                <span class="plan-count">{{ item.count }}</span>
+              </div>
+              {% endfor %}
+            {% endwith %}
+          {% else %}
+            <div class="dash-empty">
+              <i class="fas fa-chart-pie"></i>
+              No plan data available.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Three Column Layout -->
+    <div class="dash-grid-3">
+      <!-- Failed Provisioning -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2><i class="fas fa-exclamation-circle" style="color:var(--dash-danger);"></i> Failed Provisioning</h2>
+          <span class="badge-count">{{ failed_provisioning|length }}</span>
+        </div>
+        <div class="dash-card-body">
+          {% if failed_provisioning %}
+            {% for company in failed_provisioning %}
+            <div class="dash-list-item">
+              <div>
+                <div class="name">
+                  <a href="{% url 'platform_admin:company_detail' company.schema_name %}">
+                    <i class="fas fa-exclamation-triangle" style="color:var(--dash-danger);font-size:12px;margin-right:4px;"></i>
+                    {{ company.name }}
+                  </a>
+                </div>
+                <div class="meta">
+                  <i class="fas fa-database"></i> {{ company.schema_name }} <i class="fas fa-calendar-alt" style="margin-left:8px;"></i> {{ company.provisioning_started_at|date:"Y-m-d" }}
+                </div>
+              </div>
+              <div class="right">
+                <span class="dash-status-badge failed">
+                  <i class="fas fa-times-circle"></i> Failed
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="dash-empty">
+              <i class="fas fa-check-circle" style="color:var(--dash-success);"></i>
+              No failed provisioning jobs.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Pending Leads -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2><i class="fas fa-clipboard-list" style="color:var(--dash-warning);"></i> Pending Leads</h2>
+          <span class="badge-count">{{ pending_lead_count }}</span>
+        </div>
+        <div class="dash-card-body">
+          {% if pending_leads %}
+            {% for lead in pending_leads %}
+            <div class="dash-list-item">
+              <div>
+                <div class="name">
+                  <i class="fas fa-user" style="font-size:12px;color:var(--dash-text-muted);margin-right:4px;"></i>
+                  {{ lead.company_name }}
+                </div>
+                <div class="meta">
+                  <i class="fas fa-user-tie"></i> {{ lead.contact_name }} <i class="fas fa-envelope" style="margin-left:8px;"></i> {{ lead.email }}
+                </div>
+              </div>
+              <div class="right">
+                <span class="dash-status-badge pending">
+                  <i class="fas fa-hourglass-half"></i> {{ lead.get_plan_display }}
+                </span>
+                <div class="meta"><i class="fas fa-calendar-alt"></i> {{ lead.submitted_at|date:"Y-m-d" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="dash-empty">
+              <i class="fas fa-check-double" style="color:var(--dash-success);"></i>
+              No pending leads.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2><i class="fas fa-bolt" style="color:var(--dash-accent);"></i> Quick Actions</h2>
+          <span class="badge-count"><i class="fas fa-tools"></i> Tools</span>
+        </div>
+        <div class="dash-card-body" style="display:flex;flex-direction:column;gap:12px;">
+          <a href="{% url 'tenants:public_register' %}" class="dash-action-btn" style="background:var(--dash-accent);color:#fff;">
+            <i class="fas fa-plus-circle"></i> Register New Company
+          </a>
+          <a href="{% url 'platform_admin:company_list' %}" class="dash-action-btn" style="background:var(--dash-surface);color:var(--dash-text-primary);border:1px solid var(--dash-border);">
+            <i class="fas fa-list"></i> View All Companies
+          </a>
+          <div style="margin-top:8px;padding-top:12px;border-top:1px solid var(--dash-border);font-size:12px;color:var(--dash-text-muted);text-align:center;">
+            <i class="fas fa-clock"></i> Last updated: {% now "Y-m-d H:i:s" %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top:28px;text-align:center;font-size:12px;color:var(--dash-text-muted);">
+      <i class="fas fa-cube"></i> Abacash Platform Admin v2.0
+      <span style="margin:0 8px;">•</span>
+      <i class="fas fa-users"></i> Total tenants: {{ total_companies }}
+      <span style="margin:0 8px;">•</span>
+      <a href="{% url 'tenants:landing' %}" style="color:var(--dash-text-muted);text-decoration:none;">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function() {
+    'use strict';
+
+    // Auto-refresh stats every 30 seconds (optional)
+    // Uncomment to enable:
+    /*
+    setInterval(function() {
+      fetch(window.location.href, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.text())
+      .then(html => {
+        // Update stats selectively
+      })
+      .catch(console.warn);
+    }, 30000);
+    */
+
+    // Animate plan bars on load
+    document.addEventListener('DOMContentLoaded', function() {
+      var fills = document.querySelectorAll('.plan-fill');
+      fills.forEach(function(fill) {
+        var width = fill.style.width;
+        fill.style.width = '0%';
+        setTimeout(function() {
+          fill.style.width = width;
+        }, 100);
+      });
+    });
+
+    // Log dashboard load
+    console.log('Platform Admin Dashboard loaded.');
+
+  })();
+</script>
+{% endblock %}

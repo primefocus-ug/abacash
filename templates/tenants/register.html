@@ -1,161 +1,721 @@
-{% extends "tenants/landing_base.html" %}
+{% extends "base_public.html" %}
+{% load static %}
 
-{% block title %}Register | Abacash{% endblock %}
+{% block title %}Register — Abacash{% endblock %}
 
-{% block content %}
-  <section class="hero">
-    <div class="eyebrow">Register</div>
-    <h1 class="hero-title">Apply for your Abacash account.</h1>
-    <p class="hero-copy">Share your details below so we can onboard your lending team with secure access and support.</p>
-  </section>
+{% block extra_head %}
+<style>
+  :root {
+    --register-bg: linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%);
+    --register-card-bg: var(--surface);
+    --register-card-border: var(--border);
+    --register-text-primary: var(--text-primary);
+    --register-text-secondary: var(--text-secondary);
+    --register-text-muted: var(--text-muted);
+    --register-input-bg: var(--surface-2);
+    --register-input-border: var(--border);
+    --register-input-focus: #3B82F6;
+    --register-btn-bg: linear-gradient(135deg, #3B82F6, #2DD4BF);
+    --register-btn-hover: linear-gradient(135deg, #60A5FA, #34D399);
+    --register-error-color: #dc2626;
+    --register-success-color: #059669;
+    --register-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+    --register-radius: 16px;
+    --register-transition: 0.25s ease;
+  }
+
+  [data-theme="dark"] {
+    --register-bg: linear-gradient(135deg, #020617 0%, #0F172A 100%);
+    --register-card-bg: #111827;
+    --register-card-border: #334155;
+    --register-text-primary: #F8FAFC;
+    --register-text-secondary: #94A3B8;
+    --register-text-muted: #64748B;
+    --register-input-bg: #1E293B;
+    --register-input-border: #334155;
+    --register-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    --register-error-color: #F87171;
+    --register-success-color: #34D399;
+  }
+
+  .register-page {
+    min-height: 100vh;
+    padding: 40px 20px 60px;
+    background: var(--register-bg);
+    transition: background var(--register-transition);
+  }
+
+  .register-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .register-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .register-header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--register-text-primary);
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+    transition: color var(--register-transition);
+  }
+
+  .register-header p {
+    font-size: 16px;
+    color: var(--register-text-secondary);
+    margin: 0;
+    transition: color var(--register-transition);
+  }
+
+  .register-card {
+    background: var(--register-card-bg);
+    border-radius: var(--register-radius);
+    padding: 40px 44px;
+    box-shadow: var(--register-shadow);
+    border: 1px solid var(--register-card-border);
+    transition: background var(--register-transition), border-color var(--register-transition), box-shadow var(--register-transition);
+  }
+
+  .register-message {
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 24px;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .register-message.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    color: var(--register-success-color);
+  }
+
+  .register-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--register-error-color);
+  }
+
+  .register-message svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    stroke: currentColor;
+  }
+
+  .register-form-group {
+    margin-bottom: 18px;
+  }
+
+  .register-form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--register-text-secondary);
+    margin-bottom: 5px;
+    transition: color var(--register-transition);
+  }
+
+  .register-form-group label .required {
+    color: var(--register-error-color);
+    margin-left: 2px;
+  }
+
+  .register-form-group input,
+  .register-form-group select,
+  .register-form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--register-input-border);
+    border-radius: var(--radius-sm);
+    background: var(--register-input-bg);
+    color: var(--register-text-primary);
+    font-size: 14px;
+    font-family: var(--font-body);
+    transition: border-color 0.2s, box-shadow 0.2s, background var(--register-transition), color var(--register-transition);
+    outline: none;
+  }
+
+  .register-form-group input:focus,
+  .register-form-group select:focus,
+  .register-form-group textarea:focus {
+    border-color: var(--register-input-focus);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
+  }
+
+  .register-form-group input.error,
+  .register-form-group select.error,
+  .register-form-group textarea.error {
+    border-color: var(--register-error-color);
+  }
+
+  .register-form-group input::placeholder,
+  .register-form-group textarea::placeholder {
+    color: var(--register-text-muted);
+    opacity: 0.7;
+  }
+
+  .register-form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+  }
+
+  .register-form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .register-field-error {
+    font-size: 12px;
+    color: var(--register-error-color);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .register-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .register-security-box {
+    background: var(--register-input-bg);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--register-text-secondary);
+    border: 1px solid var(--register-input-border);
+    transition: background var(--register-transition), border-color var(--register-transition), color var(--register-transition);
+  }
+
+  .register-security-box strong {
+    color: var(--register-text-primary);
+  }
+
+  .register-security-box .icon {
+    font-size: 18px;
+    margin-right: 8px;
+  }
+
+  .register-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--register-btn-bg);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.25s, background 0.3s;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .register-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 36px rgba(37, 99, 235, 0.3);
+    background: var(--register-btn-hover);
+  }
+
+  .register-btn:active {
+    transform: scale(0.97);
+  }
+
+  .register-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .register-btn .spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .register-btn.loading .spinner {
+    display: inline-block;
+  }
+
+  .register-btn.loading .btn-text {
+    display: none;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .register-footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--register-text-muted);
+    transition: color var(--register-transition);
+  }
+
+  .register-footer a {
+    color: var(--register-input-focus);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .register-footer a:hover {
+    color: var(--register-input-focus);
+    text-decoration: underline;
+  }
+
+  .register-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+    text-align: center;
+  }
+
+  .register-feature {
+    font-size: 12px;
+    color: var(--register-text-muted);
+    transition: color var(--register-transition);
+  }
+
+  .register-feature .emoji {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .register-card {
+      padding: 28px 24px;
+    }
+
+    .register-header h1 {
+      font-size: 26px;
+    }
+
+    .register-header p {
+      font-size: 15px;
+    }
+
+    .register-grid-2 {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .register-page {
+      padding: 20px 12px 40px;
+    }
+
+    .register-card {
+      padding: 20px 16px;
+      border-radius: 12px;
+    }
+
+    .register-header h1 {
+      font-size: 22px;
+    }
+
+    .register-header p {
+      font-size: 14px;
+    }
+
+    .register-form-group input,
+    .register-form-group select,
+    .register-form-group textarea {
+      padding: 9px 12px;
+      font-size: 13px;
+    }
+
+    .register-btn {
+      padding: 11px;
+      font-size: 15px;
+    }
+
+    .register-features {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .register-features .register-feature {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .register-features .register-feature .emoji {
+      font-size: 18px;
+      display: inline;
+    }
+
+    .register-security-box {
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .register-card {
+      padding: 16px 12px;
+    }
+
+    .register-header h1 {
+      font-size: 19px;
+    }
+
+    .register-form-group label {
+      font-size: 12px;
+    }
+
+    .register-form-group input,
+    .register-form-group select,
+    .register-form-group textarea {
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .register-btn {
+      transition: none;
+    }
+    .register-btn:hover {
+      transform: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(0deg); }
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .register-page {
+      padding: 20px !important;
+      background: #fff !important;
+    }
+    .register-card {
+      box-shadow: none !important;
+      border: 1px solid #ddd !important;
+    }
+    .register-btn {
+      display: none !important;
+    }
+    .register-features {
+      display: none !important;
+    }
+  }
+</style>
 {% endblock %}
 
-{% block popup_content %}
-  <style>
-    .slug-inline { display: flex; gap: 0.6rem; align-items: center; }
-    .slug-inline input { flex: 1; }
-    .btn-sm { padding: 0.65rem 0.95rem; font-size: 0.9rem; }
-    .suggestion-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.45rem;
-      padding: 0.45rem 0.7rem;
-      border-radius: 999px;
-      background: rgba(37, 99, 235, 0.08);
-      color: var(--accent);
-      font-size: 0.9rem;
-      width: fit-content;
-    }
-  </style>
+{% block content %}
+<div class="register-page">
+  <div class="register-container">
+    <div class="register-header">
+      <h1>Get Started with Abacash</h1>
+      <p>Start your loan management journey today — it takes less than 2 minutes.</p>
+    </div>
 
-  <div class="popup-panel">
-    <span class="eyebrow">Register</span>
-    <h2 id="popup-title">Start your Abacash onboarding</h2>
-    <p class="hero-copy">Complete the secure registration popup and get an onboarding specialist to reach out within 24 hours.</p>
-
-    {% if messages %}
-      <div class="page-link-list" style="margin-bottom: 1rem;">
+    <div class="register-card">
+      {% if messages %}
         {% for message in messages %}
-          <div class="page-link-item" style="border-left-color: var(--accent); background: rgba(96, 165, 250, 0.08);">
-            <div>
-              <strong>{{ message.tags|default:"Notice"|title }}</strong>
-              <p style="margin-top:0.4rem; color: var(--text-secondary);">{{ message }}</p>
-            </div>
-          </div>
+        <div class="register-message {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            {% if message.tags == 'success' %}
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            {% else %}
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            {% endif %}
+          </svg>
+          <span>{{ message }}</span>
+        </div>
         {% endfor %}
-      </div>
-    {% endif %}
+      {% endif %}
 
-    <form method="POST" action="{% url 'tenants:public_register' %}" class="popup-form">
-      {% csrf_token %}
-      <div class="form-grid">
-        <div class="form-group">
+      <form method="post" id="register-form" novalidate>
+        {% csrf_token %}
+
+        <div class="register-form-group">
           <label for="company_name">Company Name <span class="required">*</span></label>
-          <input id="company_name" name="company_name" type="text" required value="{{ form_data.company_name }}" placeholder="Your organization name">
-          {% if errors.company_name %}<div class="error-text">{{ errors.company_name }}</div>{% endif %}
-        </div>
-        <div class="form-group">
-          <label for="contact_name">Contact Person <span class="required">*</span></label>
-          <input id="contact_name" name="contact_name" type="text" required value="{{ form_data.contact_name }}" placeholder="Your full name">
-          {% if errors.contact_name %}<div class="error-text">{{ errors.contact_name }}</div>{% endif %}
-        </div>
-        <div class="form-group">
-          <label for="email">Email Address <span class="required">*</span></label>
-          <input id="email" name="email" type="email" required value="{{ form_data.email }}" placeholder="your@email.com">
-          {% if errors.email %}<div class="error-text">{{ errors.email }}</div>{% endif %}
-        </div>
-        <div class="form-group">
-          <label for="phone">Phone Number <span class="required">*</span></label>
-          <input id="phone" name="phone" type="tel" required value="{{ form_data.phone }}" placeholder="+256...">
-          {% if errors.phone %}<div class="error-text">{{ errors.phone }}</div>{% endif %}
-        </div>
-        <div class="form-group">
-          <label for="country">Country</label>
-          <select id="country" name="country">
-            <option value="Uganda" {% if form_data.country == 'Uganda' %}selected{% endif %}>Uganda</option>
-            <option value="Kenya" {% if form_data.country == 'Kenya' %}selected{% endif %}>Kenya</option>
-            <option value="Tanzania" {% if form_data.country == 'Tanzania' %}selected{% endif %}>Tanzania</option>
-            <option value="Rwanda" {% if form_data.country == 'Rwanda' %}selected{% endif %}>Rwanda</option>
-            <option value="Other" {% if form_data.country == 'Other' %}selected{% endif %}>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="city">City</label>
-          <input id="city" name="city" type="text" value="{{ form_data.city }}" placeholder="Your city">
-        </div>
-        <div class="form-group">
-          <label for="plan">Pricing Plan</label>
-          <select id="plan" name="plan">
-            <option value="STARTER" {% if form_data.plan == 'STARTER' %}selected{% endif %}>Starter (Free)</option>
-            <option value="PROFESSIONAL" {% if form_data.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional</option>
-            <option value="ENTERPRISE" {% if form_data.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="tenant_slug">Tenant slug <span class="required">*</span></label>
-          <div class="slug-inline">
-            <input id="tenant_slug" name="tenant_slug" type="text" required value="{{ form_data.tenant_slug|default:'' }}" placeholder="acme-finance">
-            <button type="button" class="btn btn-secondary btn-sm" id="use-suggested-slug">Use suggestion</button>
+          <input
+            type="text"
+            id="company_name"
+            name="company_name"
+            value="{{ form_data.company_name|default:'' }}"
+            required
+            placeholder="e.g. GreenFields Microfinance"
+            class="{% if errors.company_name %}error{% endif %}"
+          >
+          {% if errors.company_name %}
+          <div class="register-field-error">
+            <span>⚠</span> {{ errors.company_name }}
           </div>
-          <div class="field-note">A slug is suggested from your company name and can be edited before submission.</div>
-          <div class="suggestion-pill">Suggested: <strong id="slug-preview">company-name</strong></div>
+          {% endif %}
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Tell us about your lending operation...">{{ form_data.message }}</textarea>
-      </div>
+        <div class="register-form-group">
+          <label for="contact_name">Contact Person <span class="required">*</span></label>
+          <input
+            type="text"
+            id="contact_name"
+            name="contact_name"
+            value="{{ form_data.contact_name|default:'' }}"
+            required
+            placeholder="Full name of primary contact"
+            class="{% if errors.contact_name %}error{% endif %}"
+          >
+          {% if errors.contact_name %}
+          <div class="register-field-error">
+            <span>⚠</span> {{ errors.contact_name }}
+          </div>
+          {% endif %}
+        </div>
 
-      <div class="popup-actions">
-        <button type="submit" class="btn btn-primary">Start registration</button>
-        <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+        <div class="register-form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="{{ form_data.email|default:'' }}"
+            required
+            placeholder="you@company.com"
+            class="{% if errors.email %}error{% endif %}"
+          >
+          {% if errors.email %}
+          <div class="register-field-error">
+            <span>⚠</span> {{ errors.email }}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="register-form-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value="{{ form_data.phone|default:'' }}"
+            required
+            placeholder="+256 700 000000"
+            class="{% if errors.phone %}error{% endif %}"
+          >
+          {% if errors.phone %}
+          <div class="register-field-error">
+            <span>⚠</span> {{ errors.phone }}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="register-grid-2">
+          <div class="register-form-group">
+            <label for="country">Country</label>
+            <input
+              type="text"
+              id="country"
+              name="country"
+              value="{{ form_data.country|default:'Uganda' }}"
+              placeholder="e.g. Uganda"
+            >
+          </div>
+          <div class="register-form-group">
+            <label for="city">City</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value="{{ form_data.city|default:'' }}"
+              placeholder="e.g. Kampala"
+            >
+          </div>
+        </div>
+
+        <div class="register-form-group">
+          <label for="plan">Select Plan</label>
+          <select id="plan" name="plan">
+            <option value="STARTER" {% if form_data.plan == 'STARTER' %}selected{% endif %}>STARTER — Free</option>
+            <option value="PROFESSIONAL" {% if form_data.plan == 'PROFESSIONAL' %}selected{% endif %}>PROFESSIONAL — Custom</option>
+            <option value="ENTERPRISE" {% if form_data.plan == 'ENTERPRISE' %}selected{% endif %}>ENTERPRISE — Custom</option>
+          </select>
+        </div>
+
+        <div class="register-form-group">
+          <label for="message">Additional Notes</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="3"
+            placeholder="Any specific requirements or questions…"
+          >{{ form_data.message|default:'' }}</textarea>
+        </div>
+
+        <div class="register-security-box">
+          <div>
+            <span class="icon">🔒</span>
+            <strong>Secure &amp; Private</strong>
+            <span style="display:block;margin-top:4px;">Your data is encrypted and stored securely. We'll never share your information with third parties.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="register-btn" id="register-submit">
+          <span class="btn-text">Register Your Company →</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="register-footer">
+        Already registered? <a href="{% url 'tenants:public_login' %}">Sign in to your tenant →</a>
       </div>
-    </form>
+    </div>
+
+    <div class="register-features">
+      <div class="register-feature">
+        <span class="emoji">⚡</span>
+        <span>Instant Setup</span>
+      </div>
+      <div class="register-feature">
+        <span class="emoji">🛡️</span>
+        <span>Bank-Grade Security</span>
+      </div>
+      <div class="register-feature">
+        <span class="emoji">📱</span>
+        <span>Mobile-Ready</span>
+      </div>
+    </div>
   </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  function slugify(value) {
-    return (value || '')
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
+  (function() {
+    'use strict';
 
-  document.addEventListener('DOMContentLoaded', function() {
-    openPopup();
+    var form = document.getElementById('register-form');
+    var submitBtn = document.getElementById('register-submit');
 
-    const companyNameInput = document.getElementById('company_name');
-    const slugInput = document.getElementById('tenant_slug');
-    const slugPreview = document.getElementById('slug-preview');
-    const useSuggestedButton = document.getElementById('use-suggested-slug');
+    if (form) {
+      // Real-time validation on blur
+      form.querySelectorAll('input[required], select[required], textarea[required]').forEach(function(input) {
+        input.addEventListener('blur', function() {
+          validateField(this);
+        });
 
-    if (!companyNameInput || !slugInput || !slugPreview || !useSuggestedButton) {
-      return;
-    }
+        input.addEventListener('input', function() {
+          if (this.classList.contains('error')) {
+            validateField(this);
+          }
+        });
+      });
 
-    function syncSlug() {
-      const value = slugify(companyNameInput.value);
-      slugPreview.textContent = value || 'company-name';
-      if (!slugInput.value || slugInput.dataset.userEdited !== 'true') {
-        slugInput.value = value;
+      function validateField(field) {
+        var errorEl = field.parentElement.querySelector('.register-field-error');
+        if (!field.value.trim()) {
+          field.classList.add('error');
+          if (!errorEl) {
+            var err = document.createElement('div');
+            err.className = 'register-field-error';
+            err.innerHTML = '<span>⚠</span> This field is required.';
+            field.parentElement.appendChild(err);
+          }
+          return false;
+        } else {
+          field.classList.remove('error');
+          if (errorEl) errorEl.remove();
+          return true;
+        }
       }
+
+      // Form submission
+      form.addEventListener('submit', function(e) {
+        var isValid = true;
+
+        form.querySelectorAll('input[required], select[required], textarea[required]').forEach(function(input) {
+          if (!input.value.trim()) {
+            input.classList.add('error');
+            isValid = false;
+          } else {
+            input.classList.remove('error');
+          }
+        });
+
+        // Email validation
+        var emailInput = document.getElementById('email');
+        if (emailInput && emailInput.value.trim()) {
+          var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(emailInput.value.trim())) {
+            emailInput.classList.add('error');
+            isValid = false;
+            if (!emailInput.parentElement.querySelector('.register-field-error')) {
+              var err = document.createElement('div');
+              err.className = 'register-field-error';
+              err.innerHTML = '<span>⚠</span> Please enter a valid email address.';
+              emailInput.parentElement.appendChild(err);
+            }
+          }
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          // Focus the first error
+          var firstError = form.querySelector('.error');
+          if (firstError) {
+            firstError.focus();
+          }
+          return false;
+        }
+
+        // Show loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        return true;
+      });
+
+      // Remove error styling on focus
+      form.querySelectorAll('input, select, textarea').forEach(function(input) {
+        input.addEventListener('focus', function() {
+          this.classList.remove('error');
+          var errorEl = this.parentElement.querySelector('.register-field-error');
+          if (errorEl) errorEl.remove();
+        });
+      });
     }
 
-    companyNameInput.addEventListener('input', syncSlug);
-    slugInput.addEventListener('input', function() {
-      slugInput.dataset.userEdited = slugInput.value.trim() !== '' ? 'true' : 'false';
-    });
-    useSuggestedButton.addEventListener('click', function() {
-      slugInput.value = slugify(companyNameInput.value);
-      slugInput.dataset.userEdited = 'true';
-    });
+    // Phone number formatting helper (optional)
+    var phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('input', function() {
+        // Simple: remove any non-digit except + and space
+        this.value = this.value.replace(/[^0-9+\s]/g, '');
+      });
+    }
 
-    syncSlug();
-  });
+  })();
 </script>
 {% endblock %}

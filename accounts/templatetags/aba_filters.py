@@ -132,3 +132,9 @@ def overdue_days(due_date):
     if due_date < today:
         return (today - due_date).days
     return 0
+
+
+@register.simple_tag
+def get_active_branches():
+    from accounts.models import Branch
+    return list(Branch.objects.filter(is_active=True).order_by("name"))

@@ -173,6 +173,32 @@ def resolve_processing_fee_rate(product=None, company_settings=None) -> Decimal:
 
 
 
+def _shift_past_holidays(d: date, holiday_dates: set) -> date:
+    while d in holiday_dates:
+        d = d + timedelta(days=1)
+    return d
+
+
+def _load_holiday_dates(schedule: list[dict]) -> set:
+    """Expand the Holiday calendar (including recurring holidays) across
+    every year touched by this schedule."""
+    if not schedule:
+        return set()
+    from accounts.models import Holiday
+    years = {row["due_date"].year for row in schedule}
+    dates = set()
+    for h in Holiday.objects.filter(is_active=True):
+        if h.is_recurring:
+            for y in years:
+                try:
+                    dates.add(h.date.replace(year=y))
+                except ValueError:
+                    pass  # e.g. a recurring Feb 29 holiday in a non-leap year
+        else:
+            dates.add(h.date)
+    return dates
+
+
 def generate_schedule(
     principal: Decimal,
     annual_rate: Decimal,
@@ -180,6 +206,7 @@ def generate_schedule(
     start_date: date,
     method: str = "FLAT",
     frequency: str = "MONTHLY",
+    company_settings=None,
 ) -> tuple[list[dict], dict]:
     """
     Generate a full amortization schedule.
@@ -192,6 +219,11 @@ def generate_schedule(
     start_date   : disbursement date (first due date is calculated from this)
     method       : "FLAT" or "REDUCING"
     frequency    : "WEEKLY", "BIWEEKLY", or "MONTHLY"
+    company_settings : CompanySettings instance (fetched lazily if omitted).
+        When adjust_due_dates_for_holidays is on, due dates landing on a
+        configured holiday are pushed to the next working day. This is a
+        pure date shift after the schedule is built — it doesn't change
+        the interest/principal math for any period.
 
     Returns
     -------
@@ -218,6 +250,19 @@ def generate_schedule(
             principal, monthly_rate, term_months, num_periods, start_date, frequency
         )
 
+    if company_settings is None:
+        try:
+            from accounts.models import CompanySettings as SettingsModel
+            company_settings = SettingsModel.get()
+        except Exception:
+            company_settings = None
+
+    if company_settings is not None and getattr(company_settings, "adjust_due_dates_for_holidays", False):
+        holiday_dates = _load_holiday_dates(schedule)
+        if holiday_dates:
+            for row in schedule:
+                row["due_date"] = _shift_past_holidays(row["due_date"], holiday_dates)
+
     return schedule, totals
 
 
@@ -229,15 +274,36 @@ def build_loan_schedule_context(
     start_date: date | None = None,
     include_processing_fee: bool = True,
     company_settings=None,
+    interest_rate_monthly: Decimal | None = None,
+    interest_method: str | None = None,
 ) -> tuple[list[dict], dict, Decimal, Decimal, str]:
     """Build a schedule and the fee/totals context used across the app.
+
+    ``product`` is still used for amount/term limits, the processing-fee
+    calculation, and its display name. But the *interest rate and method*
+    used for the schedule come from ``interest_rate_monthly`` /
+    ``interest_method`` when they're supplied — pass a loan's own
+    snapshotted fields here for any post-application regeneration
+    (approve, reschedule, regenerate) so an in-flight or active loan's
+    schedule can't drift if the product is edited later. Leave them
+    unset only while a loan is still DRAFT/PENDING and its terms are
+    meant to track the currently-selected product.
 
     The processing fee is charged separately from the repayment schedule. The
     schedule totals therefore represent principal + interest only. """
     principal = Decimal(str(principal or "0"))
     start_date = start_date or date.today()
-    annual_rate = Decimal(str(getattr(product, "interest_rate_monthly", "0") or "0")) * Decimal("12")
-    method = getattr(product, "interest_method", "FLAT")
+
+    if company_settings is None:
+        try:
+            from accounts.models import CompanySettings as SettingsModel
+            company_settings = SettingsModel.get()
+        except Exception:
+            company_settings = None
+
+    rate = interest_rate_monthly if interest_rate_monthly is not None else getattr(product, "interest_rate_monthly", "0")
+    annual_rate = Decimal(str(rate or "0")) * Decimal("12")
+    method = interest_method or getattr(product, "interest_method", "FLAT")
 
     schedule_rows, totals = generate_schedule(
         principal=principal,
@@ -246,19 +312,25 @@ def build_loan_schedule_context(
         start_date=start_date,
         method=method,
         frequency=frequency,
-    )
-
-    processing_fee = calculate_processing_fee_amount(
-        principal,
-        product=product,
         company_settings=company_settings,
     )
-    fee_percent = resolve_processing_fee_rate(product, company_settings)
-    fee_source = (
-        "Company settings (range)"
-        if (processing_fee and not fee_percent)
-        else (product.name if fee_percent else "Company settings")
-    )
+
+    if include_processing_fee:
+        processing_fee = calculate_processing_fee_amount(
+            principal,
+            product=product,
+            company_settings=company_settings,
+        )
+        fee_percent = resolve_processing_fee_rate(product, company_settings)
+        fee_source = (
+            "Company settings (range)"
+            if (processing_fee and not fee_percent)
+            else (product.name if fee_percent else "Company settings")
+        )
+    else:
+        processing_fee = Decimal("0")
+        fee_percent = Decimal("0")
+        fee_source = ""
 
     totals = dict(totals)
     totals["processing_fee"] = processing_fee

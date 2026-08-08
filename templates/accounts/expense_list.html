@@ -167,6 +167,17 @@
             <input type="date" name="expense_date" required value="{{ form_data.expense_date }}">
           </div>
         </div>
+        <div class="form-row">
+          <div>
+            <label>Branch</label>
+            <select name="branch">
+              <option value="">— Not branch-specific —</option>
+              {% for b in branches %}
+                <option value="{{ b.pk }}" {% if form_data.branch == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
         <div>
           <label>Description</label>
           <textarea name="description" rows="3" placeholder="Optional notes…">{{ form_data.description }}</textarea>

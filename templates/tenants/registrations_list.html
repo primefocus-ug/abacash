@@ -1,0 +1,70 @@
+{% extends "tenants/landing_base.html" %}
+{% block title %}Registrations | Abacash{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="eyebrow">Public Admin</div>
+    <h1 class="hero-title">Registration leads</h1>
+    <p class="hero-copy">Search and review every company that has requested access, not just the most recent few.</p>
+  </section>
+
+  <div class="dashboard-header" style="margin-top:1rem;">
+    <a class="btn btn-secondary" href="{% url 'tenants:public_admin' %}">&larr; Back to dashboard</a>
+  </div>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <form method="get" class="form-grid" style="grid-template-columns: 2fr 1fr auto; align-items:end;">
+      <div class="form-group">
+        <label for="q">Search</label>
+        <input id="q" name="q" type="text" value="{{ query }}" placeholder="Company, contact, or email">
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="">All statuses</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Filter</button>
+    </form>
+  </section>
+
+  <section class="section-card" style="margin-top:1rem;">
+    <div class="section-heading">
+      <div>
+        <div class="section-label">Leads</div>
+        <h2>{{ page_obj.paginator.count }} registration{{ page_obj.paginator.count|pluralize }}</h2>
+      </div>
+    </div>
+
+    {% if registrations %}
+      <div class="stack-list">
+        {% for registration in registrations %}
+          <div class="stack-item">
+            <div>
+              <strong>{{ registration.company_name }}</strong>
+              <small>{{ registration.contact_name }} · {{ registration.email }} · {{ registration.get_status_display }} · {{ registration.submitted_at|date:"M j, Y" }}</small>
+            </div>
+            <a class="btn btn-secondary btn-sm" href="{% url 'tenants:registration_detail' registration.pk %}">View</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="hero-copy">No registrations match your search.</p>
+    {% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <div class="panel-actions" style="margin-top:1rem;">
+        {% if page_obj.has_previous %}
+          <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Previous</a>
+        {% else %}<span></span>{% endif %}
+        <small>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+        {% if page_obj.has_next %}
+          <a class="btn btn-secondary btn-sm" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status %}&status={{ status }}{% endif %}">Next</a>
+        {% else %}<span></span>{% endif %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

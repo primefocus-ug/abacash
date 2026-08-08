@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">
+<div class="metrics-grid">
   <div class="metric-card red"><div class="metric-label">Defaulted / Written Off</div><div class="metric-value red">{{ loan_count }}</div></div>
   <div class="metric-card red"><div class="metric-label">Total Principal at Risk</div><div class="metric-value red">{{ total_defaulted|floatformat:0|intcomma }}</div></div>
   <div class="metric-card amber"><div class="metric-label">Outstanding Balance</div><div class="metric-value amber">{{ total_outstanding|floatformat:0|intcomma }}</div></div>

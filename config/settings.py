@@ -10,14 +10,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 
-
-
-
-
+# Get DEBUG from environment (defaults to False for production safety)
+DEBUG = config("DEBUG", default=False, cast=bool)
 SECRET_KEY = config("SECRET_KEY", default="devv-insecure-change-me-in-production")
-DEBUG =True
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost,.localhost", cast=Csv())
 
+# ALLOWED_HOSTS configuration based on DEBUG
+if DEBUG:
+    # In debug mode, allow localhost and common development hosts
+    ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost,.localhost,0.0.0.0", cast=Csv())
+else:
+    # In production, restrict to specific domains
+    ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="abacash.loan,www.abacash.loan", cast=Csv())
 
 
 def _database_from_url(url: str) -> dict:
@@ -37,10 +40,14 @@ def _database_from_url(url: str) -> dict:
     }
 
 
+# Get DATABASE_URL from environment with a fallback
+DATABASE_URL = config(
+    "DATABASE_URL",
+    default="postgres://postgres:@Developer25@localhost:5432/db"
+)
+
 DATABASES = {
-    "default": _database_from_url(
-        config("DATABASE_URL", default="postgres://postgres:@Developer25@localhost:5432/db")
-    )
+    "default": _database_from_url(DATABASE_URL)
 }
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
@@ -52,28 +59,40 @@ TENANT_MODEL = "tenants.Company"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
 
 PUBLIC_SCHEMA_URLCONF = "config.urls_public"
-PUBLIC_DOMAIN = config("PUBLIC_DOMAIN", default="abacash.loan")
-TENANT_PUBLIC_DOMAIN = config("TENANT_PUBLIC_DOMAIN", default="abacash.loan")
-# Public admin credentials (used to protect the platform onboarding UI). In
-# production, set these via environment variables and keep the password secret.
-PUBLIC_ADMIN_USERNAME = config("PUBLIC_ADMIN_USERNAME", default="admin")
-PUBLIC_ADMIN_PASSWORD = config("PUBLIC_ADMIN_PASSWORD", default="@Developer25")
-# How long the signed public-admin cookie remains valid (seconds)
-PUBLIC_ADMIN_COOKIE_AGE = config("PUBLIC_ADMIN_COOKIE_AGE", default=86400, cast=int)
+
+# Public domain configuration based on DEBUG
+if DEBUG:
+    PUBLIC_DOMAIN = config("PUBLIC_DOMAIN", default="localhost:8000")
+    TENANT_PUBLIC_DOMAIN = config("TENANT_PUBLIC_DOMAIN", default="localhost:8000")
+else:
+    PUBLIC_DOMAIN = config("PUBLIC_DOMAIN", default="abacash.loan")
+    TENANT_PUBLIC_DOMAIN = config("TENANT_PUBLIC_DOMAIN", default="abacash.loan")
+
+# Platform-operator (system admin) accounts for the /public-admin/ panel are
+# real, individually-hashed PlatformAdmin rows (tenants app) authenticated via
+# a normal server-side session (see tenants/auth.py) instead of a single
+# shared credential pair — see `python manage.py create_platform_admin` to
+# create the first account. PUBLIC_ADMIN_USERNAME / PUBLIC_ADMIN_PASSWORD and
+# the old signed-cookie login have both been retired.
 
 SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
 SHARED_APPS = [
     "django_tenants",
     "tenants",
+    "platform_admin",
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
+    # Needed so the public schema gets its own django_session table —
+    # PlatformAdmin logins (tenants/auth.py) use real server-side sessions
+    # rather than a hand-signed cookie, since sessions weren't previously
+    # available on the public schema at all.
+    "django.contrib.sessions",
     # Celery Beat's scheduler is a single global process — it never runs
     # inside a tenant's schema, so its own tables must live in `public`,
     # not per-tenant. The reminders task itself loops over tenants.
     "django_celery_beat",
 ]
-
 
 TENANT_APPS = [
     "django.contrib.contenttypes",
@@ -119,7 +138,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -152,7 +170,6 @@ USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -244,7 +261,6 @@ else:
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -257,6 +273,7 @@ MULTITENANT_RELATIVE_MEDIA_ROOT = "%s"
 
 INTERNAL_IPS = ["127.0.0.1"]
 
+# Redis/Celery configuration
 CELERY_BROKER_URL = config("REDIS_URL", default="redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TIMEZONE = "Africa/Kampala"
@@ -282,7 +299,12 @@ TWILIO_WHATSAPP_FROM = config("TWILIO_WHATSAPP_FROM", default="whatsapp:+2567852
 # ------------------------------------------------------------------ #
 # Email (error alerts / contact form)                                  #
 # ------------------------------------------------------------------ #
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = True
@@ -294,3 +316,32 @@ DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@abauganda.com")
 # Business rules                                                       #
 # ------------------------------------------------------------------ #
 MANAGER_APPROVAL_LIMIT = 5_000_000  # UGX fallback; per-tenant value lives on CompanySettings
+
+# ------------------------------------------------------------------ #
+# HTTPS/SSL Configuration - based on DEBUG                            #
+# ------------------------------------------------------------------ #
+if DEBUG:
+    # In development: disable HTTPS redirects and SSL
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+else:
+    # In production: enable HTTPS and security settings
+    SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
+    SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+    CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
+    SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", default=31536000, cast=int)  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True, cast=bool)
+    SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", default=True, cast=bool)
+    SECURE_REFERRER_POLICY = config("SECURE_REFERRER_POLICY", default="strict-origin-when-cross-origin")
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = config("SECURE_CROSS_ORIGIN_OPENER_POLICY", default="same-origin")
+
+    # Security middleware settings for production
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"

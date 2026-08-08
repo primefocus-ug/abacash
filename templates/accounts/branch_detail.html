@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}{{ branch.name }} — Branch Summary{% endblock %}
+{% block page_title %}{{ branch.name }}{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:branch_edit' branch.pk %}" class="btn btn-secondary btn-sm">Edit Branch</a>
+  <a href="{% url 'accounts:branch_list' %}" class="btn btn-secondary btn-sm">All Branches</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card mb-3">
+  <div class="card-body" style="display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div style="font-size:20px;font-weight:700;">{{ branch.name }}</div>
+      <div class="mono text-muted text-sm">{{ branch.code }}</div>
+      {% if branch.is_active %}
+        <span class="badge badge-success" style="margin-top:6px;">Active</span>
+      {% else %}
+        <span class="badge badge-muted" style="margin-top:6px;">Inactive</span>
+      {% endif %}
+    </div>
+    <div style="min-width:220px;">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Branch Manager</div>
+      <div style="font-weight:500;">{{ branch.manager.full_name|default:"— Not assigned —" }}</div>
+    </div>
+    <div style="min-width:220px;">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Contact</div>
+      <div style="font-weight:500;">{{ branch.phone|default:"—" }}</div>
+      <div class="text-muted text-sm">{{ branch.email|default:"—" }}</div>
+    </div>
+    <div style="min-width:220px;">
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Address</div>
+      <div style="font-weight:500;">{{ branch.address|default:"—" }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="metrics-grid mb-3">
+  <div class="metric-card teal" style="cursor:pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE&branch={{ branch.pk }}">
+    <div class="metric-label">Portfolio</div>
+    <div class="metric-value teal">{{ portfolio_amount|money }}</div>
+    <div class="metric-sub">{{ active_loan_count }} active loan{{ active_loan_count|pluralize }}</div>
+  </div>
+  <div class="metric-card blue" style="cursor:pointer;" data-link="{% url 'loans:list' %}?status=ACTIVE&branch={{ branch.pk }}">
+    <div class="metric-label">Outstanding</div>
+    <div class="metric-value" style="color:var(--blue-400)">{{ portfolio_outstanding|money }}</div>
+    <div class="metric-sub">to be collected</div>
+  </div>
+  <div class="metric-card green">
+    <div class="metric-label">Collected This Month</div>
+    <div class="metric-value green">{{ collected_month|money }}</div>
+    <div class="metric-sub">as of {{ today }}</div>
+  </div>
+  <div class="metric-card amber" style="cursor:pointer;" data-link="{% url 'loans:list' %}?status=PENDING&branch={{ branch.pk }}">
+    <div class="metric-label">Pending Approvals</div>
+    <div class="metric-value amber">{{ pending_loans|length }}</div>
+    <div class="metric-sub">awaiting review</div>
+  </div>
+  <div class="metric-card red" style="cursor:pointer;" data-link="{% url 'reports:overdue' %}?branch={{ branch.pk }}">
+    <div class="metric-label">Overdue Entries</div>
+    <div class="metric-value red">{{ overdue_count }}</div>
+    <div class="metric-sub">missed payments</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Clients</div>
+    <div class="metric-value">{{ client_count }}</div>
+    <div class="metric-sub">active clients</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">PAR (30+ days)</div>
+    <div class="metric-value">{{ par_30_count }}</div>
+    <div class="metric-sub">loans at risk</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Expenses This Month</div>
+    <div class="metric-value">{{ expenses_month|money }}</div>
+    <div class="metric-sub">recorded against this branch</div>
+  </div>
+  {% if written_off_count %}
+  <div class="metric-card">
+    <div class="metric-label">Written Off</div>
+    <div class="metric-value">{{ written_off_count }}</div>
+    <div class="metric-sub">loans total</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Staff at this branch</span>
+    <span class="text-sm text-muted">{{ staff|length }} active</span>
+  </div>
+  <div class="table-wrap">
+    {% if staff_performance %}
+    <table class="aba-table">
+      <thead>
+        <tr><th>Staff</th><th>Role</th><th>Applications</th><th>Active Loans</th><th>Collections (Month)</th></tr>
+      </thead>
+      <tbody>
+        {% for row in staff_performance %}
+        <tr>
+          <td><a href="{% url 'accounts:user_edit' row.user.pk %}">{{ row.user.full_name }}</a></td>
+          <td class="text-muted text-sm">{{ row.user.get_role_display }}</td>
+          <td class="mono">{{ row.applications_count }}</td>
+          <td class="mono">{{ row.active_loans_count }}</td>
+          <td class="mono">{{ row.collections_this_month|money }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><p>No staff assigned to this branch yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Pending Loan Approvals</span>
+    <a href="{% url 'loans:list' %}?status=PENDING&branch={{ branch.pk }}" class="btn btn-secondary btn-sm">View All</a>
+  </div>
+  <div class="table-wrap">
+    {% if pending_loans %}
+    <table class="aba-table">
+      <thead><tr><th>Loan #</th><th>Client</th><th>Product</th><th>Amount</th><th>Applied By</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for loan in pending_loans %}
+        <tr>
+          <td class="mono"><a href="{% url 'loans:detail' loan.pk %}">{{ loan.loan_number }}</a></td>
+          <td><a href="{% url 'clients:detail' loan.client.pk %}">{{ loan.client.full_name }}</a></td>
+          <td>{{ loan.product.name }}</td>
+          <td class="mono" style="color:var(--teal-400)">{{ loan.principal_amount|money }}</td>
+          <td class="text-muted text-sm">{{ loan.applied_by.full_name }}</td>
+          <td class="text-muted text-sm">{{ loan.application_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">✓</div><p>No loans pending approval.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Overdue Payments</span>
+    <a href="{% url 'reports:overdue' %}?branch={{ branch.pk }}" class="btn btn-secondary btn-sm">Full Report</a>
+  </div>
+  <div class="table-wrap">
+    {% if overdue_schedules %}
+    <table class="aba-table">
+      <thead><tr><th>Client</th><th>Loan #</th><th>Due Date</th><th>Amount Due</th><th>Period</th><th></th></tr></thead>
+      <tbody>
+        {% for entry in overdue_schedules %}
+        <tr>
+          <td><a href="{% url 'clients:detail' entry.loan.client.pk %}">{{ entry.loan.client.full_name }}</a></td>
+          <td class="mono"><a href="{% url 'loans:detail' entry.loan.pk %}">{{ entry.loan.loan_number }}</a></td>
+          <td style="color:var(--red-400)">{{ entry.due_date }}</td>
+          <td class="mono" style="color:var(--red-400)">{{ entry.total_payment|money }}</td>
+          <td>{{ entry.period_number }}</td>
+          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">✓</div><p>No overdue payments.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -90,6 +90,16 @@
               <option value="blacklisted" {% if status == 'blacklisted' %}selected{% endif %}>Blacklisted</option>
             </select>
           </div>
+          {% if branches %}
+          <div class="filter-field">
+            <select name="branch" onchange="this.form.submit()">
+              <option value="" {% if not selected_branch %}selected{% endif %}>All branches</option>
+              {% for b in branches %}
+              <option value="{{ b.pk }}" {% if selected_branch == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
           <div class="filter-actions">
             <button type="submit" class="btn btn-secondary btn-sm">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -126,6 +136,7 @@
               <th>Name</th>
               <th>Phone</th>
               <th>NIN</th>
+              {% if user.is_ceo %}<th>Branch</th>{% endif %}
               <th>Active Loans</th>
               <th>Status</th>
               <th style="width:80px;"></th>
@@ -141,6 +152,7 @@
               </td>
               <td style="font-size:13px;color:var(--text-secondary);">{{ c.phone_primary }}</td>
               <td class="mono" style="font-size:13px;color:var(--text-secondary);">{{ c.nin }}</td>
+              {% if user.is_ceo %}<td style="font-size:13px;color:var(--text-secondary);">{{ c.branch.name|default:"—" }}</td>{% endif %}
               <td>
                 {% if c.active_loan_count > 0 %}
                   <span class="badge badge-amber">{{ c.active_loan_count }}</span>

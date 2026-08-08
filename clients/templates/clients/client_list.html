@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Clients{% endblock %}
+{% block page_title %}Clients{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'clients:create' %}" class="btn btn-primary btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Register Client
+  </a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .filter-bar-wrapper { display:flex; align-items:center; gap:12px; padding:12px 0; }
+  .filter-bar-single-row { display:flex; align-items:center; gap:10px; flex-wrap:nowrap; overflow-x:auto; flex:1; padding:4px 0; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .filter-bar-single-row::-webkit-scrollbar { height:4px; }
+  .filter-bar-single-row::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .filter-field { flex:0 1 auto; min-width:0; }
+  .filter-field input, .filter-field select { width:100%; min-width:160px; padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface-2); color:var(--text-primary); font-size:13px; transition:all var(--trans); }
+  .filter-field input:focus, .filter-field select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(96,165,250,.15); outline:none; }
+  .filter-field input::placeholder { color:var(--text-muted); }
+  .filter-actions { display:flex; gap:6px; flex-shrink:0; }
+  .client-table tbody tr.clickable-row { cursor:pointer; transition:background-color .15s ease, box-shadow .15s ease; position:relative; }
+  .client-table tbody tr.clickable-row:hover { background:var(--bg-hover) !important; box-shadow:inset 3px 0 0 var(--accent); }
+  .client-table th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); padding:12px 16px; white-space:nowrap; }
+  .client-table td { padding:14px 16px; vertical-align:middle; }
+  .badge-green { background:rgba(16,185,129,.12); color:var(--success); }
+  .badge-amber { background:rgba(245,158,11,.12); color:var(--warning); }
+  .badge-red   { background:rgba(239,68,68,.12);  color:var(--danger); }
+  .badge-teal  { background:rgba(6,182,212,.12);  color:var(--cyan); }
+  .badge-muted { background:rgba(107,114,128,.1); color:var(--text-muted); }
+  [data-theme="dark"] .badge-green { background:rgba(52,211,153,.15); color:#34D399; }
+  [data-theme="dark"] .badge-amber { background:rgba(251,191,36,.15); color:#FBBF24; }
+  [data-theme="dark"] .badge-red   { background:rgba(248,113,113,.15); color:#F87171; }
+  [data-theme="dark"] .badge-teal  { background:rgba(34,211,238,.15); color:#22D3EE; }
+  [data-theme="dark"] .badge-muted { background:rgba(148,163,184,.15); color:#94A3B8; }
+  .badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+  .card-header-content { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .card-header-title h4 { margin:0; font-size:15px; font-weight:600; color:var(--text-primary); }
+  .card-header-subtitle { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .meta-info-bar { display:flex; align-items:center; gap:12px; padding:8px 0 16px; flex-wrap:wrap; }
+  .empty-state { text-align:center; padding:48px 24px; color:var(--text-muted); }
+  .empty-state .empty-icon { font-size:48px; margin-bottom:16px; opacity:.4; }
+  .empty-state p { font-size:14px; color:var(--text-secondary); }
+  /* Pagination */
+  .pagination { display:flex; gap:4px; list-style:none; padding:0; margin:0; align-items:center; flex-wrap:wrap; }
+  .pagination .page-item .page-link { display:inline-flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:var(--radius-md); border:1px solid var(--border); color:var(--text-secondary); background:var(--surface-2); font-size:13px; transition:all var(--trans); }
+  .pagination .page-item.active .page-link { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .pagination .page-item.disabled .page-link { opacity:.45; pointer-events:none; }
+  .pagination .page-item .page-link:hover:not(.disabled) { background:var(--surface-3); color:var(--text-primary); }
+  .card-footer { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+  @media (max-width:768px) {
+    .filter-bar-single-row { gap:8px; }
+    .filter-field input, .filter-field select { min-width:140px; }
+    .card-header-content { flex-direction:column; align-items:stretch; }
+    .client-table th:nth-child(3), .client-table td:nth-child(3),
+    .client-table th:nth-child(4), .client-table td:nth-child(4) { display:none; }
+  }
+  @media (max-width:480px) {
+    .client-table th:nth-child(5), .client-table td:nth-child(5) { display:none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-content" style="flex:1;">
+      <div class="card-header-title">
+        <div>
+          <h4>Client Registry</h4>
+          <div class="card-header-subtitle">Manage customer records and view loan exposure</div>
+        </div>
+      </div>
+
+      <div class="filter-bar-wrapper">
+        <form method="get" class="filter-bar-single-row">
+          {% if per_page %}<input type="hidden" name="per_page" value="{{ per_page }}">{% endif %}
+          <div class="filter-field">
+            <input type="text" name="q" value="{{ search|default:'' }}" placeholder="Search name, NIN, phone, client #…">
+          </div>
+          <div class="filter-field">
+            <select name="status" onchange="this.form.submit()">
+              <option value="" {% if not status %}selected{% endif %}>All clients</option>
+              <option value="active"      {% if status == 'active' %}selected{% endif %}>Active only</option>
+              <option value="blacklisted" {% if status == 'blacklisted' %}selected{% endif %}>Blacklisted</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button type="submit" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Search
+            </button>
+            {% if search or status %}
+              <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-sm">Clear</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    {% if clients %}
+      <div class="meta-info-bar" style="padding:16px 20px 0;">
+        <span class="badge badge-teal" style="padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">
+          {{ total_count }} client{{ total_count|pluralize }}
+        </span>
+        {% if page_obj %}
+          <span class="text-sm text-muted">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ total_count }}</span>
+        {% endif %}
+        <span class="text-sm text-muted">Click any row to view client profile</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="aba-table client-table">
+          <thead>
+            <tr>
+              <th>Client #</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>NIN</th>
+              <th>Active Loans</th>
+              <th>Status</th>
+              <th style="width:80px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in clients %}
+            <tr data-href="{% url 'clients:detail' c.pk %}" class="clickable-row" tabindex="0" role="link" aria-label="View {{ c.full_name }} profile">
+              <td class="mono" style="font-weight:500;color:var(--accent);">{{ c.client_number }}</td>
+              <td>
+                <div style="font-weight:500;color:var(--text-primary);">{{ c.full_name }}</div>
+                <div style="font-size:12px;color:var(--text-muted);">{{ c.district }}</div>
+              </td>
+              <td style="font-size:13px;color:var(--text-secondary);">{{ c.phone_primary }}</td>
+              <td class="mono" style="font-size:13px;color:var(--text-secondary);">{{ c.nin }}</td>
+              <td>
+                {% if c.active_loan_count > 0 %}
+                  <span class="badge badge-amber">{{ c.active_loan_count }}</span>
+                {% else %}
+                  <span class="text-muted text-sm">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.is_blacklisted %}
+                  <span class="badge badge-red"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentcolor;margin-right:4px;"></span>Blacklisted</span>
+                {% elif c.is_active %}
+                  <span class="badge badge-green"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:currentcolor;margin-right:4px;"></span>Active</span>
+                {% else %}
+                  <span class="badge badge-muted">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'clients:detail' c.pk %}" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();" data-tooltip="View profile">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <p>
+          {% if search %}No clients found matching "{{ search }}".
+          {% else %}No clients registered yet.{% endif %}
+        </p>
+        {% if not search %}
+          <a href="{% url 'clients:create' %}" class="btn btn-primary btn-sm" style="margin-top:16px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Register First Client
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if paginator and paginator.num_pages > 1 %}
+  <div class="card-footer">
+    <span class="text-sm text-muted">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    <nav aria-label="Client pagination">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">← Prev</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">← Prev</span></li>
+        {% endif %}
+
+        {% for p in paginator.page_range %}
+          {% if p <= 2 or p > paginator.num_pages|add:"-2" or p >= page_obj.number|add:"-2" and p <= page_obj.number|add:"2" %}
+            {% if p == page_obj.number %}
+              <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ p }}">{{ p }}</a></li>
+            {% endif %}
+          {% elif forloop.first %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next →</a></li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Next →</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  function shouldIgnore(t){ return t.closest && (t.closest('a')||t.closest('button')||t.closest('input')||t.closest('select')); }
+  document.querySelectorAll('.client-table tbody tr.clickable-row').forEach(function(row){
+    row.addEventListener('click', function(e){ if(shouldIgnore(e.target)) return; var h=row.getAttribute('data-href'); if(h) window.location=h; });
+    row.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); var h=row.getAttribute('data-href'); if(h) window.location=h; } });
+  });
+})();
+</script>
+{% endblock %}

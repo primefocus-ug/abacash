@@ -11,13 +11,16 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from accounts.models import CompanySettings
+from accounts.models import CompanySettings, Branch
+from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
 from clients.models import Client
 from .models import (
     Loan,
@@ -95,10 +98,7 @@ def _build_security_data(loan=None):
 @login_required
 def loan_list(request):
     qs = Loan.objects.select_related("client", "product", "applied_by").order_by("-application_date")
-
-    # Cashiers only see loans they applied
-    if request.user.is_cashier:
-        qs = qs.filter(applied_by=request.user)
+    qs = scope_to_branch_request(qs, request)
 
     status_filter = request.GET.get("status", "")
     if status_filter:
@@ -128,6 +128,8 @@ def loan_list(request):
         "staff_choices":  staff_choices,
         "staff_filter":   staff_filter,
         "search":         search,
+        "branches":       Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
+        "selected_branch": request.GET.get("branch", ""),
     }
     return render(request, "loans/loan_list.html", context)
 
@@ -137,6 +139,7 @@ def loan_search(request):
     """AJAX endpoint for Select2 loan search. Returns JSON in Select2 format."""
     q = request.GET.get('q', '').strip()
     qs = Loan.objects.select_related('client').order_by('-application_date')
+    qs = scope_to_branch(qs, request.user)
     if q:
         qs = qs.filter(loan_number__icontains=q) | qs.filter(client__first_name__icontains=q) | qs.filter(client__last_name__icontains=q)
 
@@ -162,19 +165,20 @@ def loan_apply_step1(request):
 def client_search_htmx(request):
     """HTMX endpoint: instant client search returning a table partial."""
     q = request.GET.get("q", "").strip()
+    base_qs = scope_to_branch(Client.objects.filter(is_active=True), request.user)
     if q:
-        qs = Client.objects.filter(is_active=True).filter(
+        qs = base_qs.filter(
             first_name__icontains=q
-        ) | Client.objects.filter(
-            is_active=True, last_name__icontains=q
-        ) | Client.objects.filter(
-            is_active=True, client_number__icontains=q
-        ) | Client.objects.filter(
-            is_active=True, nin__icontains=q
+        ) | base_qs.filter(
+            last_name__icontains=q
+        ) | base_qs.filter(
+            client_number__icontains=q
+        ) | base_qs.filter(
+            nin__icontains=q
         )
         clients = qs.distinct()[:30]
     else:
-        clients = Client.objects.filter(is_active=True).order_by("-created_at")[:30]
+        clients = base_qs.order_by("-created_at")[:30]
     return render(request, "partials/client_search_results.html", {"clients": clients, "q": q})
 
 
@@ -224,6 +228,7 @@ def loan_apply_step2(request, client_id):
                 loan = Loan(
                     client=client,
                     applied_by=request.user,
+                    branch=request.user.branch,
                     status=Loan.Status.DRAFT,
                     application_date=date.today(),
                 )
@@ -629,6 +634,16 @@ def loan_apply_review(request, client_id):
                     raise ValueError("Loan product is required.")
                 if loan.product.requires_guarantor and not guarantor_rows:
                     raise ValueError("This product requires at least one guarantor.")
+                company_settings = CompanySettings.get()
+                active_count = Client.objects.get(pk=client.pk).loans.filter(
+                    status__in=[Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED,
+                                Loan.Status.PENDING, Loan.Status.APPROVED]
+                ).exclude(pk=loan.pk).count()
+                if active_count >= company_settings.max_active_loans_per_client:
+                    raise ValueError(
+                        f"{client.full_name} already has {active_count} active/pending loan(s), "
+                        f"the maximum allowed is {company_settings.max_active_loans_per_client}."
+                    )
                 if loan.product and (loan.principal_amount < loan.product.min_amount or loan.principal_amount > loan.product.max_amount):
                     raise ValueError(
                         f"Loan amount must be between UGX {loan.product.min_amount:,.0f} and {loan.product.max_amount:,.0f}."
@@ -873,6 +888,9 @@ def loan_edit(request, pk):
 @login_required
 def loan_detail(request, pk):
     loan = get_object_or_404(Loan.objects.select_related("client", "product", "applied_by", "reviewed_by"), pk=pk)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("loans:list")
     schedule  = loan.schedule.order_by("period_number")
     payments  = loan.payments.order_by("-payment_date")
     renewals  = loan.renewal_records.select_related("new_loan").order_by("-renewal_date")
@@ -893,6 +911,21 @@ def loan_detail(request, pk):
         recent_audits = []
         audits_total = 0
 
+    # A loan is eligible for a manual write-off once it's been overdue longer
+    # than the company's configured auto-write-off threshold (see
+    # CompanySettings.auto_write_off_days) — i.e. the system's automatic
+    # write-off point has passed but the loan hasn't been written off yet.
+    # Loans not yet past that point don't show the write-off action at all;
+    # it's meant to catch loans automation hasn't (or can't) clean up, not to
+    # be a general-purpose write-off button.
+    from accounts.models import CompanySettings
+    write_off_threshold_days = getattr(CompanySettings.get(), "auto_write_off_days", 180)
+    can_write_off = (
+        request.user.is_ceo
+        and loan.status in (Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED, Loan.Status.DEFAULTED)
+        and loan.days_overdue >= write_off_threshold_days
+    )
+
     return render(request, "loans/loan_detail.html", {
         "loan":     loan,
         "schedule": schedule,
@@ -901,6 +934,8 @@ def loan_detail(request, pk):
         "today":    date.today(),
         "recent_disbursement_audits": recent_audits,
         "disbursement_audits_total": audits_total,
+        "can_write_off": can_write_off,
+        "write_off_threshold_days": write_off_threshold_days,
     })
 
 @_require_role("MANAGER", "CEO")
@@ -954,66 +989,64 @@ def loan_reschedule(request, pk):
             else:
                 chosen_disbursement = date.today()
 
-            same_terms = (
-                term_months == loan.term_months
-                and frequency == loan.repayment_frequency
-                and chosen_disbursement == loan.disbursement_date
+            # Generate the schedule from the set date. We deliberately always
+            # regenerate here (even if term/frequency/date are unchanged from
+            # the loan's current values) — the point of clicking Reschedule
+            # is to activate/re-anchor the repayment clock to the date shown
+            # in the form, not just to record a change if one happened to
+            # occur. A CEO resuming a lapsed loan after an agreement expects
+            # submitting this form to always take effect.
+            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+                principal=outstanding_amount,
+                product=loan.product,
+                term_months=term_months,
+                frequency=frequency,
+                start_date=chosen_disbursement,
+                include_processing_fee=False,
+                interest_rate_monthly=loan.interest_rate_monthly,
+                interest_method=loan.interest_method,
             )
 
-            if same_terms:
-                loan.save(update_fields=["updated_at"]) if hasattr(loan, "updated_at") else None
-            else:
-                # Generate new schedule only when the repayment settings actually change.
-                schedule_rows, totals, _, _, _ = build_loan_schedule_context(
-                    principal=outstanding_amount,
-                    product=loan.product,
-                    term_months=term_months,
-                    frequency=frequency,
-                    start_date=chosen_disbursement,
-                    include_processing_fee=False,
+            # Update the loan's schedule instead of creating a new loan
+            old_date = loan.disbursement_date
+            loan.term_months = term_months
+            loan.repayment_frequency = frequency
+            loan.disbursement_date = chosen_disbursement
+            loan.maturity_date = schedule_rows[-1]["due_date"]
+            loan.total_repayable = totals["total_repayable_exclusive"]
+            loan.total_interest = totals["total_interest"]
+            loan.outstanding_balance = outstanding_amount
+            loan.save()
+
+            # Create an audit record of this reschedule action
+            try:
+                LoanDisbursementAudit.objects.create(
+                    loan=loan,
+                    changed_by=request.user,
+                    old_disbursement_date=old_date,
+                    new_disbursement_date=loan.disbursement_date,
+                    action='reschedule',
+                    reason=reason[:2000],
                 )
+            except Exception:
+                import logging
+                logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
 
-                # Update the loan's schedule instead of creating a new loan
-                old_date = loan.disbursement_date
-                loan.term_months = term_months
-                loan.repayment_frequency = frequency
-                loan.disbursement_date = chosen_disbursement
-                loan.maturity_date = schedule_rows[-1]["due_date"]
-                loan.total_repayable = totals["total_repayable_exclusive"]
-                loan.total_interest = totals["total_interest"]
-                loan.outstanding_balance = outstanding_amount
-                loan.save()
-
-                # Create an audit record if the disbursement date changed
-                try:
-                    if old_date != loan.disbursement_date:
-                        LoanDisbursementAudit.objects.create(
-                            loan=loan,
-                            changed_by=request.user,
-                            old_disbursement_date=old_date,
-                            new_disbursement_date=loan.disbursement_date,
-                            action='reschedule',
-                            reason=reason[:2000],
-                        )
-                except Exception:
-                    import logging
-                    logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
-
-                # Delete old schedule and create new one
-                LoanSchedule.objects.filter(loan=loan).delete()
-                LoanSchedule.objects.bulk_create([
-                    LoanSchedule(
-                        loan=loan,
-                        period_number=row["period_number"],
-                        due_date=row["due_date"],
-                        opening_balance=row["opening_balance"],
-                        principal_due=row["principal_due"],
-                        interest_due=row["interest_due"],
-                        total_payment=row["total_payment"],
-                        closing_balance=row["closing_balance"],
-                    )
-                    for row in schedule_rows
-                ])
+            # Delete old schedule and create new one
+            LoanSchedule.objects.filter(loan=loan).delete()
+            LoanSchedule.objects.bulk_create([
+                LoanSchedule(
+                    loan=loan,
+                    period_number=row["period_number"],
+                    due_date=row["due_date"],
+                    opening_balance=row["opening_balance"],
+                    principal_due=row["principal_due"],
+                    interest_due=row["interest_due"],
+                    total_payment=row["total_payment"],
+                    closing_balance=row["closing_balance"],
+                )
+                for row in schedule_rows
+            ])
 
             messages.success(request, f"Loan {loan.loan_number} has been rescheduled.")
             # HTMX: return small fragment to close modal and refresh
@@ -1093,6 +1126,8 @@ def loan_regenerate_schedule(request, pk):
                 frequency=loan.repayment_frequency,
                 start_date=parsed,
                 include_processing_fee=False,
+                interest_rate_monthly=loan.interest_rate_monthly,
+                interest_method=loan.interest_method,
             )
 
             # Replace schedule rows
@@ -1149,108 +1184,6 @@ def loan_regenerate_schedule(request, pk):
             logging.exception("Failed to regenerate schedule for loan %s: %s", loan.pk, e)
             messages.error(request, "Failed to regenerate schedule. See logs.")
             return redirect("loans:detail", pk=loan.pk)
-
-    if loan.outstanding_balance <= Decimal("0"):
-        messages.error(request, "This loan has no outstanding balance to reschedule.")
-        return redirect("loans:detail", pk=loan.pk)
-
-    if request.method == "POST":
-        try:
-            term_months = int(request.POST.get("term_months", loan.term_months) or loan.term_months)
-            frequency = request.POST.get("frequency", loan.repayment_frequency)
-            reason = request.POST.get("reason", "").strip()
-
-            if not reason:
-                raise ValueError("Rescheduling reason is required.")
-
-            if term_months < loan.product.min_term_months or term_months > loan.product.max_term_months:
-                raise ValueError(
-                    f"Term must be between {loan.product.min_term_months} and {loan.product.max_term_months} months."
-                )
-
-            if frequency not in dict(Loan.RepaymentFrequency.choices):
-                raise ValueError("Invalid repayment frequency selected.")
-
-            outstanding_amount = loan.outstanding_balance
-            if outstanding_amount <= Decimal("0"):
-                raise ValueError("Loan has no outstanding balance to reschedule.")
-
-            # Allow optional disbursement_date from the form (CEOs may back-date)
-            provided_disb = request.POST.get('disbursement_date', '').strip()
-            if provided_disb:
-                try:
-                    chosen_disbursement = date.fromisoformat(provided_disb)
-                except Exception:
-                    raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
-                if chosen_disbursement < date.today() and not request.user.is_ceo:
-                    raise ValueError("Only the CEO may set a past disbursement date.")
-            else:
-                chosen_disbursement = date.today()
-
-            # Generate new schedule
-            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
-                principal=outstanding_amount,
-                product=loan.product,
-                term_months=term_months,
-                frequency=frequency,
-                start_date=chosen_disbursement,
-                include_processing_fee=False,
-            )
-
-            # Update the loan's schedule instead of creating a new loan
-            loan.term_months = term_months
-            loan.repayment_frequency = frequency
-            loan.maturity_date = schedule_rows[-1]["due_date"]
-            loan.total_repayable = totals["total_repayable_exclusive"]
-            loan.total_interest = totals["total_interest"]
-            loan.outstanding_balance = outstanding_amount
-            loan.save()
-
-            # Delete old schedule and create new one
-            LoanSchedule.objects.filter(loan=loan).delete()
-            LoanSchedule.objects.bulk_create([
-                LoanSchedule(
-                    loan=loan,
-                    period_number=row["period_number"],
-                    due_date=row["due_date"],
-                    opening_balance=row["opening_balance"],
-                    principal_due=row["principal_due"],
-                    interest_due=row["interest_due"],
-                    total_payment=row["total_payment"],
-                    closing_balance=row["closing_balance"],
-                )
-                for row in schedule_rows
-            ])
-
-            messages.success(request, f"Loan {loan.loan_number} has been rescheduled.")
-            # HTMX: return small fragment to close modal and refresh
-            if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
-                from django.urls import reverse
-                return render(request, 'loans/htmx_success.html', {
-                    'message': f'Loan {loan.loan_number} has been rescheduled.',
-                    'redirect': '"' + reverse('loans:detail', kwargs={'pk': loan.pk}) + '"',
-                })
-            return redirect("loans:detail", pk=loan.pk)
-
-        except Exception as e:
-            messages.error(request, f"Rescheduling Error: {e}")
-
-    frequency_choices = Loan.RepaymentFrequency.choices
-    context = {
-        "loan": loan,
-        "frequency_choices": frequency_choices,
-        "default_term": loan.term_months,
-        "min_term": loan.product.min_term_months,
-        "max_term": loan.product.max_term_months,
-        "is_reschedule": True,
-        "action_title": "Reschedule Loan",
-        "submit_label": "Reschedule Loan",
-        "helper_text": "This creates a new repayment schedule for the existing loan.",
-        "today": date.today(),
-    }
-    if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
-        return render(request, 'loans/renew_loan_fragment.html', context)
-    return render(request, "loans/renew_loan.html", context)
 
 # ------------------------------------------------------------------ #
 # Loan renewal / roll-over                                              #
@@ -1489,6 +1422,8 @@ def loan_approve(request, pk):
             frequency=loan.repayment_frequency,
             start_date=disbursement_date,
             include_processing_fee=False,
+            interest_rate_monthly=loan.interest_rate_monthly,
+            interest_method=loan.interest_method,
         )
 
         # Replace existing schedule with new dates/payments
@@ -1542,6 +1477,131 @@ def loan_approve(request, pk):
         logging.exception('Failed to create disbursement audit for loan %s on approval', loan.pk)
 
     messages.success(request, f"Loan {loan.loan_number} approved and activated.")
+    return redirect("loans:detail", pk=pk)
+
+
+@_require_role("CEO")
+def loan_write_off(request, pk):
+    """Write off a loan that's uncollectable (e.g. long-defaulted, client untraceable).
+
+    The model already had write_off_reason / write_off_approved_by fields
+    and a WRITTEN_OFF status, but nothing ever set them — this is that
+    missing action.
+
+    Like loan_reschedule/loan_renew, this is a GET/POST hybrid: GET (or an
+    HTMX GET) renders the confirmation form for the Loan Actions modal, POST
+    performs the write-off. Only reachable once the loan is past the
+    company's auto_write_off_days threshold (see loans.views.loan_detail's
+    can_write_off) — enforced again here since this is also a directly
+    postable URL.
+    """
+    loan = get_object_or_404(Loan.objects.select_related("client", "product"), pk=pk)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("loans:list")
+    if loan.status not in (Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED, Loan.Status.DEFAULTED):
+        messages.error(request, "Only active, restructured, or defaulted loans can be written off.")
+        return redirect("loans:detail", pk=pk)
+
+    from accounts.models import CompanySettings
+    write_off_threshold_days = getattr(CompanySettings.get(), "auto_write_off_days", 180)
+    if loan.days_overdue < write_off_threshold_days:
+        messages.error(
+            request,
+            f"This loan is only {loan.days_overdue} days overdue — it can't be written off until it passes "
+            f"the {write_off_threshold_days}-day threshold configured in Company Settings.",
+        )
+        return redirect("loans:detail", pk=pk)
+
+    is_htmx = request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true'
+
+    if request.method == "POST":
+        reason = request.POST.get("write_off_reason", "").strip()
+        if not reason:
+            messages.error(request, "A write-off reason is required.")
+            return redirect("loans:detail", pk=pk)
+
+        with transaction.atomic():
+            loan.status = Loan.Status.WRITTEN_OFF
+            loan.write_off_reason = reason
+            loan.write_off_approved_by = request.user
+            loan.outstanding_balance = Decimal("0")
+            loan.save()
+
+            # Remaining schedule entries are marked WAIVED so they stop showing
+            # as due/overdue and stop generating collection reminders. Marked
+            # waived_by_writeoff=True so a later reinstate() only reverts entries
+            # this action touched — not any independent fee waiver.
+            LoanSchedule.objects.filter(
+                loan=loan,
+                status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE, LoanSchedule.Status.PARTIAL],
+            ).update(status=LoanSchedule.Status.WAIVED, waived_by_writeoff=True)
+
+        messages.success(request, f"Loan {loan.loan_number} has been written off.")
+        if is_htmx:
+            from django.urls import reverse
+            return render(request, 'loans/htmx_success.html', {
+                'message': f'Loan {loan.loan_number} has been written off.',
+                'redirect': '"' + reverse('loans:detail', kwargs={'pk': loan.pk}) + '"',
+            })
+        return redirect("loans:detail", pk=pk)
+
+    # GET (or after a validation error above): render the confirmation form.
+    context = {
+        "loan": loan,
+        "write_off_threshold_days": write_off_threshold_days,
+    }
+    return render(request, 'loans/write_off_fragment.html', context)
+
+
+@_require_role("CEO")
+@require_POST
+def loan_reinstate(request, pk):
+    """Reverse a write-off after a settlement/agreement with the client.
+
+    Restores exactly the schedule entries the write-off waived (tracked via
+    waived_by_writeoff — untouched fee waivers are left alone), recomputes
+    the outstanding balance from what's actually still owed, and moves the
+    loan back to ACTIVE. The original write-off reason/approver are kept as
+    history; a reinstatement reason is required alongside them.
+    """
+    loan = get_object_or_404(Loan, pk=pk, status=Loan.Status.WRITTEN_OFF)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("loans:list")
+
+    reason = request.POST.get("reinstatement_reason", "").strip()
+    if not reason:
+        messages.error(request, "A reinstatement reason is required.")
+        return redirect("loans:detail", pk=pk)
+
+    today = date.today()
+    with transaction.atomic():
+        restored = LoanSchedule.objects.filter(loan=loan, waived_by_writeoff=True)
+        for entry in restored:
+            entry.status = LoanSchedule.Status.OVERDUE if entry.due_date < today else LoanSchedule.Status.PENDING
+            entry.waived_by_writeoff = False
+            entry.save(update_fields=["status", "waived_by_writeoff"])
+
+        loan.status = Loan.Status.ACTIVE
+        loan.reinstated_at = timezone.now()
+        loan.reinstated_by = request.user
+        loan.reinstatement_reason = reason
+        # Recompute outstanding balance from what's actually still owed
+        # across the restored (and any never-waived) unpaid entries.
+        loan.outstanding_balance = LoanSchedule.objects.filter(
+            loan=loan,
+        ).exclude(status=LoanSchedule.Status.PAID).exclude(status=LoanSchedule.Status.WAIVED).aggregate(
+            total=Sum("total_payment") 
+        )["total"] or Decimal("0")
+        # Subtract any partial payments already recorded against those entries
+        already_paid = LoanSchedule.objects.filter(loan=loan).exclude(
+            status=LoanSchedule.Status.PAID
+        ).exclude(status=LoanSchedule.Status.WAIVED).aggregate(total=Sum("amount_paid"))["total"] or Decimal("0")
+        loan.outstanding_balance = loan.outstanding_balance - already_paid
+        loan.save()
+
+    messages.success(request, f"Loan {loan.loan_number} has been reinstated and is active again.")
     return redirect("loans:detail", pk=pk)
 
 
