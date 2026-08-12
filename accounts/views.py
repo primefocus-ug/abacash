@@ -26,7 +26,7 @@ from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
-from .branch_scope import scope_to_branch
+from .branch_scope import scope_to_branch, effective_branch_id
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
 
@@ -287,27 +287,42 @@ def _ceo_dashboard(request, today):
 
     month_start = today.replace(day=1)
 
+    # CEO's nav-switcher branch selection (None = all branches). This makes
+    # the dashboard consistent with Loans/Clients/Payments/Reports, which
+    # all honour the same switcher via effective_branch_id/scope_to_branch.
+    branch_id = effective_branch_id(request)
+
     all_active = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
-    total_portfolio = all_active.aggregate(total=Sum("principal_amount"))["total"] or 0
-    total_outstanding = all_active.aggregate(total=Sum("outstanding_balance"))["total"] or 0
-    total_interest = all_active.aggregate(total=Sum("total_interest"))["total"] or 0
-
-    collected_month = Payment.objects.filter(
-        payment_date__gte=month_start, status="ALLOCATED"
-    )
-    collected_total = collected_month.aggregate(total=Sum("amount_received"))["total"] or 0
-    interest_income = collected_month.aggregate(total=Sum("interest_paid"))["total"] or 0
-
-    # PAR calculation
+    collected_month = Payment.objects.filter(payment_date__gte=month_start, status="ALLOCATED")
     overdue_30 = Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
         schedule__due_date__lt=today,
         schedule__status__in=["PENDING", "OVERDUE"],
     ).distinct()
-    overdue_count = overdue_30.count()
+    total_clients_qs = Client.objects.filter(is_active=True)
+    pending_loans_qs = Loan.objects.filter(status="PENDING")
+    recent_loans_qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED", "COMPLETED"])
+    risk_base_qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
 
-    total_clients = Client.objects.filter(is_active=True).count()
-    pending_count = Loan.objects.filter(status="PENDING").count()
+    if branch_id is not None:
+        all_active = all_active.filter(branch_id=branch_id)
+        collected_month = collected_month.filter(loan__branch_id=branch_id)
+        overdue_30 = overdue_30.filter(branch_id=branch_id)
+        total_clients_qs = total_clients_qs.filter(branch_id=branch_id)
+        pending_loans_qs = pending_loans_qs.filter(branch_id=branch_id)
+        recent_loans_qs = recent_loans_qs.filter(branch_id=branch_id)
+        risk_base_qs = risk_base_qs.filter(branch_id=branch_id)
+
+    total_portfolio = all_active.aggregate(total=Sum("principal_amount"))["total"] or 0
+    total_outstanding = all_active.aggregate(total=Sum("outstanding_balance"))["total"] or 0
+    total_interest = all_active.aggregate(total=Sum("total_interest"))["total"] or 0
+
+    collected_total = collected_month.aggregate(total=Sum("amount_received"))["total"] or 0
+    interest_income = collected_month.aggregate(total=Sum("interest_paid"))["total"] or 0
+
+    overdue_count = overdue_30.count()
+    total_clients = total_clients_qs.count()
+    pending_count = pending_loans_qs.count()
 
     # Last 12 months collection for chart
     historical_data = []
@@ -316,6 +331,8 @@ def _ceo_dashboard(request, today):
         ms = d.replace(day=1)
         me = ms + relativedelta(months=1)
         pmts = Payment.objects.filter(payment_date__gte=ms, payment_date__lt=me, status="ALLOCATED")
+        if branch_id is not None:
+            pmts = pmts.filter(loan__branch_id=branch_id)
         historical_data.append({
             "label": ms.strftime("%b %Y"),
             "collected": float(pmts.aggregate(total=Sum("amount_received"))["total"] or 0),
@@ -329,6 +346,8 @@ def _ceo_dashboard(request, today):
         ms = d.replace(day=1)
         me = ms + relativedelta(months=1)
         expenses = Expense.objects.filter(expense_date__gte=ms, expense_date__lt=me)
+        if branch_id is not None:
+            expenses = expenses.filter(branch_id=branch_id)
         expense_history.append({
             "label": ms.strftime("%b %Y"),
             "value": float(expenses.aggregate(total=Sum("amount"))["total"] or 0),
@@ -336,6 +355,8 @@ def _ceo_dashboard(request, today):
 
     expense_start = (today - relativedelta(months=period_months - 1)).replace(day=1)
     expenses = Expense.objects.filter(expense_date__gte=expense_start, expense_date__lte=today)
+    if branch_id is not None:
+        expenses = expenses.filter(branch_id=branch_id)
     total_expenses = expenses.aggregate(total=Sum("amount"))["total"] or 0
     # Group by TransactionCategory name
     from collections import defaultdict
@@ -347,28 +368,28 @@ def _ceo_dashboard(request, today):
     if not expense_data:
         expense_data = [{"label": "No Expenses", "value": 1}]
 
+    # Capital injections are company-wide (not tied to a branch), so they
+    # deliberately stay unfiltered regardless of the branch switcher.
     injections = CapitalInjection.objects.filter(injected_date__gte=expense_start, injected_date__lte=today)
     total_injections = injections.aggregate(total=Sum("amount"))["total"] or 0
 
     # Recent loans for loan book table
-    recent_loans = Loan.objects.filter(
-        status__in=["ACTIVE", "RESTRUCTURED", "COMPLETED"]
-    ).select_related("client", "product").order_by("-disbursement_date")[:20]
+    recent_loans = recent_loans_qs.select_related("client", "product").order_by("-disbursement_date")[:20]
 
-    # Branch performance
-    branches = Branch.objects.filter(is_active=True).annotate(
+    # Branch performance — when a single branch is selected, show just that
+    # branch instead of the full company-wide comparison table.
+    branches_qs = Branch.objects.filter(is_active=True)
+    if branch_id is not None:
+        branches_qs = branches_qs.filter(pk=branch_id)
+    branches = branches_qs.annotate(
         loan_count=Count("loans", filter=Q(loans__status__in=["ACTIVE", "RESTRUCTURED"])),
         total_disbursed=Sum("loans__principal_amount", filter=Q(loans__disbursement_date__gte=month_start)),
     )
 
     # Risk distribution
     risk_distribution = {
-        "LOW": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="LOW").count(),
-        "NORMAL": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="NORMAL").count(),
-        "WATCH": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="WATCH").count(),
-        "SUBSTANDARD": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="SUBSTANDARD").count(),
-        "DOUBTFUL": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="DOUBTFUL").count(),
-        "LOSS": Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"], risk_rating="LOSS").count(),
+        rating: risk_base_qs.filter(risk_rating=rating).count()
+        for rating in ["LOW", "NORMAL", "WATCH", "SUBSTANDARD", "DOUBTFUL", "LOSS"]
     }
 
     context = {
@@ -646,7 +667,7 @@ def branch_create(request):
     return render(request, "accounts/branch_form.html", {
         "title": "Create Branch",
         "action": "create",
-        "managers": User.objects.filter(is_active=True, role__in=["MANAGER", "CEO"]),
+        "managers": User.objects.filter(is_active=True).order_by("first_name", "last_name", "username"),
     })
 
 
@@ -675,7 +696,7 @@ def branch_edit(request, pk):
         "title": f"Edit Branch — {branch.name}",
         "action": "edit",
         "branch": branch,
-        "managers": User.objects.filter(is_active=True, role__in=["MANAGER", "CEO"]),
+        "managers": User.objects.filter(is_active=True).order_by("first_name", "last_name", "username"),
     })
 
 

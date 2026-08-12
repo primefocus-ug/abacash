@@ -43,7 +43,7 @@ def _database_from_url(url: str) -> dict:
 # Get DATABASE_URL from environment with a fallback
 DATABASE_URL = config(
     "DATABASE_URL",
-    default="postgres://postgres:@Developer25@localhost:5432/db"
+    default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
 )
 
 DATABASES = {
@@ -147,6 +147,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "config.context_processors.company",
+                "config.context_processors.active_branch_filter",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",

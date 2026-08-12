@@ -9680,3 +9680,145 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'password_reset_done' not fou
 2026-07-30 16:50:12 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
 2026-07-30 16:50:36 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
 2026-07-30 16:50:36 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-08-12 08:27:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 08:29:48 [INFO] django.server: "GET / HTTP/1.1" 301 0
+2026-08-12 08:29:48 [INFO] django.server: code 400, message Bad request version ('\x00\x02\x01\x00\x00')
+2026-08-12 08:29:48 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 08:29:48 [INFO] django.server: code 400, message Bad request version ('K\x88U\x8b¼)µ}\x15twÝÙ£\x82äp¦b\x95ÏÊ³îËÌý\x9am÷!É')
+2026-08-12 08:29:48 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 08:29:58 [INFO] django.server: "GET / HTTP/1.1" 301 0
+2026-08-12 08:29:58 [INFO] django.server: code 400, message Bad request version ('ÂË')
+2026-08-12 08:29:58 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 08:29:58 [INFO] django.server: code 400, message Bad request version ('«\x81ÃË¯ê¶0\x01\x0eAyxÂ\x87ÇÀu\x00')
+2026-08-12 08:29:58 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 08:33:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 08:33:54 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-08-12 08:33:55 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-12 08:33:55 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-08-12 08:34:08 [INFO] django.server: "GET / HTTP/1.1" 200 14161
+2026-08-12 08:34:09 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-12 08:34:17 [WARNING] django.request: Not Found: /favicon.ico
+2026-08-12 08:34:17 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-08-12 08:34:30 [WARNING] django.request: Not Found: /favicon.ico
+2026-08-12 08:34:31 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-08-12 08:35:29 [INFO] django.server: "POST / HTTP/1.1" 200 14340
+2026-08-12 08:37:55 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-08-12 08:37:56 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168488
+2026-08-12 08:37:58 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-08-12 08:37:58 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:55:50 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 08:55:52 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168496
+2026-08-12 08:55:53 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:56:14 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 142111
+2026-08-12 08:56:14 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:56:38 [INFO] django.server: "GET /accounts/admin-panel/users/4/edit/ HTTP/1.1" 200 141264
+2026-08-12 08:56:38 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:57:07 [INFO] django.server: "POST /accounts/admin-panel/users/4/edit/ HTTP/1.1" 302 0
+2026-08-12 08:57:07 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 142624
+2026-08-12 08:57:07 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:57:17 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 08:57:17 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 08:57:36 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 08:57:37 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 125198
+2026-08-12 08:57:37 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:57:43 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 129676
+2026-08-12 08:57:43 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:58:01 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 08:58:01 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 08:58:43 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 08:58:43 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168488
+2026-08-12 08:58:43 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:58:55 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 142103
+2026-08-12 08:58:55 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:59:00 [INFO] django.server: "GET /accounts/admin-panel/users/4/edit/ HTTP/1.1" 200 141256
+2026-08-12 08:59:00 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:59:10 [INFO] django.server: "POST /accounts/admin-panel/users/4/edit/ HTTP/1.1" 302 0
+2026-08-12 08:59:10 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 142617
+2026-08-12 08:59:10 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:59:25 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 08:59:25 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 08:59:46 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 08:59:46 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 115484
+2026-08-12 08:59:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 08:59:52 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 08:59:52 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 09:00:29 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 09:00:29 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168488
+2026-08-12 09:00:29 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:00:33 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 148924
+2026-08-12 09:00:33 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:00:36 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 138078
+2026-08-12 09:00:36 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:01:16 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 148924
+2026-08-12 09:01:16 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:01:38 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 142104
+2026-08-12 09:01:38 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:01:40 [INFO] django.server: "GET /accounts/admin-panel/users/new/ HTTP/1.1" 200 141249
+2026-08-12 09:01:40 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:02:17 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168488
+2026-08-12 09:02:18 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:02:28 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 139072
+2026-08-12 09:02:28 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:02:34 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:02:34 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 139080
+2026-08-12 09:02:34 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:02:38 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:02:38 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 139080
+2026-08-12 09:02:38 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:02:45 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 147097
+2026-08-12 09:02:45 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:04:23 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-08-12 09:04:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 09:07:14 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/accounts/views.py changed, reloading.
+2026-08-12 09:07:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 09:10:11 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/loans/views.py changed, reloading.
+2026-08-12 09:10:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 09:10:44 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 148078
+2026-08-12 09:10:45 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:10:59 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:10:59 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 148664
+2026-08-12 09:10:59 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:06 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:11:06 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 146347
+2026-08-12 09:11:06 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:11 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:11:12 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 148078
+2026-08-12 09:11:12 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:24 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:11:24 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 148664
+2026-08-12 09:11:24 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:37 [INFO] django.server: "GET /payments/receipt/0f9a7d42-9f5f-498d-bd8e-b30a39c889ac/ HTTP/1.1" 200 139948
+2026-08-12 09:11:37 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168498
+2026-08-12 09:11:47 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:11:55 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-08-12 09:11:55 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 166497
+2026-08-12 09:11:55 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:12:26 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:12:27 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-12 09:12:27 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3035
+2026-08-12 09:20:09 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 166497
+2026-08-12 09:20:38 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:22:00 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 166497
+2026-08-12 09:22:01 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:22:23 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:22:23 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-12 09:22:23 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3035
+2026-08-12 09:34:12 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 09:34:26 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-12 09:34:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 166497
+2026-08-12 09:34:27 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:34:27 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 304 0
+2026-08-12 09:34:29 [WARNING] django.request: Not Found: /favicon.ico
+2026-08-12 09:34:29 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-08-12 09:35:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 166497
+2026-08-12 09:35:01 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:35:07 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 149934
+2026-08-12 09:35:07 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:35:11 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 139200
+2026-08-12 09:35:12 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:39:26 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 141189
+2026-08-12 09:39:27 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:44:43 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 141482
+2026-08-12 09:44:43 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 09:46:10 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.

@@ -19,7 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from accounts.models import CompanySettings, Branch
+from accounts.models import CompanySettings
 from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
 from clients.models import Client
 from .models import (
@@ -128,8 +128,6 @@ def loan_list(request):
         "staff_choices":  staff_choices,
         "staff_filter":   staff_filter,
         "search":         search,
-        "branches":       Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
-        "selected_branch": request.GET.get("branch", ""),
     }
     return render(request, "loans/loan_list.html", context)
 
