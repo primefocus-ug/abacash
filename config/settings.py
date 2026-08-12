@@ -41,10 +41,16 @@ def _database_from_url(url: str) -> dict:
 
 
 # Get DATABASE_URL from environment with a fallback
-DATABASE_URL = config(
-    "DATABASE_URL",
-    default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
-)
+if DEBUG:
+    DATABASE_URL = config(
+        "DATABASE_URL",
+        default="postgres://postgres:@Developer25@localhost:5432/db"
+    )
+else:
+    DATABASE_URL = config(
+        "DATABASE_URL",
+        default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
+    )
 
 DATABASES = {
     "default": _database_from_url(DATABASE_URL)
@@ -240,8 +246,13 @@ LOGGING = {
 
 AUTHENTICATION_BACKENDS = [
     # Replaces ModelBackend: same behaviour, but also matches on email.
+    # This is intentionally the ONLY backend — allauth's own
+    # AuthenticationBackend was previously listed here too, but it isn't
+    # used anywhere else in the app (no allauth URLs/views/signals wired
+    # up) and its lookup crashes with MultipleObjectsReturned whenever two
+    # users share an email in different casing, instead of falling back
+    # gracefully the way EmailOrUsernameModelBackend does.
     "accounts.backends.EmailOrUsernameModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 ACCOUNT_EMAIL_VERIFICATION = "none"

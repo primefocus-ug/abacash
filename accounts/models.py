@@ -73,18 +73,32 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
     def get_by_natural_key(self, username):
-        """Allow login by email or username."""
+        """Allow login by email or username.
+
+        Case-insensitive matching (email__iexact/username__iexact) means a
+        pair of accounts differing only by letter-case can both match the
+        same lookup — the DB's unique=True constraint is case-sensitive and
+        won't have caught that. Rather than raising MultipleObjectsReturned
+        here (which previously crashed login), fall back to the oldest
+        matching row, same as EmailOrUsernameModelBackend already does.
+        """
         try:
             # Try by email first
             return self.get(email__iexact=username)
+        except self.model.MultipleObjectsReturned:
+            return self.filter(email__iexact=username).order_by("id").first()
         except self.model.DoesNotExist:
             try:
                 # Try by username
                 return self.get(username__iexact=username)
+            except self.model.MultipleObjectsReturned:
+                return self.filter(username__iexact=username).order_by("id").first()
             except self.model.DoesNotExist:
                 try:
                     # Try by phone
                     return self.get(phone=username)
+                except self.model.MultipleObjectsReturned:
+                    return self.filter(phone=username).order_by("id").first()
                 except self.model.DoesNotExist:
                     raise self.model.DoesNotExist(
                         f"No user found with email, username, or phone: {username}"
