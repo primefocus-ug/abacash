@@ -100,7 +100,7 @@ def client_list(request):
         "search": search,
         "status": status,
         "per_page": per_page,
-        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
+        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.can("can_view_all_branches") else None,
         "selected_branch": request.GET.get("branch", ""),
     })
 
@@ -152,7 +152,7 @@ def client_create(request):
 
         client_branch = None
         branch_error = None
-        if request.user.is_ceo:
+        if request.user.can("can_view_all_branches"):
             branch_id = d.get("branch", "").strip()
             client_branch = Branch.objects.filter(pk=branch_id, is_active=True).first() if branch_id else None
             if not client_branch:
@@ -257,8 +257,8 @@ def client_create(request):
 def client_edit(request, pk):
     client = get_object_or_404(Client, pk=pk)
 
-    if not (request.user.is_manager or request.user.is_ceo):
-        messages.error(request, "Only Managers and the CEO can edit client records.")
+    if not request.user.can("can_manage_clients"):
+        messages.error(request, "You do not have permission to edit client records.")
         return redirect("clients:detail", pk=pk)
 
     if not can_access_branch_object(request.user, client):
@@ -325,8 +325,8 @@ def client_edit(request, pk):
                 client.notes             = d.get("notes", "").strip()
                 if request.FILES.get("passport_photo"):
                     client.passport_photo = request.FILES["passport_photo"]
-                # CEO can toggle blacklist and reassign branch
-                if request.user.is_ceo:
+                # Users who can see across branches can also toggle blacklist and reassign branch
+                if request.user.can("can_view_all_branches"):
                     client.is_blacklisted    = d.get("is_blacklisted") == "on"
                     client.blacklist_reason  = d.get("blacklist_reason", "").strip()
                     client.is_active         = d.get("is_active") == "on"

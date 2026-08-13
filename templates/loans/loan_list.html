@@ -102,7 +102,7 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                 Continue
               </a>
-              {% if user == loan.applied_by or user.is_manager or user.is_ceo %}
+              {% if user == loan.applied_by or perms.accounts.can_edit_any_loan %}
               <form method="post" action="{% url 'loans:draft_delete' loan.pk %}" style="margin:0;" onsubmit="return confirm('Delete draft {{ loan.loan_number }}? This cannot be undone.');">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger btn-sm" title="Delete draft">

@@ -8,9 +8,40 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="{{ company.name }}">
-    {% if company_settings.company_logo %}
-    <link rel="apple-touch-icon" href="{{ company_settings.company_logo.url }}">
-    {% endif %}
+    <!-- iOS ignores the manifest's icons entirely — it always wants a
+         dedicated apple-touch-icon link. Point it at our generated,
+         always-square 192px icon (logo-based or initials fallback)
+         rather than the raw uploaded logo, which may not be square and
+         will get badly cropped by iOS's own mask. -->
+    <link rel="apple-touch-icon" href="{% url 'pwa_icon' size=192 %}">
+
+    <!-- ── PWA: manifest + iOS/Android install support ─────────── -->
+    <link rel="manifest" href="{% url 'pwa_manifest' %}">
+    <meta name="application-name" content="{{ company.name }}">
+
+    <!-- Capture beforeinstallprompt as EARLY as possible, before the
+         button/listener script near the end of <body> even runs. Chrome
+         can fire this event immediately once its installability checks
+         pass — if we only start listening at the bottom of the page,
+         we can miss it and the Install button silently never has a
+         prompt to show, even though it becomes visible. -->
+    <script>
+        window.__pwaDeferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            window.__pwaDeferredPrompt = e;
+            console.log('[PWA] beforeinstallprompt captured early');
+            var btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.hidden = false;
+        });
+        window.addEventListener('appinstalled', function () {
+            console.log('[PWA] app installed');
+            window.__pwaDeferredPrompt = null;
+            var btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.hidden = true;
+        });
+    </script>
+
     <title>{% block title %}{{ company.name }}{% endblock %} — Loan Management</title>
     {% load static aba_filters %}
 
@@ -18,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/abca.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aba.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     {% block extra_css %}{% endblock %}
 
@@ -2137,49 +2168,103 @@
             color: var(--teal-400);
         }
 
+
         @media print {
+            /* the receipt has its own header/company name — suppress the
+               generic report print-header and print-footer so they don't
+               stack on top of / compress the receipt's own design */
+            body:has(.receipt-wrap) .print-header,
+            body:has(.receipt-wrap) .print-footer {
+                display: none !important;
+            }
+
+            body:has(.receipt-wrap) {
+                font-size: 14px !important;
+            }
+
             .receipt-wrap {
+                max-width: 640px;
+                margin: 0 auto;
                 border: none;
                 background: #fff;
                 color: #000;
-                text-align: center;
+                padding: 0;
             }
 
             .receipt-header {
                 text-align: center;
+                margin-bottom: 28px !important;
             }
 
             .receipt-header > div:first-child {
+                color: #000 !important;
                 font-weight: 700 !important;
+                font-size: 26px !important;
+            }
+
+            .receipt-header > div[style*="color:var(--text-muted)"] {
+                color: #444 !important;
+                font-size: 13px !important;
+            }
+
+            .receipt-number {
+                color: #000 !important;
+                font-size: 22px !important;
             }
 
             .receipt-row {
-                display: block;
-                text-align: center;
-                border-bottom: 1px dashed #ccc;
-                padding: 6px 0;
+                display: flex;
+                justify-content: space-between;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+                padding: 10px 0 !important;
+                font-size: 14px !important;
             }
 
             .receipt-label {
-                display: block;
+                color: #444 !important;
+                font-weight: 600;
+            }
+
+            .receipt-row span:last-child,
+            .receipt-row .mono {
                 color: #000 !important;
-                font-weight: 700;
-                text-transform: uppercase;
-                font-size: 11px;
-                letter-spacing: 0.03em;
+                font-size: 14px !important;
             }
 
             .receipt-total {
-                color: #000;
+                color: #000 !important;
                 font-weight: 700;
+                font-size: 22px !important;
+            }
+
+            .receipt-row[style*="font-weight:600"] span:first-child {
+                font-size: 17px !important;
+            }
+
+            /* neutralize the balance-after status color (green/amber) for print */
+            .receipt-wrap [style*="color:var(--green-400)"],
+            .receipt-wrap [style*="color:var(--amber-400)"] {
+                color: #000 !important;
             }
 
             .receipt-wrap div[style*="text-align:center"] {
                 font-weight: 600;
+                font-size: 13px !important;
             }
 
             .receipt-wrap div[style*="text-align:center"] strong {
                 font-weight: 800;
+            }
+
+            /* the receipt's own success/fully-repaid alert should still print */
+            .receipt-wrap .alert {
+                display: block !important;
+                border: 1px solid #ccc !important;
+                background: #fff !important;
+                color: #000 !important;
+                box-shadow: none !important;
+                font-size: 14px !important;
             }
 
             .aba-table th, .aba-table td {
@@ -3437,7 +3522,7 @@
                         <span>New Loan</span>
                     </a>
 
-                    {% if user.is_ceo %}
+                    {% if perms.accounts.can_manage_loan_products %}
                     <a href="{% url 'loans:products' %}"
                        class="nav-link {% if ns == 'loans' and name == 'products' or ns == 'loans' and name == 'products_create' or ns == 'loans' and name == 'products_edit' %}active{% endif %}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -3471,7 +3556,7 @@
             {% endif %}
 
             <!-- INSIGHTS -->
-            {% if user.is_manager or user.is_ceo %}
+            {% if perms.accounts.can_view_reports or perms.accounts.can_manage_guarantors %}
             <div class="nav-group" data-group="insights">
                 <button type="button" class="nav-group-toggle" aria-expanded="false">
                     <span class="nav-group-label">Insights</span>
@@ -3503,7 +3588,7 @@
             {% endif %}
 
             <!-- FINANCIAL -->
-            {% if user.is_ceo %}
+            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
             <div class="nav-group" data-group="financial">
                 <button type="button" class="nav-group-toggle" aria-expanded="false">
                     <span class="nav-group-label">Financial</span>
@@ -3647,6 +3732,17 @@
                         <span>Audit Log</span>
                     </a>
 
+                    {% if perms.accounts.can_manage_permissions %}
+                    <a href="{% url 'accounts:permissions_manage' %}"
+                       class="nav-link {% if ns == 'accounts' and name == 'permissions_manage' %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <span>Roles & Permissions</span>
+                    </a>
+                    {% endif %}
+
                 </div>
             </div>
             {% endif %}
@@ -3688,7 +3784,7 @@
             <div class="topbar-title">{% block page_title %}{% endblock %}</div>
 
             <div class="topbar-actions">
-                {% if user.is_ceo %}
+                {% if perms.accounts.can_view_all_branches %}
                 <form method="post" action="{% url 'accounts:set_branch_filter' %}" id="branch-switcher-form" style="display:flex;align-items:center;gap:6px;">
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ request.path }}">
@@ -3702,6 +3798,14 @@
                     </select>
                 </form>
                 {% endif %}
+                <button type="button" class="btn btn-primary btn-sm" id="pwaInstallBtn" hidden>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Install App</span>
+                </button>
                 <button type="button" class="btn btn-secondary btn-sm" id="theme-toggle" aria-label="Toggle theme">
                     <svg id="theme-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2">
@@ -3910,7 +4014,7 @@
                     <span>New Loan</span>
                 </a>
 
-                {% if user.is_ceo %}
+                {% if perms.accounts.can_manage_loan_products %}
                 <a href="{% url 'loans:products' %}"
                    class="more-sheet-link {% if ns == 'loans' and name == 'products' or ns == 'loans' and name == 'products_create' or ns == 'loans' and name == 'products_edit' %}active{% endif %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -3941,7 +4045,7 @@
             </div>
             {% endif %}
 
-            {% if user.is_manager or user.is_ceo %}
+            {% if perms.accounts.can_view_reports or perms.accounts.can_manage_guarantors %}
             <div class="more-sheet-section">
                 <div class="more-sheet-section-title">Insights</div>
                 <a href="{% url 'reports:index' %}" class="more-sheet-link {% if ns == 'reports' %}active{% endif %}">
@@ -3955,7 +4059,7 @@
             </div>
             {% endif %}
 
-            {% if user.is_ceo %}
+            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
             <div class="more-sheet-section">
                 <div class="more-sheet-section-title">Financial</div>
 
@@ -4081,6 +4185,17 @@
                     </svg>
                     <span>Audit Log</span>
                 </a>
+
+                {% if perms.accounts.can_manage_permissions %}
+                <a href="{% url 'accounts:permissions_manage' %}"
+                   class="more-sheet-link {% if ns == 'accounts' and name == 'permissions_manage' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Roles & Permissions</span>
+                </a>
+                {% endif %}
             </div>
             {% endif %}
 
@@ -4343,6 +4458,58 @@
                 hideModal();
             }
         });
+    })();
+</script>
+
+<!-- ══════════════════════════════════════════
+     PWA — service worker registration + install prompt
+══════════════════════════════════════════ -->
+<script>
+    (function () {
+        if (!('serviceWorker' in navigator)) {
+            console.log('[PWA] service worker not supported in this browser');
+            return;
+        }
+
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function (reg) {
+                console.log('[PWA] service worker registered, scope:', reg.scope);
+            }).catch(function (err) {
+                console.warn('[PWA] SW registration failed:', err);
+            });
+        });
+
+        /* ─── Install button: beforeinstallprompt is captured as early
+               as possible in <head> (window.__pwaDeferredPrompt), since
+               Chrome can fire it before this bottom-of-page script runs.
+               This block just wires the click handler and picks up
+               whatever was captured, however early it happened. ─── */
+        var installBtn = document.getElementById('pwaInstallBtn');
+
+        if (!installBtn) {
+            console.warn('[PWA] #pwaInstallBtn not found in DOM — install button will not work');
+        } else {
+            // in case the event already fired before this ran
+            if (window.__pwaDeferredPrompt) {
+                installBtn.hidden = false;
+            }
+
+            installBtn.addEventListener('click', function () {
+                console.log('[PWA] install button clicked, deferredPrompt =', window.__pwaDeferredPrompt);
+                if (!window.__pwaDeferredPrompt) {
+                    console.warn('[PWA] no captured install prompt — either already installed, ' +
+                                 'criteria not met, or the browser dismissed it earlier this session');
+                    return;
+                }
+                installBtn.hidden = true;
+                window.__pwaDeferredPrompt.prompt();
+                window.__pwaDeferredPrompt.userChoice.then(function (choice) {
+                    console.log('[PWA] user choice:', choice.outcome);
+                }).finally(function () {
+                    window.__pwaDeferredPrompt = null;
+                });
+            });
+        }
     })();
 </script>
 </body>

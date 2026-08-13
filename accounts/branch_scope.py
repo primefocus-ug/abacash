@@ -1,8 +1,10 @@
 """
 Single source of truth for "who can see which branch's data".
 
-Rule (per product decision): CEOs see every branch. Managers and Cashiers
-are restricted to their own branch. A staff member with no branch assigned
+Rule (per product decision): anyone with the can_view_all_branches
+permission (CEOs by default — see accounts/permissions.py, but it's
+grantable to any role/user) sees every branch. Everyone else is
+restricted to their own branch. A staff member with no branch assigned
 sees nothing branch-scoped until an admin assigns one — we deliberately do
 NOT fall back to "show everything" for an unassigned user, since that would
 silently leak other branches' data.
@@ -22,7 +24,7 @@ def scope_to_branch(queryset, user, field="branch"):
     - Everyone else with NO branch assigned: filtered to nothing (empty
       queryset) rather than showing all branches by accident.
     """
-    if getattr(user, "is_ceo", False) or getattr(user, "is_superuser", False):
+    if getattr(user, "is_superuser", False) or (hasattr(user, "can") and user.can("can_view_all_branches")):
         return queryset
     branch_id = getattr(user, "branch_id", None)
     if not branch_id:
@@ -36,7 +38,7 @@ def can_access_branch_object(user, obj, field="branch"):
     Mirrors scope_to_branch's rule for the single-object case (detail/edit
     views that fetch by pk before deciding whether to show it).
     """
-    if getattr(user, "is_ceo", False) or getattr(user, "is_superuser", False):
+    if getattr(user, "is_superuser", False) or (hasattr(user, "can") and user.can("can_view_all_branches")):
         return True
     branch_id = getattr(user, "branch_id", None)
     if not branch_id:
@@ -68,7 +70,7 @@ def effective_branch_id(request, param="branch"):
     restriction — only ever returned for a CEO).
     """
     user = request.user
-    if not (getattr(user, "is_ceo", False) or getattr(user, "is_superuser", False)):
+    if not (getattr(user, "is_superuser", False) or (hasattr(user, "can") and user.can("can_view_all_branches"))):
         return user.branch_id or -1
 
     raw = request.GET.get(param, None)

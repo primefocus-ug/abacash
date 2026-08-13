@@ -27,10 +27,32 @@ from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
 from .branch_scope import scope_to_branch, effective_branch_id
+from .permissions import PERMISSIONS, ALL_GROUPS
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
 
 User = get_user_model()
+
+
+def _permission_required(codename):
+    """
+    Decorator factory: restrict a view to users with the given app
+    permission (see accounts/permissions.py for the full list and which
+    Group/role gets each one by default). Replaces the old
+    _ceo_required/_manager_required decorators, which hard-coded role
+    checks instead of going through the permission system.
+    """
+    from functools import wraps
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            if not request.user.can(codename):
+                messages.error(request, "You do not have permission to access that page.")
+                return redirect("accounts:dashboard")
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def _ceo_required(view_func):
@@ -242,7 +264,7 @@ def _manager_dashboard(request, today):
 
     staff_performance = []
     branch_staff = User.objects.filter(is_active=True)
-    if not request.user.is_ceo:
+    if not request.user.can("can_view_all_branches"):
         branch_staff = branch_staff.filter(branch_id=request.user.branch_id) if request.user.branch_id else branch_staff.none()
     for staff in branch_staff.order_by("first_name", "last_name", "username"):
         if staff.is_ceo:
@@ -418,7 +440,7 @@ def _ceo_dashboard(request, today):
     }
     return render(request, "accounts/dashboard_ceo.html", context)
 
-@_ceo_required
+@_permission_required("can_view_admin_panel")
 
 def admin_dashboard(request):
     context = {
@@ -440,7 +462,7 @@ def admin_dashboard(request):
     return render(request, "accounts/admin_dashboard.html", context)
 
 
-@_ceo_required
+@_permission_required("can_view_financial_overview")
 def financial_overview(request):
     """CEO-only financial overview: disbursements, repayments, expenses, injections."""
     from django.db.models import Sum
@@ -503,7 +525,7 @@ def financial_overview(request):
 # User Management                                                      #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_users")
 def user_list(request):
     qs = User.objects.select_related("branch").order_by("role", "first_name")
     q  = request.GET.get("q", "").strip()
@@ -531,7 +553,7 @@ def user_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_users")
 def user_create(request):
     if request.method == "POST":
         d = request.POST
@@ -570,7 +592,7 @@ def user_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_users")
 def user_edit(request, pk):
     staff = get_object_or_404(User, pk=pk)
 
@@ -591,6 +613,36 @@ def user_edit(request, pk):
                     raise ValueError("Passwords do not match.")
                 staff.password = make_password(d["password1"])
             staff.save()
+
+            # Per-user extra permissions, on top of whatever their role's
+            # Group already grants. Only a user with can_manage_permissions
+            # can grant/revoke these — user_edit itself only needs
+            # can_manage_users, so re-check here before touching anything.
+            if request.user.can("can_manage_permissions"):
+                from django.contrib.auth.models import Permission, Group
+                selected = set(d.getlist("extra_permissions"))
+                all_codenames = {codename for codename, _label, _groups in PERMISSIONS}
+                valid_selected = selected & all_codenames
+                perms_qs = Permission.objects.filter(
+                    content_type__app_label="accounts", codename__in=all_codenames
+                )
+                to_grant = perms_qs.filter(codename__in=valid_selected)
+                to_revoke = perms_qs.exclude(codename__in=valid_selected)
+                staff.user_permissions.remove(*to_revoke)
+                staff.user_permissions.add(*to_grant)
+
+                # Custom (non-built-in) group memberships — e.g. a role
+                # like "Loan Officer" created on the Roles & Permissions
+                # page. Built-in role membership (Cashier/Manager/CEO) is
+                # NOT touched here — that's driven entirely by the `role`
+                # field above via accounts.signals.sync_role_group.
+                custom_group_ids = set(d.getlist("extra_groups"))
+                custom_groups_qs = Group.objects.exclude(name__in=ALL_GROUPS)
+                selected_custom = custom_groups_qs.filter(pk__in=custom_group_ids)
+                unselected_custom = custom_groups_qs.exclude(pk__in=custom_group_ids)
+                staff.groups.remove(*unselected_custom)
+                staff.groups.add(*selected_custom)
+
             log_action(request.user, AuditLog.Action.UPDATE, staff, request=request,
                        changes={"role": staff.role, "is_active": staff.is_active},
                        remarks=f"User {staff.full_name} updated")
@@ -599,16 +651,37 @@ def user_edit(request, pk):
         except Exception as e:
             messages.error(request, str(e))
 
+    # Group-granted permissions (from their role) vs their own extra grants,
+    # so the template can show "already have this via role" separately from
+    # "extra, granted specifically to this person".
+    group_codenames = set(
+        staff.groups.filter(name__in=["Cashier", "Manager", "CEO"])
+        .values_list("permissions__codename", flat=True)
+    ) - {None}
+    own_codenames = set(staff.user_permissions.values_list("codename", flat=True))
+
+    from django.contrib.auth.models import Group
+    custom_groups = Group.objects.exclude(name__in=ALL_GROUPS).order_by("name")
+    staff_custom_group_ids = set(
+        staff.groups.exclude(name__in=ALL_GROUPS).values_list("pk", flat=True)
+    )
+
     return render(request, "accounts/user_form.html", {
         "title":       f"Edit — {staff.full_name}",
         "action":      "edit",
         "staff":       staff,
         "role_choices": User.Role.choices,
         "branches": Branch.objects.filter(is_active=True),
+        "can_manage_permissions": request.user.can("can_manage_permissions"),
+        "all_permissions": PERMISSIONS,
+        "group_codenames": group_codenames,
+        "own_codenames": own_codenames,
+        "custom_groups": custom_groups,
+        "staff_custom_group_ids": staff_custom_group_ids,
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_users")
 def user_toggle_active(request, pk):
     staff = get_object_or_404(User, pk=pk)
     if staff == request.user:
@@ -625,7 +698,7 @@ def user_toggle_active(request, pk):
 # Branch Management                                                    #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_branches")
 def branch_list(request):
     qs = Branch.objects.annotate(
         staff_count=Count("staff_members", filter=Q(staff_members__is_active=True)),
@@ -642,7 +715,7 @@ def branch_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_branches")
 def branch_create(request):
     if request.method == "POST":
         d = request.POST
@@ -671,7 +744,7 @@ def branch_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_branches")
 def branch_edit(request, pk):
     branch = get_object_or_404(Branch, pk=pk)
 
@@ -700,7 +773,7 @@ def branch_edit(request, pk):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_branches")
 def branch_detail(request, pk):
     """CEO-only detail/summary page for a single branch."""
     branch = get_object_or_404(Branch, pk=pk)
@@ -782,7 +855,7 @@ def branch_detail(request, pk):
 # Fee Type Management                                                  #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_loan_products")
 def fee_type_list(request):
     qs = FeeType.objects.all().order_by("name")
 
@@ -802,7 +875,7 @@ def fee_type_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_loan_products")
 def fee_type_create(request):
     if request.method == "POST":
         d = request.POST
@@ -831,7 +904,7 @@ def fee_type_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_loan_products")
 def fee_type_edit(request, pk):
     fee_type = get_object_or_404(FeeType, pk=pk)
 
@@ -866,7 +939,7 @@ def fee_type_edit(request, pk):
 # Holiday Management                                                   #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_system_settings")
 def holiday_list(request):
     qs = Holiday.objects.all().order_by("-date")
 
@@ -880,7 +953,7 @@ def holiday_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_system_settings")
 def holiday_create(request):
     if request.method == "POST":
         d = request.POST
@@ -903,7 +976,7 @@ def holiday_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_system_settings")
 def holiday_edit(request, pk):
     holiday = get_object_or_404(Holiday, pk=pk)
 
@@ -932,7 +1005,7 @@ def holiday_edit(request, pk):
 # Company Settings                                                     #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_company_settings")
 def company_settings(request):
     settings_obj = CompanySettings.get()
 
@@ -1015,7 +1088,7 @@ def company_settings(request):
 # Guarantor Management                                                 #
 # ------------------------------------------------------------------ #
 
-@_manager_required
+@_permission_required("can_manage_guarantors")
 def guarantor_list(request):
     qs = Guarantor.objects.select_related("verified_by").order_by("-created_at")
 
@@ -1045,7 +1118,7 @@ def guarantor_list(request):
     })
 
 
-@_manager_required
+@_permission_required("can_manage_guarantors")
 def guarantor_detail(request, pk):
     guarantor = get_object_or_404(Guarantor, pk=pk)
     guarantees = guarantor.guarantees.select_related("loan__client").order_by("-created_at")
@@ -1056,7 +1129,7 @@ def guarantor_detail(request, pk):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_guarantors")
 def guarantor_create(request):
     if request.method == "POST":
         d = request.POST
@@ -1097,7 +1170,7 @@ def guarantor_create_ajax(request):
     """AJAX endpoint to create a guarantor and return JSON {id, full_name}.
     Allowed for managers and CEOs only (not cashiers).
     """
-    if request.user.is_cashier:
+    if not request.user.can("can_manage_guarantors"):
         return JsonResponse({"error": "Insufficient permissions."}, status=403)
 
     if request.method != "POST":
@@ -1129,7 +1202,7 @@ def guarantor_create_ajax(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
-@_ceo_required
+@_permission_required("can_manage_guarantors")
 def guarantor_edit(request, pk):
     guarantor = get_object_or_404(Guarantor, pk=pk)
 
@@ -1154,8 +1227,8 @@ def guarantor_edit(request, pk):
             guarantor.max_liability = d.get("max_liability", "0")
             guarantor.notes = d.get("notes", "").strip()
 
-            # CEO can verify
-            if request.user.is_ceo and d.get("is_verified"):
+            # Users with verification authority can verify
+            if request.user.can("can_verify_guarantors") and d.get("is_verified"):
                 guarantor.is_verified = True
                 guarantor.verification_date = timezone.localdate()
                 guarantor.verified_by = request.user
@@ -1178,7 +1251,7 @@ def guarantor_edit(request, pk):
 # Audit Log                                                            #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_view_audit_log")
 def audit_log(request):
     qs = AuditLog.objects.select_related("user").order_by("-created_at")
 
@@ -1222,10 +1295,87 @@ def audit_log(request):
 
 
 # ------------------------------------------------------------------ #
+# Roles & Permissions                                                  #
+# ------------------------------------------------------------------ #
+
+@_permission_required("can_manage_permissions")
+def permissions_manage(request):
+    """
+    Lets a CEO see/edit which permissions each Group (role) grants, and
+    create new custom Groups (e.g. "Senior Cashier", "Loan Officer") with
+    their own permission set — without any code change or deploy.
+
+    The three built-in groups (Cashier/Manager/CEO) stay in sync with the
+    `role` field on each user via accounts.signals.sync_role_group, so
+    editing their permissions here changes what everyone with that role can
+    do; custom groups are opt-in per user via the "Extra groups" field on
+    their edit page (kept simple for now — group *membership* management
+    beyond the built-in three lives on the user's own edit page, this page
+    is about what each group *grants*).
+    """
+    from django.contrib.auth.models import Group, Permission
+
+    if request.method == "POST":
+        action = request.POST.get("form_action")
+
+        if action == "create_group":
+            name = request.POST.get("new_group_name", "").strip()
+            if not name:
+                messages.error(request, "Group name is required.")
+            elif Group.objects.filter(name=name).exists():
+                messages.error(request, f'A group named "{name}" already exists.')
+            else:
+                Group.objects.create(name=name)
+                messages.success(request, f'Group "{name}" created. Set its permissions below.')
+            return redirect("accounts:permissions_manage")
+
+        if action == "update_group":
+            group_id = request.POST.get("group_id")
+            group = get_object_or_404(Group, pk=group_id)
+            all_codenames = {codename for codename, _label, _groups in PERMISSIONS}
+            selected = set(request.POST.getlist("permissions")) & all_codenames
+            perms_qs = Permission.objects.filter(
+                content_type__app_label="accounts", codename__in=all_codenames
+            )
+            group.permissions.set(perms_qs.filter(codename__in=selected))
+            messages.success(request, f'Updated permissions for "{group.name}".')
+            return redirect("accounts:permissions_manage")
+
+        if action == "delete_group":
+            group_id = request.POST.get("group_id")
+            group = get_object_or_404(Group, pk=group_id)
+            if group.name in ALL_GROUPS:
+                messages.error(request, f'"{group.name}" is a built-in role and can\'t be deleted.')
+            else:
+                name = group.name
+                group.delete()
+                messages.success(request, f'Group "{name}" deleted.')
+            return redirect("accounts:permissions_manage")
+
+    groups = Group.objects.all().order_by("name").prefetch_related("permissions")
+    groups_data = [
+        {
+            "group": g,
+            "is_builtin": g.name in ALL_GROUPS,
+            "granted": set(g.permissions.filter(
+                content_type__app_label="accounts"
+            ).values_list("codename", flat=True)),
+            "member_count": g.user_set.count(),
+        }
+        for g in groups
+    ]
+
+    return render(request, "accounts/permissions_manage.html", {
+        "groups_data": groups_data,
+        "all_permissions": PERMISSIONS,
+    })
+
+
+# ------------------------------------------------------------------ #
 # System Parameters                                                    #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_system_settings")
 def system_parameters(request):
     qs = SystemParameter.objects.order_by("key")
 
@@ -1255,7 +1405,7 @@ def system_parameters(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_system_settings")
 def system_parameter_delete(request, pk):
     param = get_object_or_404(SystemParameter, pk=pk)
     param.delete()
@@ -1263,7 +1413,7 @@ def system_parameter_delete(request, pk):
     return redirect("accounts:system_parameters")
 
 
-@_ceo_required
+@_permission_required("can_manage_expense_categories")
 def expense_types_list(request):
     """Manage transaction categories and expense types on one page."""
     cat_error = et_error = None
@@ -1323,7 +1473,7 @@ def expense_types_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_expense_categories")
 def transaction_category_create_ajax(request):
     """AJAX: create a TransactionCategory, return {id, name}."""
     if request.method != "POST":
@@ -1341,7 +1491,7 @@ def transaction_category_create_ajax(request):
     return JsonResponse({"id": cat.pk, "name": cat.name})
 
 
-@_ceo_required
+@_permission_required("can_manage_expense_categories")
 def expense_type_create_ajax(request):
     """AJAX: create an ExpenseType under a category, return {id, name, category_id}."""
     if request.method != "POST":
@@ -1364,7 +1514,7 @@ def expense_type_create_ajax(request):
     return JsonResponse({"id": et.pk, "name": et.name, "category_id": category.pk})
 
 
-@_ceo_required
+@_permission_required("can_manage_expense_categories")
 def expense_types_for_category(request):
     """AJAX: return expense types for a given category_id."""
     category_id = request.GET.get("category_id", "")
@@ -1381,7 +1531,7 @@ def expense_types_for_category(request):
 # Expense Management                                                   #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_expenses")
 def expense_list(request):
     form_data = {
         "category": "", "expense_type": "", "amount": "",
@@ -1458,7 +1608,7 @@ def expense_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_expenses")
 def expense_create(request):
     if request.method == "POST":
         d = request.POST
@@ -1502,7 +1652,7 @@ def expense_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_expenses")
 def expense_edit(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
 
@@ -1543,7 +1693,7 @@ def expense_edit(request, pk):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_expenses")
 def expense_delete(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == "POST":
@@ -1557,7 +1707,7 @@ def expense_delete(request, pk):
 # Capital Injection Management                                        #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_capital")
 def capital_injection_list(request):
     qs = CapitalInjection.objects.select_related("created_by").order_by("-injected_date")
 
@@ -1589,7 +1739,7 @@ def capital_injection_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_capital")
 def capital_injection_create(request):
     if request.method == "POST":
         d = request.POST
@@ -1615,7 +1765,7 @@ def capital_injection_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_capital")
 def capital_injection_edit(request, pk):
     injection = get_object_or_404(CapitalInjection, pk=pk)
 
@@ -1640,7 +1790,7 @@ def capital_injection_edit(request, pk):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_capital")
 def capital_injection_delete(request, pk):
     injection = get_object_or_404(CapitalInjection, pk=pk)
     if request.method == "POST":
@@ -1654,7 +1804,7 @@ def capital_injection_delete(request, pk):
 # Bank Account Management                                              #
 # ------------------------------------------------------------------ #
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_account_list(request):
     accounts = BankAccount.objects.all().order_by("bank_name", "account_name")
     total_balance = accounts.filter(is_active=True).aggregate(total=Sum("current_balance"))["total"] or 0
@@ -1664,7 +1814,7 @@ def bank_account_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_account_create(request):
     if request.method == "POST":
         d = request.POST
@@ -1692,7 +1842,7 @@ def bank_account_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_account_edit(request, pk):
     acc = get_object_or_404(BankAccount, pk=pk)
     if request.method == "POST":
@@ -1720,7 +1870,7 @@ def bank_account_edit(request, pk):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_transaction_list(request):
     qs = BankTransaction.objects.select_related("branch", "bank_account", "created_by").order_by("-transaction_date")
     branch_filter = request.GET.get("branch", "")
@@ -1765,7 +1915,7 @@ def bank_transaction_list(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_transaction_create(request):
     transaction = None
     if request.method == "POST":
@@ -1817,7 +1967,7 @@ def bank_transaction_create(request):
     })
 
 
-@_ceo_required
+@_permission_required("can_manage_bank_accounts")
 def bank_transaction_edit(request, pk):
     transaction = get_object_or_404(BankTransaction, pk=pk)
     if request.method == "POST":

@@ -9822,3 +9822,399 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'password_reset_done' not fou
 2026-08-12 09:44:43 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 141482
 2026-08-12 09:44:43 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
 2026-08-12 09:46:10 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-08-12 10:21:16 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 10:21:25 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 10:21:25 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 10:21:26 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-12 10:21:33 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 10:21:33 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168781
+2026-08-12 10:21:33 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 11:50:31 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 11:50:32 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 11:50:46 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-08-12 11:50:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 115777
+2026-08-12 11:50:49 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 11:50:56 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 127016
+2026-08-12 11:50:56 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 11:51:27 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-08-12 11:51:27 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-08-12 14:29:47 [INFO] django.server: code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07\x06\x01\x00\x07\x02\x03\x03Î\x89\x9aC´Ó\x99\x87&íMÞ5¾ã\x0eèíb{öËü\x10\x98¢\x136\x16°\x89@')
+2026-08-12 14:29:48 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 14:29:48 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x06Æ\x01\x00\x06Â\x03\x03n\x8dõÖøn\x00ÍGO6\x04!ÐëCÛ\x89')
+2026-08-12 14:29:48 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-08-12 15:13:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-12 15:14:31 [INFO] django.server: "GET / HTTP/1.1" 200 14161
+2026-08-12 15:14:47 [INFO] django.server: "POST / HTTP/1.1" 200 14340
+2026-08-12 15:15:02 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-08-12 15:15:03 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 168781
+2026-08-12 15:15:03 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 15:15:18 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 151776
+2026-08-12 15:15:18 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-12 15:15:25 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 158666
+2026-08-12 15:15:25 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:26:25 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 12:29:17 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 12:29:25 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 12:29:25 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 170942
+2026-08-13 12:29:25 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:29:27 [WARNING] django.request: Not Found: /favicon.ico
+2026-08-13 12:29:27 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 2924
+2026-08-13 12:29:32 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 170942
+2026-08-13 12:29:32 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:29:40 [INFO] django.server: "GET /accounts/admin-panel/permissions/ HTTP/1.1" 200 168892
+2026-08-13 12:29:40 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:30:00 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 160827
+2026-08-13 12:30:00 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:30:04 [ERROR] django.request: Internal Server Error: /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/
+Traceback (most recent call last):
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/nashvybzes/Music/no/abacash/loans/views.py", line 959, in loan_detail
+    "can_undo_regenerate": _can_undo_regenerate(loan),
+                           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/contrib/auth/decorators.py", line 22, in _wrapper_view
+    if test_func(request.user):
+                 ^^^^^^^^^^^^
+AttributeError: 'Loan' object has no attribute 'user'
+2026-08-13 12:30:04 [ERROR] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/ HTTP/1.1" 500 90891
+2026-08-13 12:32:57 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/loans/views.py changed, reloading.
+2026-08-13 12:33:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 12:33:24 [INFO] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/ HTTP/1.1" 200 158182
+2026-08-13 12:33:24 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:33:40 [INFO] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 12:33:53 [INFO] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 12:33:56 [INFO] django.server: "POST /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 3884
+2026-08-13 12:34:14 [INFO] django.server: "POST /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/undo/ HTTP/1.1" 200 2150
+2026-08-13 12:44:07 [INFO] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 12:46:18 [INFO] django.server: "GET /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 12:46:20 [INFO] django.server: "POST /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/ HTTP/1.1" 200 3884
+2026-08-13 12:46:34 [INFO] django.server: "POST /loans/e14bb167-a943-4c9a-b7b5-4ab49cba4a37/regenerate-schedule/undo/ HTTP/1.1" 200 2150
+2026-08-13 12:47:02 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 150475
+2026-08-13 12:47:02 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:47:02 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 2016
+2026-08-13 12:47:08 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 160827
+2026-08-13 12:47:08 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:47:18 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 153937
+2026-08-13 12:47:18 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:47:29 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 154294
+2026-08-13 12:47:30 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:47:46 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 151108
+2026-08-13 12:47:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:47:49 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 142613
+2026-08-13 12:47:49 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:48:01 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 154294
+2026-08-13 12:48:01 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:48:18 [INFO] django.server: "POST /accounts/admin-panel/settings/ HTTP/1.1" 302 0
+2026-08-13 12:48:18 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 154806
+2026-08-13 12:48:19 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:48:24 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 151108
+2026-08-13 12:48:24 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:48:27 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 142607
+2026-08-13 12:48:27 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:49:32 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 144558
+2026-08-13 12:49:32 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:49:39 [INFO] django.server: "GET /accounts/admin-panel/permissions/ HTTP/1.1" 200 168892
+2026-08-13 12:49:39 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 170942
+2026-08-13 12:50:04 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:11 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 160827
+2026-08-13 12:50:12 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:15 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 160827
+2026-08-13 12:50:15 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:19 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/ HTTP/1.1" 200 157828
+2026-08-13 12:50:19 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:46 [INFO] django.server: "POST /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/approve/ HTTP/1.1" 302 0
+2026-08-13 12:50:46 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/ HTTP/1.1" 200 159724
+2026-08-13 12:50:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:50:56 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 4129
+2026-08-13 12:51:19 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 4129
+2026-08-13 12:51:28 [INFO] django.server: "POST /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 719
+2026-08-13 12:51:28 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/ HTTP/1.1" 200 160469
+2026-08-13 12:51:28 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:51:41 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 4129
+2026-08-13 12:51:52 [INFO] django.server: "POST /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 719
+2026-08-13 12:51:52 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/ HTTP/1.1" 200 161218
+2026-08-13 12:51:52 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:52:15 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 4129
+2026-08-13 12:52:49 [INFO] django.server: "POST /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/reschedule/ HTTP/1.1" 200 719
+2026-08-13 12:52:49 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/ HTTP/1.1" 200 161323
+2026-08-13 12:52:49 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:52:59 [INFO] django.server: "GET /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/renew/ HTTP/1.1" 200 4410
+2026-08-13 12:53:36 [INFO] django.server: "POST /loans/6346c225-8dca-437a-924d-bfbc5a5cc3a2/renew/ HTTP/1.1" 200 720
+2026-08-13 12:53:36 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/ HTTP/1.1" 200 159019
+2026-08-13 12:53:36 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:54:29 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 151350
+2026-08-13 12:54:29 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:54:32 [INFO] django.server: "GET /clients/2cd16b27-f3df-4871-b4e6-3dcaab8b10db/ HTTP/1.1" 200 147632
+2026-08-13 12:54:32 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 12:54:32 [WARNING] django.request: Not Found: /media/pay/photos/client_2cd16b27-f3df-4871-b4e6-3dcaab8b10db/ura_logo.png
+2026-08-13 12:54:32 [WARNING] django.server: "GET /media/pay/photos/client_2cd16b27-f3df-4871-b4e6-3dcaab8b10db/ura_logo.png HTTP/1.1" 404 3110
+2026-08-13 13:10:43 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 151350
+2026-08-13 13:10:43 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:10:46 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 142395
+2026-08-13 13:10:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:11:59 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:12:00 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:12:00 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3035
+2026-08-13 13:19:49 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 143357
+2026-08-13 13:19:49 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:23:45 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 144376
+2026-08-13 13:23:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:33:47 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/urls.py changed, reloading.
+2026-08-13 13:34:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 13:35:46 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 158874
+2026-08-13 13:35:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:35:46 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 976
+2026-08-13 13:35:46 [WARNING] django.server: "GET /static/icons/icon-192.png HTTP/1.1" 404 1817
+2026-08-13 13:35:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:35:47 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 13:35:47 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 155679
+2026-08-13 13:35:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 187618
+2026-08-13 13:36:30 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 157582
+2026-08-13 13:36:30 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:36:31 [WARNING] django.server: "GET /static/icons/icon-192.png HTTP/1.1" 404 1817
+2026-08-13 13:36:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:38:50 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 146829
+2026-08-13 13:38:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:39:42 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:39:42 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3436
+2026-08-13 13:50:24 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/urls.py changed, reloading.
+2026-08-13 13:50:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 13:52:27 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 147217
+2026-08-13 13:52:31 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:52:31 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 13:52:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:52:35 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 13:52:35 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 145314
+2026-08-13 13:52:36 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 13:53:09 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 147217
+2026-08-13 13:53:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:53:12 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 13:53:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:53:41 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158756
+2026-08-13 13:53:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:53:54 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:53:54 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 13:56:09 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:56:09 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 13:56:46 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 167150
+2026-08-13 13:56:46 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:56:47 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:56:47 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 13:56:47 [WARNING] django.server: "GET /static/icons/icon-192.png HTTP/1.1" 404 1817
+2026-08-13 13:56:48 [WARNING] django.server: "GET /static/icons/icon-192.png HTTP/1.1" 404 1817
+2026-08-13 13:56:48 [WARNING] django.server: "GET /static/icons/icon-192.png HTTP/1.1" 404 1817
+2026-08-13 13:56:48 [WARNING] django.server: "GET /static/icons/icon-512.png HTTP/1.1" 404 1817
+2026-08-13 13:56:48 [WARNING] django.server: "GET /static/icons/icon-512.png HTTP/1.1" 404 1817
+2026-08-13 13:56:48 [WARNING] django.server: "GET /static/icons/icon-maskable-512.png HTTP/1.1" 404 1844
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/icon-maskable-512.png HTTP/1.1" 404 1844
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/shortcut-payment.png HTTP/1.1" 404 1841
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/shortcut-payment.png HTTP/1.1" 404 1841
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/shortcut-loan.png HTTP/1.1" 404 1832
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/shortcut-loan.png HTTP/1.1" 404 1832
+2026-08-13 13:56:49 [WARNING] django.server: "GET /static/icons/shortcut-loan.png HTTP/1.1" 404 1832
+2026-08-13 13:57:06 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:57:06 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 13:57:06 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 13:58:33 [INFO] django.server: "GET / HTTP/1.1" 200 14152
+2026-08-13 13:58:33 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-13 13:58:46 [INFO] django.server: "POST / HTTP/1.1" 200 14331
+2026-08-13 13:58:56 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-08-13 13:58:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 13:58:57 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 13:58:57 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-08-13 13:58:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 13:58:59 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 13:58:59 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 145314
+2026-08-13 13:58:59 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:00:03 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 14:00:03 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 761
+2026-08-13 14:00:03 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:00:03 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:06:13 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 761
+2026-08-13 14:07:41 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3467
+2026-08-13 14:10:46 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3467
+2026-08-13 14:11:21 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 167150
+2026-08-13 14:11:26 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:11:26 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:11:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:12:39 [INFO] django.server: "GET / HTTP/1.1" 200 14152
+2026-08-13 14:12:39 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-13 14:12:51 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-08-13 14:12:51 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:12:52 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 14:12:52 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-08-13 14:12:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:12:55 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:12:55 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 145314
+2026-08-13 14:12:56 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:13:03 [WARNING] django.server: "GET /static/css/abca.css HTTP/1.1" 404 1799
+2026-08-13 14:13:03 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 761
+2026-08-13 14:13:03 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:13:03 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:13:28 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3467
+2026-08-13 14:13:28 [INFO] django.server: "GET /icons/512.png HTTP/1.1" 200 9954
+2026-08-13 14:13:28 [INFO] django.server: "GET /icons/512-maskable.png HTTP/1.1" 200 7906
+2026-08-13 14:13:42 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:13:42 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:13:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:13:56 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:13:56 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:13:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:14:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:14:14 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:14:14 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 145314
+2026-08-13 14:14:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:14:16 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:14:16 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:14:16 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:14:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:29:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:29:54 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:29:55 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 145314
+2026-08-13 14:29:55 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:30:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 177253
+2026-08-13 14:30:02 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:30:02 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:30:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:34:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:34:13 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:34:15 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 147181
+2026-08-13 14:34:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179120
+2026-08-13 14:34:17 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179120
+2026-08-13 14:34:18 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:34:18 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:34:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:35:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:35:57 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:35:57 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 147181
+2026-08-13 14:35:58 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179120
+2026-08-13 14:36:00 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179120
+2026-08-13 14:36:02 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:36:02 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:36:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:39:57 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/accounts/pwa_views.py changed, reloading.
+2026-08-13 14:40:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 14:40:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:40:38 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:40:39 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 147180
+2026-08-13 14:40:40 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:40:43 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:40:50 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:40:50 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:41:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:52:35 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 169016
+2026-08-13 14:52:37 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-08-13 14:52:37 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 14:52:37 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 14:52:38 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 782
+2026-08-13 14:52:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:52:45 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3467
+2026-08-13 14:52:49 [INFO] django.server: "GET /icons/512.png HTTP/1.1" 200 9954
+2026-08-13 14:52:49 [INFO] django.server: "GET /icons/512-maskable.png HTTP/1.1" 200 7906
+2026-08-13 14:53:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:53:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:54:12 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:54:13 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:54:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:55:11 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:55:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:55:35 [INFO] django.server: "GET / HTTP/1.1" 200 14152
+2026-08-13 14:55:46 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-08-13 14:55:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:55:49 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 304 0
+2026-08-13 14:55:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 14:55:50 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 14:55:50 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 147180
+2026-08-13 14:55:50 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 14:56:13 [INFO] django.server: "GET /icons/512-maskable.png HTTP/1.1" 304 0
+2026-08-13 14:56:13 [INFO] django.server: "GET /icons/512.png HTTP/1.1" 200 9954
+2026-08-13 14:56:13 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3467
+2026-08-13 15:39:20 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/loans/views.py changed, reloading.
+2026-08-13 15:39:36 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 15:40:09 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/loans/utils.py changed, reloading.
+2026-08-13 15:40:15 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 15:40:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:40:54 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-13 15:40:56 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 147180
+2026-08-13 15:40:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 15:40:59 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179119
+2026-08-13 15:41:04 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 15:41:04 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 15:41:08 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 782
+2026-08-13 15:41:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:41:26 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 169016
+2026-08-13 15:41:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:41:36 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/ HTTP/1.1" 200 165174
+2026-08-13 15:41:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:41:39 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 15:41:43 [INFO] django.server: "POST /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/ HTTP/1.1" 200 3865
+2026-08-13 15:41:55 [INFO] django.server: "POST /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/undo/ HTTP/1.1" 200 3147
+2026-08-13 15:42:02 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-08-13 15:42:12 [INFO] django.server: "POST /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/ HTTP/1.1" 200 3866
+2026-08-13 15:44:35 [INFO] django.server: "POST /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/regenerate-schedule/undo/ HTTP/1.1" 200 3147
+2026-08-13 15:52:02 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-08-13 15:52:07 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 782
+2026-08-13 15:52:08 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-08-13 15:52:08 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3740
+2026-08-13 15:52:35 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 169016
+2026-08-13 15:52:35 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-08-13 15:52:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:52:46 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/ HTTP/1.1" 200 166912
+2026-08-13 15:52:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:52:57 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 148214
+2026-08-13 15:53:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:53:15 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 158038
+2026-08-13 15:53:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:53:21 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 160490
+2026-08-13 15:53:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:53:31 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 152862
+2026-08-13 15:53:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:53:39 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 159176
+2026-08-13 15:53:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:54:05 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 151246
+2026-08-13 15:54:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:54:16 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 158038
+2026-08-13 15:54:19 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 149083
+2026-08-13 15:54:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 15:54:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:02:53 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/payments/views.py changed, reloading.
+2026-08-13 16:03:10 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 16:06:12 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/payments/views.py changed, reloading.
+2026-08-13 16:06:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 16:06:45 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 160979
+2026-08-13 16:06:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:06:52 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 158038
+2026-08-13 16:06:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:06:57 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 149024
+2026-08-13 16:06:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:07:21 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 160979
+2026-08-13 16:07:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:09:09 [INFO] django.server: "POST /accounts/admin-panel/settings/ HTTP/1.1" 302 0
+2026-08-13 16:09:10 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 162491
+2026-08-13 16:09:10 [WARNING] django.request: Not Found: /media/pay/company/ura_logo.png
+2026-08-13 16:09:10 [WARNING] django.server: "GET /media/pay/company/ura_logo.png HTTP/1.1" 404 3686
+2026-08-13 16:09:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:09:18 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 179794
+2026-08-13 16:09:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:09:23 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 158713
+2026-08-13 16:09:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:09:29 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 149965
+2026-08-13 16:09:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:19:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-13 16:19:29 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 149965
+2026-08-13 16:19:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:19:51 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 161976
+2026-08-13 16:19:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:20:18 [INFO] django.server: "POST /accounts/admin-panel/settings/ HTTP/1.1" 302 0
+2026-08-13 16:20:18 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 162523
+2026-08-13 16:20:18 [INFO] django.server: "GET /media/pay/company/ura_logo_lKfqFQw.png HTTP/1.1" 200 27227
+2026-08-13 16:20:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:20:24 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 158737
+2026-08-13 16:20:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:20:31 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 149997
+2026-08-13 16:20:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-13 16:24:21 [INFO] django.server: "GET /payments/receipt/f10bf9fc-b222-454c-8026-e6a109b0fedb/ HTTP/1.1" 200 150481
+2026-08-13 16:24:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

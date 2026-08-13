@@ -1,8 +1,42 @@
 from django.conf import settings
 from django.db import connection
-from django.db.models.signals import post_migrate
+from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def sync_role_group(sender, instance, **kwargs):
+    """
+    Keep group membership in sync with the `role` field whenever a user is
+    created or their role changes, so `user.can(...)` reflects the right
+    permission set without anyone having to remember to update groups by
+    hand. This only touches the built-in Cashier/Manager/CEO groups — any
+    extra groups/per-user permissions a CEO has added manually elsewhere
+    are left alone.
+    """
+    from accounts.permissions import ALL_GROUPS
+    from django.contrib.auth.models import Group
+
+    role_to_group_name = {"CASHIER": "Cashier", "MANAGER": "Manager", "CEO": "CEO"}
+    target_name = role_to_group_name.get(instance.role)
+    if not target_name:
+        return
+
+    try:
+        current = set(instance.groups.filter(name__in=ALL_GROUPS).values_list("name", flat=True))
+    except Exception:
+        # e.g. mid-migration before the groups/M2M table is ready
+        return
+
+    if current == {target_name}:
+        return  # already correct, avoid needless queries on every save
+
+    target_group, _created = Group.objects.get_or_create(name=target_name)
+    # Remove from any of the other two built-in role groups, add to the right one
+    stale = Group.objects.filter(name__in=ALL_GROUPS).exclude(name=target_name)
+    instance.groups.remove(*stale)
+    instance.groups.add(target_group)
 
 
 @receiver(post_migrate)

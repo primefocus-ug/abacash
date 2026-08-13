@@ -2,9 +2,16 @@
   <form method="post" hx-post="{% url 'loans:regenerate_schedule' loan.pk %}" hx-target="#schedule-print-card" hx-swap="outerHTML">
     {% csrf_token %}
     <div style="margin-bottom:8px;">
-      <label for="disbursement_date" style="display:block;font-weight:600;margin-bottom:6px;">Disbursement Date</label>
+      <label for="disbursement_date" style="display:block;font-weight:600;margin-bottom:6px;">Start Date</label>
       <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" required />
-      <div class="text-sm text-muted" style="margin-top:6px;">Adjust the disbursement date to regenerate due dates. CEOs may back-date.</div>
+      <div class="text-sm text-muted" style="margin-top:6px;">
+        Only unpaid periods are affected — anything already paid stays exactly as it is.
+        Users with back-dating permission may choose a past date.
+      </div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <label for="reason" style="display:block;font-weight:600;margin-bottom:6px;">Reason</label>
+      <textarea id="reason" name="reason" rows="2" style="width:100%;" placeholder="Why is this schedule being regenerated?"></textarea>
     </div>
     <div style="display:flex;gap:8px;">
       <button type="submit" class="btn btn-primary btn-sm">Regenerate</button>

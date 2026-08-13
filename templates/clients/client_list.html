@@ -136,7 +136,7 @@
               <th>Name</th>
               <th>Phone</th>
               <th>NIN</th>
-              {% if user.is_ceo %}<th>Branch</th>{% endif %}
+              {% if perms.accounts.can_view_all_branches %}<th>Branch</th>{% endif %}
               <th>Active Loans</th>
               <th>Status</th>
               <th style="width:80px;"></th>
@@ -152,7 +152,7 @@
               </td>
               <td style="font-size:13px;color:var(--text-secondary);">{{ c.phone_primary }}</td>
               <td class="mono" style="font-size:13px;color:var(--text-secondary);">{{ c.nin }}</td>
-              {% if user.is_ceo %}<td style="font-size:13px;color:var(--text-secondary);">{{ c.branch.name|default:"—" }}</td>{% endif %}
+              {% if perms.accounts.can_view_all_branches %}<td style="font-size:13px;color:var(--text-secondary);">{{ c.branch.name|default:"—" }}</td>{% endif %}
               <td>
                 {% if c.active_loan_count > 0 %}
                   <span class="badge badge-amber">{{ c.active_loan_count }}</span>

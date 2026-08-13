@@ -14,7 +14,7 @@
   {% endif %}
 
 
-  {% if can_write_off or loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
+  {% if can_write_off or loan.status == 'ACTIVE' and perms.accounts.can_approve_loans %}
   <div style="position:relative;display:inline-block;flex-shrink:0;" id="loan-ops-wrap">
     <button
       class="btn btn-secondary btn-sm"
@@ -32,7 +32,7 @@
       border-radius:var(--radius-md); box-shadow:0 8px 24px rgba(15,23,42,.12);
       width:min(90vw, 260px); z-index:1200; overflow:hidden;
     ">
-      {% if loan.status == 'ACTIVE' and user.is_manager or loan.status == 'ACTIVE' and user.is_ceo %}
+      {% if loan.status == 'ACTIVE' and perms.accounts.can_approve_loans %}
       <button
         type="button"
         class="loan-ops-item"
@@ -92,7 +92,7 @@
   {% endif %}
 
   {% if loan.status == 'REJECTED' or loan.status == 'DRAFT' %}
-    {% if user == loan.applied_by or user.is_manager or user.is_ceo %}
+    {% if user == loan.applied_by or perms.accounts.can_edit_any_loan %}
     <a href="{% url 'loans:recall' loan.pk %}" class="btn btn-secondary btn-sm flex-shrink-0"
        onclick="return confirm('Recall this application back to draft for editing?');">Recall</a>
     {% endif %}
@@ -339,7 +339,7 @@
                   <div style="font-weight:600;font-size:16px;">{{ loan.total_repayable|money }}</div>
                 </div>
 
-                {% if user.is_ceo %}
+                {% if perms.accounts.can_backdate_transactions %}
                 <div style="min-width:150px;flex:1;">
                   <label for="disbursement_date" style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Disbursement date</label>
                   <input type="date" id="disbursement_date" name="disbursement_date" value="{{ loan.disbursement_date|default:today|date:'Y-m-d' }}" style="padding:6px 8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;" />
@@ -372,7 +372,7 @@
     </div>
     {% endif %}
 
-    {% if user.is_ceo %}
+    {% if perms.accounts.can_write_off_loans %}
       {% if loan.status == 'WRITTEN_OFF' %}
       <div class="card mb-3 print-hide" id="reinstate" style="border-color:var(--green-500);">
         <div class="card-header"><span class="card-title">Reinstate Loan</span></div>

@@ -58,16 +58,23 @@ def _next_due_date(current: date, frequency: str, period: int) -> date:
         return current + relativedelta(months=period)
 
 
-def _periods_for_term(term_months: int, frequency: str) -> int:
-    """Convert a term in months to number of repayment periods."""
+def _periods_for_term(term_months, frequency: str) -> int:
+    """Convert a term in months to number of repayment periods.
+
+    Accepts either an int or a Decimal for term_months (regenerate-schedule
+    passes a Decimal for the remaining fractional-month term) and always
+    returns a plain int, since callers use this directly as a range()
+    bound.
+    """
     if frequency == "DAILY":
-        return term_months * 30         # approx 30 days per month
+        result = term_months * 30         # approx 30 days per month
     elif frequency == "WEEKLY":
-        return term_months * 4          # approx 4 weeks per month
+        result = term_months * 4          # approx 4 weeks per month
     elif frequency == "BIWEEKLY":
-        return term_months * 2
+        result = term_months * 2
     else:
-        return term_months
+        result = term_months
+    return int(round(result))
 
 
 # ------------------------------------------------------------------ #
@@ -691,3 +698,75 @@ def generate_schedule_preview_pdf(
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
+
+# ------------------------------------------------------------------ #
+# Regenerate-schedule snapshot / restore helpers                       #
+# ------------------------------------------------------------------ #
+#
+# Used by loans.views.loan_regenerate_schedule / loan_undo_regenerate_schedule
+# together with the LoanScheduleSnapshot model. Kept here rather than
+# inline in the view so the exact shape of what gets saved/restored has
+# one canonical definition.
+
+_SCHEDULE_ROW_FIELDS = [
+    "period_number", "due_date", "opening_balance", "principal_due",
+    "interest_due", "penalty_due", "fee_due", "total_payment",
+    "closing_balance", "amount_paid", "paid_date", "status",
+    "waived_by_writeoff", "notes",
+]
+
+_LOAN_SNAPSHOT_FIELDS = [
+    "disbursement_date", "first_repayment_date", "maturity_date",
+    "total_repayable", "total_interest", "outstanding_balance",
+]
+
+
+def _to_jsonable(value):
+    if isinstance(value, Decimal):
+        return str(value)
+    if hasattr(value, "isoformat"):  # date/datetime
+        return value.isoformat()
+    return value
+
+
+def _from_jsonable(value, field_name):
+    if value is None:
+        return None
+    if field_name in (
+        "opening_balance", "principal_due", "interest_due", "penalty_due",
+        "fee_due", "total_payment", "closing_balance", "amount_paid",
+        "total_repayable", "total_interest", "outstanding_balance",
+    ):
+        return Decimal(str(value))
+    if field_name in ("due_date", "paid_date", "disbursement_date",
+                       "first_repayment_date", "maturity_date"):
+        return date.fromisoformat(value)
+    return value
+
+
+def serialize_schedule_row(row):
+    """LoanSchedule instance -> plain JSON-safe dict (includes paid_by_payment_id)."""
+    data = {f: _to_jsonable(getattr(row, f)) for f in _SCHEDULE_ROW_FIELDS}
+    data["paid_by_payment_id"] = row.paid_by_payment_id
+    return data
+
+
+def deserialize_schedule_row(loan, data):
+    """Plain dict (as produced by serialize_schedule_row) -> unsaved LoanSchedule instance."""
+    from loans.models import LoanSchedule
+    kwargs = {f: _from_jsonable(data.get(f), f) for f in _SCHEDULE_ROW_FIELDS}
+    kwargs["loan"] = loan
+    kwargs["paid_by_payment_id"] = data.get("paid_by_payment_id")
+    return LoanSchedule(**kwargs)
+
+
+def serialize_loan_snapshot_fields(loan):
+    """Loan instance -> plain JSON-safe dict of the fields a regenerate touches."""
+    return {f: _to_jsonable(getattr(loan, f)) for f in _LOAN_SNAPSHOT_FIELDS}
+
+
+def restore_loan_snapshot_fields(loan, data):
+    """Apply a serialize_loan_snapshot_fields() dict back onto a loan instance (not saved)."""
+    for f in _LOAN_SNAPSHOT_FIELDS:
+        if f in data:
+            setattr(loan, f, _from_jsonable(data[f], f))

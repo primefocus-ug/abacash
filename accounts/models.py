@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from accounts.permissions import PERMISSIONS
 from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -197,10 +198,26 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_ceo(self):
         return self.role == self.Role.CEO
 
+    def can(self, codename):
+        """
+        Check an app permission by its short codename, e.g. user.can("can_manage_branches").
+        Thin wrapper over has_perm() so call sites don't need to spell out
+        the "accounts." app-label prefix every time. Respects everything
+        has_perm() does: group permissions, per-user overrides, and
+        is_superuser (which auto-passes every check).
+        """
+        return self.has_perm(f"accounts.{codename}")
+
     @property
     def can_approve_loans(self):
-        """Managers and CEOs can approve loans."""
-        return self.role in (self.Role.MANAGER, self.Role.CEO)
+        """Whether this user is allowed to approve/renew loans.
+
+        Backed by the real can_approve_loans permission (granted to the
+        Manager/CEO groups by default, see accounts/permissions.py) rather
+        than a hardcoded role check, so a CEO can extend or restrict this
+        per-user or per-group without a code change.
+        """
+        return self.can("can_approve_loans")
 
     @property
     def full_name(self):
@@ -223,6 +240,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _("User")
         verbose_name_plural = _("Users")
         ordering = ["first_name", "last_name"]
+        # App-level permissions (not tied to any one model instance) that
+        # power the Roles & Permissions system. See accounts/permissions.py
+        # for the canonical list + which Group each is granted to by
+        # default, and the 0006/0007 migrations for how they're created.
+        permissions = [(codename, label) for codename, label, _groups in PERMISSIONS]
 
 
 class Branch(models.Model):

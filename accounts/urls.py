@@ -98,6 +98,7 @@ urlpatterns = [
 
     # Audit Log
     path("admin-panel/audit-log/",          views.audit_log,            name="audit_log"),
+    path("admin-panel/permissions/",        views.permissions_manage,   name="permissions_manage"),
 
     # Transaction Categories & Expense Types
     path("admin-panel/expense-types/",                      views.expense_types_list,                name="expense_types_list"),

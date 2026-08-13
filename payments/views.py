@@ -22,6 +22,7 @@ from accounts.branch_scope import scope_to_branch, can_access_branch_object, sco
 from common.pdf_utils import render_pdf_response
 from clients.models import CreditTransaction
 from .models import Payment, Receipt
+from accounts.models import CompanySettings
 
 logger = logging.getLogger("payments")
 
@@ -48,7 +49,7 @@ def payment_list(request):
         "search": search,
         "active_loans": active_loans,
         "today": date.today(),
-        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.is_ceo else None,
+        "branches": Branch.objects.filter(is_active=True).order_by("name") if request.user.can("can_view_all_branches") else None,
         "selected_branch": request.GET.get("branch", ""),
     })
 
@@ -456,6 +457,7 @@ def receipt_view(request, pk):
         "receipt": receipt,
         "guarantees": guarantees,
         "collateral_items": collateral_items,
+        "company": CompanySettings.get(),
     }
     if request.GET.get("format") == "pdf":
         filename = f"Receipt-{receipt.receipt_number}.pdf"
@@ -477,8 +479,8 @@ def credit_refund(request, client_pk):
     """Manager/CEO refund a client's credit balance (cash payout of stored credit)."""
     from clients.models import Client
 
-    if request.user.is_cashier:
-        messages.error(request, "Only Managers and CEO can process refunds.")
+    if not request.user.can("can_manage_payments"):
+        messages.error(request, "You do not have permission to process refunds.")
         return redirect("clients:detail", pk=client_pk)
 
     client = get_object_or_404(Client, pk=client_pk)

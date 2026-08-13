@@ -4,13 +4,25 @@
   <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
     <span><span class="card-title">Repayment Schedule</span></span>
     <span style="display:flex;gap:8px;align-items:center;">
-      {% if user == loan.applied_by or user.is_manager or user.is_ceo or user.can_approve_loans %}
+      {% if perms.accounts.can_regenerate_schedule %}
       <button type="button" class="btn btn-secondary btn-sm" 
               hx-get="{% url 'loans:regenerate_schedule' loan.pk %}"
               hx-target="#modal-body" hx-swap="innerHTML"
               onclick="openModal();">
         Regenerate Schedule
       </button>
+      {% if can_undo_regenerate %}
+      <form method="post" action="{% url 'loans:undo_regenerate_schedule' loan.pk %}"
+            hx-post="{% url 'loans:undo_regenerate_schedule' loan.pk %}"
+            hx-target="#schedule-print-card" hx-swap="outerHTML"
+            onsubmit="return confirm('Undo the last schedule regeneration and restore it exactly as it was before?');"
+            style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary btn-sm" style="color:var(--amber-500,#b45309);">
+          Undo Last Regeneration
+        </button>
+      </form>
+      {% endif %}
       {% endif %}
     </span>
   </div>

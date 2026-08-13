@@ -5,7 +5,7 @@
 {% block page_title %}{{ client.full_name }}{% endblock %}
 
 {% block topbar_actions %}
-  {% if user.is_manager or user.is_ceo %}
+  {% if perms.accounts.can_manage_clients %}
     <a href="{% url 'clients:edit' client.pk %}" class="btn btn-secondary btn-sm">Edit Client</a>
   {% endif %}
   {% if not client.is_blacklisted %}
@@ -129,7 +129,7 @@
           <span class="text-muted text-sm">Credit Balance</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="mono" style="color:var(--teal-400);font-weight:500;">{{ client.credit_balance|ugx }}</span>
-            {% if client.credit_balance > 0 and not user.is_cashier %}
+            {% if client.credit_balance > 0 and perms.accounts.can_manage_payments %}
             <a href="{% url 'payments:credit_refund' client.pk %}" class="btn btn-secondary btn-sm">Refund</a>
             {% endif %}
           </div>

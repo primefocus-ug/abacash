@@ -25,6 +25,7 @@ urlpatterns = [
     path("schedule/<int:pk>/extend/", views.schedule_extend, name="schedule_extend"),
     path("<uuid:pk>/renew/",          views.loan_renew,     name="renew"),
     path("<uuid:pk>/regenerate-schedule/", views.loan_regenerate_schedule, name="regenerate_schedule"),
+    path("<uuid:pk>/regenerate-schedule/undo/", views.loan_undo_regenerate_schedule, name="undo_regenerate_schedule"),
     path("<uuid:pk>/delete-draft/",  views.loan_draft_delete, name="draft_delete"),
     path("search/",                  views.loan_search,    name="search"),
     # Loan products (CEO config)

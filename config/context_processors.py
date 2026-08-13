@@ -1,3 +1,4 @@
+
 def company(request):
 
     """
@@ -33,18 +34,19 @@ def company(request):
 
 def active_branch_filter(request):
     """
-    Makes the CEO's currently-selected branch (nav switcher) available in
+    Makes the currently-selected branch (nav switcher) available in
     every template, so any page can show a "you're viewing Branch X" banner
     without each view having to look it up itself.
 
-    Only ever non-None for a logged-in CEO with a branch chosen in the
-    switcher — everyone else (including Managers/Cashiers, who aren't
-    switch-able) gets None and templates simply won't render the banner.
+    Only ever non-None for a logged-in user with the can_view_all_branches
+    permission (CEOs by default, but grantable to anyone) who has also
+    chosen a branch in the switcher — everyone else gets None and templates
+    simply won't render the banner.
     """
     user = getattr(request, "user", None)
     if not user or not getattr(user, "is_authenticated", False):
         return {"active_branch_filter": None}
-    if not (getattr(user, "is_ceo", False) or getattr(user, "is_superuser", False)):
+    if not (getattr(user, "is_superuser", False) or (hasattr(user, "can") and user.can("can_view_all_branches"))):
         return {"active_branch_filter": None}
 
     session_val = request.session.get("ceo_branch_filter")
@@ -58,3 +60,4 @@ def active_branch_filter(request):
         branch = None
 
     return {"active_branch_filter": branch}
+

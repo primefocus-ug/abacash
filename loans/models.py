@@ -664,6 +664,60 @@ class LoanDisbursementAudit(models.Model):
         return f"{self.loan.loan_number}: {self.get_action_display()} by {who} on {self.created_at.date()}"
 
 
+class LoanScheduleSnapshot(models.Model):
+    """
+    Full point-in-time backup of a loan's repayment schedule + key loan
+    totals, taken immediately before a "Regenerate Schedule" action, so
+    that action can be undone.
+
+    A regenerate only ever touches *unsettled* schedule rows (no payment
+    applied yet) — rows that already have a payment against them are left
+    completely alone and never appear in new_row_ids below. That's what
+    makes undo safe: it only ever deletes rows it itself created and
+    restores the exact unsettled rows that were there before, it never
+    touches anything a real payment has since been recorded against.
+
+    Stored as JSON rather than trying to diff/reconstruct from other
+    tables, since that's the only way to guarantee an exact restore of
+    every field (status, amount_paid, paid_date, paid_by_payment, etc.)
+    exactly as it was.
+    """
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name="schedule_snapshots")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    reason = models.TextField(blank=True)
+
+    # Full old state, keyed by whatever LoanSchedule/Loan fields matter for
+    # an exact restore. See loans/utils.py::snapshot_loan_for_regenerate()
+    # / restore_loan_snapshot() for the exact shape.
+    old_schedule_rows = models.JSONField()
+    old_loan_fields = models.JSONField()
+
+    # IDs of the LoanSchedule rows this regeneration created, so undo knows
+    # exactly what to delete (and can refuse if any of them have since been
+    # paid against).
+    new_row_ids = models.JSONField(default=list, blank=True)
+
+    is_undone = models.BooleanField(default=False)
+    undone_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+",
+    )
+    undone_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Loan Schedule Snapshot"
+        verbose_name_plural = "Loan Schedule Snapshots"
+
+    def __str__(self):
+        who = self.created_by.full_name if self.created_by else "System"
+        return f"{self.loan.loan_number}: schedule snapshot by {who} on {self.created_at.date()}"
+
+
 class Guarantor(models.Model):
     """
     A person who provides a guarantee for a client's loan.

@@ -31,6 +31,7 @@ from .models import (
     Guarantor,
     LoanGuarantee,
     LoanDisbursementAudit,
+    LoanScheduleSnapshot,
 )
 from .utils import (
     build_loan_schedule_context,
@@ -39,6 +40,10 @@ from .utils import (
     collateral_minimum,
     generate_schedule,
     resolve_processing_fee_rate,
+    serialize_schedule_row,
+    deserialize_schedule_row,
+    serialize_loan_snapshot_fields,
+    restore_loan_snapshot_fields,
 )
 from payments.models import Payment
 
@@ -189,7 +194,7 @@ def loan_apply_step2(request, client_id):
     if client.active_loan_count > 0:
         # show existing active loan and allow rollover option when product and user permit
         active_loan = client.loans.filter(status=Loan.Status.ACTIVE).order_by("-disbursement_date").first()
-        can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and (request.user.is_manager or request.user.is_ceo))
+        can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and request.user.can("can_approve_loans"))
 
     products = LoanProduct.objects.filter(is_active=True)
     company_default_fee = CompanySettings.get().default_processing_fee_percent
@@ -883,6 +888,23 @@ def loan_edit(request, pk):
 # Loan detail                                                          #
 # ------------------------------------------------------------------ #
 
+def _can_undo_regenerate(loan):
+    """
+    Whether there's a not-yet-undone schedule regeneration on this loan
+    that's still safe to undo (i.e. nothing's been paid against the rows
+    it created since). Drives whether the "Undo Last Regeneration" button
+    shows up at all.
+    """
+    snapshot = loan.schedule_snapshots.filter(is_undone=False).order_by("-created_at").first()
+    if not snapshot:
+        return False
+    new_rows = list(LoanSchedule.objects.filter(pk__in=snapshot.new_row_ids))
+    return not any(
+        r.amount_paid > 0 or r.status not in (LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE)
+        for r in new_rows
+    )
+
+
 @login_required
 def loan_detail(request, pk):
     loan = get_object_or_404(Loan.objects.select_related("client", "product", "applied_by", "reviewed_by"), pk=pk)
@@ -919,7 +941,7 @@ def loan_detail(request, pk):
     from accounts.models import CompanySettings
     write_off_threshold_days = getattr(CompanySettings.get(), "auto_write_off_days", 180)
     can_write_off = (
-        request.user.is_ceo
+        request.user.can("can_write_off_loans")
         and loan.status in (Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED, Loan.Status.DEFAULTED)
         and loan.days_overdue >= write_off_threshold_days
     )
@@ -934,6 +956,7 @@ def loan_detail(request, pk):
         "disbursement_audits_total": audits_total,
         "can_write_off": can_write_off,
         "write_off_threshold_days": write_off_threshold_days,
+        "can_undo_regenerate": _can_undo_regenerate(loan),
     })
 
 @_require_role("MANAGER", "CEO")
@@ -982,8 +1005,8 @@ def loan_reschedule(request, pk):
                     chosen_disbursement = date.fromisoformat(provided_disb)
                 except Exception:
                     raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
-                if chosen_disbursement < date.today() and not request.user.is_ceo:
-                    raise ValueError("Only the CEO may set a past disbursement date.")
+                if chosen_disbursement < date.today() and not request.user.can("can_backdate_transactions"):
+                    raise ValueError("Only users with back-dating permission may set a past disbursement date.")
             else:
                 chosen_disbursement = date.today()
 
@@ -1085,8 +1108,22 @@ def loan_regenerate_schedule(request, pk):
     GET: returns a small fragment with a date input (modal body)
     POST: regenerates schedule using the provided disbursement_date and returns the updated
           schedule card fragment so the page can update via HTMX.
+
+    Only ever touches *unsettled* schedule rows (no payment applied yet —
+    status PENDING/OVERDUE with amount_paid == 0). Any row a payment has
+    been recorded against (PAID, PARTIAL, WAIVED, or amount_paid > 0) is
+    left completely untouched, so payment history can never be lost here.
+    The remaining principal is re-amortized only over however many
+    unsettled periods remain — not the loan's original full term — so
+    regenerating mid-loan doesn't silently restart the amortization clock.
+
+    A full backup is taken first (LoanScheduleSnapshot) so this can be
+    undone via loan_undo_regenerate_schedule.
     """
     loan = get_object_or_404(Loan.objects.select_related("product", "client"), pk=pk)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("loans:detail", pk=loan.pk)
 
     # GET -> return the small form fragment
     if request.method == "GET":
@@ -1097,6 +1134,17 @@ def loan_regenerate_schedule(request, pk):
 
     # POST -> perform regeneration
     if request.method == "POST":
+        if not request.user.can("can_regenerate_schedule"):
+            messages.error(request, "You do not have permission to regenerate a loan's schedule.")
+            return redirect("loans:detail", pk=loan.pk)
+
+        if loan.status not in (Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED):
+            messages.error(
+                request,
+                f"Cannot regenerate the schedule for a {loan.get_status_display()} loan.",
+            )
+            return redirect("loans:detail", pk=loan.pk)
+
         provided = request.POST.get("disbursement_date", "").strip()
         if not provided:
             messages.error(request, "Please provide a disbursement date.")
@@ -1108,80 +1156,203 @@ def loan_regenerate_schedule(request, pk):
             messages.error(request, "Invalid disbursement date format. Use YYYY-MM-DD.")
             return redirect("loans:detail", pk=loan.pk)
 
-        # Non-CEOs may not back-date; CEOs may
-        if not request.user.is_ceo and parsed < date.today():
-            messages.error(request, "Only the CEO may set a past disbursement date.")
+        # Non-privileged users may not set a start date in the past
+        if not request.user.can("can_backdate_transactions") and parsed < date.today():
+            messages.error(request, "You do not have permission to set a past date.")
             return redirect("loans:detail", pk=loan.pk)
 
-        # Decide principal: for ACTIVE loans use outstanding_balance, otherwise use principal_amount
-        principal_to_use = loan.outstanding_balance if loan.status == Loan.Status.ACTIVE else loan.principal_amount
+        reason = request.POST.get("reason", "").strip()[:2000]
+
+        all_rows = list(loan.schedule.order_by("period_number"))
+        settled_rows = [
+            r for r in all_rows
+            if r.status in (LoanSchedule.Status.PAID, LoanSchedule.Status.WAIVED) or r.amount_paid > 0
+        ]
+        unsettled_rows = [r for r in all_rows if r not in settled_rows]
+
+        if not unsettled_rows:
+            messages.info(request, "Every period on this loan is already settled — nothing to regenerate.")
+            return redirect("loans:detail", pk=loan.pk)
+
+        remaining_principal = sum((r.principal_due for r in unsettled_rows), Decimal("0"))
+        remaining_periods = len(unsettled_rows)
+
+        # build_loan_schedule_context's `term_months` genuinely means
+        # months — it internally multiplies by 4/2/30 for WEEKLY/BIWEEKLY/
+        # DAILY to get the period count. remaining_periods above is a count
+        # of remaining installment ROWS, not months, so for anything other
+        # than MONTHLY frequency those are different numbers. Convert back
+        # to the equivalent month count so the periods (and interest, which
+        # is calculated off term_months) come out right either way.
+        periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(loan.repayment_frequency, 1)
+        remaining_term_months = Decimal(remaining_periods) / Decimal(periods_per_month)
 
         try:
-            schedule_rows, totals, _, _, _ = build_loan_schedule_context(
-                principal=principal_to_use,
-                product=loan.product,
-                term_months=loan.term_months,
-                frequency=loan.repayment_frequency,
-                start_date=parsed,
-                include_processing_fee=False,
-                interest_rate_monthly=loan.interest_rate_monthly,
-                interest_method=loan.interest_method,
-            )
-
-            # Replace schedule rows
-            LoanSchedule.objects.filter(loan=loan).delete()
-            LoanSchedule.objects.bulk_create([
-                LoanSchedule(
+            with transaction.atomic():
+                # 1. Snapshot the full current state before touching anything.
+                snapshot = LoanScheduleSnapshot.objects.create(
                     loan=loan,
-                    period_number=row["period_number"],
-                    due_date=row["due_date"],
-                    opening_balance=row["opening_balance"],
-                    principal_due=row["principal_due"],
-                    interest_due=row["interest_due"],
-                    total_payment=row["total_payment"],
-                    closing_balance=row["closing_balance"],
+                    created_by=request.user,
+                    reason=reason,
+                    old_schedule_rows=[serialize_schedule_row(r) for r in all_rows],
+                    old_loan_fields=serialize_loan_snapshot_fields(loan),
                 )
-                for row in schedule_rows
-            ])
 
-            old_date = loan.disbursement_date
-            loan.disbursement_date = parsed
-            loan.first_repayment_date = schedule_rows[0]["due_date"]
-            loan.maturity_date = schedule_rows[-1]["due_date"]
-            loan.total_repayable = totals.get("total_repayable", loan.total_repayable)
-            loan.total_interest = totals.get("total_interest", loan.total_interest)
-            loan.outstanding_balance = loan.total_repayable
-            loan.save()
+                # 2. Build the replacement schedule for ONLY the unsettled
+                #    remainder — remaining principal, remaining period count.
+                schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+                    principal=remaining_principal,
+                    product=loan.product,
+                    term_months=remaining_term_months,
+                    frequency=loan.repayment_frequency,
+                    start_date=parsed,
+                    include_processing_fee=False,
+                    interest_rate_monthly=loan.interest_rate_monthly,
+                    interest_method=loan.interest_method,
+                )
 
-            # Create an audit record if the disbursement date changed
-            try:
-                if old_date != loan.disbursement_date:
+                # 3. Delete only the unsettled rows; settled rows are untouched.
+                unsettled_ids = [r.pk for r in unsettled_rows]
+                LoanSchedule.objects.filter(pk__in=unsettled_ids).delete()
+
+                next_period = (max((r.period_number for r in settled_rows), default=0)) + 1
+                new_rows = LoanSchedule.objects.bulk_create([
+                    LoanSchedule(
+                        loan=loan,
+                        period_number=next_period + i,
+                        due_date=row["due_date"],
+                        opening_balance=row["opening_balance"],
+                        principal_due=row["principal_due"],
+                        interest_due=row["interest_due"],
+                        total_payment=row["total_payment"],
+                        closing_balance=row["closing_balance"],
+                    )
+                    for i, row in enumerate(schedule_rows)
+                ])
+                snapshot.new_row_ids = [r.pk for r in new_rows]
+                snapshot.save(update_fields=["new_row_ids"])
+
+                # 4. Recompute loan totals from the FULL current row set
+                #    (preserved settled rows + freshly regenerated ones) —
+                #    never from outstanding_balance, which already includes
+                #    interest and would compound it further.
+                final_rows = settled_rows + list(new_rows)
+                loan.total_repayable = sum((r.total_payment for r in final_rows), Decimal("0"))
+                loan.total_interest = sum((r.interest_due for r in final_rows), Decimal("0"))
+                loan.outstanding_balance = sum(
+                    (max(r.total_payment - r.amount_paid, Decimal("0")) for r in final_rows),
+                    Decimal("0"),
+                )
+                loan.first_repayment_date = min(r.due_date for r in final_rows)
+                loan.maturity_date = max(r.due_date for r in final_rows)
+
+                # Only rewrite disbursement_date if nothing has been paid
+                # yet — once real payments exist against the original
+                # date, that date is a historical fact and shouldn't move;
+                # `parsed` in that case just becomes the resume date for
+                # the newly-regenerated remaining periods.
+                old_disbursement_date = loan.disbursement_date
+                if not settled_rows:
+                    loan.disbursement_date = parsed
+                loan.save()
+
+                if old_disbursement_date != loan.disbursement_date or reason:
                     LoanDisbursementAudit.objects.create(
                         loan=loan,
                         changed_by=request.user,
-                        old_disbursement_date=old_date,
+                        old_disbursement_date=old_disbursement_date,
                         new_disbursement_date=loan.disbursement_date,
-                        action='regenerate',
-                        reason=request.POST.get('reason', '')[:2000],
+                        action="regenerate",
+                        reason=reason,
                     )
-            except Exception:
-                # Never raise audit failures to the user flow
-                import logging
-                logging.exception('Failed to create disbursement audit for loan %s', loan.pk)
 
-            # Return updated schedule fragment so HTMX can replace the card
-            schedule = loan.schedule.order_by("period_number")
-            return render(request, "loans/loan_detail_schedule_fragment.html", {
-                "loan": loan,
-                "schedule": schedule,
-                "user": request.user,
-            })
+            messages.success(request, "Schedule regenerated. You can undo this from the schedule card if needed.")
 
-        except Exception as e:
+        except Exception:
             import logging
-            logging.exception("Failed to regenerate schedule for loan %s: %s", loan.pk, e)
+            logging.exception("Failed to regenerate schedule for loan %s", loan.pk)
             messages.error(request, "Failed to regenerate schedule. See logs.")
             return redirect("loans:detail", pk=loan.pk)
+
+        schedule = loan.schedule.order_by("period_number")
+        return render(request, "loans/loan_detail_schedule_fragment.html", {
+            "loan": loan,
+            "schedule": schedule,
+            "user": request.user,
+            "can_undo_regenerate": _can_undo_regenerate(loan),
+        })
+
+
+@login_required
+@require_POST
+def loan_undo_regenerate_schedule(request, pk):
+    """
+    Reverts the most recent Regenerate Schedule action on this loan, using
+    the LoanScheduleSnapshot it created. Refuses if a payment has since
+    been recorded against any of the rows the regeneration created, since
+    undoing would silently lose that payment's schedule linkage — the user
+    is told exactly why and nothing is changed in that case.
+    """
+    loan = get_object_or_404(Loan, pk=pk)
+    if not can_access_branch_object(request.user, loan):
+        messages.error(request, "That loan belongs to a different branch.")
+        return redirect("loans:list")
+
+    if not request.user.can("can_regenerate_schedule"):
+        messages.error(request, "You do not have permission to undo a schedule regeneration.")
+        return redirect("loans:detail", pk=loan.pk)
+
+    snapshot = loan.schedule_snapshots.filter(is_undone=False).order_by("-created_at").first()
+    if not snapshot:
+        messages.info(request, "There's no schedule regeneration to undo for this loan.")
+        return redirect("loans:detail", pk=loan.pk)
+
+    new_rows = list(LoanSchedule.objects.filter(pk__in=snapshot.new_row_ids))
+    if any(r.amount_paid > 0 or r.status not in (LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE) for r in new_rows):
+        messages.error(
+            request,
+            "A payment has already been recorded against the regenerated schedule, "
+            "so this can no longer be undone safely.",
+        )
+        return redirect("loans:detail", pk=loan.pk)
+
+    try:
+        with transaction.atomic():
+            LoanSchedule.objects.filter(pk__in=snapshot.new_row_ids).delete()
+            LoanSchedule.objects.bulk_create([
+                deserialize_schedule_row(loan, row) for row in snapshot.old_schedule_rows
+            ])
+            restore_loan_snapshot_fields(loan, snapshot.old_loan_fields)
+            loan.save()
+
+            snapshot.is_undone = True
+            snapshot.undone_by = request.user
+            snapshot.undone_at = timezone.now()
+            snapshot.save(update_fields=["is_undone", "undone_by", "undone_at"])
+
+            LoanDisbursementAudit.objects.create(
+                loan=loan,
+                changed_by=request.user,
+                old_disbursement_date=loan.disbursement_date,
+                new_disbursement_date=loan.disbursement_date,
+                action="regenerate",
+                reason=f"Undo of regeneration from {snapshot.created_at:%Y-%m-%d %H:%M}",
+            )
+
+        messages.success(request, "Schedule regeneration undone — restored to how it was before.")
+    except Exception:
+        import logging
+        logging.exception("Failed to undo schedule regeneration for loan %s", loan.pk)
+        messages.error(request, "Failed to undo. See logs.")
+        return redirect("loans:detail", pk=loan.pk)
+
+    schedule = loan.schedule.order_by("period_number")
+    return render(request, "loans/loan_detail_schedule_fragment.html", {
+        "loan": loan,
+        "schedule": schedule,
+        "user": request.user,
+        "can_undo_regenerate": _can_undo_regenerate(loan),
+    })
 
 # ------------------------------------------------------------------ #
 # Loan renewal / roll-over                                              #
@@ -1236,8 +1407,8 @@ def loan_renew(request, pk):
                     chosen_disbursement = date.fromisoformat(provided_disb)
                 except Exception:
                     raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
-                if chosen_disbursement < date.today() and not request.user.is_ceo:
-                    raise ValueError("Only the CEO may set a past disbursement date.")
+                if chosen_disbursement < date.today() and not request.user.can("can_backdate_transactions"):
+                    raise ValueError("Only users with back-dating permission may set a past disbursement date.")
             else:
                 chosen_disbursement = date.today()
 
@@ -1372,7 +1543,7 @@ def loan_approve(request, pk):
     # Limit check: managers can only approve up to UGX 5,000,000
     from django.conf import settings as django_settings
     limit = Decimal(str(getattr(django_settings, "MANAGER_APPROVAL_LIMIT", 5_000_000)))
-    if user.is_manager and loan.principal_amount > limit:
+    if not user.can("can_approve_unlimited_loans") and loan.principal_amount > limit:
         messages.error(request, f"Loans above UGX {limit:,.0f} require CEO approval.")
         return redirect("loans:detail", pk=pk)
 
@@ -1384,8 +1555,8 @@ def loan_approve(request, pk):
     # If a disbursement_date was provided and user is CEO, validate and apply it
     provided = request.POST.get("disbursement_date", "").strip() if request.POST else ""
     if provided:
-        if not user.is_ceo:
-            messages.error(request, "Only the CEO may set a custom disbursement date.")
+        if not user.can("can_backdate_transactions"):
+            messages.error(request, "You do not have permission to set a custom disbursement date.")
             return redirect("loans:detail", pk=pk)
         try:
             parsed = date.fromisoformat(provided)
@@ -1626,7 +1797,7 @@ def loan_reject(request, pk):
 def loan_draft_delete(request, pk):
     """Permanently delete a DRAFT loan application."""
     loan = get_object_or_404(Loan, pk=pk, status=Loan.Status.DRAFT)
-    if not (request.user == loan.applied_by or request.user.is_manager or request.user.is_ceo):
+    if not (request.user == loan.applied_by or request.user.can("can_edit_any_loan")):
         messages.error(request, "You do not have permission to delete this draft.")
         return redirect("loans:detail", pk=loan.pk)
     ref = loan.loan_number
@@ -1639,7 +1810,7 @@ def loan_draft_delete(request, pk):
 def loan_recall(request, loan_id):
     """Pull a rejected/draft loan back into edit mode."""
     loan = get_object_or_404(Loan, pk=loan_id)
-    if not (request.user == loan.applied_by or request.user.is_manager or request.user.is_ceo):
+    if not (request.user == loan.applied_by or request.user.can("can_edit_any_loan")):
         messages.error(request, "You do not have permission to recall this application.")
         return redirect("loans:detail", pk=loan.pk)
     if loan.status not in (Loan.Status.DRAFT, Loan.Status.REJECTED):
@@ -1871,7 +2042,7 @@ def loan_product_list(request):
         qs = qs.filter(is_active=False)
 
     # Default for non-CEO users: show active only.
-    if not request.user.is_ceo and not status:
+    if not request.user.can("can_view_all_loan_products") and not status:
         qs = qs.filter(is_active=True)
 
     return render(
@@ -1881,7 +2052,7 @@ def loan_product_list(request):
             "products": qs,
             "q": q,
             "status": status,
-            "is_ceo": request.user.is_ceo,
+            "is_ceo": request.user.can("can_view_all_loan_products"),
         },
     )
 

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Roles & Permissions{% endblock %}
+{% block page_title %}Roles & Permissions{% endblock %}
+
+{% block content %}
+<p style="color:var(--text-muted);max-width:640px;margin:0 0 20px;">
+  Each role below is a group of permissions. Tick or untick a permission and save to change what
+  everyone with that role can do — no code change needed. Need something more specific for one
+  person? Grant it directly on their <a href="{% url 'accounts:user_list' %}">user edit page</a>
+  instead of changing a whole role.
+</p>
+
+{% for entry in groups_data %}
+<div class="card mb-3">
+  <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+    <span class="card-title">
+      {{ entry.group.name }}
+      {% if entry.is_builtin %}<span style="font-size:12px;color:var(--text-muted);font-weight:400;">(built-in role)</span>{% endif %}
+    </span>
+    <span style="font-size:13px;color:var(--text-muted);">{{ entry.member_count }} user{{ entry.member_count|pluralize }}</span>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="form_action" value="update_group">
+      <input type="hidden" name="group_id" value="{{ entry.group.pk }}">
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:10px 20px;margin-bottom:16px;">
+        {% for codename, label, default_groups in all_permissions %}
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13.5px;">
+          <input type="checkbox" name="permissions" value="{{ codename }}"
+                 style="margin-top:3px;"
+                 {% if codename in entry.granted %}checked{% endif %}>
+          <span>{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button type="submit" class="btn btn-primary btn-sm">Save {{ entry.group.name }} permissions</button>
+        {% if not entry.is_builtin %}
+        <span style="color:var(--text-muted);font-size:13px;">or</span>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if not entry.is_builtin %}
+    <form method="post" onsubmit="return confirm('Delete the {{ entry.group.name }} group? Anyone currently in it will lose these permissions.');" style="display:inline;margin-top:4px;">
+      {% csrf_token %}
+      <input type="hidden" name="form_action" value="delete_group">
+      <input type="hidden" name="group_id" value="{{ entry.group.pk }}">
+      <button type="submit" class="btn btn-secondary btn-sm" style="color:var(--red-500);border-color:var(--red-500);margin-top:8px;">
+        Delete group
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="card mb-3">
+  <div class="card-header"><span class="card-title">Create a new role</span></div>
+  <div class="card-body">
+    <form method="post" style="display:flex;gap:10px;align-items:flex-end;max-width:480px;">
+      {% csrf_token %}
+      <input type="hidden" name="form_action" value="create_group">
+      <div class="form-group" style="flex:1;margin-bottom:0;">
+        <label class="form-label">Role name</label>
+        <input type="text" name="new_group_name" class="form-control" placeholder="e.g. Loan Officer" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+    <small style="color:var(--text-muted);display:block;margin-top:8px;">
+      New roles start with no permissions — tick the ones it needs above once it's created,
+      then assign staff to it from their user edit page.
+    </small>
+  </div>
+</div>
+{% endblock %}

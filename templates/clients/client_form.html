@@ -39,7 +39,7 @@
           </div>
           <div class="btn-group" role="group" aria-label="Duplicate actions">
             <a href="{% url 'clients:detail' pk=dup.pk %}" class="btn btn-secondary btn-sm">View</a>
-            {% if user.is_manager or user.is_ceo %}
+            {% if perms.accounts.can_manage_clients %}
             <a href="{% url 'clients:edit' pk=dup.pk %}" class="btn btn-primary btn-sm">Edit</a>
             {% endif %}
           </div>
@@ -73,7 +73,7 @@
     </div>
   </div>
 
-  {% if user.is_ceo %}
+  {% if perms.accounts.can_view_all_branches %}
   <div class="card mb-3">
     <div class="card-header"><span class="card-title">Branch <span style="color:var(--red-400)">*</span></span></div>
     <div class="card-body">
@@ -296,7 +296,7 @@
         <textarea name="notes" id="notes" rows="3"
                   placeholder="Any internal notes about this client (not shown to client)">{{ client.notes|default:'' }}</textarea>
       </div>
-      {% if action == "edit" and user.is_ceo %}
+      {% if action == "edit" and perms.accounts.can_view_all_branches %}
       <hr style="border-color:var(--border);margin:16px 0;">
       <div class="form-group">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">

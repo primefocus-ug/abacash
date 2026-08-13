@@ -49,8 +49,8 @@ def _require_manager(view_fn):
     @wraps(view_fn)
     @login_required
     def wrapper(request, *args, **kwargs):
-        if request.user.is_cashier:
-            messages.error(request, "Reports are available to Managers and CEO only.")
+        if not request.user.can("can_view_reports"):
+            messages.error(request, "You do not have permission to view reports.")
             return redirect("accounts:dashboard")
         return view_fn(request, *args, **kwargs)
     return wrapper

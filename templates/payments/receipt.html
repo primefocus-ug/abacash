@@ -10,10 +10,23 @@
 {% endblock %}
 
 {% block content %}
-<div class="receipt-wrap">
-  <div class="receipt-header">
-    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{% company_name %}</div>
-    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">Loan Management System · Kampala, Uganda</div>
+<div class="receipt-wrap" style="border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+  <div class="receipt-header" style="text-align:center;">
+    {% if company.company_logo %}
+    <div style="display:flex;justify-content:center;">
+      <img src="{{ company.company_logo.url }}" alt="{{ company.company_name }} logo"
+           style="height:64px;width:64px;object-fit:cover;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.12);">
+    </div>
+    {% endif %}
+    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{{ company.company_name }}</div>
+    {% if company.company_address %}
+    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">{{ company.company_address }}</div>
+    {% endif %}
+    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">
+      {% if company.company_phone %}{{ company.company_phone }}{% endif %}
+      {% if company.company_phone and company.company_email %} · {% endif %}
+      {% if company.company_email %}{{ company.company_email }}{% endif %}
+    </div>
     <div style="margin-top:16px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
       <div style="font-size:13px;color:var(--text-muted);font-weight:700;letter-spacing:0.04em;">PAYMENT RECEIPT</div>
       <div class="receipt-number" style="font-size:20px;font-weight:700;color:var(--text-primary);margin-top:4px;">
@@ -103,12 +116,12 @@
     <span class="receipt-total">{{ receipt.amount_received|money }}</span>
   </div>
 
-  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <div>
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
       <div class="text-muted text-sm">Balance Before</div>
       <div class="mono">{{ receipt.balance_before|money }}</div>
     </div>
-    <div>
+    <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
       <div class="text-muted text-sm">Balance After</div>
       <div class="mono" style="color:{% if receipt.balance_after == 0 %}var(--green-400){% else %}var(--amber-400){% endif %}">
         {{ receipt.balance_after|money }}
@@ -117,15 +130,15 @@
   </div>
 
   {% if receipt.balance_after == 0 %}
-  <div class="alert alert-success mt-3">
+  <div class="alert alert-success mt-3" style="border-radius:10px;">
     Loan fully repaid. Congratulations!
   </div>
   {% endif %}
 
-  <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:16px;">
+  <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding:16px 8px 20px;background:var(--surface, rgba(0,0,0,0.02));">
     <strong>Served by:</strong> {{ receipt.payment.recorded_by.full_name }}<br>
     <strong>Issued:</strong> {{ receipt.issued_at|date:"d M Y H:i" }}<br>
-    <strong>{% company_name %} — This is an official receipt. Keep it safe.</strong>
+    <strong>{{ company.company_name }} — This is an official receipt. Keep it safe.</strong>
   </div>
 </div>
 {% endblock %}

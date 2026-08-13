@@ -126,6 +126,51 @@
     </div>
   </div>
 
+  {% if action == "edit" and can_manage_permissions %}
+  <div class="card mb-4">
+    <div class="card-header"><span class="card-title">Extra permissions</span></div>
+    <div class="card-body">
+      <p style="color:var(--text-muted);font-size:13px;margin:0 0 12px;">
+        {{ staff.first_name }} already has everything their <strong>{{ staff.get_role_display }}</strong> role
+        grants (greyed out below — change that on the
+        <a href="{% url 'accounts:permissions_manage' %}">Roles & Permissions page</a> if needed).
+        Tick anything extra just for this person.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:10px 20px;">
+        {% for codename, label, default_groups in all_permissions %}
+        {% if codename in group_codenames %}
+        <label style="display:flex;align-items:flex-start;gap:8px;color:var(--text-muted);font-size:13.5px;">
+          <input type="checkbox" checked disabled style="margin-top:3px;">
+          <span>{{ label }} <span style="font-size:12px;">(via role)</span></span>
+        </label>
+        {% else %}
+        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:13.5px;">
+          <input type="checkbox" name="extra_permissions" value="{{ codename }}"
+                 style="margin-top:3px;"
+                 {% if codename in own_codenames %}checked{% endif %}>
+          <span>{{ label }}</span>
+        </label>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if custom_groups %}
+      <hr style="border-color:var(--border);margin:16px 0;">
+      <label class="form-label">Custom roles</label>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;">
+        {% for g in custom_groups %}
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13.5px;">
+          <input type="checkbox" name="extra_groups" value="{{ g.pk }}"
+                 {% if g.pk in staff_custom_group_ids %}checked{% endif %}>
+          <span>{{ g.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="flex gap-2 mb-4">
     <button type="submit" class="btn btn-primary btn-lg">
       {% if action == "create" %}Create User{% else %}Save Changes{% endif %}
