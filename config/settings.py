@@ -41,10 +41,16 @@ def _database_from_url(url: str) -> dict:
 
 
 # Get DATABASE_URL from environment with a fallback
-DATABASE_URL = config(
-    "DATABASE_URL",
-    default="postgres://postgres:@Developer25@localhost:5432/db"
-)
+if DEBUG:
+    DATABASE_URL = config(
+        "DATABASE_URL",
+        default="postgres://postgres:@Developer25@localhost:5432/db"
+    )
+else:
+    DATABASE_URL = config(
+        "DATABASE_URL",
+        default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
+    )
 
 DATABASES = {
     "default": _database_from_url(DATABASE_URL)
