@@ -457,7 +457,7 @@ def receipt_view(request, pk):
         "receipt": receipt,
         "guarantees": guarantees,
         "collateral_items": collateral_items,
-        "company": CompanySettings.get(),
+        "company_settings": CompanySettings.get(),
     }
     if request.GET.get("format") == "pdf":
         filename = f"Receipt-{receipt.receipt_number}.pdf"

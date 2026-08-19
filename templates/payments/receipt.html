@@ -12,21 +12,23 @@
 {% block content %}
 <div class="receipt-wrap" style="border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
   <div class="receipt-header" style="text-align:center;">
-    {% if company.company_logo %}
+    {% if company_settings.company_logo %}
     <div style="display:flex;justify-content:center;">
-      <img src="{{ company.company_logo.url }}" alt="{{ company.company_name }} logo"
+      <img src="{{ company_settings.company_logo.url }}" alt="{{ company_settings.company_name }} logo"
            style="height:64px;width:64px;object-fit:cover;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.12);">
     </div>
     {% endif %}
-    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{{ company.company_name }}</div>
-    {% if company.company_address %}
-    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">{{ company.company_address }}</div>
+    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{{ company_settings.company_name|default:company.name }}</div>
+    {% if company_settings.company_address %}
+    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">{{ company_settings.company_address }}</div>
     {% endif %}
+    {% if company_settings.company_phone or company_settings.company_email %}
     <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">
-      {% if company.company_phone %}{{ company.company_phone }}{% endif %}
-      {% if company.company_phone and company.company_email %} · {% endif %}
-      {% if company.company_email %}{{ company.company_email }}{% endif %}
+      {% if company_settings.company_phone %}Phone: {{ company_settings.company_phone }}{% endif %}
+      {% if company_settings.company_phone and company_settings.company_email %} · {% endif %}
+      {% if company_settings.company_email %}Email: {{ company_settings.company_email }}{% endif %}
     </div>
+    {% endif %}
     <div style="margin-top:16px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
       <div style="font-size:13px;color:var(--text-muted);font-weight:700;letter-spacing:0.04em;">PAYMENT RECEIPT</div>
       <div class="receipt-number" style="font-size:20px;font-weight:700;color:var(--text-primary);margin-top:4px;">
@@ -35,40 +37,51 @@
     </div>
   </div>
 
+  <style>
+    .receipt-wrap .receipt-row {
+      display: block;
+      text-align: center;
+    }
+    .receipt-wrap .receipt-row .receipt-label {
+      display: block;
+      margin-bottom: 2px;
+    }
+  </style>
+
   <div class="receipt-row">
-    <span class="receipt-label">Date</span>
-    <span>{{ receipt.payment.payment_date }}</span>
+    <span class="receipt-label" style="font-weight:600;">Date</span>
+    <span style="font-weight:600;">{{ receipt.payment.payment_date }}</span>
   </div>
   {% if receipt.payment.loan.branch %}
   <div class="receipt-row">
-    <span class="receipt-label">Branch</span>
-    <span style="font-weight:500;">{{ receipt.payment.loan.branch.name }}</span>
+    <span class="receipt-label" style="font-weight:600;">Branch</span>
+    <span style="font-weight:600;">{{ receipt.payment.loan.branch.name }}</span>
   </div>
   {% endif %}
   <div class="receipt-row">
-    <span class="receipt-label">Client</span>
-    <span style="font-weight:500;">{{ receipt.payment.client.full_name }}</span>
+    <span class="receipt-label" style="font-weight:600;">Client</span>
+    <span style="font-weight:600;">{{ receipt.payment.client.full_name }}</span>
   </div>
   <div class="receipt-row">
-    <span class="receipt-label">Client #</span>
-    <span class="mono">{{ receipt.payment.client.client_number }}</span>
+    <span class="receipt-label" style="font-weight:600;">Client #</span>
+    <span class="mono" style="font-weight:600;">{{ receipt.payment.client.client_number }}</span>
   </div>
   <div class="receipt-row">
-    <span class="receipt-label">Phone</span>
-    <span>{{ receipt.payment.client.phone_primary }}</span>
+    <span class="receipt-label" style="font-weight:600;">Phone</span>
+    <span style="font-weight:600;">{{ receipt.payment.client.phone_primary }}</span>
   </div>
   <div class="receipt-row">
-    <span class="receipt-label">Loan Reference</span>
-    <span class="mono">{{ receipt.payment.loan.loan_number }}</span>
+    <span class="receipt-label" style="font-weight:600;">Loan Reference</span>
+    <span class="mono" style="font-weight:600;">{{ receipt.payment.loan.loan_number }}</span>
   </div>
   <div class="receipt-row">
-    <span class="receipt-label">Product</span>
-    <span>{{ receipt.payment.loan.product.name }}</span>
+    <span class="receipt-label" style="font-weight:600;">Product</span>
+    <span style="font-weight:600;">{{ receipt.payment.loan.product.name }}</span>
   </div>
   {% if guarantees %}
   <div class="receipt-row">
-    <span class="receipt-label">Guarantors</span>
-    <span>
+    <span class="receipt-label" style="font-weight:600;">Guarantors</span>
+    <span style="font-weight:600;">
       {% for g in guarantees %}
         <div class="mono">{{ g.guarantor.full_name }} — {{ g.guaranteed_amount|money }}</div>
       {% endfor %}
@@ -77,8 +90,8 @@
   {% endif %}
   {% if collateral_items %}
   <div class="receipt-row">
-    <span class="receipt-label">Collateral</span>
-    <span>
+    <span class="receipt-label" style="font-weight:600;">Collateral</span>
+    <span style="font-weight:600;">
       {% for c in collateral_items %}
         <div class="mono">{{ c.description }} — {{ c.estimated_value|money }}</div>
       {% endfor %}
@@ -86,28 +99,28 @@
   </div>
   {% endif %}
   <div class="receipt-row">
-    <span class="receipt-label">Payment Method</span>
-    <span>{{ receipt.payment.get_payment_method_display }}</span>
+    <span class="receipt-label" style="font-weight:600;">Payment Method</span>
+    <span style="font-weight:600;">{{ receipt.payment.get_payment_method_display }}</span>
   </div>
   {% if receipt.payment.reference_number %}
   <div class="receipt-row">
-    <span class="receipt-label">Reference #</span>
-    <span class="mono">{{ receipt.payment.reference_number }}</span>
+    <span class="receipt-label" style="font-weight:600;">Reference #</span>
+    <span class="mono" style="font-weight:600;">{{ receipt.payment.reference_number }}</span>
   </div>
   {% endif %}
 
   <div class="receipt-row">
-    <span class="receipt-label">Principal Paid</span>
-    <span class="mono">{{ receipt.principal_paid|money }}</span>
+    <span class="receipt-label" style="font-weight:600;">Principal Paid</span>
+    <span class="mono" style="font-weight:600;">{{ receipt.principal_paid|money }}</span>
   </div>
   <div class="receipt-row">
-    <span class="receipt-label">Interest Paid</span>
-    <span class="mono">{{ receipt.interest_paid|money }}</span>
+    <span class="receipt-label" style="font-weight:600;">Interest Paid</span>
+    <span class="mono" style="font-weight:600;">{{ receipt.interest_paid|money }}</span>
   </div>
   {% if receipt.penalty_paid > 0 %}
   <div class="receipt-row">
-    <span class="receipt-label">Penalty Paid</span>
-    <span class="mono" style="color:var(--red-400)">{{ receipt.penalty_paid|money }}</span>
+    <span class="receipt-label" style="font-weight:600;">Penalty Paid</span>
+    <span class="mono" style="font-weight:600;color:var(--red-400)">{{ receipt.penalty_paid|money }}</span>
   </div>
   {% endif %}
 
@@ -118,12 +131,12 @@
 
   <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:10px;">
     <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
-      <div class="text-muted text-sm">Balance Before</div>
-      <div class="mono">{{ receipt.balance_before|money }}</div>
+      <div class="text-muted text-sm" style="font-weight:600;">Balance Before</div>
+      <div class="mono" style="font-weight:600;">{{ receipt.balance_before|money }}</div>
     </div>
     <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
-      <div class="text-muted text-sm">Balance After</div>
-      <div class="mono" style="color:{% if receipt.balance_after == 0 %}var(--green-400){% else %}var(--amber-400){% endif %}">
+      <div class="text-muted text-sm" style="font-weight:600;">Balance After</div>
+      <div class="mono" style="font-weight:600;color:{% if receipt.balance_after == 0 %}var(--green-400){% else %}var(--amber-400){% endif %}">
         {{ receipt.balance_after|money }}
       </div>
     </div>
@@ -135,10 +148,21 @@
   </div>
   {% endif %}
 
+  <div style="margin-top:32px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+    <div style="text-align:center;">
+      <div style="border-bottom:1px solid var(--text-primary);height:40px;"></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;">Customer Signature</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="border-bottom:1px solid var(--text-primary);height:40px;"></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;">Authorized Signatory</div>
+    </div>
+  </div>
+
   <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding:16px 8px 20px;background:var(--surface, rgba(0,0,0,0.02));">
     <strong>Served by:</strong> {{ receipt.payment.recorded_by.full_name }}<br>
     <strong>Issued:</strong> {{ receipt.issued_at|date:"d M Y H:i" }}<br>
-    <strong>{{ company.company_name }} — This is an official receipt. Keep it safe.</strong>
+    <strong>{{ company_settings.company_name|default:company.name }} — This is an official receipt. Keep it safe.</strong>
   </div>
 </div>
 {% endblock %}

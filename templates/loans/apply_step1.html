@@ -14,18 +14,9 @@
   .htmx-request .search-spinner { display:inline-block; }
   @keyframes spin { to { transform:rotate(360deg); } }
 
-  /* Responsive fixes for the modal */
-  #loan-apply-modal {
-    padding: 8px;
-    align-items: flex-start;
-    padding-top: 8px;
-    overflow-y: auto;
-  }
+  /* Layout for the wizard shell (now a normal in-page panel, not a popup) */
   #loan-apply-modal > div {
-    max-height: calc(100vh - 16px);
-    margin: auto;
     border-radius: 12px;
-    overflow-y: auto;
   }
   #loan-apply-modal > div > div:first-child {
     flex-wrap: wrap;
@@ -53,7 +44,6 @@
     }
     #loan-apply-modal > div {
       border-radius: 8px;
-      max-height: calc(100vh - 8px);
     }
     #loan-apply-modal > div > div:first-child {
       padding: 12px 14px;
@@ -77,7 +67,7 @@
     #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
       font-size: 9px;
     }
-    #loan-apply-modal > div > div:first-child button {
+    #loan-apply-modal > div > div:first-child a.btn {
       align-self: flex-end;
       margin-top: -4px;
     }
@@ -182,8 +172,8 @@
   }
 </style>
 
-<div id="loan-apply-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;overflow-y:auto;">
-  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:860px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);margin:auto;">
+<div id="loan-apply-modal" style="max-width:860px;margin:0 auto;">
+  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;width:100%;box-shadow:var(--shadow-soft);">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;">
       <div style="min-width:0;max-width:100%;">
         <h2 style="margin:0;font-size:18px;overflow-wrap:break-word;word-break:break-word;">New Loan Application</h2>
@@ -197,7 +187,7 @@
           <span class="wizard-chip">4. Review</span>
         </div>
       </div>
-      <button type="button" id="loan-apply-modal-close" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Close</button>
+      <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Close</a>
     </div>
 
     <div style="padding:20px;">
@@ -250,14 +240,4 @@
     </div>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const closeBtn = document.getElementById('loan-apply-modal-close');
-    closeBtn?.addEventListener('click', () => window.location.href = '{% url "loans:list" %}');
-    document.getElementById('loan-apply-modal')?.addEventListener('click', function (e) {
-      if (e.target === this) window.location.href = '{% url "loans:list" %}';
-    });
-  });
-</script>
 {% endblock %}

@@ -54,6 +54,11 @@
     <div class="metric-value amber">{{ pending_count }}</div>
     <div class="metric-sub"><i class="fas fa-hourglass-start"></i> awaiting review</div>
   </div>
+  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">
+    <div class="metric-label"><i class="fas fa-wallet"></i> Cash at Hand</div>
+    <div class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">{{ cash_at_hand|money }}</div>
+    <div class="metric-sub"><i class="fas fa-balance-scale"></i> Running balance{% if not can_view_all_branches %} .{% endif %}</div>
+  </div>
 </div>
 
 <!-- ============================================================ -->

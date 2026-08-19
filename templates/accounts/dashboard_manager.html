@@ -42,6 +42,11 @@
     <div class="metric-value">{{ active_loan_count }}</div>
     <div class="metric-sub">in portfolio</div>
   </div>
+  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">
+    <div class="metric-label">Cash at Hand</div>
+    <div class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">{{ cash_at_hand|money }}</div>
+    <div class="metric-sub">Running balance{% if not can_view_all_branches %} · your branch{% endif %}</div>
+  </div>
 </div>
 
 <div class="card mb-3">

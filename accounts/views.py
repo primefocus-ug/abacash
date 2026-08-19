@@ -286,6 +286,31 @@ def _manager_dashboard(request, today):
         key=lambda item: (-item["applications_count"], -item["collections_this_month"], item["user"].full_name)
     )
 
+    # Running cash at hand: cumulative injections + repayments collected,
+    # minus everything disbursed and spent, all-time (not period-limited).
+    # Capital injections aren't attributed to a branch on the model, so they
+    # only count towards this figure for users who can see all branches —
+    # branch-scoped managers get pure operating cash flow for their branch.
+    can_view_all_branches = request.user.can("can_view_all_branches")
+
+    all_time_repayments = scope_to_branch(Payment.objects.filter(
+        status="ALLOCATED",
+    ), request.user, "loan__branch").aggregate(total=Sum("amount_received"))["total"] or Decimal("0")
+
+    all_time_disbursed = scope_to_branch(Loan.objects.filter(
+        disbursement_date__isnull=False,
+    ), request.user).aggregate(total=Sum("principal_amount"))["total"] or Decimal("0")
+
+    all_time_expenses = scope_to_branch(Expense.objects.all(), request.user, "branch").aggregate(
+        total=Sum("amount")
+    )["total"] or Decimal("0")
+
+    all_time_injections = Decimal("0")
+    if can_view_all_branches:
+        all_time_injections = CapitalInjection.objects.aggregate(total=Sum("amount"))["total"] or Decimal("0")
+
+    cash_at_hand = (all_time_injections + all_time_repayments) - (all_time_disbursed + all_time_expenses)
+
     context = {
         "pending_loans":        pending_loans,
         "overdue_schedules":    overdue_schedules,
@@ -297,6 +322,8 @@ def _manager_dashboard(request, today):
         "pending_count":        pending_loans.count(),
         "par_30_count":         par_30_count,
         "staff_performance":   staff_performance[:8],
+        "cash_at_hand":         cash_at_hand,
+        "can_view_all_branches": can_view_all_branches,
     }
     return render(request, "accounts/dashboard_manager.html", context)
 

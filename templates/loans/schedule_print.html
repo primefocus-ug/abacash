@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Repayment Schedule — {{ loan.loan_number }}</title>
+<title>Repayment Schedule — {{ loan.loan_number }} — {{ company.name }}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -287,7 +287,7 @@
 <body>
 
 <div class="print-bar">
-  <span class="print-bar-title">Repayment Schedule — {{ loan.loan_number }}</span>
+  <span class="print-bar-title">{{ company.name }} — Repayment Schedule — {{ loan.loan_number }}</span>
   <div class="print-bar-actions">
     <button class="btn-close-tab" onclick="window.close()">✕ Close</button>
     <button class="btn-print" onclick="window.print()">
@@ -301,9 +301,20 @@
 
   <!-- Document header -->
   <div class="doc-header">
-    <div>
-      <div class="org-name">ABA Uganda</div>
-      <div class="org-sub">Loan Management System</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      {% if company_settings.company_logo %}
+      <img src="{{ company_settings.company_logo.url }}"
+           alt="{{ company.name }}"
+           style="width:44px;height:44px;object-fit:contain;flex-shrink:0;">
+      {% endif %}
+      <div>
+        <div class="org-name">{{ company.name }}</div>
+        <div class="org-sub" style="text-transform:none;letter-spacing:normal;">
+          {% if company_settings.company_email %}{{ company_settings.company_email }}{% endif %}
+          {% if company_settings.company_phone %} · {{ company_settings.company_phone }}{% endif %}
+          {% if company_settings.company_address %} · {{ company_settings.company_address }}{% endif %}
+        </div>
+      </div>
     </div>
     <div class="doc-title-block">
       <div class="doc-title">Loan Repayment Schedule</div>
