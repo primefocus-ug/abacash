@@ -10544,3 +10544,7 @@ django.template.base.VariableDoesNotExist: Failed lookup for key [name] in <Comp
 2026-08-21 11:59:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-08-21 11:59:42 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 162476
 2026-08-21 11:59:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 16:29:17 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-21 16:29:33 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 163882
+2026-08-21 16:29:35 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 816
+2026-08-21 16:29:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

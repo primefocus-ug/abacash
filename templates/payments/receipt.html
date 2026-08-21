@@ -33,11 +33,24 @@
   .rcpt-doc {
     max-width: 620px;
     margin: 0 auto;
-    background: #ffffff;
+    background: #ffffff !important;
     border: 1px solid #E2E8F0;
     border-radius: 16px;
     padding: 36px 40px;
     font-family: var(--font-body, system-ui, sans-serif);
+    color-scheme: light;
+  }
+
+  /* The site's dark theme can win the cascade on background-color for
+     nested elements (tables, rows, cards) even though .rcpt-doc itself
+     is forced white above. Force every descendant back to white/transparent
+     too, so the receipt always renders as a light card no matter what
+     theme the rest of the app is in. */
+  .rcpt-doc, .rcpt-doc * {
+    background-color: transparent !important;
+  }
+  .rcpt-doc {
+    background-color: #ffffff !important;
   }
 
   /* Hard reset: don't let the site's own table/td/theme rules (or
@@ -197,23 +210,35 @@
   .rcpt2-doc {
     max-width: 700px;
     margin: 0 auto;
-    background: #fff;
+    background: #fff !important;
     border: 1px solid var(--rcpt2-line);
     border-radius: 14px;
     overflow: hidden;
     font-family: var(--font-body, system-ui, sans-serif);
+    color-scheme: light;
   }
 
   /* Hard reset so the site's own table/theme styling can't leak
      unexpected colors into this design either. */
   .rcpt2-doc, .rcpt2-doc * {
     color: var(--rcpt2-ink) !important;
+    background-color: transparent !important;
   }
+  .rcpt2-doc { background-color: #fff !important; }
+  .rcpt2-brand-icon { background-color: var(--rcpt2-green-soft) !important; }
+  .rcpt2-panel { background-color: var(--rcpt2-green-soft) !important; }
+  .rcpt2-table thead th { background-color: var(--rcpt2-navy) !important; }
+  .rcpt2-table tfoot td { background-color: var(--rcpt2-green-soft) !important; }
+  .rcpt2-status-pill.rcpt2-clear { background-color: var(--rcpt2-green) !important; }
+  .rcpt2-status-pill.rcpt2-open { background-color: var(--amber-400, #c07a11) !important; }
+  .rcpt2-footerbar { background-color: #f8f9fb !important; }
+  .rcpt2-h3 .rcpt2-ico { background-color: var(--rcpt2-green) !important; }
+  .rcpt2-thanks-rule::before, .rcpt2-thanks-rule::after { background-color: var(--rcpt2-line) !important; }
   .rcpt2-doc svg { color: inherit !important; }
 
   .rcpt2-ribbon { display: flex; height: 6px; }
-  .rcpt2-ribbon span:first-child { flex: 7; background: var(--rcpt2-navy); }
-  .rcpt2-ribbon span:last-child { flex: 3; background: var(--rcpt2-green); }
+  .rcpt2-ribbon span:first-child { flex: 7; background-color: var(--rcpt2-navy) !important; }
+  .rcpt2-ribbon span:last-child { flex: 3; background-color: var(--rcpt2-green) !important; }
 
   .rcpt2-body { padding: 28px 32px 24px; color: var(--rcpt2-ink) !important; }
 
