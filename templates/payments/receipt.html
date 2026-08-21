@@ -23,6 +23,27 @@
 
 {% block extra_css %}
 <style>
+  /* Isolate the receipt on print: hide every other element on the page
+     (app sidebar, topbar, buttons, nav, etc. from base.html) so only the
+     receipt card prints — this is what was causing an extra blank/partial
+     page when printing straight from the app layout. */
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    .rcpt-doc, .rcpt-doc *,
+    .rcpt2-doc, .rcpt2-doc * {
+      visibility: visible !important;
+    }
+    .rcpt-doc, .rcpt2-doc {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+  }
+
   /* Prevent the generic print header/footer chrome from duplicating our
      own receipt letterhead below, and keep everything on one printed page. */
   html body .print-header,
