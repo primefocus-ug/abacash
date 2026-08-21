@@ -10489,3 +10489,58 @@ django.template.base.VariableDoesNotExist: Failed lookup for key [name] in <Comp
 2026-08-19 15:57:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-08-19 15:58:12 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 180376
 2026-08-19 15:58:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:24:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-21 10:26:35 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-08-21 10:26:36 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 180363
+2026-08-21 10:26:38 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 816
+2026-08-21 10:26:39 [WARNING] django.request: Not Found: /favicon.ico
+2026-08-21 10:26:39 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-08-21 10:26:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:27:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:27:51 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 170018
+2026-08-21 10:27:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:27:59 [INFO] django.server: "GET /loans/5bad1609-41a4-40f2-ad79-a47093db8faf/ HTTP/1.1" 200 167874
+2026-08-21 10:28:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:28:25 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 159010
+2026-08-21 10:28:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:28:31 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 152462
+2026-08-21 10:28:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:40:58 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 153674
+2026-08-21 10:41:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:52:01 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 160582
+2026-08-21 10:52:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:53:45 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 160582
+2026-08-21 10:53:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:56:02 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 161371
+2026-08-21 10:56:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:57:10 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/payments/views.py changed, reloading.
+2026-08-21 10:57:24 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-21 10:58:14 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 162019
+2026-08-21 10:58:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:58:20 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=modern HTTP/1.1" 200 166454
+2026-08-21 10:58:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 10:59:03 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 162019
+2026-08-21 10:59:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:03:24 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/payments/views.py changed, reloading.
+2026-08-21 11:03:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-08-21 11:04:47 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 162386
+2026-08-21 11:04:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:04:53 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=modern HTTP/1.1" 200 166859
+2026-08-21 11:04:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:05:37 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 162386
+2026-08-21 11:05:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:08:13 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 162296
+2026-08-21 11:08:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:08:38 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 159010
+2026-08-21 11:08:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:08:41 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 162386
+2026-08-21 11:08:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:32:59 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 162476
+2026-08-21 11:33:00 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 816
+2026-08-21 11:33:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:59:09 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/ HTTP/1.1" 200 162476
+2026-08-21 11:59:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:59:16 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=modern HTTP/1.1" 200 167015
+2026-08-21 11:59:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-08-21 11:59:42 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 162476
+2026-08-21 11:59:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

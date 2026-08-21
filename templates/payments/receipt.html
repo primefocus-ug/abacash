@@ -5,164 +5,712 @@
 {% block page_title %}Receipt{% endblock %}
 
 {% block topbar_actions %}
+  <div class="rcpt-style-toggle print-hide" style="display:inline-flex;align-items:center;gap:2px;background:var(--surface-3,#EEF2F7);border-radius:999px;padding:3px;margin-right:8px;">
+    <a href="?style=classic"
+       class="btn btn-sm"
+       style="border-radius:999px;padding:5px 14px;font-size:12px;{% if receipt_style == 'modern' %}background:transparent;color:var(--text-secondary,#475569);{% else %}background:var(--surface,#fff);color:var(--text-primary,#0F172A);box-shadow:0 1px 2px rgba(0,0,0,.08);{% endif %}">
+      Classic
+    </a>
+    <a href="?style=modern"
+       class="btn btn-sm"
+       style="border-radius:999px;padding:5px 14px;font-size:12px;{% if receipt_style == 'modern' %}background:var(--surface,#fff);color:var(--text-primary,#0F172A);box-shadow:0 1px 2px rgba(0,0,0,.08);{% else %}background:transparent;color:var(--text-secondary,#475569);{% endif %}">
+      Modern
+    </a>
+  </div>
   <button onclick="window.print()" class="btn btn-primary btn-sm">Print Receipt</button>
   <a href="{% url 'loans:detail' receipt.payment.loan.pk %}" class="btn btn-secondary btn-sm">Back to Loan</a>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+  /* Prevent the generic print header/footer chrome from duplicating our
+     own receipt letterhead below, and keep everything on one printed page. */
+  html body .print-header,
+  html body .print-footer {
+    display: none !important;
+  }
+
+  .rcpt-doc {
+    max-width: 620px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 36px 40px;
+    font-family: var(--font-body, system-ui, sans-serif);
+  }
+
+  /* Hard reset: don't let the site's own table/td/theme rules (or
+     per-tenant CSS variable overrides) bleed color into the receipt. */
+  .rcpt-doc, .rcpt-doc * {
+    color: #1f2937 !important;
+    text-shadow: none !important;
+  }
+
+  .rcpt-logo {
+    display: block;
+    max-height: 56px;
+    max-width: 220px;
+    margin: 0 auto 12px;
+    object-fit: contain;
+  }
+
+  .rcpt-header { text-align: center; }
+
+  .rcpt-company {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #0F172A !important;
+    text-transform: uppercase;
+  }
+
+  .rcpt-meta {
+    font-size: 12px;
+    color: #64748B !important;
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  .rcpt-rule {
+    border: none;
+    border-top: 2px solid #0F172A;
+    margin: 18px 0 16px;
+  }
+
+  .rcpt-title-box {
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    text-align: center;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    color: #0F172A !important;
+    margin-bottom: 8px;
+  }
+
+  .rcpt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+  }
+
+  .rcpt-table td {
+    padding: 9px 2px;
+    border-bottom: 1px solid #E2E8F0;
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .rcpt-table tr:last-child td { border-bottom: none; }
+
+  .rcpt-table td.rcpt-label {
+    font-weight: 700;
+    color: #0F172A !important;
+    width: 42%;
+    white-space: nowrap;
+  }
+
+  .rcpt-table td.rcpt-value {
+    text-align: right;
+    color: #1f2937 !important;
+  }
+
+  .rcpt-mono { font-family: var(--font-mono, 'DM Mono', monospace); }
+
+  .rcpt-amount { color: #265ee8 !important; font-weight: 700; font-size: 14px; }
+  .rcpt-balance-clear { color: #188457 !important; font-weight: 700; }
+  .rcpt-balance-open { color: #c07a11 !important; font-weight: 700; }
+  .rcpt-penalty { color: #bf312d !important; }
+
+  .rcpt-total-row td {
+    padding-top: 14px;
+    border-top: 2px solid #0F172A;
+    border-bottom: none;
+    font-size: 15px;
+  }
+
+  .rcpt-total-row td.rcpt-label { font-size: 14px; }
+
+  .rcpt-sign {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 56px;
+  }
+
+  .rcpt-sign-box {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: #64748B !important;
+    padding-top: 6px;
+    border-top: 1px solid #0F172A;
+  }
+
+  .rcpt-footer {
+    margin-top: 26px;
+    padding-top: 14px;
+    border-top: 1px solid #E2E8F0;
+    text-align: center;
+    font-size: 11px;
+    color: #64748B !important;
+    line-height: 1.7;
+  }
+
+  .rcpt-footer strong { color: #334155 !important; }
+
+  @media print {
+    .rcpt-doc {
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      max-width: 100%;
+    }
+    .rcpt-doc, .rcpt-doc * { color: #1f2937 !important; }
+    .rcpt-company, .rcpt-title-box, .rcpt-table td.rcpt-label,
+    .rcpt-total-row td {
+      color: #000 !important;
+    }
+    .rcpt-rule, .rcpt-total-row td, .rcpt-sign-box { border-color: #000 !important; }
+    .rcpt-table td { border-bottom-color: #ccc !important; font-size: 12px !important; }
+    .rcpt-meta, .rcpt-footer, .rcpt-sign-box { color: #444 !important; }
+    .rcpt-amount { color: #1746c9 !important; }
+    .rcpt-balance-clear { color: #0f7a4f !important; }
+    .rcpt-balance-open { color: #a2650d !important; }
+    .rcpt-penalty { color: #a3221f !important; }
+    .rcpt-sign { margin-top: 40px; }
+    .rcpt-doc, .rcpt-sign { page-break-inside: avoid; }
+  }
+
+  /* ── MODERN DESIGN (rcpt2-*) ─────────────────────────────────── */
+  :root {
+    --rcpt2-navy: #16325c;
+    --rcpt2-green: #1e9e5a;
+    --rcpt2-green-soft: #eef8f1;
+    --rcpt2-ink: #1f2937;
+    --rcpt2-muted: #6b7280;
+    --rcpt2-line: #e5e7eb;
+  }
+
+  .rcpt2-doc {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--rcpt2-line);
+    border-radius: 14px;
+    overflow: hidden;
+    font-family: var(--font-body, system-ui, sans-serif);
+  }
+
+  /* Hard reset so the site's own table/theme styling can't leak
+     unexpected colors into this design either. */
+  .rcpt2-doc, .rcpt2-doc * {
+    color: var(--rcpt2-ink) !important;
+  }
+  .rcpt2-doc svg { color: inherit !important; }
+
+  .rcpt2-ribbon { display: flex; height: 6px; }
+  .rcpt2-ribbon span:first-child { flex: 7; background: var(--rcpt2-navy); }
+  .rcpt2-ribbon span:last-child { flex: 3; background: var(--rcpt2-green); }
+
+  .rcpt2-body { padding: 28px 32px 24px; color: var(--rcpt2-ink) !important; }
+
+  .rcpt2-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rcpt2-line);
+    margin-bottom: 22px;
+  }
+
+  .rcpt2-brand { display: flex; align-items: center; gap: 12px; }
+  .rcpt2-brand img { max-height: 48px; max-width: 160px; object-fit: contain; }
+  .rcpt2-brand-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--rcpt2-green-soft);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rcpt2-brand-name { font-size: 18px; font-weight: 800; color: var(--rcpt2-navy) !important; line-height: 1.15; }
+  .rcpt2-brand-name span { color: var(--rcpt2-green) !important; }
+  .rcpt2-brand-tag { font-size: 11px; color: var(--rcpt2-muted) !important; margin-top: 2px; }
+
+  .rcpt2-titlebox { text-align: right; }
+  .rcpt2-titlebox h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--rcpt2-navy) !important; letter-spacing: -0.3px; }
+  .rcpt2-titlebox .rcpt2-recno { font-size: 13px; margin-top: 4px; color: var(--rcpt2-muted) !important; }
+  .rcpt2-titlebox .rcpt2-recno b { color: var(--rcpt2-green) !important; }
+
+  .rcpt2-cols { display: flex; gap: 32px; margin-bottom: 22px; }
+  .rcpt2-col { flex: 1; min-width: 0; }
+
+  .rcpt2-h3 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+    color: var(--rcpt2-navy) !important; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .rcpt2-h3 .rcpt2-ico {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--rcpt2-green); color: #fff !important;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  .rcpt2-kv { display: flex; font-size: 13px; padding: 5px 0; }
+  .rcpt2-kv .rcpt2-k { width: 96px; color: var(--rcpt2-muted) !important; flex-shrink: 0; }
+  .rcpt2-kv .rcpt2-sep { width: 12px; color: var(--rcpt2-muted) !important; flex-shrink: 0; }
+  .rcpt2-kv .rcpt2-v { font-weight: 600; }
+
+  .rcpt2-info-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rcpt2-line); }
+  .rcpt2-info-item:last-child { border-bottom: none; }
+  .rcpt2-info-ico { color: var(--rcpt2-green) !important; flex-shrink: 0; margin-top: 2px; }
+  .rcpt2-info-label { font-size: 11px; font-weight: 800; color: var(--rcpt2-navy) !important; letter-spacing: 0.03em; text-transform: uppercase; }
+  .rcpt2-info-value { font-size: 13px; margin-top: 2px; }
+
+  .rcpt2-panel {
+    background: var(--rcpt2-green-soft);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+  }
+  .rcpt2-chips { display: flex; flex-wrap: wrap; gap: 18px 24px; }
+  .rcpt2-chip { min-width: 110px; }
+  .rcpt2-chip .rcpt2-chip-label { font-size: 11px; color: var(--rcpt2-muted) !important; }
+  .rcpt2-chip .rcpt2-chip-value { font-size: 13.5px; font-weight: 700; margin-top: 2px; }
+
+  .rcpt2-table-wrap { margin-bottom: 22px; }
+  .rcpt2-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rcpt2-table thead th {
+    background: var(--rcpt2-navy); color: #fff !important;
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .rcpt2-table thead th.rcpt2-num { text-align: right; }
+  .rcpt2-table tbody td { padding: 10px 14px; border-bottom: 1px solid var(--rcpt2-line); }
+  .rcpt2-table tbody td.rcpt2-num { text-align: right; font-family: var(--font-mono, monospace); }
+  .rcpt2-table tfoot td {
+    padding: 12px 14px; background: var(--rcpt2-green-soft);
+    font-weight: 800; color: var(--rcpt2-navy) !important; border: none;
+  }
+  .rcpt2-table tfoot td.rcpt2-num { text-align: right; color: var(--rcpt2-green) !important; font-size: 15px; }
+
+  .rcpt2-methodbox {
+    display: flex; border: 1px solid var(--rcpt2-line); border-radius: 10px; overflow: hidden;
+    margin-bottom: 22px;
+  }
+  .rcpt2-method-half { flex: 1; padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start; }
+  .rcpt2-method-half + .rcpt2-method-half { border-left: 1px dashed var(--rcpt2-line); }
+  .rcpt2-method-label { font-size: 11px; font-weight: 800; color: var(--rcpt2-navy) !important; text-transform: uppercase; letter-spacing: 0.03em; }
+  .rcpt2-method-value { font-size: 13.5px; margin-top: 3px; }
+  .rcpt2-status-pill {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: #fff !important;
+  }
+  .rcpt2-status-pill.rcpt2-clear { background: var(--rcpt2-green); }
+  .rcpt2-status-pill.rcpt2-open { background: var(--amber-400, #c07a11); }
+  .rcpt2-status-value { font-size: 16px; font-weight: 800; margin-top: 2px; }
+  .rcpt2-status-value.rcpt2-clear-text { color: var(--rcpt2-green) !important; }
+  .rcpt2-status-value.rcpt2-open-text { color: var(--amber-400, #c07a11) !important; }
+
+  .rcpt2-thanks { text-align: center; margin-bottom: 20px; }
+  .rcpt2-thanks-rule { display: flex; align-items: center; gap: 14px; color: var(--rcpt2-line) !important; margin-bottom: 10px; }
+  .rcpt2-thanks-rule::before, .rcpt2-thanks-rule::after { content: ""; flex: 1; height: 1px; background: var(--rcpt2-line); }
+  .rcpt2-thanks h4 { margin: 0; font-size: 16px; font-weight: 800; color: var(--rcpt2-navy) !important; letter-spacing: 0.03em; }
+  .rcpt2-thanks p { margin: 4px 0 0; font-size: 12.5px; color: var(--rcpt2-muted) !important; }
+
+  .rcpt2-brand-contact {
+    font-size: 11.5px;
+    color: var(--rcpt2-muted) !important;
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+
+  .rcpt2-sign {
+    display: flex; justify-content: space-between; gap: 32px;
+    margin: 28px 0 22px;
+  }
+  .rcpt2-sign-box {
+    flex: 1; text-align: center; font-size: 12px;
+    color: var(--rcpt2-muted) !important;
+    padding-top: 6px; border-top: 1px solid var(--rcpt2-navy);
+  }
+
+  .rcpt2-footerbar {
+    background: #f8f9fb; border-top: 1px solid var(--rcpt2-line);
+    padding: 16px 32px; text-align: center;
+  }
+  .rcpt2-footer-meta {
+    font-size: 11px; color: var(--rcpt2-muted) !important;
+    line-height: 1.8;
+  }
+  .rcpt2-footer-meta strong { color: var(--rcpt2-navy) !important; }
+  .rcpt2-footer-meta .rcpt2-thankyou { color: var(--rcpt2-green) !important; }
+
+  @media print {
+    .rcpt2-doc { border: none; border-radius: 0; }
+    .rcpt2-body { padding: 0 0 14px; }
+    .rcpt2-table thead th { background: #16325c !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rcpt2-panel, .rcpt2-table tfoot td, .rcpt2-brand-icon { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rcpt2-footerbar { background: #fff !important; }
+    .rcpt2-doc, .rcpt2-table-wrap, .rcpt2-methodbox, .rcpt2-sign { page-break-inside: avoid; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="receipt-wrap" style="border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-  <div class="receipt-header" style="text-align:center;">
+{% if receipt_style == "modern" %}
+<div class="rcpt2-doc">
+  <div class="rcpt2-ribbon"><span></span><span></span></div>
+  <div class="rcpt2-body">
+
+    <div class="rcpt2-top">
+      <div class="rcpt2-brand">
+        {% if company_settings.company_logo %}
+        <img src="{{ company_settings.company_logo.url }}" alt="{% company_name %}">
+        {% else %}
+        <div class="rcpt2-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e9e5a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17v-5"/><path d="M8 17v-3"/></svg>
+        </div>
+        {% endif %}
+        <div>
+          <div class="rcpt2-brand-name">{% company_name %}</div>
+          {% if company_settings.company_phone or company_settings.company_email or company_settings.company_website %}
+          <div class="rcpt2-brand-contact">
+            {% if company_settings.company_phone %}{{ company_settings.company_phone }}{% endif %}
+            {% if company_settings.company_email %}{% if company_settings.company_phone %} · {% endif %}{{ company_settings.company_email }}{% endif %}
+            {% if company_settings.company_website %}{% if company_settings.company_phone or company_settings.company_email %} · {% endif %}{{ company_settings.company_website }}{% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="rcpt2-titlebox">
+        <h1>LOAN RECEIPT</h1>
+        <div class="rcpt2-recno">Receipt No: <b>{{ receipt.receipt_number }}</b></div>
+      </div>
+    </div>
+
+    <div class="rcpt2-cols">
+      <div class="rcpt2-col">
+        <div class="rcpt2-h3">
+          <span class="rcpt2-ico">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+          </span>
+          Borrower Information
+        </div>
+        <div class="rcpt2-kv"><span class="rcpt2-k">Name</span><span class="rcpt2-sep">:</span><span class="rcpt2-v">{{ receipt.payment.client.full_name }}</span></div>
+        <div class="rcpt2-kv"><span class="rcpt2-k">Customer ID</span><span class="rcpt2-sep">:</span><span class="rcpt2-v">{{ receipt.payment.client.client_number }}</span></div>
+        <div class="rcpt2-kv"><span class="rcpt2-k">Phone</span><span class="rcpt2-sep">:</span><span class="rcpt2-v">{{ receipt.payment.client.phone_primary }}</span></div>
+        {% if receipt.payment.client.email %}
+        <div class="rcpt2-kv"><span class="rcpt2-k">Email</span><span class="rcpt2-sep">:</span><span class="rcpt2-v">{{ receipt.payment.client.email }}</span></div>
+        {% endif %}
+        {% if receipt.payment.client.address %}
+        <div class="rcpt2-kv"><span class="rcpt2-k">Address</span><span class="rcpt2-sep">:</span><span class="rcpt2-v">{{ receipt.payment.client.address }}</span></div>
+        {% endif %}
+      </div>
+
+      <div class="rcpt2-col">
+        <div class="rcpt2-info-item">
+          <span class="rcpt2-info-ico">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </span>
+          <div>
+            <div class="rcpt2-info-label">Receipt Date</div>
+            <div class="rcpt2-info-value">{{ receipt.payment.payment_date }}</div>
+          </div>
+        </div>
+        <div class="rcpt2-info-item">
+          <span class="rcpt2-info-ico">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </span>
+          <div>
+            <div class="rcpt2-info-label">Payment Time</div>
+            <div class="rcpt2-info-value">{{ receipt.issued_at|date:"h:i A" }}</div>
+          </div>
+        </div>
+        <div class="rcpt2-info-item">
+          <span class="rcpt2-info-ico">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+          </span>
+          <div>
+            <div class="rcpt2-info-label">Loan Account</div>
+            <div class="rcpt2-info-value">{{ receipt.payment.loan.loan_number }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rcpt2-panel">
+      <div class="rcpt2-h3" style="margin-bottom:14px;">
+        <span class="rcpt2-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>
+        </span>
+        Loan Details
+      </div>
+      <div class="rcpt2-chips">
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Loan Type</div>
+          <div class="rcpt2-chip-value">{{ receipt.payment.loan.product.name }}</div>
+        </div>
+        {% if receipt.payment.loan.branch %}
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Branch</div>
+          <div class="rcpt2-chip-value">{{ receipt.payment.loan.branch.name }}</div>
+        </div>
+        {% endif %}
+        {% if receipt.payment.loan.principal_amount %}
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Loan Amount</div>
+          <div class="rcpt2-chip-value">{{ receipt.payment.loan.principal_amount|money }}</div>
+        </div>
+        {% endif %}
+        {% if receipt.payment.loan.interest_rate %}
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Interest Rate</div>
+          <div class="rcpt2-chip-value">{{ receipt.payment.loan.interest_rate }}</div>
+        </div>
+        {% endif %}
+        {% if receipt.payment.loan.disbursement_date %}
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Disbursement Date</div>
+          <div class="rcpt2-chip-value">{{ receipt.payment.loan.disbursement_date }}</div>
+        </div>
+        {% endif %}
+        <div class="rcpt2-chip">
+          <div class="rcpt2-chip-label">Balance After Payment</div>
+          <div class="rcpt2-chip-value">{{ receipt.balance_after|money }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rcpt2-table-wrap">
+      <div class="rcpt2-h3">
+        <span class="rcpt2-ico">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 10h20"/></svg>
+        </span>
+        Payment Details
+      </div>
+      <table class="rcpt2-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th class="rcpt2-num">Amount ({{ receipt.currency|default:"UGX" }})</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Principal Paid</td>
+            <td class="rcpt2-num">{{ receipt.principal_paid|money }}</td>
+          </tr>
+          <tr>
+            <td>Interest Paid</td>
+            <td class="rcpt2-num">{{ receipt.interest_paid|money }}</td>
+          </tr>
+          {% if receipt.penalty_paid > 0 %}
+          <tr>
+            <td>Penalty Paid</td>
+            <td class="rcpt2-num">{{ receipt.penalty_paid|money }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total Paid</td>
+            <td class="rcpt2-num">{{ receipt.amount_received|money }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="rcpt2-methodbox">
+      <div class="rcpt2-method-half">
+        <div class="rcpt2-status-pill rcpt2-clear">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        </div>
+        <div>
+          <div class="rcpt2-method-label">Payment Method</div>
+          <div class="rcpt2-method-value">{{ receipt.payment.get_payment_method_display }}</div>
+          {% if receipt.payment.reference_number %}
+          <div class="rcpt2-method-value">Reference: <strong>{{ receipt.payment.reference_number }}</strong></div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="rcpt2-method-half">
+        <div class="rcpt2-status-pill {% if receipt.balance_after == 0 %}rcpt2-clear{% else %}rcpt2-open{% endif %}">
+          {% if receipt.balance_after == 0 %}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          {% else %}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          {% endif %}
+        </div>
+        <div>
+          <div class="rcpt2-method-label">Payment Status</div>
+          {% if receipt.balance_after == 0 %}
+          <div class="rcpt2-status-value rcpt2-clear-text">PAID IN FULL</div>
+          {% else %}
+          <div class="rcpt2-status-value rcpt2-open-text">{{ receipt.balance_after|money }} OWING</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if receipt.balance_after == 0 %}
+    <div class="alert alert-success mt-3 print-hide" style="margin-bottom:4px;">
+      Loan fully repaid. Congratulations!
+    </div>
+    {% endif %}
+
+    <div class="rcpt2-sign">
+      <div class="rcpt2-sign-box">Customer Signature</div>
+      <div class="rcpt2-sign-box">Authorized Signatory</div>
+    </div>
+
+  </div>
+
+  <div class="rcpt2-footerbar">
+    <div class="rcpt2-footer-meta">
+      <strong>Served by:</strong> {{ receipt.payment.recorded_by.full_name }}<br>
+      <strong>Issued:</strong> {{ receipt.issued_at|date:"d M Y H:i" }}<br>
+      <span class="rcpt2-thankyou">This is a system generated receipt. Thank you for your payment.</span><br>
+      <strong>{% company_name %} — This is an official receipt. Keep it safe.</strong>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="rcpt-doc">
+
+  <div class="rcpt-header">
     {% if company_settings.company_logo %}
-    <div style="display:flex;justify-content:center;">
-      <img src="{{ company_settings.company_logo.url }}" alt="{{ company_settings.company_name }} logo"
-           style="height:64px;width:64px;object-fit:cover;border-radius:12px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.12);">
-    </div>
+    <img src="{{ company_settings.company_logo.url }}" alt="{% company_name %}" class="rcpt-logo"
+         onerror="this.style.display='none';">
     {% endif %}
-    <div style="font-size:22px;font-weight:700;color:var(--teal-400);letter-spacing:-.5px;">{{ company_settings.company_name|default:company.name }}</div>
-    {% if company_settings.company_address %}
-    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">{{ company_settings.company_address }}</div>
+    <div class="rcpt-company">{% company_name %}</div>
+    <div class="rcpt-meta">
+      {% if company_settings.company_address %}{{ company_settings.company_address }}<br>{% endif %}
+      {% if company_settings.company_phone %}Phone: {{ company_settings.company_phone }}<br>{% endif %}
+      {% if company_settings.company_email %}Email: {{ company_settings.company_email }}<br>{% endif %}
+      {% if company_settings.company_website %}Website: {{ company_settings.company_website }}{% endif %}
+    </div>
+  </div>
+
+  <hr class="rcpt-rule">
+
+  <div class="rcpt-title-box">LOAN REPAYMENT RECEIPT</div>
+  <div style="text-align:center;font-family:var(--font-mono);font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+    {{ receipt.receipt_number }}
+  </div>
+
+  <table class="rcpt-table">
+    <tr>
+      <td class="rcpt-label">Date</td>
+      <td class="rcpt-value">{{ receipt.payment.payment_date }}</td>
+    </tr>
+    {% if receipt.payment.loan.branch %}
+    <tr>
+      <td class="rcpt-label">Branch</td>
+      <td class="rcpt-value">{{ receipt.payment.loan.branch.name }}</td>
+    </tr>
     {% endif %}
-    {% if company_settings.company_phone or company_settings.company_email %}
-    <div style="color:var(--text-muted);font-size:13px;margin-top:2px;">
-      {% if company_settings.company_phone %}Phone: {{ company_settings.company_phone }}{% endif %}
-      {% if company_settings.company_phone and company_settings.company_email %} · {% endif %}
-      {% if company_settings.company_email %}Email: {{ company_settings.company_email }}{% endif %}
-    </div>
+    <tr>
+      <td class="rcpt-label">Client</td>
+      <td class="rcpt-value">{{ receipt.payment.client.full_name }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Client #</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.payment.client.client_number }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Phone</td>
+      <td class="rcpt-value">{{ receipt.payment.client.phone_primary }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Loan Reference</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.payment.loan.loan_number }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Product</td>
+      <td class="rcpt-value">{{ receipt.payment.loan.product.name }}</td>
+    </tr>
+    {% if guarantees %}
+    <tr>
+      <td class="rcpt-label">Guarantors</td>
+      <td class="rcpt-value">
+        {% for g in guarantees %}
+          <div class="rcpt-mono">{{ g.guarantor.full_name }} — {{ g.guaranteed_amount|money }}</div>
+        {% endfor %}
+      </td>
+    </tr>
     {% endif %}
-    <div style="margin-top:16px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-      <div style="font-size:13px;color:var(--text-muted);font-weight:700;letter-spacing:0.04em;">PAYMENT RECEIPT</div>
-      <div class="receipt-number" style="font-size:20px;font-weight:700;color:var(--text-primary);margin-top:4px;">
-        {{ receipt.receipt_number }}
-      </div>
-    </div>
-  </div>
-
-  <style>
-    .receipt-wrap .receipt-row {
-      display: block;
-      text-align: center;
-    }
-    .receipt-wrap .receipt-row .receipt-label {
-      display: block;
-      margin-bottom: 2px;
-    }
-  </style>
-
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Date</span>
-    <span style="font-weight:600;">{{ receipt.payment.payment_date }}</span>
-  </div>
-  {% if receipt.payment.loan.branch %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Branch</span>
-    <span style="font-weight:600;">{{ receipt.payment.loan.branch.name }}</span>
-  </div>
-  {% endif %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Client</span>
-    <span style="font-weight:600;">{{ receipt.payment.client.full_name }}</span>
-  </div>
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Client #</span>
-    <span class="mono" style="font-weight:600;">{{ receipt.payment.client.client_number }}</span>
-  </div>
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Phone</span>
-    <span style="font-weight:600;">{{ receipt.payment.client.phone_primary }}</span>
-  </div>
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Loan Reference</span>
-    <span class="mono" style="font-weight:600;">{{ receipt.payment.loan.loan_number }}</span>
-  </div>
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Product</span>
-    <span style="font-weight:600;">{{ receipt.payment.loan.product.name }}</span>
-  </div>
-  {% if guarantees %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Guarantors</span>
-    <span style="font-weight:600;">
-      {% for g in guarantees %}
-        <div class="mono">{{ g.guarantor.full_name }} — {{ g.guaranteed_amount|money }}</div>
-      {% endfor %}
-    </span>
-  </div>
-  {% endif %}
-  {% if collateral_items %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Collateral</span>
-    <span style="font-weight:600;">
-      {% for c in collateral_items %}
-        <div class="mono">{{ c.description }} — {{ c.estimated_value|money }}</div>
-      {% endfor %}
-    </span>
-  </div>
-  {% endif %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Payment Method</span>
-    <span style="font-weight:600;">{{ receipt.payment.get_payment_method_display }}</span>
-  </div>
-  {% if receipt.payment.reference_number %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Reference #</span>
-    <span class="mono" style="font-weight:600;">{{ receipt.payment.reference_number }}</span>
-  </div>
-  {% endif %}
-
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Principal Paid</span>
-    <span class="mono" style="font-weight:600;">{{ receipt.principal_paid|money }}</span>
-  </div>
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Interest Paid</span>
-    <span class="mono" style="font-weight:600;">{{ receipt.interest_paid|money }}</span>
-  </div>
-  {% if receipt.penalty_paid > 0 %}
-  <div class="receipt-row">
-    <span class="receipt-label" style="font-weight:600;">Penalty Paid</span>
-    <span class="mono" style="font-weight:600;color:var(--red-400)">{{ receipt.penalty_paid|money }}</span>
-  </div>
-  {% endif %}
-
-  <div class="receipt-row" style="margin-top:12px;padding-top:16px;border-top:2px solid var(--border);border-bottom:none;">
-    <span style="font-weight:600;font-size:15px;">Amount Received</span>
-    <span class="receipt-total">{{ receipt.amount_received|money }}</span>
-  </div>
-
-  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-    <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
-      <div class="text-muted text-sm" style="font-weight:600;">Balance Before</div>
-      <div class="mono" style="font-weight:600;">{{ receipt.balance_before|money }}</div>
-    </div>
-    <div style="background:var(--surface, rgba(0,0,0,0.03));border-radius:10px;padding:10px 12px;">
-      <div class="text-muted text-sm" style="font-weight:600;">Balance After</div>
-      <div class="mono" style="font-weight:600;color:{% if receipt.balance_after == 0 %}var(--green-400){% else %}var(--amber-400){% endif %}">
+    {% if collateral_items %}
+    <tr>
+      <td class="rcpt-label">Collateral</td>
+      <td class="rcpt-value">
+        {% for c in collateral_items %}
+          <div class="rcpt-mono">{{ c.description }} — {{ c.estimated_value|money }}</div>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td class="rcpt-label">Payment Method</td>
+      <td class="rcpt-value">{{ receipt.payment.get_payment_method_display }}</td>
+    </tr>
+    {% if receipt.payment.reference_number %}
+    <tr>
+      <td class="rcpt-label">Reference #</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.payment.reference_number }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td class="rcpt-label">Principal Paid</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.principal_paid|money }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Interest Paid</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.interest_paid|money }}</td>
+    </tr>
+    {% if receipt.penalty_paid > 0 %}
+    <tr>
+      <td class="rcpt-label">Penalty Paid</td>
+      <td class="rcpt-value rcpt-mono rcpt-penalty">{{ receipt.penalty_paid|money }}</td>
+    </tr>
+    {% endif %}
+    <tr class="rcpt-total-row">
+      <td class="rcpt-label">Amount Received</td>
+      <td class="rcpt-value rcpt-amount">{{ receipt.amount_received|money }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Balance Before</td>
+      <td class="rcpt-value rcpt-mono">{{ receipt.balance_before|money }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Balance After</td>
+      <td class="rcpt-value rcpt-mono {% if receipt.balance_after == 0 %}rcpt-balance-clear{% else %}rcpt-balance-open{% endif %}">
         {{ receipt.balance_after|money }}
-      </div>
-    </div>
-  </div>
+      </td>
+    </tr>
+  </table>
 
   {% if receipt.balance_after == 0 %}
-  <div class="alert alert-success mt-3" style="border-radius:10px;">
+  <div class="alert alert-success mt-3 print-hide">
     Loan fully repaid. Congratulations!
   </div>
   {% endif %}
 
-  <div style="margin-top:32px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-    <div style="text-align:center;">
-      <div style="border-bottom:1px solid var(--text-primary);height:40px;"></div>
-      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;">Customer Signature</div>
-    </div>
-    <div style="text-align:center;">
-      <div style="border-bottom:1px solid var(--text-primary);height:40px;"></div>
-      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;">Authorized Signatory</div>
-    </div>
+  <div class="rcpt-sign">
+    <div class="rcpt-sign-box">Customer Signature</div>
+    <div class="rcpt-sign-box">Authorized Signatory</div>
   </div>
 
-  <div style="margin-top:24px;text-align:center;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding:16px 8px 20px;background:var(--surface, rgba(0,0,0,0.02));">
+  <div class="rcpt-footer">
     <strong>Served by:</strong> {{ receipt.payment.recorded_by.full_name }}<br>
     <strong>Issued:</strong> {{ receipt.issued_at|date:"d M Y H:i" }}<br>
-    <strong>{{ company_settings.company_name|default:company.name }} — This is an official receipt. Keep it safe.</strong>
+    This is a system generated receipt. Thank you for your payment.<br>
+    <strong>{% company_name %} — This is an official receipt. Keep it safe.</strong>
   </div>
+
 </div>
+{% endif %}
 {% endblock %}
