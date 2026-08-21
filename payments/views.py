@@ -470,12 +470,12 @@ def receipt_view(request, pk):
     else:
         # TODO: once there's a persisted per-company preference (e.g. a
         # `receipt_template` field on your company/branch settings model),
-        # swap the "modern" default below for that value, e.g.:
-        #   company_default = getattr(loan.branch, "receipt_template", "modern")
-        company_default = "modern"
+        # swap the "classic" default below for that value, e.g.:
+        #   company_default = getattr(loan.branch, "receipt_template", "classic")
+        company_default = "classic"
         receipt_style = request.session.get("receipt_style", company_default)
         if receipt_style not in VALID_RECEIPT_STYLES:
-            receipt_style = "modern"
+            receipt_style = "classic"
 
     context = {
         "receipt": receipt,
