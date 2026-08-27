@@ -27,15 +27,33 @@
          prompt to show, even though it becomes visible. -->
     <script>
         window.__pwaDeferredPrompt = null;
+        window.__pwaIsInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true;
+
+        function pwaIsInstalled() {
+            if (window.__pwaIsInstalled) return Promise.resolve(true);
+            if (!('getInstalledRelatedApps' in navigator)) return Promise.resolve(false);
+            return navigator.getInstalledRelatedApps().then(function (apps) {
+                window.__pwaIsInstalled = apps.length > 0;
+                return window.__pwaIsInstalled;
+            }).catch(function () {
+                return false;
+            });
+        }
+
+        pwaIsInstalled();
         window.addEventListener('beforeinstallprompt', function (e) {
             e.preventDefault();
             window.__pwaDeferredPrompt = e;
             console.log('[PWA] beforeinstallprompt captured early');
-            var btn = document.getElementById('pwaInstallBtn');
-            if (btn) btn.hidden = false;
+            pwaIsInstalled().then(function (installed) {
+                var btn = document.getElementById('pwaInstallBtn');
+                if (btn && !installed) btn.hidden = false;
+            });
         });
         window.addEventListener('appinstalled', function () {
             console.log('[PWA] app installed');
+            window.__pwaIsInstalled = true;
             window.__pwaDeferredPrompt = null;
             var btn = document.getElementById('pwaInstallBtn');
             if (btn) btn.hidden = true;
@@ -4502,11 +4520,19 @@
             console.warn('[PWA] #pwaInstallBtn not found in DOM — install button will not work');
         } else {
             // in case the event already fired before this ran
-            if (window.__pwaDeferredPrompt) {
-                installBtn.hidden = false;
-            }
+            pwaIsInstalled().then(function (installed) {
+                if (installed) {
+                    installBtn.hidden = true;
+                } else if (window.__pwaDeferredPrompt) {
+                    installBtn.hidden = false;
+                }
+            });
 
             installBtn.addEventListener('click', function () {
+                if (window.__pwaIsInstalled) {
+                    installBtn.hidden = true;
+                    return;
+                }
                 console.log('[PWA] install button clicked, deferredPrompt =', window.__pwaDeferredPrompt);
                 if (!window.__pwaDeferredPrompt) {
                     console.warn('[PWA] no captured install prompt — either already installed, ' +

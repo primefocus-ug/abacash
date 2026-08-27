@@ -27,6 +27,7 @@ from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
 from .branch_scope import scope_to_branch, effective_branch_id
+from .cash import cash_movement, recent_cash_transactions
 from .permissions import PERMISSIONS, ALL_GROUPS
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
@@ -286,30 +287,9 @@ def _manager_dashboard(request, today):
         key=lambda item: (-item["applications_count"], -item["collections_this_month"], item["user"].full_name)
     )
 
-    # Running cash at hand: cumulative injections + repayments collected,
-    # minus everything disbursed and spent, all-time (not period-limited).
-    # Capital injections aren't attributed to a branch on the model, so they
-    # only count towards this figure for users who can see all branches —
-    # branch-scoped managers get pure operating cash flow for their branch.
     can_view_all_branches = request.user.can("can_view_all_branches")
-
-    all_time_repayments = scope_to_branch(Payment.objects.filter(
-        status="ALLOCATED",
-    ), request.user, "loan__branch").aggregate(total=Sum("amount_received"))["total"] or Decimal("0")
-
-    all_time_disbursed = scope_to_branch(Loan.objects.filter(
-        disbursement_date__isnull=False,
-    ), request.user).aggregate(total=Sum("principal_amount"))["total"] or Decimal("0")
-
-    all_time_expenses = scope_to_branch(Expense.objects.all(), request.user, "branch").aggregate(
-        total=Sum("amount")
-    )["total"] or Decimal("0")
-
-    all_time_injections = Decimal("0")
-    if can_view_all_branches:
-        all_time_injections = CapitalInjection.objects.aggregate(total=Sum("amount"))["total"] or Decimal("0")
-
-    cash_at_hand = (all_time_injections + all_time_repayments) - (all_time_disbursed + all_time_expenses)
+    cash_at_hand = cash_movement(user=request.user)["cash_at_hand"]
+    recent_cash = recent_cash_transactions(user=request.user)
 
     context = {
         "pending_loans":        pending_loans,
@@ -323,6 +303,7 @@ def _manager_dashboard(request, today):
         "par_30_count":         par_30_count,
         "staff_performance":   staff_performance[:8],
         "cash_at_hand":         cash_at_hand,
+        "recent_cash":          recent_cash,
         "can_view_all_branches": can_view_all_branches,
     }
     return render(request, "accounts/dashboard_manager.html", context)
@@ -462,6 +443,28 @@ def _ceo_dashboard(request, today):
         "expense_data_json": json.dumps(expense_data),
         "total_expenses": total_expenses,
         "total_injections": total_injections,
+        "cash_at_hand": cash_movement(user=request.user, branch_id=branch_id)["cash_at_hand"],
+        "recent_cash": recent_cash_transactions(user=request.user, branch_id=branch_id),
+        "cash_switch_data": [
+            {
+                "id": selected_id,
+                "label": label,
+                "balance": str(cash_movement(user=request.user, branch_id=selected_id)["cash_at_hand"]),
+                "transactions": [
+                    {
+                        **transaction,
+                        "date": transaction["date"].isoformat(),
+                        "timestamp": transaction["timestamp"].strftime("%d %b %Y at %H:%M"),
+                        "amount": str(transaction["amount"]),
+                    }
+                    for transaction in recent_cash_transactions(user=request.user, branch_id=selected_id)
+                ],
+            }
+            for selected_id, label in [(None, "All")] + list(
+                Branch.objects.filter(is_active=True).values_list("pk", "code")
+            )
+        ],
+        "cash_branch_id": branch_id,
         "period": int(period),
         "period_options": [3, 6, 12],
     }
@@ -502,12 +505,12 @@ def financial_overview(request):
     today = timezone.localdate()
     start_date = today - relativedelta(days=days)
 
-    disbursed = Loan.objects.filter(disbursement_date__gte=start_date, disbursement_date__lte=today).aggregate(total=Sum("principal_amount"))["total"] or 0
-    repayments = Payment.objects.filter(payment_date__gte=start_date, payment_date__lte=today, status="ALLOCATED").aggregate(total=Sum("amount_received"))["total"] or 0
-    expenses = Expense.objects.filter(expense_date__gte=start_date, expense_date__lte=today).aggregate(total=Sum("amount"))["total"] or 0
-    injections = CapitalInjection.objects.filter(injected_date__gte=start_date, injected_date__lte=today).aggregate(total=Sum("amount"))["total"] or 0
-
-    net_cash = (injections + repayments) - (disbursed + expenses)
+    movement = cash_movement(user=request.user, start_date=start_date, end_date=today)
+    disbursed = movement["disbursements"]
+    repayments = movement["payments"]
+    expenses = movement["expenses"]
+    injections = movement["injections"]
+    net_cash = movement["cash_at_hand"]
 
     # Allow CSV export of ledger rows for the period
     if request.GET.get("export") == "csv":
@@ -517,11 +520,11 @@ def financial_overview(request):
         rows = []
         for l in Loan.objects.filter(disbursement_date__gte=start_date, disbursement_date__lte=today).order_by("disbursement_date"):
             rows.append((l.disbursement_date, "Disbursement", l.loan_number or "", float(l.principal_amount)))
-        for p in Payment.objects.filter(payment_date__gte=start_date, payment_date__lte=today, status="ALLOCATED").order_by("payment_date"):
+        for p in Payment.objects.filter(payment_date__gte=start_date, payment_date__lte=today, status="ALLOCATED", payment_method=Payment.PaymentMethod.CASH).order_by("payment_date"):
             rows.append((p.payment_date, "Repayment", p.loan.loan_number if p.loan else "", float(p.amount_received)))
-        for e in Expense.objects.filter(expense_date__gte=start_date, expense_date__lte=today).order_by("expense_date"):
+        for e in Expense.objects.filter(expense_date__gte=start_date, expense_date__lte=today, status=Expense.Status.APPROVED, payment_method=Expense.PaymentMethod.CASH).order_by("expense_date"):
             rows.append((e.expense_date, "Expense", e.reference_number or "", float(e.amount)))
-        for ci in CapitalInjection.objects.filter(injected_date__gte=start_date, injected_date__lte=today).order_by("injected_date"):
+        for ci in CapitalInjection.objects.filter(injected_date__gte=start_date, injected_date__lte=today, payment_method=CapitalInjection.PaymentMethod.CASH).order_by("injected_date"):
             rows.append((ci.injected_date, "Injection", ci.source, float(ci.amount)))
 
         rows.sort(key=lambda r: r[0])
@@ -1776,6 +1779,8 @@ def capital_injection_create(request):
                 source=d["source"].strip(),
                 amount=amount_value,
                 injected_date=d["injected_date"],
+                payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.CASH),
+                branch_id=d.get("branch") or None,
                 investor=d.get("investor", "").strip(),
                 notes=d.get("notes", "").strip(),
                 created_by=request.user,
@@ -1789,6 +1794,7 @@ def capital_injection_create(request):
     return render(request, "accounts/capital_injection_form.html", {
         "title": "Record Capital Injection",
         "action": "create",
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 
@@ -1802,6 +1808,8 @@ def capital_injection_edit(request, pk):
             injection.source = d["source"].strip()
             injection.amount = d["amount"]
             injection.injected_date = d["injected_date"]
+            injection.payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.CASH)
+            injection.branch_id = d.get("branch") or None
             injection.investor = d.get("investor", "").strip()
             injection.notes = d.get("notes", "").strip()
             injection.save()
@@ -1814,6 +1822,7 @@ def capital_injection_edit(request, pk):
         "title": f"Edit Capital Injection — {injection.source}",
         "action": "edit",
         "injection": injection,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
     })
 
 

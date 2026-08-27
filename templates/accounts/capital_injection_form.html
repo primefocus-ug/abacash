@@ -41,6 +41,25 @@
         </div>
 
         <div>
+          <label for="payment_method">Received Through *</label>
+          <select id="payment_method" name="payment_method" required>
+            <option value="CASH" {% if injection.payment_method == 'CASH' or not injection %}selected{% endif %}>Cash</option>
+            <option value="BANK" {% if injection.payment_method == 'BANK' %}selected{% endif %}>Bank Transfer</option>
+            <option value="MOBILE_MONEY" {% if injection.payment_method == 'MOBILE_MONEY' %}selected{% endif %}>Mobile Money</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="branch">Branch</label>
+          <select id="branch" name="branch">
+            <option value="">Company-wide</option>
+            {% for branch in branches %}
+              <option value="{{ branch.pk }}" {% if injection.branch_id == branch.pk %}selected{% endif %}>{{ branch.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
           <label for="investor">Investor Name</label>
           <input type="text" id="investor" name="investor" placeholder="Optional investor/source contact name" value="{{ injection.investor|default:'' }}">
         </div>

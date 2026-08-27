@@ -36,6 +36,6 @@ class BankTransactionAdmin(admin.ModelAdmin):
 
 @admin.register(CapitalInjection)
 class CapitalInjectionAdmin(admin.ModelAdmin):
-    list_display = ("injected_date", "source", "amount", "investor")
-    list_filter = ("injected_date",)
+    list_display = ("injected_date", "source", "amount", "payment_method", "branch", "investor")
+    list_filter = ("injected_date", "payment_method", "branch")
     search_fields = ("source", "investor", "notes")

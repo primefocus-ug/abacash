@@ -142,6 +142,8 @@ def capital_injection_create(request):
                 source=d["source"].strip(),
                 amount=amount_value,
                 injected_date=d["injected_date"],
+                payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.CASH),
+                branch_id=d.get("branch") or None,
                 investor=d.get("investor", "").strip(),
                 notes=d.get("notes", "").strip(),
                 created_by=request.user,
@@ -155,6 +157,7 @@ def capital_injection_create(request):
     return render(request, "accounts/capital_injection_form.html", {
         "title": "Record Capital Injection",
         "action": "create",
+        "branches": Branch.objects.filter(is_active=True),
     })
 
 
@@ -168,6 +171,8 @@ def capital_injection_edit(request, pk):
             injection.source = d["source"].strip()
             injection.amount = d["amount"]
             injection.injected_date = d["injected_date"]
+            injection.payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.CASH)
+            injection.branch_id = d.get("branch") or None
             injection.investor = d.get("investor", "").strip()
             injection.notes = d.get("notes", "").strip()
             injection.save()
@@ -180,6 +185,7 @@ def capital_injection_edit(request, pk):
         "title": f"Edit Capital Injection — {injection.source}",
         "action": "edit",
         "injection": injection,
+        "branches": Branch.objects.filter(is_active=True),
     })
 
 

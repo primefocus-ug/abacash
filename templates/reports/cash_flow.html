@@ -79,13 +79,26 @@
 </style>
 
 <div class="card mb-3">
-  <div class="card-header"><span class="card-title">Cash In / Cash Out Ledger</span></div>
+  <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <span class="card-title">Cash In / Cash Out Ledger</span>
+    <form method="get" style="display:flex;align-items:center;gap:8px;">
+      <input type="hidden" name="date_from" value="{{ date_from }}">
+      <input type="hidden" name="date_to" value="{{ date_to }}">
+      <label for="cash-flow-sort" class="text-sm text-muted">Sort</label>
+      <select id="cash-flow-sort" name="sort" onchange="this.form.submit()" style="margin:0;width:auto;">
+        <option value="date" {% if sort_by == "date" %}selected{% endif %}>Date / time</option>
+        <option value="cash_in" {% if sort_by == "cash_in" %}selected{% endif %}>Cash in</option>
+        <option value="cash_out" {% if sort_by == "cash_out" %}selected{% endif %}>Cash out</option>
+      </select>
+    </form>
+  </div>
   <div class="table-wrap">
     {% if ledger %}
     <table class="aba-table" id="cf-ledger">
       <thead>
         <tr>
           <th style="width:100px">Date</th>
+          <th style="width:85px">Time</th>
           <th style="width:130px">Type</th>
           <th>Client</th>
           <th>Description</th>
@@ -97,6 +110,7 @@
         <tr
           data-type="{{ row.type }}"
           data-date="{{ row.date }}"
+          data-time="{{ row.time|date:'H:i:s' }}"
           data-client="{{ row.client.full_name|default:'—' }}"
           data-desc="{{ row.description|escapejs }}"
           data-cash-in="{{ row.cash_in|ugx_plain }}"
@@ -110,6 +124,7 @@
           {% endif %}
         >
           <td class="mono" style="white-space:nowrap">{{ row.date }}</td>
+          <td class="mono text-sm" style="white-space:nowrap">{{ row.time|date:"H:i:s" }}</td>
           <td>
             {% if row.type == "Expense" %}
               <span class="badge badge-amber">Expense</span>
@@ -135,7 +150,7 @@
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="4" style="text-align:right;font-weight:600">Net Cash Flow</td>
+          <td colspan="5" style="text-align:right;font-weight:600">Net Cash Flow</td>
           <td class="mono fw-500" style="text-align:right">
             {% if total_cash_in > total_cash_out %}
               <span style="color:var(--green-400)">+ {{ total_cash_in|ugx_plain }}</span>
@@ -191,6 +206,7 @@
         + '</div>'
         + '<div class="cf-detail-grid">'
         +   '<div class="cf-field"><label>Date</label><span>' + d.date + '</span></div>'
+        +   '<div class="cf-field"><label>Time</label><span>' + d.time + '</span></div>'
         +   '<div class="cf-field"><label>Client</label><span>' + d.client + '</span></div>'
         +   (d.loanNum ? '<div class="cf-field"><label>Loan #</label><span>' + d.loanNum + '</span></div>' : '<div></div>')
         +   '<div class="cf-field" style="grid-column:1/-1"><label>Description</label><span>' + d.desc + '</span></div>'

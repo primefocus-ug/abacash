@@ -42,12 +42,45 @@
     <div class="metric-value">{{ active_loan_count }}</div>
     <div class="metric-sub">in portfolio</div>
   </div>
-  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">
-    <div class="metric-label">Cash at Hand</div>
+  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}" id="cash-at-hand-card">
+    <button type="button" class="cash-toggle" aria-expanded="false" aria-controls="cash-at-hand-flow">
+      <span class="metric-label">Cash at Hand</span><span aria-hidden="true">⌄</span>
+    </button>
     <div class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">{{ cash_at_hand|money }}</div>
     <div class="metric-sub">Running balance{% if not can_view_all_branches %} · your branch{% endif %}</div>
+    <div id="cash-at-hand-flow" class="cash-flow-preview" hidden>
+      {% for transaction in recent_cash %}
+        <div class="cash-flow-row"><span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.date }} at {{ transaction.timestamp|date:'H:i' }}</small></span><b class="{{ transaction.direction }}">{% if transaction.direction == 'in' %}+{% else %}-{% endif %} {{ transaction.amount|money }}</b></div>
+      {% empty %}<small class="text-muted">No cash movements yet.</small>{% endfor %}
+      <a href="{% url 'reports:cash_flow' %}">View full cash flow <span aria-hidden="true">→</span></a>
+    </div>
   </div>
 </div>
+
+<style>
+  .cash-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; padding:0; border:0; background:none; color:inherit; cursor:pointer; text-align:left; }
+  .cash-toggle > span:last-child { font-size:20px; transition:transform .2s ease; }
+  #cash-at-hand-card.is-open .cash-toggle > span:last-child { transform:rotate(180deg); }
+  #cash-at-hand-card { position:relative; z-index:2; overflow:visible; }
+  #cash-at-hand-card.is-open { z-index:20; }
+  .cash-flow-preview { position:absolute; top:calc(100% - 8px); left:0; right:0; margin:0; border:1px solid var(--border); border-radius:0 0 var(--radius-md) var(--radius-md); padding:12px; background:var(--surface); box-shadow:var(--shadow-soft); transform-origin:top center; transition:opacity .18s ease, transform .18s ease; }
+  .cash-flow-preview[hidden] { display:block; opacity:0; pointer-events:none; transform:translateY(-6px) scaleY(.96); }
+  .cash-flow-preview:not([hidden]) { opacity:1; transform:translateY(0) scaleY(1); }
+  .cash-branch-switcher { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:5px; font-size:10px; color:var(--text-muted); } .cash-branch-btn { padding:3px 7px; border-radius:5px; background:rgba(31,132,196,.12); color:var(--accent); font-weight:700; } .cash-branch-btn:nth-of-type(3n) { background:rgba(231,157,63,.16); color:#a86413; } .cash-branch-btn:nth-of-type(3n+1) { background:rgba(42,157,114,.14); color:#187653; } .cash-branch-btn.active { outline:2px solid currentColor; outline-offset:1px; }
+  .cash-flow-row { display:flex; justify-content:space-between; gap:10px; padding:7px 0; font-size:11px; }
+  .cash-flow-row small { display:block; color:var(--text-muted); margin-top:2px; }
+  .cash-flow-row b { white-space:nowrap; font-family:var(--font-mono); }
+  .cash-flow-row b.in { color:var(--green-400); } .cash-flow-row b.out { color:var(--red-400); }
+  .cash-flow-preview > a { display:block; margin-top:5px; color:var(--accent); font-size:11px; font-weight:600; }
+</style>
+<script>
+  document.querySelector('#cash-at-hand-card .cash-toggle')?.addEventListener('click', function () {
+    const card = document.getElementById('cash-at-hand-card');
+    const flow = document.getElementById('cash-at-hand-flow');
+    const expanded = this.getAttribute('aria-expanded') === 'true';
+    this.setAttribute('aria-expanded', String(!expanded)); flow.hidden = expanded; card.classList.toggle('is-open', !expanded);
+  });
+</script>
 
 <div class="card mb-3">
   <div class="card-header">

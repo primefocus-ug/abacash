@@ -54,12 +54,63 @@
     <div class="metric-value amber">{{ pending_count }}</div>
     <div class="metric-sub"><i class="fas fa-hourglass-start"></i> awaiting review</div>
   </div>
-  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">
-    <div class="metric-label"><i class="fas fa-wallet"></i> Cash at Hand</div>
-    <div class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">{{ cash_at_hand|money }}</div>
+  <div class="metric-card {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}" id="cash-at-hand-card">
+    <button type="button" class="cash-toggle" aria-expanded="false" aria-controls="cash-at-hand-flow">
+      <span class="metric-label"><i class="fas fa-wallet"></i> Cash at Hand</span><span aria-hidden="true">⌄</span>
+    </button>
+    <div id="cash-at-hand-value" class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}">{{ cash_at_hand|money }}</div>
     <div class="metric-sub"><i class="fas fa-balance-scale"></i> Running balance{% if not can_view_all_branches %} .{% endif %}</div>
+    <div id="cash-at-hand-flow" class="cash-flow-preview" hidden>
+      <div id="cash-branch-switcher" class="cash-branch-switcher"></div>
+      <div id="cash-flow-rows">
+        {% for transaction in recent_cash %}<div class="cash-flow-row"><span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.date }} at {{ transaction.timestamp|date:'H:i' }}</small></span><b class="{{ transaction.direction }}">{% if transaction.direction == 'in' %}+{% else %}-{% endif %} {{ transaction.amount|money }}</b></div>{% empty %}<small>No cash movements yet.</small>{% endfor %}
+      </div>
+      <a href="{% url 'reports:cash_flow' %}">View full cash flow <span aria-hidden="true">→</span></a>
+    </div>
   </div>
 </div>
+
+{% block extra_css %}
+<style>
+  .cash-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; padding:0; border:0; background:none; color:inherit; cursor:pointer; text-align:left; }
+  .cash-toggle > span:last-child { font-size:20px; transition:transform .2s ease; } #cash-at-hand-card.is-open .cash-toggle > span:last-child { transform:rotate(180deg); }
+  #cash-at-hand-card { position:relative; z-index:2; overflow:visible; } #cash-at-hand-card.is-open { z-index:20; }
+  .cash-flow-preview { position:absolute; top:calc(100% - 8px); left:0; right:0; margin:0; border:1px solid var(--border); border-radius:0 0 var(--radius-md) var(--radius-md); padding:12px; background:var(--bg-surface, #fff); box-shadow:var(--shadow-soft, 0 16px 40px rgba(15,23,42,.12)); transform-origin:top center; transition:opacity .18s ease, transform .18s ease; } .cash-flow-preview[hidden] { display:block !important; opacity:0; pointer-events:none; transform:translateY(-6px) scaleY(.96); } .cash-flow-preview:not([hidden]) { opacity:1; transform:translateY(0) scaleY(1); }
+  .cash-branch-switcher { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:5px; font-size:10px; color:var(--text-muted); } .cash-branch-btn { padding:3px 7px; border-radius:5px; background:rgba(31,132,196,.12); color:var(--accent); font-weight:700; } .cash-branch-btn:nth-of-type(3n) { background:rgba(231,157,63,.16); color:#a86413; } .cash-branch-btn:nth-of-type(3n+1) { background:rgba(42,157,114,.14); color:#187653; } .cash-branch-btn.active { outline:2px solid currentColor; outline-offset:1px; }
+  .cash-branch-btn { border:0; cursor:pointer; font:inherit; }
+  .cash-flow-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); font-size:11px; line-height:1.35; }
+  .cash-flow-row:last-child { border-bottom:0; }
+  .cash-flow-row span { min-width:0; }
+  .cash-flow-row strong { display:block; font-size:11px; font-weight:700; }
+  .cash-flow-row small { display:block; margin-top:2px; color:var(--text-muted); font-size:10px; line-height:1.35; }
+  .cash-flow-row b { flex-shrink:0; white-space:nowrap; font-family:var(--font-mono); font-size:11px; }
+  .cash-flow-row b.in { color:var(--green-400); }
+  .cash-flow-row b.out { color:var(--red-400); }
+  .cash-flow-preview > a { display:block; margin-top:8px; color:var(--accent); font-size:11px; font-weight:600; }
+</style>
+{% endblock %}
+{{ cash_switch_data|json_script:"cash-switch-data" }}
+<script>
+  (function () {
+    const data = JSON.parse(document.getElementById('cash-switch-data').textContent);
+    const card = document.getElementById('cash-at-hand-card');
+    const value = document.getElementById('cash-at-hand-value');
+    const switcher = document.getElementById('cash-branch-switcher');
+    const rows = document.getElementById('cash-flow-rows');
+    const initial = {{ cash_branch_id|default:'null'|safe }};
+    const formatMoney = amount => 'UGX ' + Number(amount).toLocaleString('en-UG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    function selectBranch(id) {
+      const selected = data.find(item => item.id === id) || data[0];
+      value.textContent = formatMoney(selected.balance);
+      value.classList.toggle('red', Number(selected.balance) < 0); value.classList.toggle('teal', Number(selected.balance) >= 0);
+      switcher.querySelectorAll('button').forEach(button => button.classList.toggle('active', String(button.dataset.branch) === String(selected.id)));
+      rows.innerHTML = selected.transactions.length ? selected.transactions.map(item => '<div class="cash-flow-row"><span><strong>' + item.type + '</strong><small>' + item.description + ' · ' + item.date + ' at ' + item.timestamp.split(' at ')[1] + '</small></span><b class="' + item.direction + '">' + (item.direction === 'in' ? '+' : '-') + ' ' + formatMoney(item.amount) + '</b></div>').join('') : '<small>No cash movements yet.</small>';
+    }
+    data.forEach(item => { const button = document.createElement('button'); button.type = 'button'; button.className = 'cash-branch-btn'; button.dataset.branch = item.id; button.textContent = item.label; button.addEventListener('click', () => selectBranch(item.id)); switcher.appendChild(button); });
+    selectBranch(initial === null ? null : Number(initial));
+    document.querySelector('#cash-at-hand-card .cash-toggle')?.addEventListener('click', function () { const flow = document.getElementById('cash-at-hand-flow'), expanded = this.getAttribute('aria-expanded') === 'true'; this.setAttribute('aria-expanded', String(!expanded)); flow.hidden = expanded; card.classList.toggle('is-open', !expanded); });
+  }());
+</script>
 
 <!-- ============================================================ -->
 <!--  PERIOD CONTROLS  (clean, spaced)                            -->

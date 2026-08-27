@@ -668,9 +668,21 @@ class Expense(models.Model):
 
 
 class CapitalInjection(models.Model):
+    class PaymentMethod(models.TextChoices):
+        CASH         = "CASH",         _("Cash")
+        BANK         = "BANK",         _("Bank Transfer")
+        MOBILE_MONEY = "MOBILE_MONEY", _("Mobile Money")
+
     source = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     injected_date = models.DateField(default=timezone.localdate)
+    payment_method = models.CharField(
+        max_length=20, choices=PaymentMethod.choices, default=PaymentMethod.CASH,
+    )
+    branch = models.ForeignKey(
+        "accounts.Branch", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="capital_injections",
+    )
     investor = models.CharField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(

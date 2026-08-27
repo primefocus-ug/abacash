@@ -12,7 +12,7 @@ from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from reportlab.lib.units import mm
 
-from accounts.models import Branch, Expense
+from accounts.models import Branch, Expense, CapitalInjection
 from accounts.branch_scope import scope_to_branch, can_access_branch_object
 from loans.models import Loan, LoanSchedule, LoanProduct
 from payments.models import Payment
@@ -135,7 +135,6 @@ def loan_book_download(request):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=12*mm, leftMargin=12*mm, topMargin=15*mm, bottomMargin=15*mm)
     story = []
-
     story.append(Paragraph("Loan Book Report", header_style))
     filters_text = "All Loans"
     if date_from or date_to:
@@ -314,11 +313,15 @@ def cash_flow_report(request):
     today      = date.today()
     date_from  = request.GET.get("date_from", today.replace(day=1).isoformat())
     date_to    = request.GET.get("date_to", today.isoformat())
+    sort_by    = request.GET.get("sort", "date")
+    if sort_by not in {"date", "cash_in", "cash_out"}:
+        sort_by = "date"
 
     payments = list(Payment.objects.filter(
         payment_date__gte=date_from,
         payment_date__lte=date_to,
         status="ALLOCATED",
+        payment_method=Payment.PaymentMethod.CASH,
     ).select_related("loan__client", "recorded_by").order_by("payment_date"))
 
     disbursements = list(Loan.objects.filter(
@@ -331,15 +334,28 @@ def cash_flow_report(request):
         expense_date__gte=date_from,
         expense_date__lte=date_to,
         status="APPROVED",
+        payment_method=Expense.PaymentMethod.CASH,
     ).select_related("category", "expense_type").order_by("expense_date"))
+    injections = list(CapitalInjection.objects.filter(
+        injected_date__gte=date_from,
+        injected_date__lte=date_to,
+        payment_method=CapitalInjection.PaymentMethod.CASH,
+    ).order_by("injected_date"))
 
-    total_cash_in = sum(p.amount_received for p in payments)
+    branch_id = _effective_branch_id(request)
+    if branch_id:
+        payments = [p for p in payments if p.loan.branch_id == branch_id]
+        disbursements = [l for l in disbursements if l.branch_id == branch_id]
+        expenses = [e for e in expenses if e.branch_id == branch_id]
+        injections = [i for i in injections if i.branch_id == branch_id]
+
+    total_processing_fees = sum(l.effective_processing_fee for l in disbursements)
+    total_cash_in = sum(p.amount_received for p in payments) + sum(i.amount for i in injections)
+    total_cash_in += total_processing_fees
     total_principal = sum(p.principal_paid for p in payments)
     total_interest = sum(p.interest_paid for p in payments)
     total_penalties = sum(p.penalty_paid for p in payments)
     total_cash_out = sum(l.cash_disbursed for l in disbursements)
-    total_processing_fees = sum(l.effective_processing_fee for l in disbursements)
-    total_cash_in += total_processing_fees
     total_expenses = sum(e.amount for e in expenses)
     total_cash_out += total_expenses
 
@@ -347,6 +363,7 @@ def cash_flow_report(request):
     for p in payments:
         ledger.append({
             "date": p.payment_date,
+            "time": p.created_at,
             "type": "Payment",
             "loan": p.loan,
             "client": p.client,
@@ -361,9 +378,11 @@ def cash_flow_report(request):
         })
 
     for l in disbursements:
+        loan_sequence = len(ledger)
         if l.cash_disbursed:
             ledger.append({
                 "date": l.disbursement_date,
+                "time": l.created_at,
                 "type": "Disbursement",
                 "loan": l,
                 "client": l.client,
@@ -373,11 +392,12 @@ def cash_flow_report(request):
                 "interest": Decimal("0"),
                 "penalty": Decimal("0"),
                 "description": "Principal disbursed to client",
-                "sort_order": 0,
+                "sort_order": loan_sequence,
             })
         if l.effective_processing_fee:
             ledger.append({
                 "date": l.disbursement_date,
+                "time": l.created_at,
                 "type": "Processing Fee",
                 "loan": l,
                 "client": l.client,
@@ -387,13 +407,14 @@ def cash_flow_report(request):
                 "interest": Decimal("0"),
                 "penalty": Decimal("0"),
                 "description": "Processing fee collected",
-                "sort_order": 0,
+                "sort_order": loan_sequence + 1,
             })
 
     for e in expenses:
         category = e.expense_type.name if e.expense_type else (e.category.name if e.category else "Expense")
         ledger.append({
             "date": e.expense_date,
+            "time": e.created_at,
             "type": "Expense",
             "loan": None,
             "client": None,
@@ -406,8 +427,29 @@ def cash_flow_report(request):
             "description": category + (f" — {e.vendor}" if e.vendor else ""),
             "sort_order": 2,
         })
+    for injection in injections:
+        ledger.append({
+            "date": injection.injected_date,
+            "time": injection.created_at,
+            "type": "Capital Injection",
+            "loan": None,
+            "client": None,
+            "cash_in": injection.amount,
+            "cash_out": Decimal("0"),
+            "processing_fee": Decimal("0"),
+            "principal": Decimal("0"),
+            "interest": Decimal("0"),
+            "penalty": Decimal("0"),
+            "description": f"Capital injection from {injection.source}",
+            "sort_order": 0,
+        })
 
-    ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["type"]))
+    if sort_by == "cash_in":
+        ledger.sort(key=lambda row: (-row["cash_in"], row["date"], row["sort_order"]))
+    elif sort_by == "cash_out":
+        ledger.sort(key=lambda row: (-row["cash_out"], row["date"], row["sort_order"]))
+    else:
+        ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["time"], row["type"]))
 
     return render(request, "reports/cash_flow.html", {
         "date_from": date_from,
@@ -423,6 +465,7 @@ def cash_flow_report(request):
         "payment_count": len(payments),
         "disbursement_count": len(disbursements),
         "expense_count": len(expenses),
+        "sort_by": sort_by,
     })
 
 
@@ -959,9 +1002,13 @@ def cash_flow_download(request):
     today     = date.today()
     date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
     date_to   = request.GET.get("date_to", today.isoformat())
+    sort_by   = request.GET.get("sort", "date")
+    if sort_by not in {"date", "cash_in", "cash_out"}:
+        sort_by = "date"
 
     payments = list(Payment.objects.filter(
         payment_date__gte=date_from, payment_date__lte=date_to, status="ALLOCATED",
+        payment_method=Payment.PaymentMethod.CASH,
     ).select_related("loan__client", "recorded_by").order_by("payment_date"))
 
     disbursements = list(Loan.objects.filter(
@@ -971,47 +1018,70 @@ def cash_flow_download(request):
 
     expenses = list(Expense.objects.filter(
         expense_date__gte=date_from, expense_date__lte=date_to, status="APPROVED",
+        payment_method=Expense.PaymentMethod.CASH,
     ).select_related("category", "expense_type").order_by("expense_date"))
+    injections = list(CapitalInjection.objects.filter(
+        injected_date__gte=date_from, injected_date__lte=date_to,
+        payment_method=CapitalInjection.PaymentMethod.CASH,
+    ).order_by("injected_date"))
 
-    total_cash_in = sum(pm.amount_received for pm in payments)
-    total_cash_out = sum(l.cash_disbursed for l in disbursements)
     total_processing_fees = sum(l.effective_processing_fee for l in disbursements)
-    total_cash_in += total_processing_fees
+    total_cash_in = sum(pm.amount_received for pm in payments)
+    total_cash_in += total_processing_fees + sum(i.amount for i in injections)
+    total_cash_out = sum(l.cash_disbursed for l in disbursements)
     total_cash_out += sum(e.amount for e in expenses)
 
     ledger = []
     for pm in payments:
         ledger.append({
-            "date": pm.payment_date, "type": "Payment", "client": pm.client,
+            "date": pm.payment_date, "time": pm.created_at, "type": "Payment", "client": pm.client,
             "cash_in": pm.amount_received, "cash_out": Decimal("0"),
             "description": f"Payment received ({pm.get_payment_method_display()})",
             "sort_order": 1,
         })
     for l in disbursements:
+        loan_sequence = len(ledger)
         ledger.append({
-            "date": l.disbursement_date, "type": "Disbursement", "client": l.client,
-            "cash_in": l.effective_processing_fee, "cash_out": l.cash_disbursed,
-            "description": "Loan disbursed", "sort_order": 0,
+            "date": l.disbursement_date, "time": l.created_at, "type": "Disbursement", "client": l.client,
+            "cash_in": Decimal("0"), "cash_out": l.cash_disbursed,
+            "description": "Loan disbursed", "sort_order": loan_sequence,
         })
+        if l.effective_processing_fee:
+            ledger.append({
+                "date": l.disbursement_date, "time": l.created_at, "type": "Processing Fee", "client": l.client,
+                "cash_in": l.effective_processing_fee, "cash_out": Decimal("0"),
+                "description": "Processing fee collected", "sort_order": loan_sequence + 1,
+            })
     for e in expenses:
         category = e.expense_type.name if e.expense_type else (e.category.name if e.category else "Expense")
         ledger.append({
-            "date": e.expense_date, "type": "Expense", "client": None,
+            "date": e.expense_date, "time": e.created_at, "type": "Expense", "client": None,
             "cash_in": Decimal("0"), "cash_out": e.amount,
             "description": category + (f" — {e.vendor}" if e.vendor else ""),
             "sort_order": 2,
         })
-    ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["type"]))
+    for injection in injections:
+        ledger.append({
+            "date": injection.injected_date, "time": injection.created_at, "type": "Capital Injection", "client": None,
+            "cash_in": injection.amount, "cash_out": Decimal("0"),
+            "description": f"Capital injection from {injection.source}", "sort_order": 0,
+        })
+    if sort_by == "cash_in":
+        ledger.sort(key=lambda row: (-row["cash_in"], row["date"], row["sort_order"]))
+    elif sort_by == "cash_out":
+        ledger.sort(key=lambda row: (-row["cash_out"], row["date"], row["sort_order"]))
+    else:
+        ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["time"], row["type"]))
 
     body_rows = [
         [
-            p(row["date"].isoformat()), p(row["type"]),
+            p(row["date"].isoformat()), p(row["time"].strftime("%H:%M:%S")), p(row["type"]),
             p(row["client"].full_name if row["client"] else "—"),
             p(row["description"]), p(_ugx(row["cash_in"])), p(_ugx(row["cash_out"])),
         ]
         for row in ledger
     ]
-    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_cash_in)}</b>"), p(f"<b>{_ugx(total_cash_out)}</b>")]
+    totals_row = [p(""), p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_cash_in)}</b>"), p(f"<b>{_ugx(total_cash_out)}</b>")]
 
     return build_report_pdf(
         request,
@@ -1021,8 +1091,8 @@ def cash_flow_download(request):
         landscape=True,
         sections=[{
             "heading": None,
-            "head_row": ["Date", "Type", "Client / Description", "Description", "Cash In", "Cash Out"],
-            "col_widths": [24*mm, 30*mm, 55*mm, 70*mm, 35*mm, 35*mm],
+            "head_row": ["Date", "Time", "Type", "Client / Description", "Description", "Cash In", "Cash Out"],
+            "col_widths": [24*mm, 18*mm, 30*mm, 55*mm, 70*mm, 35*mm, 35*mm],
             "body_rows": body_rows,
             "totals_row": totals_row,
         }],
