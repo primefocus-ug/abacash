@@ -631,11 +631,20 @@ def user_edit(request, pk):
     if request.method == "POST":
         d = request.POST
         try:
+            # Never leave the organisation without an active CEO.
+            new_role = d["role"]
+            stays_active_ceo = new_role == "CEO" and d.get("is_active") == "on"
+            if staff.role == "CEO" and not stays_active_ceo:
+                if not User.objects.filter(role="CEO", is_active=True).exclude(pk=staff.pk).exists():
+                    raise ValueError("You can't demote or deactivate the only active CEO. Make someone else CEO first.")
             staff.first_name = d["first_name"].strip()
             staff.last_name  = d["last_name"].strip()
             staff.email      = d["email"].strip()
             staff.phone      = d.get("phone", "").strip()
             staff.role       = d["role"]
+            if staff.role != "CEO":
+                # Superuser bypasses every permission check; only CEOs may hold it.
+                staff.is_superuser = False
             staff.branch_id  = d.get("branch") or None
             staff.commission_rate = d.get("commission_rate", "0.00")
             staff.is_active  = d.get("is_active") == "on"

@@ -1,8 +1,30 @@
 from django.conf import settings
 from django.db import connection
-from django.db.models.signals import post_migrate, post_save
+from django.db.models.signals import post_migrate, post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+
+
+@receiver(pre_save, sender=settings.AUTH_USER_MODEL)
+def strip_elevated_flags_on_demotion(sender, instance, **kwargs):
+    """When someone is moved OUT of the CEO role, drop is_superuser / is_staff.
+
+    CEOs are normally created as superusers, and Django treats a superuser as
+    holding EVERY permission (has_perm() always returns True) -- so without
+    this, a demoted CEO keeps the admin panel, user management, etc. even
+    though their role says Cashier.
+    """
+    if instance.pk is None or instance.role == "CEO":
+        return
+    if not (instance.is_superuser or instance.is_staff):
+        return
+    try:
+        old_role = sender.objects.filter(pk=instance.pk).values_list("role", flat=True).first()
+    except Exception:
+        return
+    if old_role == "CEO":
+        instance.is_superuser = False
+        instance.is_staff = False
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

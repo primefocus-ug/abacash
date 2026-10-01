@@ -3513,7 +3513,6 @@
             </div>
 
             <!-- CORE OPERATIONS -->
-            {% if not user.is_cashier %}
             <div class="nav-group" data-group="operations">
                 <button type="button" class="nav-group-toggle" aria-expanded="false">
                     <span class="nav-group-label">Core Operations</span>
@@ -3583,7 +3582,6 @@
 
                 </div>
             </div>
-            {% endif %}
 
             <!-- INSIGHTS -->
             {% if perms.accounts.can_view_reports or perms.accounts.can_manage_guarantors %}
@@ -4010,7 +4008,6 @@
                 </a>
             </div>
 
-            {% if not user.is_cashier %}
             <div class="more-sheet-section">
                 <div class="more-sheet-section-title">Core Operations</div>
 
@@ -4073,7 +4070,6 @@
                     <span>Record Payment</span>
                 </a>
             </div>
-            {% endif %}
 
             {% if perms.accounts.can_view_reports or perms.accounts.can_manage_guarantors %}
             <div class="more-sheet-section">
