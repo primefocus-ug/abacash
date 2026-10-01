@@ -44,7 +44,7 @@ def _database_from_url(url: str) -> dict:
 if DEBUG:
     DATABASE_URL = config(
         "DATABASE_URL",
-        default="postgres://postgres:@Developer25@localhost:5432/db"
+        default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
     )
 else:
     DATABASE_URL = config(

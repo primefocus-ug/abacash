@@ -1,12 +1,12 @@
 from decimal import Decimal
-from django.core.management.base import BaseCommand
 from accounts.models import OfficeChargeTier
+from tenants.command_utils import TenantSchemaCommand
 
 
-class Command(BaseCommand):
-    help = "Seed the database with initial office charge tiers"
+class Command(TenantSchemaCommand):
+    help = "Seed initial office charge tiers (usage: --schema=<name> or --all-tenants)"
 
-    def handle(self, *args, **kwargs):
+    def handle_tenant(self, schema, *args, **kwargs):
         tiers = [
             {
                 "min_amount": Decimal("0"),

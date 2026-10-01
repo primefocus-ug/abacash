@@ -1,32 +1,31 @@
 """Find stored loan figures that disagree with the underlying schedule/payments.
 
-Read-only by default. Usage:
-    python manage.py reconcile_loans                # report discrepancies
-    python manage.py reconcile_loans --fix          # rewrite total_paid / outstanding_balance
-    python manage.py reconcile_loans --tolerance 1  # ignore differences <= 1 UGX
+Read-only by default. Always runs inside a tenant schema context
+(see tenants/command_utils.py):
 
-For multi-tenant setups run inside a tenant, e.g.:
-    python manage.py tenant_command reconcile_loans --schema=<schema>
+    python manage.py reconcile_loans --schema=<name>                # report
+    python manage.py reconcile_loans --schema=<name> --fix          # rewrite total_paid / outstanding_balance
+    python manage.py reconcile_loans --all-tenants --tolerance 1    # every tenant, ignore diffs <= 1 UGX
 """
 from decimal import Decimal
 
-from django.core.management.base import BaseCommand
 from django.db.models import Sum
 
 from loans.models import Loan, LoanSchedule
 from payments.models import Payment
+from tenants.command_utils import TenantSchemaCommand
 
 ZERO = Decimal("0")
 
 
-class Command(BaseCommand):
+class Command(TenantSchemaCommand):
     help = "Compare Loan.total_paid / outstanding_balance with schedule rows and payments."
 
-    def add_arguments(self, parser):
+    def add_tenant_arguments(self, parser):
         parser.add_argument("--fix", action="store_true", help="Rewrite stored totals from the schedule.")
         parser.add_argument("--tolerance", type=Decimal, default=Decimal("0.01"))
 
-    def handle(self, *args, **opts):
+    def handle_tenant(self, schema, *args, **opts):
         tol, fix = opts["tolerance"], opts["fix"]
         bad = 0
         loans = Loan.objects.exclude(status__in=["DRAFT", "PENDING", "APPROVED", "REJECTED"])
