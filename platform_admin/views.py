@@ -150,7 +150,7 @@ def _tenant_stats(company: Company) -> dict:
                 t=Sum("outstanding_balance")
             )["t"] or Decimal("0")
 
-            stats["collected_this_month"] = Payment.objects.filter(
+            stats["collected_this_month"] = Payment.objects.cash_receipts().filter(
                 payment_date__gte=month_start, status="ALLOCATED",
             ).aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
 

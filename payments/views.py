@@ -21,7 +21,7 @@ from accounts.audit import log_action
 from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
 from common.pdf_utils import render_pdf_response
 from clients.models import CreditTransaction
-from .models import Payment, Receipt
+from .models import Payment, Receipt, TRANSFER_REF_PREFIX
 
 logger = logging.getLogger("payments")
 
@@ -202,7 +202,7 @@ def record_payment(request, loan_pk=None):
                                         penalty_paid=t_penalty_paid,
                                         overpayment=Decimal('0'),
                                         payment_method=Payment.PaymentMethod.OTHER,
-                                        reference_number=f"CREDIT_TRANSFER:{request.user.pk}",
+                                        reference_number=f"{TRANSFER_REF_PREFIX}{request.user.pk}",
                                         payment_date=pay_date,
                                         status=Payment.Status.ALLOCATED,
                                     )

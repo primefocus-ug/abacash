@@ -7,6 +7,18 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+# Payments created when a client's stored credit is moved onto another loan.
+# They carry a principal/interest/penalty allocation (real income) but NO new
+# cash -- the cash was already counted when the original overpayment arrived.
+TRANSFER_REF_PREFIX = "CREDIT_TRANSFER:"
+
+
+class PaymentQuerySet(models.QuerySet):
+    def cash_receipts(self):
+        """Exclude internal credit-transfer rows so cash totals aren't double counted."""
+        return self.exclude(reference_number__startswith=TRANSFER_REF_PREFIX)
+
+
 class Payment(models.Model):
 
     class PaymentMethod(models.TextChoices):
@@ -24,6 +36,8 @@ class Payment(models.Model):
     # ------------------------------------------------------------------ #
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    objects = PaymentQuerySet.as_manager()
 
     # ------------------------------------------------------------------ #
     # Relationships                                                        #

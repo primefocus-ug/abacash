@@ -48,9 +48,21 @@
         <span>Late Payment Penalties</span>
         <span class="mono fw-500" style="color:var(--amber-400)">{{ total_penalties|ugx }}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:14px 20px;border-bottom:2px solid var(--border);font-weight:600;">
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Processing Fees</span>
+        <span class="mono fw-500" style="color:var(--teal-400)">{{ total_fees|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);font-weight:600;">
         <span>Total Income</span>
-        <span class="mono" style="color:var(--green-400);font-size:16px;">{{ total_interest|add:total_penalties|ugx }}</span>
+        <span class="mono" style="color:var(--green-400);font-size:16px;">{{ total_income|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Operating Expenses (approved)</span>
+        <span class="mono" style="color:var(--red-400)">- {{ total_expenses|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:14px 20px;border-bottom:2px solid var(--border);font-weight:600;">
+        <span>Net Income</span>
+        <span class="mono" style="font-size:16px;">{{ net_income|ugx }}</span>
       </div>
 
       <!-- Cash flow -->
@@ -63,8 +75,12 @@
         <span class="mono">{{ total_principal|ugx }}</span>
       </div>
       <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
-        <span>Total Cash Received</span>
+        <span>Total Cash Received <span class="text-sm text-muted">(excl. credit transfers)</span></span>
         <span class="mono fw-500">{{ total_received|ugx }}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span>Client credit applied / (held) <span class="text-sm text-muted">(interest + principal + penalties − cash)</span></span>
+        <span class="mono">{{ credit_adjustment|ugx }}</span>
       </div>
       <div style="display:flex;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
         <span>New Loans Disbursed ({{ loan_count }})</span>

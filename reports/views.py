@@ -1,15 +1,29 @@
-"""reports/views.py — all management reports for ABA Uganda."""
+"""reports/views.py — all management reports for ABA Uganda.
+
+Every on-screen report and its PDF download are built from the SAME query
+helpers below, so the two can never drift apart (scope, statuses, totals).
+
+Conventions used throughout:
+  * Dates use timezone.localdate() (Africa/Kampala), never date.today().
+  * Branch scoping is applied in one place (_branch / _effective_branch_id).
+  * "Cash received" excludes internal client-credit transfers
+    (Payment.objects.cash_receipts()); principal/interest/penalty splits
+    include them, because that is when the credit is actually earned.
+  * "Overdue" = any unpaid installment past due, i.e. PENDING, OVERDUE *or*
+    PARTIAL, measured as total_payment + penalty_due - amount_paid.
+"""
 
 import logging
-from datetime import date, datetime
-from decimal import Decimal
 from collections import defaultdict
+from datetime import date, timedelta
+from decimal import Decimal
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-from django.db.models import Sum
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from reportlab.lib.units import mm
 
 from accounts.models import Branch, Expense, CapitalInjection
@@ -21,31 +35,74 @@ from .pdf_utils import build_report_pdf, p, CELL_BOLD
 
 logger = logging.getLogger("reports")
 
+ZERO = Decimal("0")
+OPEN_SCHEDULE = ["PENDING", "OVERDUE", "PARTIAL"]
+LIVE_LOAN = ["ACTIVE", "RESTRUCTURED"]
+# Loans whose principal has actually been paid out (keep in sync with accounts/cash.py).
+DISBURSED = ["ACTIVE", "COMPLETED", "DEFAULTED", "WRITTEN_OFF", "RESTRUCTURED"]
 
+
+# ---------------------------------------------------------------------------
+# Small helpers
+# ---------------------------------------------------------------------------
 def _ugx(value):
     return f"UGX {value:,.0f}"
 
 
-def _effective_branch_id(request):
-    """Resolve which branch a report should be scoped to.
+def _today():
+    return timezone.localdate()
 
-    CEO: the page's own ?branch= wins if present; otherwise falls back to
-    the nav switcher's session default; otherwise None (all branches).
-    Everyone else: always their own branch, regardless of any ?branch= in
-    the querystring — a Manager/Cashier can't page-hack their way into
-    another branch's numbers. If they have no branch assigned, -1 is
-    returned (truthy, so scoping still applies) which can never match a
-    real branch's auto-incrementing id — filtering on it safely yields an
-    empty queryset instead of raising on a non-numeric filter value or,
-    worse, silently returning unfiltered (all-branch) data.
-    """
+
+def _stamp():
+    return f"{timezone.localtime():%d %b %Y %H:%M}"
+
+
+def _effective_branch_id(request):
+    """Branch a report is scoped to: CEO's ?branch=/switcher, everyone else
+    their own branch (-1 = unassigned -> deliberately matches nothing)."""
     from accounts.branch_scope import effective_branch_id
     return effective_branch_id(request)
 
 
+def _branch(qs, request, field="branch_id"):
+    branch_id = _effective_branch_id(request)
+    return qs.filter(**{field: branch_id}) if branch_id else qs
+
+
+def _unpaid(entry):
+    """Amount still owed on a schedule row."""
+    return max(entry.total_payment + entry.penalty_due - entry.amount_paid, ZERO)
+
+
+def _sum(qs, field):
+    return qs.aggregate(t=Sum(field))["t"] or ZERO
+
+
+def _period(request):
+    today = _today()
+    return (
+        request.GET.get("date_from", today.replace(day=1).isoformat()),
+        request.GET.get("date_to", today.isoformat()),
+    )
+
+
+def _month(request):
+    """(month_str, first_day, last_day_inclusive) for the ?month=YYYY-MM picker."""
+    today = _today()
+    month_str = request.GET.get("month", today.strftime("%Y-%m"))
+    try:
+        year, month = int(month_str[:4]), int(month_str[5:7])
+        first = date(year, month, 1)
+    except (ValueError, IndexError):
+        first = today.replace(day=1)
+        month_str = first.strftime("%Y-%m")
+    nxt = date(first.year + (first.month == 12), first.month % 12 + 1, 1)
+    return month_str, first, nxt - timedelta(days=1)
+
 
 def _require_manager(view_fn):
     from functools import wraps
+
     @wraps(view_fn)
     @login_required
     def wrapper(request, *args, **kwargs):
@@ -56,1376 +113,291 @@ def _require_manager(view_fn):
     return wrapper
 
 
-@_require_manager
-def report_index(request):
-    return render(request, "reports/index.html")
-
-
-@_require_manager
-def loan_book(request):
-    today      = date.today()
-    date_from  = request.GET.get("date_from", "")
-    date_to    = request.GET.get("date_to",   "")
-    product_id = request.GET.get("product",   "")
-
-    from loans.models import LoanProduct
-    products = LoanProduct.objects.filter(is_active=True)
-
-    qs = Loan.objects.filter(
-        status__in=["ACTIVE", "COMPLETED", "DEFAULTED"]
-    ).select_related("client", "product").order_by("-disbursement_date")
-
-    if date_from:
-        qs = qs.filter(disbursement_date__gte=date_from)
-    if date_to:
-        qs = qs.filter(disbursement_date__lte=date_to)
-    if product_id:
-        qs = qs.filter(product_id=product_id)
-
-    total_principal   = sum(l.principal_amount    for l in qs)
-    total_outstanding = sum(l.outstanding_balance for l in qs)
-    total_paid        = sum(l.total_paid          for l in qs)
-
-    return render(request, "reports/loan_book.html", {
-        "loans":             qs,
-        "total_principal":   total_principal,
-        "total_outstanding": total_outstanding,
-        "total_paid":        total_paid,
-        "products":          products,
-        "date_from":         date_from,
-        "date_to":           date_to,
-        "product_id":        product_id,
-    })
-
-
-@_require_manager
-def loan_book_download(request):
-    """Download loan book as PDF."""
-    from datetime import datetime
-    from django.http import HttpResponse
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.enums import TA_CENTER
-    from reportlab.lib.units import mm
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-    from reportlab.lib import colors
-    from io import BytesIO
-    from loans.models import Loan, LoanProduct
-
-    today      = date.today()
-    date_from  = request.GET.get("date_from", "")
-    date_to    = request.GET.get("date_to",   "")
-    product_id = request.GET.get("product",   "")
-
-    qs = Loan.objects.filter(
-        status__in=["ACTIVE", "COMPLETED", "DEFAULTED"]
-    ).select_related("client", "product").order_by("-disbursement_date")
-
-    if date_from:
-        qs = qs.filter(disbursement_date__gte=date_from)
-    if date_to:
-        qs = qs.filter(disbursement_date__lte=date_to)
-    if product_id:
-        qs = qs.filter(product_id=product_id)
-
-    styles = getSampleStyleSheet()
-    header_style = ParagraphStyle("Header", parent=styles["Heading1"], fontSize=14, alignment=TA_CENTER, spaceAfter=8)
-    normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=8, spaceAfter=2)
-
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=12*mm, leftMargin=12*mm, topMargin=15*mm, bottomMargin=15*mm)
-    story = []
-    story.append(Paragraph("Loan Book Report", header_style))
-    filters_text = "All Loans"
-    if date_from or date_to:
-        filters_text = f"{date_from or 'Start'} to {date_to or 'End'}"
-    story.append(Paragraph(f"Period: {filters_text} | Generated: {datetime.now():%d %b %Y %H:%M}", normal))
-    story.append(Spacer(1, 6))
-
-    table_data = [[
-        Paragraph("<b>Loan #</b>", normal),
-        Paragraph("<b>Client</b>", normal),
-        Paragraph("<b>Product</b>", normal),
-        Paragraph("<b>Principal</b>", normal),
-        Paragraph("<b>Outstanding</b>", normal),
-        Paragraph("<b>Paid</b>", normal),
-        Paragraph("<b>Status</b>", normal),
-    ]]
-
-    for loan in qs[:100]:
-        table_data.append([
-            Paragraph(loan.loan_number, normal),
-            Paragraph(loan.client.full_name, normal),
-            Paragraph(loan.product.name, normal),
-            Paragraph(f"UGX {loan.principal_amount:,.0f}", normal),
-            Paragraph(f"UGX {loan.outstanding_balance:,.0f}", normal),
-            Paragraph(f"UGX {loan.total_paid:,.0f}", normal),
-            Paragraph(loan.get_status_display(), normal),
-        ])
-
-    table = Table(table_data, colWidths=[18*mm, 28*mm, 20*mm, 20*mm, 20*mm, 18*mm, 16*mm])
-    table.setStyle(TableStyle([
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E5E7EB")),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
-        ("ALIGN", (0, 0), (1, -1), "LEFT"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 7),
-    ]))
-    story.append(table)
-
-    doc.build(story)
-    pdf_bytes = buffer.getvalue()
-    buffer.close()
-
-    response = HttpResponse(pdf_bytes, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="LoanBook-{today}.pdf"'
-    return response
-
-
-@_require_manager
-def collections_report(request):
-    today      = date.today()
-    date_from  = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to    = request.GET.get("date_to",   today.isoformat())
-
-    payments = Payment.objects.filter(
-        payment_date__gte=date_from,
-        payment_date__lte=date_to,
-        status="ALLOCATED",
-    ).select_related("loan__client", "recorded_by").order_by("recorded_by__last_name", "-payment_date")
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        payments = payments.filter(loan__branch_id=branch_id)
-
-    by_cashier = defaultdict(list)
-    for p in payments:
-        by_cashier[p.recorded_by].append(p)
-
-    cashier_totals = [
-        {
-            "user":     user,
-            "payments": pmts,
-            "total":    sum(p.amount_received for p in pmts),
-            "count":    len(pmts),
-        }
-        for user, pmts in by_cashier.items()
-    ]
-
-    grand_total = sum(r["total"] for r in cashier_totals)
-
-    return render(request, "reports/collections.html", {
-        "cashier_totals": cashier_totals,
-        "grand_total":    grand_total,
-        "date_from":      date_from,
-        "date_to":        date_to,
-        "payment_count":  payments.count(),
-    })
-
-
-@_require_manager
-def overdue_report(request):
-    today = date.today()
-
-    overdue = LoanSchedule.objects.filter(
-        due_date__lt=today,
-        status__in=["PENDING", "PARTIAL"],
-        loan__status="ACTIVE",
-    ).select_related("loan__client", "loan__product").order_by("due_date")
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        overdue = overdue.filter(loan__branch_id=branch_id)
-
-    # Annotate days overdue
-    rows = []
-    for entry in overdue:
-        days = (today - entry.due_date).days
-        rows.append({
-            "entry":         entry,
-            "days_overdue":  days,
-            "overdue_amount": entry.total_payment - entry.amount_paid,
-        })
-
-    rows.sort(key=lambda r: r["days_overdue"], reverse=True)
-    total_overdue = sum(r["overdue_amount"] for r in rows)
-
-    return render(request, "reports/overdue.html", {
-        "rows":          rows,
-        "total_overdue": total_overdue,
-        "today":         today,
-    })
-
-
-@_require_manager
-def income_statement(request):
-    today      = date.today()
-    month_str  = request.GET.get("month", today.strftime("%Y-%m"))
-
-    try:
-        year, month = int(month_str[:4]), int(month_str[5:7])
-    except (ValueError, IndexError):
-        year, month = today.year, today.month
-
-    from dateutil.relativedelta import relativedelta as rd
-    period_start = date(year, month, 1)
-    period_end   = period_start + rd(months=1)
-
-    payments = Payment.objects.filter(
-        payment_date__gte=period_start,
-        payment_date__lt=period_end,
-        status="ALLOCATED",
-    )
-
-    # Loans disbursed this month
-    disbursed = Loan.objects.filter(
-        disbursement_date__gte=period_start,
-        disbursement_date__lt=period_end,
-    )
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        payments = payments.filter(loan__branch_id=branch_id)
-        disbursed = disbursed.filter(branch_id=branch_id)
-
-    total_received  = sum(p.amount_received for p in payments)
-    total_principal = sum(p.principal_paid  for p in payments)
-    total_interest  = sum(p.interest_paid   for p in payments)
-    total_penalties = sum(p.penalty_paid    for p in payments)
-
-    total_disbursed = sum(l.principal_amount for l in disbursed)
-
-    return render(request, "reports/income_statement.html", {
-        "month_str":       month_str,
-        "period_start":    period_start,
-        "period_end":      period_end - rd(days=1),
-        "total_received":  total_received,
-        "total_principal": total_principal,
-        "total_interest":  total_interest,
-        "total_penalties": total_penalties,
-        "total_disbursed": total_disbursed,
-        "loan_count":      disbursed.count(),
-        "payment_count":   payments.count(),
-    })
-
-
-@_require_manager
-def cash_flow_report(request):
-    today      = date.today()
-    date_from  = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to    = request.GET.get("date_to", today.isoformat())
-    sort_by    = request.GET.get("sort", "date")
-    if sort_by not in {"date", "cash_in", "cash_out"}:
-        sort_by = "date"
-
-    payments = list(Payment.objects.filter(
-        payment_date__gte=date_from,
-        payment_date__lte=date_to,
-        status="ALLOCATED",
-        payment_method=Payment.PaymentMethod.CASH,
-    ).select_related("loan__client", "recorded_by").order_by("payment_date"))
-
-    disbursements = list(Loan.objects.filter(
-        disbursement_date__gte=date_from,
-        disbursement_date__lte=date_to,
-        status__in=[Loan.Status.ACTIVE, Loan.Status.COMPLETED],
-    ).select_related("client", "product").order_by("disbursement_date"))
-
-    expenses = list(Expense.objects.filter(
-        expense_date__gte=date_from,
-        expense_date__lte=date_to,
-        status="APPROVED",
-        payment_method=Expense.PaymentMethod.CASH,
-    ).select_related("category", "expense_type").order_by("expense_date"))
-    injections = list(CapitalInjection.objects.filter(
-        injected_date__gte=date_from,
-        injected_date__lte=date_to,
-        payment_method=CapitalInjection.PaymentMethod.CASH,
-    ).order_by("injected_date"))
-
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        payments = [p for p in payments if p.loan.branch_id == branch_id]
-        disbursements = [l for l in disbursements if l.branch_id == branch_id]
-        expenses = [e for e in expenses if e.branch_id == branch_id]
-        injections = [i for i in injections if i.branch_id == branch_id]
-
-    total_processing_fees = sum(l.effective_processing_fee for l in disbursements)
-    total_cash_in = sum(p.amount_received for p in payments) + sum(i.amount for i in injections)
-    total_cash_in += total_processing_fees
-    total_principal = sum(p.principal_paid for p in payments)
-    total_interest = sum(p.interest_paid for p in payments)
-    total_penalties = sum(p.penalty_paid for p in payments)
-    total_cash_out = sum(l.cash_disbursed for l in disbursements)
-    total_expenses = sum(e.amount for e in expenses)
-    total_cash_out += total_expenses
-
-    ledger = []
-    for p in payments:
-        ledger.append({
-            "date": p.payment_date,
-            "time": p.created_at,
-            "type": "Payment",
-            "loan": p.loan,
-            "client": p.client,
-            "cash_in": p.amount_received,
-            "cash_out": Decimal("0"),
-            "processing_fee": Decimal("0"),
-            "principal": p.principal_paid,
-            "interest": p.interest_paid,
-            "penalty": p.penalty_paid,
-            "description": f"Payment received ({p.get_payment_method_display()})",
-            "sort_order": 1,
-        })
-
-    for l in disbursements:
-        loan_sequence = len(ledger)
-        if l.cash_disbursed:
-            ledger.append({
-                "date": l.disbursement_date,
-                "time": l.created_at,
-                "type": "Disbursement",
-                "loan": l,
-                "client": l.client,
-                "cash_in": Decimal("0"),
-                "cash_out": l.cash_disbursed,
-                "principal": l.principal_amount,
-                "interest": Decimal("0"),
-                "penalty": Decimal("0"),
-                "description": "Principal disbursed to client",
-                "sort_order": loan_sequence,
-            })
-        if l.effective_processing_fee:
-            ledger.append({
-                "date": l.disbursement_date,
-                "time": l.created_at,
-                "type": "Processing Fee",
-                "loan": l,
-                "client": l.client,
-                "cash_in": l.effective_processing_fee,
-                "cash_out": Decimal("0"),
-                "principal": Decimal("0"),
-                "interest": Decimal("0"),
-                "penalty": Decimal("0"),
-                "description": "Processing fee collected",
-                "sort_order": loan_sequence + 1,
-            })
-
-    for e in expenses:
-        category = e.expense_type.name if e.expense_type else (e.category.name if e.category else "Expense")
-        ledger.append({
-            "date": e.expense_date,
-            "time": e.created_at,
-            "type": "Expense",
-            "loan": None,
-            "client": None,
-            "cash_in": Decimal("0"),
-            "cash_out": e.amount,
-            "processing_fee": Decimal("0"),
-            "principal": Decimal("0"),
-            "interest": Decimal("0"),
-            "penalty": Decimal("0"),
-            "description": category + (f" — {e.vendor}" if e.vendor else ""),
-            "sort_order": 2,
-        })
-    for injection in injections:
-        ledger.append({
-            "date": injection.injected_date,
-            "time": injection.created_at,
-            "type": "Capital Injection",
-            "loan": None,
-            "client": None,
-            "cash_in": injection.amount,
-            "cash_out": Decimal("0"),
-            "processing_fee": Decimal("0"),
-            "principal": Decimal("0"),
-            "interest": Decimal("0"),
-            "penalty": Decimal("0"),
-            "description": f"Capital injection from {injection.source}",
-            "sort_order": 0,
-        })
-
-    if sort_by == "cash_in":
-        ledger.sort(key=lambda row: (-row["cash_in"], row["date"], row["sort_order"]))
-    elif sort_by == "cash_out":
-        ledger.sort(key=lambda row: (-row["cash_out"], row["date"], row["sort_order"]))
-    else:
-        ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["time"], row["type"]))
-
-    return render(request, "reports/cash_flow.html", {
-        "date_from": date_from,
-        "date_to": date_to,
-        "ledger": ledger,
-        "total_cash_in": total_cash_in,
-        "total_cash_out": total_cash_out,
-        "total_processing_fees": total_processing_fees,
-        "total_expenses": total_expenses,
-        "total_principal": total_principal,
-        "total_interest": total_interest,
-        "total_penalties": total_penalties,
-        "payment_count": len(payments),
-        "disbursement_count": len(disbursements),
-        "expense_count": len(expenses),
-        "sort_by": sort_by,
-    })
-
-
-@_require_manager
-def disbursements_report(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to   = request.GET.get("date_to",   today.isoformat())
-    product_id = request.GET.get("product", "")
-
-    products = LoanProduct.objects.filter(is_active=True)
-
-    qs = Loan.objects.filter(
-        disbursement_date__gte=date_from,
-        disbursement_date__lte=date_to,
-        status__in=["ACTIVE", "COMPLETED", "DEFAULTED", "WRITTEN_OFF", "RESTRUCTURED"],
-    ).select_related("client", "product", "applied_by", "reviewed_by").order_by("-disbursement_date")
-
-    if product_id:
-        qs = qs.filter(product_id=product_id)
-
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        qs = qs.filter(branch_id=branch_id)
-
-    total_disbursed    = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_interest_exp = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
-    total_fees         = qs.aggregate(t=Sum("processing_fee"))["t"] or Decimal("0")
-
-    return render(request, "reports/disbursements.html", {
-        "loans":             qs,
-        "total_disbursed":   total_disbursed,
-        "total_interest_exp": total_interest_exp,
-        "total_fees":        total_fees,
-        "loan_count":        qs.count(),
-        "products":          products,
-        "product_id":        product_id,
-        "date_from":         date_from,
-        "date_to":           date_to,
-    })
-
-
-@_require_manager
-def repayments_report(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to   = request.GET.get("date_to",   today.isoformat())
-    method    = request.GET.get("method", "")
-
+# ---------------------------------------------------------------------------
+# Shared data builders (used by BOTH the HTML view and the PDF download)
+# ---------------------------------------------------------------------------
+def _payments_qs(request, date_from, date_to, method=""):
     qs = Payment.objects.filter(
-        payment_date__gte=date_from,
-        payment_date__lte=date_to,
-        status="ALLOCATED",
-    ).select_related("loan__client", "loan__product", "recorded_by").order_by("-payment_date")
-
+        payment_date__gte=date_from, payment_date__lte=date_to, status="ALLOCATED",
+    )
     if method:
         qs = qs.filter(payment_method=method)
-
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        qs = qs.filter(loan__branch_id=branch_id)
-
-    total_received  = qs.aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
-    total_principal = qs.aggregate(t=Sum("principal_paid"))["t"] or Decimal("0")
-    total_interest  = qs.aggregate(t=Sum("interest_paid"))["t"] or Decimal("0")
-    total_penalty   = qs.aggregate(t=Sum("penalty_paid"))["t"] or Decimal("0")
-
-    from payments.models import Payment as P
-    methods = P.PaymentMethod.choices
-
-    return render(request, "reports/repayments.html", {
-        "payments":       qs,
-        "total_received": total_received,
-        "total_principal": total_principal,
-        "total_interest": total_interest,
-        "total_penalty":  total_penalty,
-        "payment_count":  qs.count(),
-        "date_from":      date_from,
-        "date_to":        date_to,
-        "method_filter":  method,
-        "methods":        methods,
-    })
+    return _branch(qs, request, "loan__branch_id")
 
 
-@_require_manager
-def defaulted_loans_report(request):
-    today = date.today()
-
+def _disbursed_qs(request, date_from, date_to, product_id=""):
     qs = Loan.objects.filter(
-        status__in=["DEFAULTED", "WRITTEN_OFF"],
-    ).select_related("client", "product", "reviewed_by").order_by("-updated_at")
-
-    # Also include active loans with 90+ days overdue
-    par90 = Loan.objects.filter(
-        status="ACTIVE",
-        par_category="PAR90",
-    ).select_related("client", "product")
-
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        qs = qs.filter(branch_id=branch_id)
-        par90 = par90.filter(branch_id=branch_id)
-
-    total_defaulted   = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_outstanding = qs.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
-    total_written_off = qs.filter(status="WRITTEN_OFF").aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
-
-    return render(request, "reports/defaulted.html", {
-        "loans":            qs,
-        "par90_loans":      par90,
-        "total_defaulted":  total_defaulted,
-        "total_outstanding": total_outstanding,
-        "total_written_off": total_written_off,
-        "loan_count":       qs.count(),
-        "par90_count":      par90.count(),
-        "today":            today,
-    })
-
-
-@_require_manager
-def closed_loans_report(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", "")
-    date_to   = request.GET.get("date_to",   "")
-    product_id = request.GET.get("product", "")
-
-    products = LoanProduct.objects.filter(is_active=True)
-
-    qs = Loan.objects.filter(
-        status="COMPLETED",
-    ).select_related("client", "product").order_by("-completion_date")
-
-    if date_from:
-        qs = qs.filter(completion_date__gte=date_from)
-    if date_to:
-        qs = qs.filter(completion_date__lte=date_to)
+        disbursement_date__gte=date_from, disbursement_date__lte=date_to,
+        status__in=DISBURSED,
+    )
     if product_id:
         qs = qs.filter(product_id=product_id)
-
-    branch_id = _effective_branch_id(request)
-    if branch_id:
-        qs = qs.filter(branch_id=branch_id)
-
-    total_principal = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_interest  = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
-    total_collected = qs.aggregate(t=Sum("total_paid"))["t"] or Decimal("0")
-
-    return render(request, "reports/closed_loans.html", {
-        "loans":           qs,
-        "total_principal": total_principal,
-        "total_interest":  total_interest,
-        "total_collected": total_collected,
-        "loan_count":      qs.count(),
-        "products":        products,
-        "product_id":      product_id,
-        "date_from":       date_from,
-        "date_to":         date_to,
-    })
+    return _branch(qs, request)
 
 
-@_require_manager
-def par_report(request):
-    """Portfolio at Risk report — loans with overdue schedule entries."""
-    today = date.today()
-    branch_id = _effective_branch_id(request)
+def _fees(loans):
+    return sum((l.effective_processing_fee for l in loans), ZERO)
 
-    def _par_loans(days_min, days_max=None):
-        qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
-        if branch_id:
-            qs = qs.filter(branch_id=branch_id)
-        qs = qs.filter(
-            schedule__due_date__lt=today,
-            schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
-        ).distinct()
-        result = []
-        for loan in qs.select_related("client", "product"):
-            oldest = loan.schedule.filter(
-                due_date__lt=today,
-                status__in=["PENDING", "OVERDUE", "PARTIAL"],
-            ).order_by("due_date").first()
-            if not oldest:
-                continue
-            days = (today - oldest.due_date).days
-            if days >= days_min and (days_max is None or days < days_max):
-                overdue_amt = loan.schedule.filter(
-                    due_date__lt=today,
-                    status__in=["PENDING", "OVERDUE", "PARTIAL"],
-                ).aggregate(
-                    t=Sum("total_payment")
-                )["t"] or Decimal("0")
-                result.append({
-                    "loan": loan,
-                    "days_overdue": days,
-                    "overdue_amount": overdue_amt,
-                })
-        return result
 
-    par1  = _par_loans(1,  31)
-    par30 = _par_loans(31, 61)
-    par60 = _par_loans(61, 91)
-    par90 = _par_loans(91)
+def _loan_book_qs(request):
+    qs = Loan.objects.filter(status__in=DISBURSED).select_related("client", "product")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    product_id = request.GET.get("product", "")
+    if date_from:
+        qs = qs.filter(disbursement_date__gte=date_from)
+    if date_to:
+        qs = qs.filter(disbursement_date__lte=date_to)
+    if product_id:
+        qs = qs.filter(product_id=product_id)
+    return _branch(qs, request).order_by("-disbursement_date")
 
-    active_portfolio = Loan.objects.filter(
-        status__in=["ACTIVE", "RESTRUCTURED"]
+
+def _collections_data(request):
+    date_from, date_to = _period(request)
+    payments = (
+        _payments_qs(request, date_from, date_to).cash_receipts()
+        .select_related("loan__client", "recorded_by")
+        .order_by("recorded_by__last_name", "-payment_date")
     )
-    if branch_id:
-        active_portfolio = active_portfolio.filter(branch_id=branch_id)
-    active_portfolio = active_portfolio.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("1")
-
-    def _total(rows):
-        return sum(r["overdue_amount"] for r in rows)
-
-    def _pct(amt):
-        return round(float(amt) / float(active_portfolio) * 100, 2) if active_portfolio else 0
-
-    t1, t30, t60, t90 = _total(par1), _total(par30), _total(par60), _total(par90)
-    return render(request, "reports/par.html", {
-        "par1":  par1,  "par1_total":  t1,  "par1_pct":  _pct(t1),
-        "par30": par30, "par30_total": t30, "par30_pct": _pct(t30),
-        "par60": par60, "par60_total": t60, "par60_pct": _pct(t60),
-        "par90": par90, "par90_total": t90, "par90_pct": _pct(t90),
-        "par_data": [
-            (par1,  par1,  "PAR1 — 1 to 30 Days Overdue",  "par1",  t1,  _pct(t1)),
-            (par30, par30, "PAR30 — 31 to 60 Days Overdue", "par30", t30, _pct(t30)),
-            (par60, par60, "PAR60 — 61 to 90 Days Overdue", "par60", t60, _pct(t60)),
-            (par90, par90, "PAR90 — 90+ Days Overdue",      "par90", t90, _pct(t90)),
-        ],
-        "active_portfolio": active_portfolio,
-        "today": today,
-    })
-
-
-@_require_manager
-def client_statement(request):
-    """Per-client loan & payment statement."""
-    client_id = request.GET.get("client", "")
-    client    = None
-    loans     = []
-    payments  = []
-
-    all_clients = scope_to_branch(Client.objects.filter(is_active=True), request.user).order_by("last_name", "first_name")
-
-    if client_id:
-        from django.shortcuts import get_object_or_404
-        client   = get_object_or_404(Client, pk=client_id)
-        if not can_access_branch_object(request.user, client):
-            messages.error(request, "That client belongs to a different branch.")
-            return redirect("reports:client_statement")
-        loans    = Loan.objects.filter(client=client).select_related("product").order_by("-application_date")
-        payments = Payment.objects.filter(client=client).select_related("loan").order_by("-payment_date")
-
-    return render(request, "reports/client_statement.html", {
-        "all_clients": all_clients,
-        "client":      client,
-        "loans":       loans,
-        "payments":    payments,
-        "client_id":   client_id,
-    })
-
-
-@_require_manager
-def staff_performance_report(request):
-    """Simple staff performance report based on disbursements, collections, and overdue risk."""
-    today = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to = request.GET.get("date_to", today.isoformat())
-    branch_id = _effective_branch_id(request)
-    role = request.GET.get("role", "")
-    staff_id = request.GET.get("staff", "")
-
-    logger.info(
-        "Staff performance report requested with filters: date_from=%s date_to=%s branch=%s role=%s staff=%s",
-        date_from,
-        date_to,
-        branch_id or "all",
-        role or "all",
-        staff_id or "all",
-    )
-
-    User = get_user_model()
-    all_staff = User.objects.filter(is_active=True).order_by("last_name", "first_name")
-    branches = Branch.objects.filter(is_active=True).order_by("name")
-    roles = User.Role.choices
-
-    staff_users = all_staff
-    if branch_id:
-        staff_users = staff_users.filter(branch_id=branch_id)
-    if role:
-        staff_users = staff_users.filter(role=role)
-    if staff_id:
-        staff_users = staff_users.filter(pk=staff_id)
-
-    rows = []
-    for user in staff_users:
-        disbursed_loans = Loan.objects.filter(
-            disbursement_date__gte=date_from,
-            disbursement_date__lte=date_to,
-            applied_by=user,
-            status__in=[Loan.Status.ACTIVE, Loan.Status.COMPLETED, Loan.Status.DEFAULTED, Loan.Status.RESTRUCTURED, Loan.Status.WRITTEN_OFF],
-        )
-        if branch_id:
-            disbursed_loans = disbursed_loans.filter(branch_id=branch_id)
-
-        disbursed_amount = disbursed_loans.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-        disbursed_count = disbursed_loans.count()
-
-        collected_payments = Payment.objects.filter(
-            payment_date__gte=date_from,
-            payment_date__lte=date_to,
-            recorded_by=user,
-            status="ALLOCATED",
-        )
-        if branch_id:
-            collected_payments = collected_payments.filter(loan__branch_id=branch_id)
-        collected_amount = collected_payments.aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
-        collected_count = collected_payments.count()
-
-        overdue_loans = Loan.objects.filter(
-            applied_by=user,
-            status__in=[Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED],
-            schedule__due_date__lt=today,
-            schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
-        ).distinct()
-        if branch_id:
-            overdue_loans = overdue_loans.filter(branch_id=branch_id)
-
-        overdue_count = overdue_loans.count()
-        overdue_amount = overdue_loans.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
-
-        total_loans = Loan.objects.filter(applied_by=user)
-        if branch_id:
-            total_loans = total_loans.filter(branch_id=branch_id)
-        total_loans = total_loans.count()
-
-        defaulted_loans = Loan.objects.filter(applied_by=user, status__in=[Loan.Status.DEFAULTED, Loan.Status.WRITTEN_OFF])
-        if branch_id:
-            defaulted_loans = defaulted_loans.filter(branch_id=branch_id)
-        defaulted_loans = defaulted_loans.count()
-
-        quality_score = Decimal("100")
-        if disbursed_count:
-            quality_score -= Decimal("5") * min(defaulted_loans, Decimal("10"))
-        if overdue_count:
-            quality_score -= Decimal("2") * min(overdue_count, Decimal("10"))
-        quality_score = max(Decimal("0"), quality_score)
-        performance_percentage = quality_score
-
-        rows.append({
-            "user": user,
-            "disbursed_amount": disbursed_amount,
-            "disbursed_count": disbursed_count,
-            "collected_amount": collected_amount,
-            "collected_count": collected_count,
-            "overdue_count": overdue_count,
-            "overdue_amount": overdue_amount,
-            "total_loans": total_loans,
-            "defaulted_loans": defaulted_loans,
-            "quality_score": quality_score,
-            "performance_percentage": performance_percentage,
-        })
-
-    rows.sort(key=lambda item: (-item["disbursed_amount"], item["user"].last_name))
-    logger.info("Staff performance report completed with %s staff rows", len(rows))
-
-    return render(request, "reports/staff_performance.html", {
-        "rows": rows,
-        "date_from": date_from,
-        "date_to": date_to,
-        "today": today,
-        "branches": branches,
-        "selected_branch": str(branch_id) if branch_id and branch_id != -1 else "",
-        "roles": roles,
-        "selected_role": role,
-        "staff_members": all_staff,
-        "selected_staff": staff_id,
-    })
-
-# ---------------------------------------------------------------------------
-# Collections by Cashier
-# ---------------------------------------------------------------------------
-@_require_manager
-def collections_download(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to   = request.GET.get("date_to",   today.isoformat())
-
-    payments = Payment.objects.filter(
-        payment_date__gte=date_from,
-        payment_date__lte=date_to,
-        status="ALLOCATED",
-    ).select_related("loan__client", "recorded_by").order_by("recorded_by__last_name", "-payment_date")
-
     by_cashier = defaultdict(list)
     for pm in payments:
         by_cashier[pm.recorded_by].append(pm)
-
     cashier_totals = [
-        {"user": user, "payments": pmts, "total": sum(x.amount_received for x in pmts), "count": len(pmts)}
+        {"user": user, "payments": pmts,
+         "total": sum((x.amount_received for x in pmts), ZERO), "count": len(pmts)}
         for user, pmts in by_cashier.items()
     ]
-    grand_total = sum(r["total"] for r in cashier_totals)
-
-    body_rows = [
-        [p(r["user"].get_full_name() if r["user"] else "Unknown"), p(r["count"]), p(_ugx(r["total"]))]
-        for r in cashier_totals
-    ]
-    totals_row = [p("<b>TOTAL</b>", CELL_BOLD), p(f"<b>{payments.count()}</b>", CELL_BOLD), p(f"<b>{_ugx(grand_total)}</b>", CELL_BOLD)]
-
-    return build_report_pdf(
-        request,
-        filename=f"Collections-{today}.pdf",
-        title="Collections by Cashier",
-        subtitle=f"Period: {date_from} to {date_to} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        sections=[{
-            "heading": None,
-            "head_row": ["Cashier", "Payments", "Total Collected"],
-            "col_widths": [90*mm, 40*mm, 50*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
-    )
+    return {
+        "date_from": date_from, "date_to": date_to,
+        "cashier_totals": cashier_totals,
+        "grand_total": sum((r["total"] for r in cashier_totals), ZERO),
+        "payment_count": sum(r["count"] for r in cashier_totals),
+    }
 
 
-# ---------------------------------------------------------------------------
-# Overdue Installments
-# ---------------------------------------------------------------------------
-@_require_manager
-def overdue_download(request):
-    today = date.today()
-
-    overdue = LoanSchedule.objects.filter(
-        due_date__lt=today,
-        status__in=["PENDING", "PARTIAL"],
-        loan__status="ACTIVE",
+def _overdue_data(request):
+    today = _today()
+    entries = LoanSchedule.objects.filter(
+        due_date__lt=today, status__in=OPEN_SCHEDULE, loan__status__in=LIVE_LOAN,
     ).select_related("loan__client", "loan__product").order_by("due_date")
-
+    entries = _branch(entries, request, "loan__branch_id")
     rows = []
-    for entry in overdue:
-        days = (today - entry.due_date).days
+    for entry in entries:
+        amount = _unpaid(entry)
+        if amount <= 0:
+            continue
         rows.append({
             "entry": entry,
-            "days_overdue": days,
-            "overdue_amount": entry.total_payment - entry.amount_paid,
+            "days_overdue": (today - entry.due_date).days,
+            "overdue_amount": amount,
         })
     rows.sort(key=lambda r: r["days_overdue"], reverse=True)
-    total_overdue = sum(r["overdue_amount"] for r in rows)
+    return {"rows": rows, "total_overdue": sum((r["overdue_amount"] for r in rows), ZERO), "today": today}
 
-    body_rows = [
-        [
-            p(r["entry"].loan.loan_number),
-            p(r["entry"].loan.client.full_name),
-            p(r["entry"].due_date.isoformat()),
-            p(r["days_overdue"]),
-            p(_ugx(r["overdue_amount"])),
-        ]
-        for r in rows
-    ]
-    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_overdue)}</b>")]
 
-    return build_report_pdf(
+PAR_BUCKETS = [
+    # (key, label, css, lower_days, upper_days_exclusive)
+    ("par1",  "PAR1 — 1 to 30 Days Overdue",   "par1",  1,  31),
+    ("par30", "PAR30 — 31 to 60 Days Overdue", "par30", 31, 61),
+    ("par60", "PAR60 — 61 to 90 Days Overdue", "par60", 61, 91),
+    ("par90", "PAR90 — Over 90 Days Overdue",  "par90", 91, None),
+]
+
+
+def _par_data(request):
+    """Portfolio-at-risk. A loan sits in ONE bucket, chosen by its oldest unpaid
+    overdue installment. overdue_amount = unpaid part of overdue installments;
+    the % is the loan's full outstanding balance over the active portfolio
+    (the standard PAR definition)."""
+    today = _today()
+    loans = _branch(Loan.objects.filter(status__in=LIVE_LOAN), request)
+    per_loan = {}
+    entries = LoanSchedule.objects.filter(
+        loan__in=loans, due_date__lt=today, status__in=OPEN_SCHEDULE,
+    ).order_by("due_date")
+    for e in entries:
+        rec = per_loan.setdefault(e.loan_id, {"oldest": e.due_date, "amount": ZERO})
+        rec["amount"] += _unpaid(e)
+
+    loan_map = {l.pk: l for l in loans.filter(pk__in=list(per_loan)).select_related("client", "product")}
+    portfolio = _sum(loans, "outstanding_balance")
+
+    buckets = {key: [] for key, *_ in PAR_BUCKETS}
+    for loan_id, rec in per_loan.items():
+        if rec["amount"] <= 0 or loan_id not in loan_map:
+            continue
+        days = (today - rec["oldest"]).days
+        for key, _label, _css, lo, hi in PAR_BUCKETS:
+            if days >= lo and (hi is None or days < hi):
+                buckets[key].append({"loan": loan_map[loan_id], "days_overdue": days,
+                                     "overdue_amount": rec["amount"]})
+                break
+
+    out = []
+    for key, label, css, _lo, _hi in PAR_BUCKETS:
+        rows = sorted(buckets[key], key=lambda r: r["days_overdue"], reverse=True)
+        at_risk = sum((r["loan"].outstanding_balance for r in rows), ZERO)
+        pct = round(float(at_risk) / float(portfolio) * 100, 2) if portfolio else 0
+        out.append({"key": key, "label": label, "css": css, "rows": rows,
+                    "at_risk": at_risk, "pct": pct})
+    return {"buckets": out, "portfolio": portfolio, "today": today}
+
+
+def _defaulted_data(request):
+    today = _today()
+    qs = _branch(
+        Loan.objects.filter(status__in=["DEFAULTED", "WRITTEN_OFF"])
+        .select_related("client", "product", "reviewed_by").order_by("-updated_at"),
         request,
-        filename=f"Overdue-{today}.pdf",
-        title="Overdue Installments Report",
-        subtitle=f"As at {today:%d %b %Y} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        sections=[{
-            "heading": None,
-            "head_row": ["Loan #", "Client", "Due Date", "Days Overdue", "Amount Overdue"],
-            "col_widths": [28*mm, 55*mm, 28*mm, 28*mm, 41*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
     )
+    loans = list(qs)
+
+    # Write-off zeroes outstanding_balance, so recover the amount from the
+    # installments the write-off waived.
+    wo_ids = [l.pk for l in loans if l.status == "WRITTEN_OFF"]
+    wo_amounts = defaultdict(lambda: ZERO)
+    for e in LoanSchedule.objects.filter(loan_id__in=wo_ids, waived_by_writeoff=True):
+        wo_amounts[e.loan_id] += _unpaid(e)
+    for l in loans:
+        l.written_off_amount = wo_amounts.get(l.pk, ZERO) if l.status == "WRITTEN_OFF" else ZERO
+
+    par90 = [r["loan"] for r in next(b for b in _par_data(request)["buckets"] if b["key"] == "par90")["rows"]]
+    return {
+        "loans": loans,
+        "par90_loans": par90,
+        "total_defaulted": sum((l.principal_amount for l in loans), ZERO),
+        "total_outstanding": sum((l.outstanding_balance for l in loans), ZERO),
+        "total_written_off": sum((l.written_off_amount for l in loans), ZERO),
+        "loan_count": len(loans),
+        "par90_count": len(par90),
+        "today": today,
+    }
 
 
-# ---------------------------------------------------------------------------
-# Monthly Income Statement
-# ---------------------------------------------------------------------------
-@_require_manager
-def income_download(request):
-    today     = date.today()
-    month_str = request.GET.get("month", today.strftime("%Y-%m"))
+def _income_data(request):
+    month_str, first, last = _month(request)
+    payments = _payments_qs(request, first, last)
+    cash_payments = payments.cash_receipts()
 
-    try:
-        year, month = int(month_str[:4]), int(month_str[5:7])
-    except (ValueError, IndexError):
-        year, month = today.year, today.month
+    total_received = _sum(cash_payments, "amount_received")
+    total_principal = _sum(payments, "principal_paid")
+    total_interest = _sum(payments, "interest_paid")
+    total_penalties = _sum(payments, "penalty_paid")
+    total_allocated = total_principal + total_interest + total_penalties
 
-    from dateutil.relativedelta import relativedelta as rd
-    period_start = date(year, month, 1)
-    period_end   = period_start + rd(months=1)
+    disbursed = list(_disbursed_qs(request, first, last).select_related("product"))
+    total_fees = _fees(disbursed)
+    expenses = _branch(Expense.objects.filter(
+        expense_date__gte=first, expense_date__lte=last, status="APPROVED"), request)
+    total_expenses = _sum(expenses, "amount")
 
-    payments = Payment.objects.filter(
-        payment_date__gte=period_start, payment_date__lt=period_end, status="ALLOCATED",
-    )
-    total_received  = sum(pm.amount_received for pm in payments)
-    total_principal = sum(pm.principal_paid  for pm in payments)
-    total_interest  = sum(pm.interest_paid   for pm in payments)
-    total_penalties = sum(pm.penalty_paid    for pm in payments)
-
-    disbursed = Loan.objects.filter(
-        disbursement_date__gte=period_start, disbursement_date__lt=period_end,
-    )
-    total_disbursed = sum(l.principal_amount for l in disbursed)
-
-    body_rows = [
-        [p("Interest Income"),          p(_ugx(total_interest))],
-        [p("Penalty Income"),           p(_ugx(total_penalties))],
-        [p("Principal Recovered"),      p(_ugx(total_principal))],
-        [p("Total Cash Received"),      p(_ugx(total_received))],
-        [p("Loans Disbursed (count)"),  p(disbursed.count())],
-        [p("Total Principal Disbursed"), p(_ugx(total_disbursed))],
-    ]
-
-    return build_report_pdf(
-        request,
-        filename=f"IncomeStatement-{month_str}.pdf",
-        title="Monthly Income Statement",
-        subtitle=f"Period: {period_start:%d %b %Y} – {period_end - rd(days=1):%d %b %Y} | "
-                  f"Generated: {datetime.now():%d %b %Y %H:%M}",
-        sections=[{
-            "heading": None,
-            "head_row": ["Item", "Amount"],
-            "col_widths": [110*mm, 60*mm],
-            "body_rows": body_rows,
-        }],
-    )
+    total_income = total_interest + total_penalties + total_fees
+    return {
+        "month_str": month_str, "period_start": first, "period_end": last,
+        "total_received": total_received,
+        "total_principal": total_principal,
+        "total_interest": total_interest,
+        "total_penalties": total_penalties,
+        "total_fees": total_fees,
+        "total_income": total_income,
+        "total_expenses": total_expenses,
+        "net_income": total_income - total_expenses,
+        # >0: client credit was consumed this month; <0: overpayments were held as credit.
+        "credit_adjustment": total_allocated - total_received,
+        "total_disbursed": sum((l.principal_amount for l in disbursed), ZERO),
+        "loan_count": len(disbursed),
+        "payment_count": cash_payments.count(),
+    }
 
 
-# ---------------------------------------------------------------------------
-# Cash In / Cash Out
-# ---------------------------------------------------------------------------
-@_require_manager
-def cash_flow_download(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to   = request.GET.get("date_to", today.isoformat())
-    sort_by   = request.GET.get("sort", "date")
+def _cash_flow_data(request):
+    date_from, date_to = _period(request)
+    sort_by = request.GET.get("sort", "date")
     if sort_by not in {"date", "cash_in", "cash_out"}:
         sort_by = "date"
 
-    payments = list(Payment.objects.filter(
-        payment_date__gte=date_from, payment_date__lte=date_to, status="ALLOCATED",
-        payment_method=Payment.PaymentMethod.CASH,
-    ).select_related("loan__client", "recorded_by").order_by("payment_date"))
+    payments = list(_branch(
+        Payment.objects.cash_receipts().filter(
+            payment_date__gte=date_from, payment_date__lte=date_to, status="ALLOCATED",
+            payment_method=Payment.PaymentMethod.CASH),
+        request, "loan__branch_id",
+    ).select_related("loan__client", "client", "recorded_by").order_by("payment_date"))
 
-    disbursements = list(Loan.objects.filter(
-        disbursement_date__gte=date_from, disbursement_date__lte=date_to,
-        status__in=[Loan.Status.ACTIVE, Loan.Status.COMPLETED],
-    ).select_related("client", "product").order_by("disbursement_date"))
+    disbursements = list(_disbursed_qs(request, date_from, date_to)
+                         .select_related("client", "product").order_by("disbursement_date"))
 
-    expenses = list(Expense.objects.filter(
+    expenses = list(_branch(Expense.objects.filter(
         expense_date__gte=date_from, expense_date__lte=date_to, status="APPROVED",
         payment_method=Expense.PaymentMethod.CASH,
-    ).select_related("category", "expense_type").order_by("expense_date"))
-    injections = list(CapitalInjection.objects.filter(
+    ), request).select_related("category", "expense_type").order_by("expense_date"))
+
+    injections = list(_branch(CapitalInjection.objects.filter(
         injected_date__gte=date_from, injected_date__lte=date_to,
         payment_method=CapitalInjection.PaymentMethod.CASH,
-    ).order_by("injected_date"))
+    ), request).order_by("injected_date"))
 
-    total_processing_fees = sum(l.effective_processing_fee for l in disbursements)
-    total_cash_in = sum(pm.amount_received for pm in payments)
-    total_cash_in += total_processing_fees + sum(i.amount for i in injections)
-    total_cash_out = sum(l.cash_disbursed for l in disbursements)
-    total_cash_out += sum(e.amount for e in expenses)
+    total_processing_fees = _fees(disbursements)
+    total_expenses = sum((e.amount for e in expenses), ZERO)
+    total_cash_in = (sum((x.amount_received for x in payments), ZERO)
+                     + sum((i.amount for i in injections), ZERO) + total_processing_fees)
+    total_cash_out = sum((l.cash_disbursed for l in disbursements), ZERO) + total_expenses
+
+    def row(**kw):
+        base = {"loan": None, "client": None, "cash_in": ZERO, "cash_out": ZERO,
+                "processing_fee": ZERO, "principal": ZERO, "interest": ZERO, "penalty": ZERO}
+        base.update(kw)
+        return base
 
     ledger = []
     for pm in payments:
-        ledger.append({
-            "date": pm.payment_date, "time": pm.created_at, "type": "Payment", "client": pm.client,
-            "cash_in": pm.amount_received, "cash_out": Decimal("0"),
-            "description": f"Payment received ({pm.get_payment_method_display()})",
-            "sort_order": 1,
-        })
-    for l in disbursements:
-        loan_sequence = len(ledger)
-        ledger.append({
-            "date": l.disbursement_date, "time": l.created_at, "type": "Disbursement", "client": l.client,
-            "cash_in": Decimal("0"), "cash_out": l.cash_disbursed,
-            "description": "Loan disbursed", "sort_order": loan_sequence,
-        })
-        if l.effective_processing_fee:
-            ledger.append({
-                "date": l.disbursement_date, "time": l.created_at, "type": "Processing Fee", "client": l.client,
-                "cash_in": l.effective_processing_fee, "cash_out": Decimal("0"),
-                "description": "Processing fee collected", "sort_order": loan_sequence + 1,
-            })
+        ledger.append(row(
+            date=pm.payment_date, time=pm.created_at, type="Payment", loan=pm.loan, client=pm.client,
+            cash_in=pm.amount_received, principal=pm.principal_paid, interest=pm.interest_paid,
+            penalty=pm.penalty_paid, sort_order=1,
+            description=f"Payment received ({pm.get_payment_method_display()})"))
+    for seq, l in enumerate(disbursements):
+        if l.cash_disbursed:
+            ledger.append(row(
+                date=l.disbursement_date, time=l.created_at, type="Disbursement", loan=l, client=l.client,
+                cash_out=l.cash_disbursed, principal=l.principal_amount, sort_order=3 + seq * 2,
+                description="Principal disbursed to client"))
+        fee = l.effective_processing_fee
+        if fee:
+            ledger.append(row(
+                date=l.disbursement_date, time=l.created_at, type="Processing Fee", loan=l, client=l.client,
+                cash_in=fee, sort_order=4 + seq * 2, description="Processing fee collected"))
     for e in expenses:
         category = e.expense_type.name if e.expense_type else (e.category.name if e.category else "Expense")
-        ledger.append({
-            "date": e.expense_date, "time": e.created_at, "type": "Expense", "client": None,
-            "cash_in": Decimal("0"), "cash_out": e.amount,
-            "description": category + (f" — {e.vendor}" if e.vendor else ""),
-            "sort_order": 2,
-        })
-    for injection in injections:
-        ledger.append({
-            "date": injection.injected_date, "time": injection.created_at, "type": "Capital Injection", "client": None,
-            "cash_in": injection.amount, "cash_out": Decimal("0"),
-            "description": f"Capital injection from {injection.source}", "sort_order": 0,
-        })
+        ledger.append(row(
+            date=e.expense_date, time=e.created_at, type="Expense", cash_out=e.amount, sort_order=2,
+            description=category + (f" — {e.vendor}" if e.vendor else "")))
+    for i in injections:
+        ledger.append(row(
+            date=i.injected_date, time=i.created_at, type="Capital Injection", cash_in=i.amount,
+            sort_order=0, description=f"Capital injection from {i.source}"))
+
     if sort_by == "cash_in":
-        ledger.sort(key=lambda row: (-row["cash_in"], row["date"], row["sort_order"]))
+        ledger.sort(key=lambda r: (-r["cash_in"], r["date"], r["sort_order"]))
     elif sort_by == "cash_out":
-        ledger.sort(key=lambda row: (-row["cash_out"], row["date"], row["sort_order"]))
+        ledger.sort(key=lambda r: (-r["cash_out"], r["date"], r["sort_order"]))
     else:
-        ledger.sort(key=lambda row: (row["date"], row["sort_order"], row["time"], row["type"]))
+        ledger.sort(key=lambda r: (r["date"], r["sort_order"], r["time"], r["type"]))
 
-    body_rows = [
-        [
-            p(row["date"].isoformat()), p(row["time"].strftime("%H:%M:%S")), p(row["type"]),
-            p(row["client"].full_name if row["client"] else "—"),
-            p(row["description"]), p(_ugx(row["cash_in"])), p(_ugx(row["cash_out"])),
-        ]
-        for row in ledger
-    ]
-    totals_row = [p(""), p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_cash_in)}</b>"), p(f"<b>{_ugx(total_cash_out)}</b>")]
-
-    return build_report_pdf(
-        request,
-        filename=f"CashFlow-{today}.pdf",
-        title="Cash In / Cash Out Ledger",
-        subtitle=f"Period: {date_from} to {date_to} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=[{
-            "heading": None,
-            "head_row": ["Date", "Time", "Type", "Client / Description", "Description", "Cash In", "Cash Out"],
-            "col_widths": [24*mm, 18*mm, 30*mm, 55*mm, 70*mm, 35*mm, 35*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
-    )
+    return {
+        "date_from": date_from, "date_to": date_to, "ledger": ledger, "sort_by": sort_by,
+        "total_cash_in": total_cash_in, "total_cash_out": total_cash_out,
+        "total_processing_fees": total_processing_fees, "total_expenses": total_expenses,
+        "total_principal": sum((x.principal_paid for x in payments), ZERO),
+        "total_interest": sum((x.interest_paid for x in payments), ZERO),
+        "total_penalties": sum((x.penalty_paid for x in payments), ZERO),
+        "payment_count": len(payments), "disbursement_count": len(disbursements),
+        "expense_count": len(expenses),
+    }
 
 
-# ---------------------------------------------------------------------------
-# Disbursements
-# ---------------------------------------------------------------------------
-@_require_manager
-def disbursements_download(request):
-    today      = date.today()
-    date_from  = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to    = request.GET.get("date_to",   today.isoformat())
-    product_id = request.GET.get("product", "")
-
-    qs = Loan.objects.filter(
-        disbursement_date__gte=date_from, disbursement_date__lte=date_to,
-        status__in=["ACTIVE", "COMPLETED", "DEFAULTED", "WRITTEN_OFF", "RESTRUCTURED"],
-    ).select_related("client", "product", "applied_by").order_by("-disbursement_date")
-    if product_id:
-        qs = qs.filter(product_id=product_id)
-
-    total_disbursed    = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_interest_exp = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
-    total_fees         = qs.aggregate(t=Sum("processing_fee"))["t"] or Decimal("0")
-
-    body_rows = [
-        [
-            p(l.loan_number), p(l.client.full_name), p(l.product.name),
-            p(l.applied_by.get_full_name() if l.applied_by else "—"),
-            p(_ugx(l.principal_amount)), p(_ugx(l.processing_fee)),
-            p(l.disbursement_date.isoformat() if l.disbursement_date else "—"),
-        ]
-        for l in qs
-    ]
-    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_disbursed)}</b>"), p(f"<b>{_ugx(total_fees)}</b>"), p("")]
-
-    return build_report_pdf(
-        request,
-        filename=f"Disbursements-{today}.pdf",
-        title="Disbursements Report",
-        subtitle=f"Period: {date_from} to {date_to} | Total Interest Expected: {_ugx(total_interest_exp)} | "
-                  f"Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=[{
-            "heading": None,
-            "head_row": ["Loan #", "Client", "Product", "Loan Officer", "Principal", "Fees", "Disbursed"],
-            "col_widths": [24*mm, 50*mm, 35*mm, 40*mm, 32*mm, 28*mm, 28*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
-    )
-
-
-# ---------------------------------------------------------------------------
-# Repayments
-# ---------------------------------------------------------------------------
-@_require_manager
-def repayments_download(request):
-    today     = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to   = request.GET.get("date_to",   today.isoformat())
-    method    = request.GET.get("method", "")
-
-    qs = Payment.objects.filter(
-        payment_date__gte=date_from, payment_date__lte=date_to, status="ALLOCATED",
-    ).select_related("loan__client", "loan__product", "recorded_by").order_by("-payment_date")
-    if method:
-        qs = qs.filter(payment_method=method)
-
-    total_received  = qs.aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
-    total_principal = qs.aggregate(t=Sum("principal_paid"))["t"] or Decimal("0")
-    total_interest  = qs.aggregate(t=Sum("interest_paid"))["t"] or Decimal("0")
-    total_penalty   = qs.aggregate(t=Sum("penalty_paid"))["t"] or Decimal("0")
-
-    body_rows = [
-        [
-            p(pm.payment_date.isoformat()), p(pm.loan.loan_number), p(pm.loan.client.full_name),
-            p(pm.get_payment_method_display()), p(_ugx(pm.amount_received)),
-            p(_ugx(pm.principal_paid)), p(_ugx(pm.interest_paid)), p(_ugx(pm.penalty_paid)),
-        ]
-        for pm in qs
-    ]
-    totals_row = [
-        p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_received)}</b>"),
-        p(f"<b>{_ugx(total_principal)}</b>"), p(f"<b>{_ugx(total_interest)}</b>"), p(f"<b>{_ugx(total_penalty)}</b>"),
-    ]
-
-    return build_report_pdf(
-        request,
-        filename=f"Repayments-{today}.pdf",
-        title="Repayments Report",
-        subtitle=f"Period: {date_from} to {date_to} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=[{
-            "heading": None,
-            "head_row": ["Date", "Loan #", "Client", "Method", "Received", "Principal", "Interest", "Penalty"],
-            "col_widths": [22*mm, 22*mm, 45*mm, 25*mm, 28*mm, 28*mm, 25*mm, 25*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
-    )
-
-
-# ---------------------------------------------------------------------------
-# Defaulted Loans
-# ---------------------------------------------------------------------------
-@_require_manager
-def defaulted_download(request):
-    today = date.today()
-
-    qs = Loan.objects.filter(
-        status__in=["DEFAULTED", "WRITTEN_OFF"],
-    ).select_related("client", "product").order_by("-updated_at")
-
-    par90 = Loan.objects.filter(status="ACTIVE", par_category="PAR90").select_related("client", "product")
-
-    total_defaulted   = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_outstanding = qs.aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("0")
-
-    defaulted_rows = [
-        [p(l.loan_number), p(l.client.full_name), p(l.product.name), p(l.get_status_display()),
-         p(_ugx(l.principal_amount)), p(_ugx(l.outstanding_balance))]
-        for l in qs
-    ]
-    defaulted_totals = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_defaulted)}</b>"), p(f"<b>{_ugx(total_outstanding)}</b>")]
-
-    par90_rows = [
-        [p(l.loan_number), p(l.client.full_name), p(l.product.name), p(_ugx(l.outstanding_balance))]
-        for l in par90
-    ]
-
-    return build_report_pdf(
-        request,
-        filename=f"Defaulted-{today}.pdf",
-        title="Defaulted & Written-Off Loans",
-        subtitle=f"As at {today:%d %b %Y} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=[
-            {
-                "heading": "Defaulted / Written Off Loans",
-                "head_row": ["Loan #", "Client", "Product", "Status", "Principal", "Outstanding"],
-                "col_widths": [24*mm, 55*mm, 35*mm, 30*mm, 35*mm, 35*mm],
-                "body_rows": defaulted_rows,
-                "totals_row": defaulted_totals,
-            },
-            {
-                "heading": "Active Loans 90+ Days Overdue (PAR90)",
-                "head_row": ["Loan #", "Client", "Product", "Outstanding"],
-                "col_widths": [24*mm, 70*mm, 45*mm, 35*mm],
-                "body_rows": par90_rows,
-            },
-        ],
-    )
-
-
-# ---------------------------------------------------------------------------
-# Closed (Fully Repaid) Loans
-# ---------------------------------------------------------------------------
-@_require_manager
-def closed_loans_download(request):
-    today      = date.today()
-    date_from  = request.GET.get("date_from", "")
-    date_to    = request.GET.get("date_to",   "")
-    product_id = request.GET.get("product", "")
-
-    qs = Loan.objects.filter(status="COMPLETED").select_related("client", "product").order_by("-completion_date")
-    if date_from:
-        qs = qs.filter(completion_date__gte=date_from)
-    if date_to:
-        qs = qs.filter(completion_date__lte=date_to)
-    if product_id:
-        qs = qs.filter(product_id=product_id)
-
-    total_principal = qs.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-    total_interest  = qs.aggregate(t=Sum("total_interest"))["t"] or Decimal("0")
-    total_collected = qs.aggregate(t=Sum("total_paid"))["t"] or Decimal("0")
-
-    body_rows = [
-        [p(l.loan_number), p(l.client.full_name), p(l.product.name),
-         p(l.completion_date.isoformat() if l.completion_date else "—"),
-         p(_ugx(l.principal_amount)), p(_ugx(l.total_interest)), p(_ugx(l.total_paid))]
-        for l in qs
-    ]
-    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(total_principal)}</b>"),
-                  p(f"<b>{_ugx(total_interest)}</b>"), p(f"<b>{_ugx(total_collected)}</b>")]
-
-    return build_report_pdf(
-        request,
-        filename=f"ClosedLoans-{today}.pdf",
-        title="Closed (Fully Repaid) Loans",
-        subtitle=f"Period: {date_from or 'Any'} to {date_to or 'Any'} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=[{
-            "heading": None,
-            "head_row": ["Loan #", "Client", "Product", "Completed", "Principal", "Interest Earned", "Total Collected"],
-            "col_widths": [22*mm, 45*mm, 30*mm, 25*mm, 30*mm, 33*mm, 33*mm],
-            "body_rows": body_rows,
-            "totals_row": totals_row,
-        }],
-    )
-
-
-# ---------------------------------------------------------------------------
-# Portfolio at Risk (PAR)
-# ---------------------------------------------------------------------------
-@_require_manager
-def par_download(request):
-    today = date.today()
-
-    def _par_loans(days_min, days_max=None):
-        qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
-        qs = qs.filter(
-            schedule__due_date__lt=today,
-            schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
-        ).distinct()
-        result = []
-        for loan in qs.select_related("client", "product"):
-            oldest = loan.schedule.filter(
-                due_date__lt=today, status__in=["PENDING", "OVERDUE", "PARTIAL"],
-            ).order_by("due_date").first()
-            if not oldest:
-                continue
-            days = (today - oldest.due_date).days
-            if days >= days_min and (days_max is None or days < days_max):
-                overdue_amt = loan.schedule.filter(
-                    due_date__lt=today, status__in=["PENDING", "OVERDUE", "PARTIAL"],
-                ).aggregate(t=Sum("total_payment"))["t"] or Decimal("0")
-                result.append({"loan": loan, "days_overdue": days, "overdue_amount": overdue_amt})
-        return result
-
-    buckets = [
-        ("PAR1 — 1 to 30 Days Overdue",  _par_loans(1, 31)),
-        ("PAR30 — 31 to 60 Days Overdue", _par_loans(31, 61)),
-        ("PAR60 — 61 to 90 Days Overdue", _par_loans(61, 91)),
-        ("PAR90 — 90+ Days Overdue",      _par_loans(91)),
-    ]
-
-    active_portfolio = Loan.objects.filter(
-        status__in=["ACTIVE", "RESTRUCTURED"]
-    ).aggregate(t=Sum("outstanding_balance"))["t"] or Decimal("1")
-
-    sections = []
-    for label, rows in buckets:
-        bucket_total = sum(r["overdue_amount"] for r in rows)
-        pct = round(float(bucket_total) / float(active_portfolio) * 100, 2) if active_portfolio else 0
-        body_rows = [
-            [p(r["loan"].loan_number), p(r["loan"].client.full_name), p(r["loan"].product.name),
-             p(r["days_overdue"]), p(_ugx(r["overdue_amount"]))]
-            for r in rows
-        ]
-        sections.append({
-            "heading": f"{label}  —  {_ugx(bucket_total)}  ({pct}% of portfolio)",
-            "head_row": ["Loan #", "Client", "Product", "Days Overdue", "Amount"],
-            "col_widths": [24*mm, 55*mm, 35*mm, 30*mm, 42*mm],
-            "body_rows": body_rows,
-        })
-
-    return build_report_pdf(
-        request,
-        filename=f"PAR-{today}.pdf",
-        title="Portfolio at Risk (PAR)",
-        subtitle=f"As at {today:%d %b %Y} | Active Portfolio: {_ugx(active_portfolio)} | "
-                  f"Generated: {datetime.now():%d %b %Y %H:%M}",
-        landscape=True,
-        sections=sections,
-    )
-
-
-# ---------------------------------------------------------------------------
-# Client Account Statement
-# ---------------------------------------------------------------------------
-@_require_manager
-def client_statement_download(request):
-    client_id = request.GET.get("client", "")
-    client = get_object_or_404(Client, pk=client_id) if client_id else None
-    today = date.today()
-
-    if not client:
-        # Nothing selected — return a near-empty PDF rather than error out.
-        return build_report_pdf(
-            request,
-            filename=f"ClientStatement-{today}.pdf",
-            title="Client Account Statement",
-            subtitle="No client selected.",
-            sections=[{"heading": None, "head_row": ["—"], "col_widths": [170*mm], "body_rows": []}],
-        )
-
-    loans = Loan.objects.filter(client=client).select_related("product").order_by("-application_date")
-    payments = Payment.objects.filter(client=client).select_related("loan").order_by("-payment_date")
-
-    loan_rows = [
-        [p(l.loan_number), p(l.product.name), p(_ugx(l.principal_amount)),
-         p(_ugx(l.outstanding_balance)), p(l.get_status_display())]
-        for l in loans
-    ]
-    payment_rows = [
-        [p(pm.payment_date.isoformat()), p(pm.loan.loan_number), p(_ugx(pm.amount_received)),
-         p(pm.get_payment_method_display())]
-        for pm in payments
-    ]
-
-    return build_report_pdf(
-        request,
-        filename=f"ClientStatement-{client.full_name.replace(' ', '')}-{today}.pdf",
-        title=f"Client Account Statement — {client.full_name}",
-        subtitle=f"Phone: {client.phone_primary} | Generated: {datetime.now():%d %b %Y %H:%M}",
-        sections=[
-            {
-                "heading": "Loans",
-                "head_row": ["Loan #", "Product", "Principal", "Outstanding", "Status"],
-                "col_widths": [26*mm, 40*mm, 35*mm, 35*mm, 34*mm],
-                "body_rows": loan_rows,
-            },
-            {
-                "heading": "Payment History",
-                "head_row": ["Date", "Loan #", "Amount", "Method"],
-                "col_widths": [35*mm, 35*mm, 50*mm, 50*mm],
-                "body_rows": payment_rows,
-            },
-        ],
-    )
-
-
-# ---------------------------------------------------------------------------
-# Staff Performance
-# ---------------------------------------------------------------------------
-@_require_manager
-def staff_performance_download(request):
-    today = date.today()
-    date_from = request.GET.get("date_from", today.replace(day=1).isoformat())
-    date_to = request.GET.get("date_to", today.isoformat())
+def _staff_rows(request, date_from, date_to):
+    today = _today()
     branch_id = _effective_branch_id(request)
     role = request.GET.get("role", "")
     staff_id = request.GET.get("staff", "")
@@ -1439,75 +411,550 @@ def staff_performance_download(request):
     if staff_id:
         staff_users = staff_users.filter(pk=staff_id)
 
+    def scoped(qs):
+        return qs.filter(branch_id=branch_id) if branch_id else qs
+
     rows = []
     for user in staff_users:
-        disbursed_loans = Loan.objects.filter(
-            disbursement_date__gte=date_from, disbursement_date__lte=date_to, applied_by=user,
-            status__in=[Loan.Status.ACTIVE, Loan.Status.COMPLETED, Loan.Status.DEFAULTED,
-                        Loan.Status.RESTRUCTURED, Loan.Status.WRITTEN_OFF],
-        )
+        disbursed = scoped(Loan.objects.filter(
+            disbursement_date__gte=date_from, disbursement_date__lte=date_to,
+            applied_by=user, status__in=DISBURSED))
+        collected = Payment.objects.cash_receipts().filter(
+            payment_date__gte=date_from, payment_date__lte=date_to,
+            recorded_by=user, status="ALLOCATED")
         if branch_id:
-            disbursed_loans = disbursed_loans.filter(branch_id=branch_id)
-        disbursed_amount = disbursed_loans.aggregate(t=Sum("principal_amount"))["t"] or Decimal("0")
-        disbursed_count = disbursed_loans.count()
+            collected = collected.filter(loan__branch_id=branch_id)
+        overdue = scoped(Loan.objects.filter(
+            applied_by=user, status__in=LIVE_LOAN,
+            schedule__due_date__lt=today, schedule__status__in=OPEN_SCHEDULE,
+        )).distinct()
+        overdue_count = overdue.count()
+        overdue_amount = sum((l.outstanding_balance for l in overdue), ZERO)
+        total_loans = scoped(Loan.objects.filter(applied_by=user)).count()
+        defaulted = scoped(Loan.objects.filter(
+            applied_by=user, status__in=["DEFAULTED", "WRITTEN_OFF"])).count()
+        disbursed_count = disbursed.count()
 
-        collected_payments = Payment.objects.filter(
-            payment_date__gte=date_from, payment_date__lte=date_to, recorded_by=user, status="ALLOCATED",
-        )
-        if branch_id:
-            collected_payments = collected_payments.filter(loan__branch_id=branch_id)
-        collected_amount = collected_payments.aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
-
-        overdue_loans = Loan.objects.filter(
-            applied_by=user, status__in=[Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED],
-            schedule__due_date__lt=today, schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
-        ).distinct()
-        if branch_id:
-            overdue_loans = overdue_loans.filter(branch_id=branch_id)
-        overdue_count = overdue_loans.count()
-
-        defaulted_loans = Loan.objects.filter(
-            applied_by=user, status__in=[Loan.Status.DEFAULTED, Loan.Status.WRITTEN_OFF],
-        )
-        if branch_id:
-            defaulted_loans = defaulted_loans.filter(branch_id=branch_id)
-        defaulted_count = defaulted_loans.count()
-
-        quality_score = Decimal("100")
+        quality = Decimal("100")
         if disbursed_count:
-            quality_score -= Decimal("5") * min(defaulted_count, 10)
+            quality -= 5 * min(defaulted, 10)
         if overdue_count:
-            quality_score -= Decimal("2") * min(overdue_count, 10)
-        quality_score = max(Decimal("0"), quality_score)
+            quality -= 2 * min(overdue_count, 10)
+        quality = max(ZERO, quality)
 
         rows.append({
-            "user": user, "disbursed_amount": disbursed_amount, "disbursed_count": disbursed_count,
-            "collected_amount": collected_amount, "overdue_count": overdue_count,
-            "defaulted_count": defaulted_count, "quality_score": quality_score,
+            "user": user,
+            "disbursed_amount": _sum(disbursed, "principal_amount"),
+            "disbursed_count": disbursed_count,
+            "collected_amount": _sum(collected, "amount_received"),
+            "collected_count": collected.count(),
+            "overdue_count": overdue_count, "overdue_amount": overdue_amount,
+            "total_loans": total_loans,
+            "defaulted_loans": defaulted, "defaulted_count": defaulted,
+            "quality_score": quality, "performance_percentage": quality,
         })
+    rows.sort(key=lambda r: (-r["disbursed_amount"], r["user"].last_name))
+    return rows
 
-    rows.sort(key=lambda item: (-item["disbursed_amount"], item["user"].last_name))
+
+# ---------------------------------------------------------------------------
+# Index
+# ---------------------------------------------------------------------------
+@_require_manager
+def report_index(request):
+    return render(request, "reports/index.html")
+
+
+# ---------------------------------------------------------------------------
+# Loan book
+# ---------------------------------------------------------------------------
+@_require_manager
+def loan_book(request):
+    loans = list(_loan_book_qs(request))
+    return render(request, "reports/loan_book.html", {
+        "loans": loans,
+        "total_principal": sum((l.principal_amount for l in loans), ZERO),
+        "total_outstanding": sum((l.outstanding_balance for l in loans), ZERO),
+        "total_paid": sum((l.total_paid for l in loans), ZERO),
+        "products": LoanProduct.objects.filter(is_active=True),
+        "date_from": request.GET.get("date_from", ""),
+        "date_to": request.GET.get("date_to", ""),
+        "product_id": request.GET.get("product", ""),
+    })
+
+
+@_require_manager
+def loan_book_download(request):
+    loans = list(_loan_book_qs(request))
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    period = f"{date_from or 'Start'} to {date_to or 'End'}" if (date_from or date_to) else "All Loans"
 
     body_rows = [
-        [
-            p(r["user"].get_full_name()), p(r["disbursed_count"]), p(_ugx(r["disbursed_amount"])),
-            p(_ugx(r["collected_amount"])), p(r["overdue_count"]), p(r["defaulted_count"]),
-            p(f"{r['quality_score']}%"),
-        ]
-        for r in rows
+        [p(l.loan_number), p(l.client.full_name), p(l.product.name), p(_ugx(l.principal_amount)),
+         p(_ugx(l.outstanding_balance)), p(_ugx(l.total_paid)), p(l.get_status_display())]
+        for l in loans
     ]
-
+    totals_row = [
+        p(""), p(""), p("<b>TOTAL</b>", CELL_BOLD),
+        p(f"<b>{_ugx(sum((l.principal_amount for l in loans), ZERO))}</b>", CELL_BOLD),
+        p(f"<b>{_ugx(sum((l.outstanding_balance for l in loans), ZERO))}</b>", CELL_BOLD),
+        p(f"<b>{_ugx(sum((l.total_paid for l in loans), ZERO))}</b>", CELL_BOLD), p(""),
+    ]
     return build_report_pdf(
-        request,
-        filename=f"StaffPerformance-{today}.pdf",
-        title="Staff Performance Report",
-        subtitle=f"Period: {date_from} to {date_to} | Generated: {datetime.now():%d %b %Y %H:%M}",
+        request, filename=f"LoanBook-{_today()}.pdf", title="Loan Book Report",
+        subtitle=f"Period: {period} | {len(loans)} loans | Generated: {_stamp()}",
         landscape=True,
         sections=[{
             "heading": None,
-            "head_row": ["Staff", "Loans Disbursed", "Amount Disbursed", "Amount Collected",
-                         "Overdue Loans", "Defaulted", "Quality Score"],
-            "col_widths": [40*mm, 25*mm, 35*mm, 35*mm, 25*mm, 22*mm, 25*mm],
-            "body_rows": body_rows,
+            "head_row": ["Loan #", "Client", "Product", "Principal", "Outstanding", "Paid", "Status"],
+            "col_widths": [28*mm, 60*mm, 40*mm, 34*mm, 34*mm, 34*mm, 30*mm],
+            "body_rows": body_rows, "totals_row": totals_row,
         }],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Collections by cashier
+# ---------------------------------------------------------------------------
+@_require_manager
+def collections_report(request):
+    return render(request, "reports/collections.html", _collections_data(request))
+
+
+@_require_manager
+def collections_download(request):
+    d = _collections_data(request)
+    body_rows = [
+        [p(r["user"].get_full_name() if r["user"] else "Unknown"), p(r["count"]), p(_ugx(r["total"]))]
+        for r in d["cashier_totals"]
+    ]
+    totals_row = [p("<b>TOTAL</b>", CELL_BOLD), p(f"<b>{d['payment_count']}</b>", CELL_BOLD),
+                  p(f"<b>{_ugx(d['grand_total'])}</b>", CELL_BOLD)]
+    return build_report_pdf(
+        request, filename=f"Collections-{_today()}.pdf", title="Collections by Cashier",
+        subtitle=f"Period: {d['date_from']} to {d['date_to']} | Generated: {_stamp()}",
+        sections=[{"heading": None, "head_row": ["Cashier", "Payments", "Total Collected"],
+                   "col_widths": [90*mm, 40*mm, 50*mm], "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Overdue installments
+# ---------------------------------------------------------------------------
+@_require_manager
+def overdue_report(request):
+    return render(request, "reports/overdue.html", _overdue_data(request))
+
+
+@_require_manager
+def overdue_download(request):
+    d = _overdue_data(request)
+    body_rows = [
+        [p(r["entry"].loan.loan_number), p(r["entry"].loan.client.full_name),
+         p(r["entry"].due_date.isoformat()), p(r["days_overdue"]), p(_ugx(r["overdue_amount"]))]
+        for r in d["rows"]
+    ]
+    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(d['total_overdue'])}</b>")]
+    return build_report_pdf(
+        request, filename=f"Overdue-{d['today']}.pdf", title="Overdue Installments Report",
+        subtitle=f"As at {d['today']:%d %b %Y} | Generated: {_stamp()}",
+        sections=[{"heading": None,
+                   "head_row": ["Loan #", "Client", "Due Date", "Days Overdue", "Amount Overdue"],
+                   "col_widths": [28*mm, 55*mm, 28*mm, 28*mm, 41*mm],
+                   "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Monthly income statement
+# ---------------------------------------------------------------------------
+@_require_manager
+def income_statement(request):
+    return render(request, "reports/income_statement.html", _income_data(request))
+
+
+@_require_manager
+def income_download(request):
+    d = _income_data(request)
+    body_rows = [
+        [p("Interest Income"), p(_ugx(d["total_interest"]))],
+        [p("Penalty Income"), p(_ugx(d["total_penalties"]))],
+        [p("Processing Fee Income"), p(_ugx(d["total_fees"]))],
+        [p("<b>Total Income</b>", CELL_BOLD), p(f"<b>{_ugx(d['total_income'])}</b>", CELL_BOLD)],
+        [p("Operating Expenses (approved)"), p(f"- {_ugx(d['total_expenses'])}")],
+        [p("<b>Net Income</b>", CELL_BOLD), p(f"<b>{_ugx(d['net_income'])}</b>", CELL_BOLD)],
+        [p("Principal Recovered"), p(_ugx(d["total_principal"]))],
+        [p("Cash Received (excl. credit transfers)"), p(_ugx(d["total_received"]))],
+        [p("Client credit applied / (held) — reconciles cash to allocations"), p(_ugx(d["credit_adjustment"]))],
+        [p("Loans Disbursed (count)"), p(d["loan_count"])],
+        [p("Total Principal Disbursed"), p(_ugx(d["total_disbursed"]))],
+    ]
+    return build_report_pdf(
+        request, filename=f"IncomeStatement-{d['month_str']}.pdf", title="Monthly Income Statement",
+        subtitle=f"Period: {d['period_start']:%d %b %Y} – {d['period_end']:%d %b %Y} | Generated: {_stamp()}",
+        sections=[{"heading": None, "head_row": ["Item", "Amount"],
+                   "col_widths": [110*mm, 60*mm], "body_rows": body_rows}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cash in / cash out
+# ---------------------------------------------------------------------------
+@_require_manager
+def cash_flow_report(request):
+    return render(request, "reports/cash_flow.html", _cash_flow_data(request))
+
+
+@_require_manager
+def cash_flow_download(request):
+    d = _cash_flow_data(request)
+    body_rows = [
+        [p(r["date"].isoformat()), p(timezone.localtime(r["time"]).strftime("%H:%M:%S")), p(r["type"]),
+         p(r["client"].full_name if r["client"] else "—"), p(r["description"]),
+         p(_ugx(r["cash_in"])), p(_ugx(r["cash_out"]))]
+        for r in d["ledger"]
+    ]
+    totals_row = [p(""), p(""), p(""), p(""), p("<b>TOTAL</b>"),
+                  p(f"<b>{_ugx(d['total_cash_in'])}</b>"), p(f"<b>{_ugx(d['total_cash_out'])}</b>")]
+    return build_report_pdf(
+        request, filename=f"CashFlow-{_today()}.pdf", title="Cash In / Cash Out Ledger",
+        subtitle=f"Period: {d['date_from']} to {d['date_to']} | Generated: {_stamp()}",
+        landscape=True,
+        sections=[{"heading": None,
+                   "head_row": ["Date", "Time", "Type", "Client", "Description", "Cash In", "Cash Out"],
+                   "col_widths": [24*mm, 18*mm, 30*mm, 55*mm, 70*mm, 35*mm, 35*mm],
+                   "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Disbursements
+# ---------------------------------------------------------------------------
+def _disbursements_data(request):
+    date_from, date_to = _period(request)
+    product_id = request.GET.get("product", "")
+    loans = list(_disbursed_qs(request, date_from, date_to, product_id)
+                 .select_related("client", "product", "applied_by", "reviewed_by")
+                 .order_by("-disbursement_date"))
+    return {
+        "loans": loans,
+        "total_disbursed": sum((l.principal_amount for l in loans), ZERO),
+        "total_interest_exp": sum((l.total_interest for l in loans), ZERO),
+        "total_fees": _fees(loans),
+        "loan_count": len(loans),
+        "product_id": product_id, "date_from": date_from, "date_to": date_to,
+    }
+
+
+@_require_manager
+def disbursements_report(request):
+    d = _disbursements_data(request)
+    d["products"] = LoanProduct.objects.filter(is_active=True)
+    return render(request, "reports/disbursements.html", d)
+
+
+@_require_manager
+def disbursements_download(request):
+    d = _disbursements_data(request)
+    body_rows = [
+        [p(l.loan_number), p(l.client.full_name), p(l.product.name),
+         p(l.applied_by.get_full_name() if l.applied_by else "—"),
+         p(_ugx(l.principal_amount)), p(_ugx(l.effective_processing_fee)),
+         p(l.disbursement_date.isoformat() if l.disbursement_date else "—")]
+        for l in d["loans"]
+    ]
+    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(d['total_disbursed'])}</b>"),
+                  p(f"<b>{_ugx(d['total_fees'])}</b>"), p("")]
+    return build_report_pdf(
+        request, filename=f"Disbursements-{_today()}.pdf", title="Disbursements Report",
+        subtitle=f"Period: {d['date_from']} to {d['date_to']} | Total Interest Expected: "
+                 f"{_ugx(d['total_interest_exp'])} | Generated: {_stamp()}",
+        landscape=True,
+        sections=[{"heading": None,
+                   "head_row": ["Loan #", "Client", "Product", "Loan Officer", "Principal", "Fees", "Disbursed"],
+                   "col_widths": [24*mm, 50*mm, 35*mm, 40*mm, 32*mm, 28*mm, 28*mm],
+                   "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Repayments
+# ---------------------------------------------------------------------------
+def _repayments_data(request):
+    date_from, date_to = _period(request)
+    method = request.GET.get("method", "")
+    qs = (_payments_qs(request, date_from, date_to, method)
+          .select_related("loan__client", "loan__product", "recorded_by").order_by("-payment_date"))
+    return {
+        "payments": qs,
+        "total_received": _sum(qs.cash_receipts(), "amount_received"),
+        "total_principal": _sum(qs, "principal_paid"),
+        "total_interest": _sum(qs, "interest_paid"),
+        "total_penalty": _sum(qs, "penalty_paid"),
+        "payment_count": qs.count(),
+        "date_from": date_from, "date_to": date_to, "method_filter": method,
+    }
+
+
+@_require_manager
+def repayments_report(request):
+    d = _repayments_data(request)
+    d["methods"] = Payment.PaymentMethod.choices
+    return render(request, "reports/repayments.html", d)
+
+
+@_require_manager
+def repayments_download(request):
+    d = _repayments_data(request)
+    body_rows = [
+        [p(pm.payment_date.isoformat()), p(pm.loan.loan_number), p(pm.loan.client.full_name),
+         p(pm.get_payment_method_display()), p(_ugx(pm.amount_received)),
+         p(_ugx(pm.principal_paid)), p(_ugx(pm.interest_paid)), p(_ugx(pm.penalty_paid))]
+        for pm in d["payments"]
+    ]
+    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(d['total_received'])}</b>"),
+                  p(f"<b>{_ugx(d['total_principal'])}</b>"), p(f"<b>{_ugx(d['total_interest'])}</b>"),
+                  p(f"<b>{_ugx(d['total_penalty'])}</b>")]
+    return build_report_pdf(
+        request, filename=f"Repayments-{_today()}.pdf", title="Repayments Report",
+        subtitle=f"Period: {d['date_from']} to {d['date_to']} | Cash total excludes internal credit "
+                 f"transfers | Generated: {_stamp()}",
+        landscape=True,
+        sections=[{"heading": None,
+                   "head_row": ["Date", "Loan #", "Client", "Method", "Received", "Principal", "Interest", "Penalty"],
+                   "col_widths": [22*mm, 22*mm, 45*mm, 25*mm, 28*mm, 28*mm, 25*mm, 25*mm],
+                   "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Defaulted / written-off
+# ---------------------------------------------------------------------------
+@_require_manager
+def defaulted_loans_report(request):
+    return render(request, "reports/defaulted.html", _defaulted_data(request))
+
+
+@_require_manager
+def defaulted_download(request):
+    d = _defaulted_data(request)
+    defaulted_rows = [
+        [p(l.loan_number), p(l.client.full_name), p(l.product.name), p(l.get_status_display()),
+         p(_ugx(l.principal_amount)),
+         p(_ugx(l.written_off_amount if l.status == "WRITTEN_OFF" else l.outstanding_balance))]
+        for l in d["loans"]
+    ]
+    defaulted_totals = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(d['total_defaulted'])}</b>"),
+                        p(f"<b>{_ugx(d['total_outstanding'] + d['total_written_off'])}</b>")]
+    par90_rows = [[p(l.loan_number), p(l.client.full_name), p(l.product.name), p(_ugx(l.outstanding_balance))]
+                  for l in d["par90_loans"]]
+    return build_report_pdf(
+        request, filename=f"Defaulted-{d['today']}.pdf", title="Defaulted & Written-Off Loans",
+        subtitle=f"As at {d['today']:%d %b %Y} | Generated: {_stamp()}", landscape=True,
+        sections=[
+            {"heading": "Defaulted / Written Off Loans (amount = outstanding, or amount written off)",
+             "head_row": ["Loan #", "Client", "Product", "Status", "Principal", "Outstanding / Written off"],
+             "col_widths": [24*mm, 55*mm, 35*mm, 30*mm, 35*mm, 45*mm],
+             "body_rows": defaulted_rows, "totals_row": defaulted_totals},
+            {"heading": "Active Loans Over 90 Days Overdue (PAR90)",
+             "head_row": ["Loan #", "Client", "Product", "Outstanding"],
+             "col_widths": [24*mm, 70*mm, 45*mm, 35*mm], "body_rows": par90_rows},
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Closed loans
+# ---------------------------------------------------------------------------
+def _closed_data(request):
+    qs = Loan.objects.filter(status="COMPLETED").select_related("client", "product").order_by("-completion_date")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    product_id = request.GET.get("product", "")
+    if date_from:
+        qs = qs.filter(completion_date__gte=date_from)
+    if date_to:
+        qs = qs.filter(completion_date__lte=date_to)
+    if product_id:
+        qs = qs.filter(product_id=product_id)
+    qs = _branch(qs, request)
+    return {
+        "loans": qs,
+        "total_principal": _sum(qs, "principal_amount"),
+        "total_interest": _sum(qs, "total_interest"),
+        "total_collected": _sum(qs, "total_paid"),
+        "loan_count": qs.count(),
+        "product_id": product_id, "date_from": date_from, "date_to": date_to,
+    }
+
+
+@_require_manager
+def closed_loans_report(request):
+    d = _closed_data(request)
+    d["products"] = LoanProduct.objects.filter(is_active=True)
+    return render(request, "reports/closed_loans.html", d)
+
+
+@_require_manager
+def closed_loans_download(request):
+    d = _closed_data(request)
+    body_rows = [
+        [p(l.loan_number), p(l.client.full_name), p(l.product.name),
+         p(l.completion_date.isoformat() if l.completion_date else "—"),
+         p(_ugx(l.principal_amount)), p(_ugx(l.total_interest)), p(_ugx(l.total_paid))]
+        for l in d["loans"]
+    ]
+    totals_row = [p(""), p(""), p(""), p("<b>TOTAL</b>"), p(f"<b>{_ugx(d['total_principal'])}</b>"),
+                  p(f"<b>{_ugx(d['total_interest'])}</b>"), p(f"<b>{_ugx(d['total_collected'])}</b>")]
+    return build_report_pdf(
+        request, filename=f"ClosedLoans-{_today()}.pdf", title="Closed (Fully Repaid) Loans",
+        subtitle=f"Period: {d['date_from'] or 'Any'} to {d['date_to'] or 'Any'} | Generated: {_stamp()}",
+        landscape=True,
+        sections=[{"heading": None,
+                   "head_row": ["Loan #", "Client", "Product", "Completed", "Principal", "Interest Earned", "Total Collected"],
+                   "col_widths": [22*mm, 45*mm, 30*mm, 25*mm, 30*mm, 33*mm, 33*mm],
+                   "body_rows": body_rows, "totals_row": totals_row}],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Portfolio at risk
+# ---------------------------------------------------------------------------
+@_require_manager
+def par_report(request):
+    d = _par_data(request)
+    ctx = {"active_portfolio": d["portfolio"], "today": d["today"], "par_data": []}
+    for b in d["buckets"]:
+        ctx[b["key"]] = b["rows"]
+        ctx[f"{b['key']}_total"] = b["at_risk"]      # outstanding balance at risk
+        ctx[f"{b['key']}_pct"] = b["pct"]
+        ctx["par_data"].append((b["rows"], b["rows"], b["label"], b["css"], b["at_risk"], b["pct"]))
+    return render(request, "reports/par.html", ctx)
+
+
+@_require_manager
+def par_download(request):
+    d = _par_data(request)
+    sections = []
+    for b in d["buckets"]:
+        sections.append({
+            "heading": f"{b['label']}  —  {_ugx(b['at_risk'])} outstanding at risk  ({b['pct']}% of portfolio)",
+            "head_row": ["Loan #", "Client", "Product", "Outstanding", "Overdue Amount", "Days Overdue"],
+            "col_widths": [24*mm, 55*mm, 35*mm, 35*mm, 35*mm, 25*mm],
+            "body_rows": [
+                [p(r["loan"].loan_number), p(r["loan"].client.full_name), p(r["loan"].product.name),
+                 p(_ugx(r["loan"].outstanding_balance)), p(_ugx(r["overdue_amount"])), p(r["days_overdue"])]
+                for r in b["rows"]
+            ],
+        })
+    return build_report_pdf(
+        request, filename=f"PAR-{d['today']}.pdf", title="Portfolio at Risk (PAR)",
+        subtitle=f"As at {d['today']:%d %b %Y} | Active Portfolio: {_ugx(d['portfolio'])} | Generated: {_stamp()}",
+        landscape=True, sections=sections,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Client statement
+# ---------------------------------------------------------------------------
+@_require_manager
+def client_statement(request):
+    """Per-client loan & payment statement."""
+    client_id = request.GET.get("client", "")
+    client = None
+    loans = []
+    payments = []
+
+    all_clients = scope_to_branch(Client.objects.filter(is_active=True), request.user).order_by("last_name", "first_name")
+
+    if client_id:
+        client = get_object_or_404(Client, pk=client_id)
+        if not can_access_branch_object(request.user, client):
+            messages.error(request, "That client belongs to a different branch.")
+            return redirect("reports:client_statement")
+        loans = Loan.objects.filter(client=client).select_related("product").order_by("-application_date")
+        payments = Payment.objects.filter(client=client, status="ALLOCATED").select_related("loan").order_by("-payment_date")
+
+    return render(request, "reports/client_statement.html", {
+        "all_clients": all_clients, "client": client, "loans": loans,
+        "payments": payments, "client_id": client_id,
+    })
+
+
+@_require_manager
+def client_statement_download(request):
+    client_id = request.GET.get("client", "")
+    client = get_object_or_404(Client, pk=client_id) if client_id else None
+    today = _today()
+
+    if client and not can_access_branch_object(request.user, client):
+        messages.error(request, "That client belongs to a different branch.")
+        return redirect("reports:client_statement")
+
+    if not client:
+        return build_report_pdf(
+            request, filename=f"ClientStatement-{today}.pdf", title="Client Account Statement",
+            subtitle="No client selected.",
+            sections=[{"heading": None, "head_row": ["—"], "col_widths": [170*mm], "body_rows": []}],
+        )
+
+    loans = Loan.objects.filter(client=client).select_related("product").order_by("-application_date")
+    payments = Payment.objects.filter(client=client, status="ALLOCATED").select_related("loan").order_by("-payment_date")
+
+    loan_rows = [[p(l.loan_number), p(l.product.name), p(_ugx(l.principal_amount)),
+                  p(_ugx(l.outstanding_balance)), p(l.get_status_display())] for l in loans]
+    payment_rows = [[p(pm.payment_date.isoformat()), p(pm.loan.loan_number), p(_ugx(pm.amount_received)),
+                     p(pm.get_payment_method_display())] for pm in payments]
+
+    return build_report_pdf(
+        request, filename=f"ClientStatement-{client.full_name.replace(' ', '')}-{today}.pdf",
+        title=f"Client Account Statement — {client.full_name}",
+        subtitle=f"Phone: {client.phone_primary} | Generated: {_stamp()}",
+        sections=[
+            {"heading": "Loans", "head_row": ["Loan #", "Product", "Principal", "Outstanding", "Status"],
+             "col_widths": [26*mm, 40*mm, 35*mm, 35*mm, 34*mm], "body_rows": loan_rows},
+            {"heading": "Payment History", "head_row": ["Date", "Loan #", "Amount", "Method"],
+             "col_widths": [35*mm, 35*mm, 50*mm, 50*mm], "body_rows": payment_rows},
+        ],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Staff performance
+# ---------------------------------------------------------------------------
+@_require_manager
+def staff_performance_report(request):
+    date_from, date_to = _period(request)
+    branch_id = _effective_branch_id(request)
+    rows = _staff_rows(request, date_from, date_to)
+    User = get_user_model()
+    return render(request, "reports/staff_performance.html", {
+        "rows": rows, "date_from": date_from, "date_to": date_to, "today": _today(),
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "selected_branch": str(branch_id) if branch_id and branch_id != -1 else "",
+        "roles": User.Role.choices, "selected_role": request.GET.get("role", ""),
+        "staff_members": User.objects.filter(is_active=True).order_by("last_name", "first_name"),
+        "selected_staff": request.GET.get("staff", ""),
+    })
+
+
+@_require_manager
+def staff_performance_download(request):
+    date_from, date_to = _period(request)
+    rows = _staff_rows(request, date_from, date_to)
+    body_rows = [
+        [p(r["user"].get_full_name()), p(r["disbursed_count"]), p(_ugx(r["disbursed_amount"])),
+         p(_ugx(r["collected_amount"])), p(r["overdue_count"]), p(r["defaulted_count"]),
+         p(f"{r['quality_score']}%")]
+        for r in rows
+    ]
+    return build_report_pdf(
+        request, filename=f"StaffPerformance-{_today()}.pdf", title="Staff Performance Report",
+        subtitle=f"Period: {date_from} to {date_to} | Generated: {_stamp()}", landscape=True,
+        sections=[{"heading": None,
+                   "head_row": ["Staff", "Loans Disbursed", "Amount Disbursed", "Amount Collected",
+                                "Overdue Loans", "Defaulted", "Quality Score"],
+                   "col_widths": [40*mm, 25*mm, 35*mm, 35*mm, 25*mm, 22*mm, 25*mm],
+                   "body_rows": body_rows}],
     )

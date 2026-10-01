@@ -23,7 +23,7 @@
   <div class="metric-card amber"><div class="metric-label">PAR1 (1–30 days)</div><div class="metric-value amber">{{ par1|length }}</div><div class="metric-sub">{{ par1_total|money }} — {{ par1_pct }}%</div></div>
   <div class="metric-card amber"><div class="metric-label">PAR30 (31–60 days)</div><div class="metric-value amber">{{ par30|length }}</div><div class="metric-sub">{{ par30_total|money }} — {{ par30_pct }}%</div></div>
   <div class="metric-card red"><div class="metric-label">PAR60 (61–90 days)</div><div class="metric-value red">{{ par60|length }}</div><div class="metric-sub">{{ par60_total|money }} — {{ par60_pct }}%</div></div>
-  <div class="metric-card red"><div class="metric-label">PAR90 (90+ days)</div><div class="metric-value red">{{ par90|length }}</div><div class="metric-sub">{{ par90_total|money }} — {{ par90_pct }}%</div></div>
+  <div class="metric-card red"><div class="metric-label">PAR90 (over 90 days)</div><div class="metric-value red">{{ par90|length }}</div><div class="metric-sub">{{ par90_total|money }} — {{ par90_pct }}%</div></div>
   <div class="metric-card teal"><div class="metric-label">Active Portfolio</div><div class="metric-value teal">{{ active_portfolio|floatformat:0|intcomma }}</div><div class="metric-sub">Outstanding balance</div></div>
 </div>
 
@@ -33,7 +33,7 @@
 <div class="card par-bucket {{ cls }}">
   <div class="card-header card-header-content">
     <div class="card-header-title card-title">{{ label }} — {{ rows|length }} loan{{ rows|length|pluralize }}</div>
-    <div class="text-sm text-muted">{{ total|money }} overdue &nbsp;|&nbsp; {{ pct }}% of portfolio</div>
+    <div class="text-sm text-muted">{{ total|money }} outstanding at risk &nbsp;|&nbsp; {{ pct }}% of portfolio</div>
   </div>
   <div class="card-body" style="padding:0;">
     <div class="table-wrap">

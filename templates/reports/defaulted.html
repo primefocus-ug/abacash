@@ -33,7 +33,7 @@
             <td>{{ loan.client.full_name }}<div class="text-sm text-muted">{{ loan.client.phone_primary }}</div></td>
             <td class="text-sm">{{ loan.product.name }}</td>
             <td class="mono">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
-            <td class="mono" style="color:var(--danger);">{{ loan.outstanding_balance|floatformat:0|intcomma }}</td>
+            <td class="mono" style="color:var(--danger);">{% if loan.status == "WRITTEN_OFF" %}{{ loan.written_off_amount|floatformat:0|intcomma }} <span class="text-sm text-muted">(written off)</span>{% else %}{{ loan.outstanding_balance|floatformat:0|intcomma }}{% endif %}</td>
             <td class="text-sm">{{ loan.disbursement_date|default:"—" }}</td>
             <td><span class="badge badge-red">{{ loan.get_status_display }}</span></td>
             <td class="text-sm" style="max-width:200px;white-space:normal;">{{ loan.write_off_reason|default:loan.rejection_reason|default:"—"|truncatechars:60 }}</td>

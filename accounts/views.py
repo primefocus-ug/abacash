@@ -201,7 +201,7 @@ def _cashier_dashboard(request, today):
     # Loans with payments due today
     due_today = scope_to_branch(LoanSchedule.objects.filter(
         due_date=today,
-        status__in=["PENDING", "OVERDUE"],
+        status__in=["PENDING", "OVERDUE", "PARTIAL"],
         loan__status__in=["ACTIVE", "RESTRUCTURED"],
     ), request.user, "loan__branch").select_related("loan__client").order_by("loan__client__last_name")[:20]
 
@@ -211,7 +211,7 @@ def _cashier_dashboard(request, today):
     ).select_related("loan__client").order_by("-created_at")[:10]
 
     # Today's collection total
-    collected_today = Payment.objects.filter(
+    collected_today = Payment.objects.cash_receipts().filter(
         recorded_by=request.user,
         payment_date=today,
         status="ALLOCATED",
@@ -241,7 +241,7 @@ def _manager_dashboard(request, today):
     # Overdue loans
     overdue_schedules = scope_to_branch(LoanSchedule.objects.filter(
         due_date__lt=today,
-        status__in=["PENDING", "OVERDUE"],
+        status__in=["PENDING", "OVERDUE", "PARTIAL"],
         loan__status__in=["ACTIVE", "RESTRUCTURED"],
     ), request.user, "loan__branch").select_related("loan__client").order_by("due_date")[:20]
 
@@ -251,7 +251,7 @@ def _manager_dashboard(request, today):
     total_outstanding  = active_loans.aggregate(total=Sum("outstanding_balance"))["total"] or 0
 
     month_start = today.replace(day=1)
-    collected_month = scope_to_branch(Payment.objects.filter(
+    collected_month = scope_to_branch(Payment.objects.cash_receipts().filter(
         payment_date__gte=month_start,
         status="ALLOCATED",
     ), request.user, "loan__branch").aggregate(total=Sum("amount_received"))["total"] or 0
@@ -260,7 +260,7 @@ def _manager_dashboard(request, today):
     par_30_count = scope_to_branch(Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
         schedule__due_date__lt=today,
-        schedule__status__in=["PENDING", "OVERDUE"],
+        schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
     ), request.user).distinct().count()
 
     staff_performance = []
@@ -271,7 +271,7 @@ def _manager_dashboard(request, today):
         if staff.is_ceo:
             continue
         applied_loans = Loan.objects.filter(applied_by=staff)
-        collections_this_month = Payment.objects.filter(
+        collections_this_month = Payment.objects.cash_receipts().filter(
             recorded_by=staff,
             payment_date__gte=month_start,
             status="ALLOCATED",
@@ -323,11 +323,11 @@ def _ceo_dashboard(request, today):
     branch_id = effective_branch_id(request)
 
     all_active = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
-    collected_month = Payment.objects.filter(payment_date__gte=month_start, status="ALLOCATED")
+    allocated_month = Payment.objects.filter(payment_date__gte=month_start, status="ALLOCATED")
     overdue_30 = Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
         schedule__due_date__lt=today,
-        schedule__status__in=["PENDING", "OVERDUE"],
+        schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
     ).distinct()
     total_clients_qs = Client.objects.filter(is_active=True)
     pending_loans_qs = Loan.objects.filter(status="PENDING")
@@ -336,7 +336,7 @@ def _ceo_dashboard(request, today):
 
     if branch_id is not None:
         all_active = all_active.filter(branch_id=branch_id)
-        collected_month = collected_month.filter(loan__branch_id=branch_id)
+        allocated_month = allocated_month.filter(loan__branch_id=branch_id)
         overdue_30 = overdue_30.filter(branch_id=branch_id)
         total_clients_qs = total_clients_qs.filter(branch_id=branch_id)
         pending_loans_qs = pending_loans_qs.filter(branch_id=branch_id)
@@ -347,8 +347,10 @@ def _ceo_dashboard(request, today):
     total_outstanding = all_active.aggregate(total=Sum("outstanding_balance"))["total"] or 0
     total_interest = all_active.aggregate(total=Sum("total_interest"))["total"] or 0
 
-    collected_total = collected_month.aggregate(total=Sum("amount_received"))["total"] or 0
-    interest_income = collected_month.aggregate(total=Sum("interest_paid"))["total"] or 0
+    # Cash collected excludes internal credit transfers (cash already counted when
+    # the overpayment arrived); interest income includes them (real allocation).
+    collected_total = allocated_month.cash_receipts().aggregate(total=Sum("amount_received"))["total"] or 0
+    interest_income = allocated_month.aggregate(total=Sum("interest_paid"))["total"] or 0
 
     overdue_count = overdue_30.count()
     total_clients = total_clients_qs.count()
@@ -360,7 +362,7 @@ def _ceo_dashboard(request, today):
         d = today - relativedelta(months=i)
         ms = d.replace(day=1)
         me = ms + relativedelta(months=1)
-        pmts = Payment.objects.filter(payment_date__gte=ms, payment_date__lt=me, status="ALLOCATED")
+        pmts = Payment.objects.cash_receipts().filter(payment_date__gte=ms, payment_date__lt=me, status="ALLOCATED")
         if branch_id is not None:
             pmts = pmts.filter(loan__branch_id=branch_id)
         historical_data.append({
@@ -520,7 +522,7 @@ def financial_overview(request):
         rows = []
         for l in Loan.objects.filter(disbursement_date__gte=start_date, disbursement_date__lte=today).order_by("disbursement_date"):
             rows.append((l.disbursement_date, "Disbursement", l.loan_number or "", float(l.principal_amount)))
-        for p in Payment.objects.filter(payment_date__gte=start_date, payment_date__lte=today, status="ALLOCATED", payment_method=Payment.PaymentMethod.CASH).order_by("payment_date"):
+        for p in Payment.objects.cash_receipts().filter(payment_date__gte=start_date, payment_date__lte=today, status="ALLOCATED", payment_method=Payment.PaymentMethod.CASH).order_by("payment_date"):
             rows.append((p.payment_date, "Repayment", p.loan.loan_number if p.loan else "", float(p.amount_received)))
         for e in Expense.objects.filter(expense_date__gte=start_date, expense_date__lte=today, status=Expense.Status.APPROVED, payment_method=Expense.PaymentMethod.CASH).order_by("expense_date"):
             rows.append((e.expense_date, "Expense", e.reference_number or "", float(e.amount)))
@@ -823,26 +825,26 @@ def branch_detail(request, pk):
 
     overdue_schedules = LoanSchedule.objects.filter(
         due_date__lt=today,
-        status__in=["PENDING", "OVERDUE"],
+        status__in=["PENDING", "OVERDUE", "PARTIAL"],
         loan__branch=branch,
         loan__status__in=["ACTIVE", "RESTRUCTURED"],
     ).select_related("loan__client").order_by("due_date")[:20]
     overdue_count = LoanSchedule.objects.filter(
-        due_date__lt=today, status__in=["PENDING", "OVERDUE"],
+        due_date__lt=today, status__in=["PENDING", "OVERDUE", "PARTIAL"],
         loan__branch=branch, loan__status__in=["ACTIVE", "RESTRUCTURED"],
     ).count()
 
     par_30_count = active_loans.filter(
         schedule__due_date__lt=today,
-        schedule__status__in=["PENDING", "OVERDUE"],
+        schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
     ).distinct().count()
 
-    collected_month = Payment.objects.filter(
+    collected_month = Payment.objects.cash_receipts().filter(
         loan__branch=branch, payment_date__gte=month_start, status="ALLOCATED",
     ).aggregate(t=Sum("amount_received"))["t"] or Decimal("0")
 
     expenses_month = Expense.objects.filter(
-        branch=branch, expense_date__gte=month_start,
+        branch=branch, expense_date__gte=month_start, status="APPROVED",
     ).aggregate(t=Sum("amount"))["t"] or Decimal("0")
 
     written_off_count = Loan.objects.filter(branch=branch, status="WRITTEN_OFF").count()
@@ -852,7 +854,7 @@ def branch_detail(request, pk):
         if s.is_ceo:
             continue
         applied_loans = Loan.objects.filter(applied_by=s)
-        collections_this_month = Payment.objects.filter(
+        collections_this_month = Payment.objects.cash_receipts().filter(
             recorded_by=s, payment_date__gte=month_start, status="ALLOCATED",
         ).aggregate(total=Sum("amount_received"))["total"] or Decimal("0")
         staff_performance.append({

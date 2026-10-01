@@ -10548,3 +10548,6 @@ django.template.base.VariableDoesNotExist: Failed lookup for key [name] in <Comp
 2026-08-21 16:29:33 [INFO] django.server: "GET /payments/receipt/c95c1976-6ad2-4572-90e0-85cfc519360d/?style=classic HTTP/1.1" 200 163882
 2026-08-21 16:29:35 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 816
 2026-08-21 16:29:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-01 08:36:24 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-01 08:43:38 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/loans/models.py changed, reloading.
+2026-10-01 08:43:50 [INFO] django.utils.autoreload: Watching for file changes with StatReloader

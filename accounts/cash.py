@@ -7,6 +7,10 @@ from .branch_scope import scope_to_branch
 
 ZERO = Decimal("0")
 
+# Loans whose principal has actually left the till. Must match the set used by
+# reports.views (cash-flow / disbursements) so dashboard and reports agree.
+DISBURSED_STATUSES = ["ACTIVE", "COMPLETED", "DEFAULTED", "WRITTEN_OFF", "RESTRUCTURED"]
+
 
 def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, opening_balance=ZERO):
     """Return physical-cash movement and balance for the selected scope."""
@@ -18,7 +22,9 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
         status=Payment.Status.ALLOCATED,
         payment_method=Payment.PaymentMethod.CASH,
     )
-    disbursements = Loan.objects.filter(disbursement_date__isnull=False)
+    disbursements = Loan.objects.filter(
+        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
+    )
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,
@@ -53,12 +59,15 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
     injection_total = injections.aggregate(total=Sum("amount"))["total"] or ZERO
     disbursement_total = disbursements.aggregate(total=Sum("principal_amount"))["total"] or ZERO
     expense_total = expenses.aggregate(total=Sum("amount"))["total"] or ZERO
-    cash_in = payment_total + injection_total
+    # Processing fees are collected in cash at disbursement (as in the cash-flow report).
+    fee_total = sum((l.effective_processing_fee for l in disbursements.select_related("product")), ZERO)
+    cash_in = payment_total + injection_total + fee_total
     cash_out = disbursement_total + expense_total
 
     return {
         "payments": payment_total,
         "injections": injection_total,
+        "processing_fees": fee_total,
         "disbursements": disbursement_total,
         "expenses": expense_total,
         "cash_in": cash_in,
@@ -78,8 +87,8 @@ def recent_cash_transactions(*, user=None, branch_id=None, limit=6):
         payment_method=Payment.PaymentMethod.CASH,
     ).select_related("client")
     disbursements = Loan.objects.filter(
-        disbursement_date__isnull=False,
-    ).select_related("client")
+        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
+    ).select_related("client", "product")
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,
@@ -120,6 +129,18 @@ def recent_cash_transactions(*, user=None, branch_id=None, limit=6):
             "direction": "out",
         }
         for loan in disbursements
+    ]
+    transactions += [
+        {
+            "date": loan.disbursement_date,
+            "timestamp": loan.created_at,
+            "type": "Processing Fee",
+            "description": f"Fee from {loan.client.full_name}",
+            "amount": loan.effective_processing_fee,
+            "direction": "in",
+        }
+        for loan in disbursements
+        if loan.effective_processing_fee
     ]
     transactions += [
         {

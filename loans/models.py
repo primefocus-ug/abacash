@@ -538,6 +538,9 @@ class Loan(models.Model):
     def effective_processing_fee(self):
         if self.processing_fee and self.processing_fee > Decimal("0"):
             return self.processing_fee
+        if self.processing_fee_manually_set:
+            # Fee was deliberately waived / set to 0 -- don't recalculate it.
+            return Decimal("0")
         try:
             from loans.utils import calculate_processing_fee_amount
             return calculate_processing_fee_amount(self.principal_amount, product=self.product)
@@ -557,7 +560,7 @@ class Loan(models.Model):
         """True if there is at least one unpaid schedule entry past its due date."""
         today = timezone.localdate()
         return self.schedule.filter(
-            status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE],
+            status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE, LoanSchedule.Status.PARTIAL],
             due_date__lt=today,
         ).exists()
 
@@ -567,7 +570,7 @@ class Loan(models.Model):
         today = timezone.localdate()
         oldest = (
             self.schedule.filter(
-                status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE],
+                status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE, LoanSchedule.Status.PARTIAL],
                 due_date__lt=today,
             )
             .order_by("due_date")
@@ -581,7 +584,7 @@ class Loan(models.Model):
     def next_due_date(self):
         """Due date of the next unpaid schedule entry."""
         entry = (
-            self.schedule.filter(status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE])
+            self.schedule.filter(status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE, LoanSchedule.Status.PARTIAL])
             .order_by("due_date")
             .first()
         )
@@ -591,7 +594,7 @@ class Loan(models.Model):
     def next_due_amount(self):
         """Total amount due on the next unpaid schedule entry."""
         entry = (
-            self.schedule.filter(status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE])
+            self.schedule.filter(status__in=[LoanSchedule.Status.PENDING, LoanSchedule.Status.OVERDUE, LoanSchedule.Status.PARTIAL])
             .order_by("due_date")
             .first()
         )
