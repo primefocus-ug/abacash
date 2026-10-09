@@ -134,7 +134,28 @@
                 </div>
               {% endif %}
             </div>
-            <button type="button" onclick="addGuarantor()" class="btn btn-secondary btn-sm">+ Add Guarantor</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button type="button" onclick="toggleNewGuarantor(true)" class="btn btn-primary btn-sm">+ Add Guarantor</button>
+              <button type="button" onclick="addGuarantor()" class="btn btn-secondary btn-sm">+ Select Existing</button>
+            </div>
+
+            <div id="new-guarantor-panel" style="display:none;border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px;background:var(--surface-2);">
+              <div style="font-weight:600;font-size:13px;margin-bottom:10px;">New guarantor</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-group" style="margin:0;"><input type="text" id="ng-first" class="form-control" placeholder="First name *"></div>
+                <div class="form-group" style="margin:0;"><input type="text" id="ng-last" class="form-control" placeholder="Last name *"></div>
+                <div class="form-group" style="margin:0;"><input type="text" id="ng-phone" class="form-control" placeholder="Phone, e.g. +256700123456 *"></div>
+                <div class="form-group" style="margin:0;"><input type="text" id="ng-nin" class="form-control" placeholder="National ID (NIN)"></div>
+                <div class="form-group" style="margin:0;grid-column:1 / -1;"><input type="text" id="ng-address" class="form-control" placeholder="Physical address *"></div>
+                <div class="form-group" style="margin:0;"><input type="text" id="ng-employer" class="form-control" placeholder="Employer / business"></div>
+                <div class="form-group" style="margin:0;"><input type="number" id="ng-income" class="form-control" placeholder="Monthly income ({% currency_symbol %})" min="0" step="1000"></div>
+              </div>
+              <div id="ng-error" style="color:var(--danger);font-size:12px;margin-top:8px;display:none;"></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleNewGuarantor(false)">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="ng-save" onclick="saveNewGuarantor()">Save guarantor</button>
+              </div>
+            </div>
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:16px;border-top:1px solid var(--border);margin-top:8px;flex-wrap:wrap;">
@@ -176,7 +197,8 @@
 </div>
 
 <script>
-const guarantorOptions = `{% for g in available_guarantors %}<option value="{{ g.pk }}">{{ g.full_name }} — {{ g.phone_primary }}</option>{% endfor %}`;
+// Guarantors available to pick, kept current as new ones are saved.
+const guarantorList = [{% for g in available_guarantors %}{id: {{ g.pk }}, text: "{{ g.full_name|escapejs }} — {{ g.phone_primary|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}];
 
 function addCollateral() {
   const row = document.createElement('div');
@@ -188,14 +210,99 @@ function addCollateral() {
   document.getElementById('collateral-rows').appendChild(row);
 }
 
-function addGuarantor() {
+function fillGuarantorOptions(sel, selectedId) {
+  sel.innerHTML = '';
+  sel.add(new Option('— Select guarantor —', ''));
+  guarantorList.forEach(g => sel.add(new Option(g.text, g.id, false, String(g.id) === String(selectedId))));
+}
+
+function addGuarantorOption(id, text) {
+  if (!guarantorList.some(g => String(g.id) === String(id))) guarantorList.push({id: id, text: text});
+  document.querySelectorAll('select[name="guarantor_id"]').forEach(sel => {
+    if (![...sel.options].some(o => o.value === String(id))) sel.add(new Option(text, id));
+  });
+}
+
+function addGuarantorRow(selectedId) {
   const row = document.createElement('div');
   row.className = 'row-item';
-  row.innerHTML = `
-    <div class="form-group" style="margin:0;"><select name="guarantor_id" class="form-control"><option value="">— Select guarantor —</option>${guarantorOptions}</select></div>
-    <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000"></div>
-    <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>`;
+
+  const selWrap = document.createElement('div');
+  selWrap.className = 'form-group';
+  selWrap.style.margin = '0';
+  const sel = document.createElement('select');
+  sel.name = 'guarantor_id';
+  sel.className = 'form-control';
+  fillGuarantorOptions(sel, selectedId);
+  selWrap.appendChild(sel);
+
+  const amtWrap = document.createElement('div');
+  amtWrap.className = 'form-group';
+  amtWrap.style.margin = '0';
+  const amt = document.createElement('input');
+  amt.type = 'number';
+  amt.name = 'guarantor_amount';
+  amt.className = 'form-control';
+  amt.placeholder = 'Amount ({% currency_symbol %})';
+  amt.min = '0';
+  amt.step = '1000';
+  amtWrap.appendChild(amt);
+
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.textContent = '✕';
+  remove.style.cssText = 'background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;';
+  remove.onclick = () => row.remove();
+
+  row.append(selWrap, amtWrap, remove);
   document.getElementById('guarantor-rows').appendChild(row);
+  return amt;
+}
+
+function addGuarantor() {
+  addGuarantorRow('');
+}
+
+function toggleNewGuarantor(show) {
+  document.getElementById('new-guarantor-panel').style.display = show ? 'block' : 'none';
+  if (show) document.getElementById('ng-first').focus();
+}
+
+async function saveNewGuarantor() {
+  const errBox = document.getElementById('ng-error');
+  const btn = document.getElementById('ng-save');
+  const fieldMap = {
+    first_name: 'ng-first', last_name: 'ng-last', phone_primary: 'ng-phone',
+    nin: 'ng-nin', physical_address: 'ng-address', employer_name: 'ng-employer',
+    monthly_income: 'ng-income',
+  };
+  const body = new URLSearchParams();
+  body.set('csrfmiddlewaretoken', document.querySelector('input[name=csrfmiddlewaretoken]').value);
+  Object.entries(fieldMap).forEach(([name, id]) => body.set(name, document.getElementById(id).value.trim()));
+
+  btn.disabled = true;
+  errBox.style.display = 'none';
+  try {
+    const resp = await fetch("{% url 'loans:guarantor_quick_create' %}", {
+      method: 'POST',
+      body: body,
+      credentials: 'same-origin',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Could not save guarantor.');
+
+    addGuarantorOption(data.id, data.text);
+    const amt = addGuarantorRow(data.id);
+    amt.focus();
+    Object.values(fieldMap).forEach(id => document.getElementById(id).value = '');
+    toggleNewGuarantor(false);
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+  }
 }
 </script>
 {% endblock %}

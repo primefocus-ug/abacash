@@ -122,6 +122,35 @@ def client_detail(request, pk):
     })
 
 
+def _ensure_guarantor_from_kin(client, kin):
+    """Create (or reuse) a loans.Guarantor for a next-of-kin marked as guarantor.
+
+    The loan application's guarantor picker lists loans.Guarantor records, so
+    a guarantor added at registration must also exist there to be selectable.
+    """
+    from loans.models import Guarantor
+    parts = kin.full_name.split()
+    first_name = parts[0] if parts else kin.full_name
+    last_name = " ".join(parts[1:])
+    existing = Guarantor.objects.filter(
+        phone_primary=kin.phone_primary,
+        first_name__iexact=first_name,
+        last_name__iexact=last_name,
+    ).first()
+    if existing:
+        return existing
+    return Guarantor.objects.create(
+        first_name=first_name,
+        last_name=last_name,
+        guarantor_type=Guarantor.Type.INDIVIDUAL,
+        phone_primary=kin.phone_primary,
+        phone_secondary=kin.phone_secondary,
+        physical_address=kin.physical_address or client.physical_address,
+        district=client.district or "Kampala",
+        notes=f"Added from next of kin of {client.client_number} ({kin.relationship}).",
+    )
+
+
 @login_required
 def client_create(request):
     duplicates = []
@@ -211,16 +240,21 @@ def client_create(request):
                     # Optional next of kin
                     kin_name  = d.get("kin_name", "").strip()
                     kin_phone = d.get("kin_phone", "").strip()
+                    wants_guarantor = d.get("kin_is_guarantor") == "on"
+                    if wants_guarantor and not (kin_name and kin_phone):
+                        raise ValueError("A guarantor needs a name and phone number.")
                     if kin_name and kin_phone:
-                        NextOfKin.objects.create(
+                        kin = NextOfKin.objects.create(
                             client           = client,
                             full_name        = kin_name,
                             relationship     = d.get("kin_relationship", "").strip(),
                             phone_primary    = kin_phone,
                             phone_secondary  = d.get("kin_phone2", "").strip(),
                             physical_address = d.get("kin_address", "").strip(),
-                            is_guarantor     = d.get("kin_is_guarantor") == "on",
+                            is_guarantor     = wants_guarantor,
                         )
+                        if kin.is_guarantor:
+                            _ensure_guarantor_from_kin(client, kin)
                     log_action(request.user, AuditLog.Action.CREATE, client, request=request,
                                changes={"client_number": client.client_number, "name": client.full_name},
                                remarks=f"Client {client.full_name} registered")

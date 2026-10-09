@@ -89,3 +89,35 @@ def scope_to_branch_request(queryset, request, field="branch", param="branch"):
     if branch_id is None:
         return queryset
     return queryset.filter(**{f"{field}_id": branch_id})
+
+
+def _is_all_branches(user):
+    return getattr(user, "is_superuser", False) or (hasattr(user, "can") and user.can("can_view_all_branches"))
+
+
+def resolve_branch_for_write(request, posted_branch_id):
+    """Return the branch a NEW or EDITED record should be stored against.
+
+    Never trusts the posted form value for non-CEO users: they always write
+    to their own branch, so a record cannot land in another branch and cannot
+    silently fall into "general" because a dropdown was left blank.
+
+    CEOs (and superusers): an explicit choice in the form wins; otherwise the
+    nav switcher's session branch; otherwise None (company-wide). The page's
+    ?branch= query param is deliberately ignored here, since it belongs to the
+    list filter, not to the record being written.
+
+    Raises ValueError if a non-CEO has no branch assigned, so the view can
+    show a message instead of saving a general record by accident.
+    """
+    user = request.user
+    if not _is_all_branches(user):
+        if not user.branch_id:
+            raise ValueError("Your account has no branch assigned. Ask an administrator to assign one.")
+        return user.branch_id
+    if posted_branch_id and str(posted_branch_id).isdigit():
+        return int(posted_branch_id)
+    session_val = request.session.get(SESSION_KEY)
+    if session_val and str(session_val).isdigit():
+        return int(session_val)
+    return None

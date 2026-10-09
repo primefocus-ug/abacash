@@ -26,7 +26,7 @@ from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
-from .branch_scope import scope_to_branch, effective_branch_id
+from .branch_scope import scope_to_branch, effective_branch_id, resolve_branch_for_write
 from .cash import cash_movement, recent_cash_transactions
 from .permissions import PERMISSIONS, ALL_GROUPS
 from .audit import log_action
@@ -771,7 +771,7 @@ def branch_create(request):
                 email=d.get("email", "").strip(),
                 manager_id=d.get("manager") or None,
                 approval_limit=d.get("approval_limit", "10000000"),
-                is_active=d.get("is_active") == "on",
+                is_active=True,
             )
             messages.success(request, f"Branch '{branch.name}' created.")
             return redirect("accounts:branch_list")
@@ -1594,7 +1594,7 @@ def expense_list(request):
             Expense.objects.create(
                 category_id=form_data["category"] or None,
                 expense_type_id=form_data["expense_type"] or None,
-                branch_id=form_data["branch"] or None,
+                branch_id=resolve_branch_for_write(request, form_data["branch"]),
                 amount=amount_val,
                 expense_date=exp_date,
                 vendor=form_data["vendor"],
@@ -1667,7 +1667,7 @@ def expense_create(request):
             expense = Expense.objects.create(
                 category_id=d.get("category") or None,
                 expense_type_id=d.get("expense_type") or None,
-                branch_id=d.get("branch") or None,
+                branch_id=resolve_branch_for_write(request, d.get("branch")),
                 amount=amount_val,
                 expense_date=expense_date,
                 vendor=d.get("vendor", "").strip(),
@@ -1711,7 +1711,7 @@ def expense_edit(request, pk):
             from datetime import date as _date
             expense.category_id = d.get("category") or None
             expense.expense_type_id = d.get("expense_type") or None
-            expense.branch_id = d.get("branch") or None
+            expense.branch_id = resolve_branch_for_write(request, d.get("branch"))
             expense.amount = amount_val
             expense.expense_date = _date.fromisoformat(d["expense_date"])
             expense.vendor = d.get("vendor", "").strip()
@@ -1791,7 +1791,7 @@ def capital_injection_create(request):
                 amount=amount_value,
                 injected_date=d["injected_date"],
                 payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.CASH),
-                branch_id=d.get("branch") or None,
+                branch_id=resolve_branch_for_write(request, d.get("branch")),
                 investor=d.get("investor", "").strip(),
                 notes=d.get("notes", "").strip(),
                 created_by=request.user,
@@ -1820,7 +1820,7 @@ def capital_injection_edit(request, pk):
             injection.amount = d["amount"]
             injection.injected_date = d["injected_date"]
             injection.payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.CASH)
-            injection.branch_id = d.get("branch") or None
+            injection.branch_id = resolve_branch_for_write(request, d.get("branch"))
             injection.investor = d.get("investor", "").strip()
             injection.notes = d.get("notes", "").strip()
             injection.save()
@@ -1968,7 +1968,7 @@ def bank_transaction_create(request):
     if request.method == "POST":
         d = request.POST
         try:
-            branch_id = d.get("branch") or None
+            branch_id = resolve_branch_for_write(request, d.get("branch"))
             bank_account = get_object_or_404(BankAccount, pk=d["bank_account"])
             transaction_type = d.get("transaction_type", BankTransaction.TransactionType.CREDIT)
             amount = Decimal(d["amount"])
@@ -2024,7 +2024,7 @@ def bank_transaction_edit(request, pk):
             old_type = transaction.transaction_type
             old_amount = transaction.amount
 
-            transaction.branch_id = d.get("branch") or None
+            transaction.branch_id = resolve_branch_for_write(request, d.get("branch"))
             transaction.bank_account = get_object_or_404(BankAccount, pk=d["bank_account"])
             transaction.category = d.get("category", "").strip()
             transaction.transaction_type = d.get("transaction_type", BankTransaction.TransactionType.CREDIT)

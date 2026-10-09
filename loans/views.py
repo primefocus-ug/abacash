@@ -20,7 +20,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import CompanySettings
-from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
+from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request, resolve_branch_for_write
 from clients.models import Client
 from .models import (
     Loan,
@@ -56,6 +56,25 @@ def _require_role(*roles):
         @login_required
         def wrapper(request, *args, **kwargs):
             if request.user.role not in roles:
+                messages.error(request, "You do not have permission to access that page.")
+                return redirect("accounts:dashboard")
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def _permission_required(codename):
+    """Restrict a view to users holding the given app permission.
+
+    Uses user.can() so access follows the Roles & Permissions page (group
+    grants and per-user overrides) instead of the user's role field.
+    """
+    from functools import wraps
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def wrapper(request, *args, **kwargs):
+            if not request.user.can(codename):
                 messages.error(request, "You do not have permission to access that page.")
                 return redirect("accounts:dashboard")
             return view_func(request, *args, **kwargs)
@@ -198,7 +217,7 @@ def loan_apply_step2(request, client_id):
 
     products = LoanProduct.objects.filter(is_active=True)
     company_default_fee = CompanySettings.get().default_processing_fee_percent
-    
+
     loan = _get_client_loan_draft(client)
     form_data = _build_loan_basic_data(loan)
     schedule_rows = []
@@ -231,7 +250,6 @@ def loan_apply_step2(request, client_id):
                 loan = Loan(
                     client=client,
                     applied_by=request.user,
-                    branch=request.user.branch,
                     status=Loan.Status.DRAFT,
                     application_date=date.today(),
                 )
@@ -244,6 +262,11 @@ def loan_apply_step2(request, client_id):
             loan.term_months = term_months
             loan.repayment_frequency = frequency
             loan.purpose = purpose
+
+            # Set on every save, including reused drafts that were saved with no branch.
+            loan.branch_id = resolve_branch_for_write(request, data.get("branch"))
+            if loan.branch_id is None:
+                raise ValueError("Select a branch before creating a loan.")
 
             schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=principal,
@@ -509,15 +532,37 @@ def loan_apply_step3(request, client_id):
             if d.strip() and v
         ]
 
-        guarantor_ids = data.getlist("guarantor_id")
-        guarantor_amounts = data.getlist("guarantor_amount")
-        guarantor_rows = [
-            {"guarantor_id": gid, "amount": amt}
-            for gid, amt in zip(guarantor_ids, guarantor_amounts)
-            if gid and amt
-        ]
-
         try:
+            # Validate guarantor rows BEFORE touching any data, so a bad row
+            # shows an error instead of being silently dropped.
+            guarantor_ids = data.getlist("guarantor_id")
+            guarantor_amounts = data.getlist("guarantor_amount")
+            guarantor_rows = []
+            guarantor_errors = []
+            for index, (gid, amt) in enumerate(zip(guarantor_ids, guarantor_amounts), start=1):
+                gid = (gid or "").strip()
+                amt = (amt or "").strip()
+                if not gid and not amt:
+                    continue  # empty row in the picker
+                if not gid:
+                    guarantor_errors.append(f"Guarantor row {index}: choose a guarantor.")
+                    continue
+                if not amt:
+                    guarantor_errors.append(f"Guarantor row {index}: enter the guaranteed amount.")
+                    continue
+                try:
+                    if Decimal(amt) <= 0:
+                        raise ValueError
+                except (ValueError, ArithmeticError):
+                    guarantor_errors.append(f"Guarantor row {index}: the amount must be a positive number.")
+                    continue
+                if not Guarantor.objects.filter(pk=gid, is_active=True).exists():
+                    guarantor_errors.append(f"Guarantor row {index}: that guarantor is not active or does not exist.")
+                    continue
+                guarantor_rows.append({"guarantor_id": gid, "amount": amt})
+            if guarantor_errors:
+                raise ValueError(" ".join(guarantor_errors))
+
             CollateralItem.objects.filter(loan=loan).delete()
             CollateralItem.objects.bulk_create([
                 CollateralItem(
@@ -1358,7 +1403,7 @@ def loan_undo_regenerate_schedule(request, pk):
 # Loan renewal / roll-over                                              #
 # ------------------------------------------------------------------ #
 
-@_require_role("MANAGER", "CEO")
+@_permission_required("can_approve_loans")
 def loan_renew(request, pk):
     loan = get_object_or_404(
         Loan.objects.select_related("client", "product"),
@@ -1424,6 +1469,7 @@ def loan_renew(request, pk):
             new_loan = Loan.objects.create(
                 client=loan.client,
                 product=loan.product,
+                branch=loan.branch,
                 applied_by=request.user,
                 reviewed_by=request.user,
                 disbursed_by=request.user,
@@ -1534,7 +1580,7 @@ def loan_renew(request, pk):
 # Approve / Reject                                                     #
 # ------------------------------------------------------------------ #
 
-@_require_role("MANAGER", "CEO")
+@_permission_required("can_approve_loans")
 @require_POST
 def loan_approve(request, pk):
     loan = get_object_or_404(Loan, pk=pk, status=Loan.Status.PENDING)
@@ -1761,7 +1807,7 @@ def loan_reinstate(request, pk):
         loan.outstanding_balance = LoanSchedule.objects.filter(
             loan=loan,
         ).exclude(status=LoanSchedule.Status.PAID).exclude(status=LoanSchedule.Status.WAIVED).aggregate(
-            total=Sum("total_payment") 
+            total=Sum("total_payment")
         )["total"] or Decimal("0")
         # Subtract any partial payments already recorded against those entries
         already_paid = LoanSchedule.objects.filter(loan=loan).exclude(
@@ -1774,7 +1820,7 @@ def loan_reinstate(request, pk):
     return redirect("loans:detail", pk=pk)
 
 
-@_require_role("MANAGER", "CEO")
+@_permission_required("can_approve_loans")
 @require_POST
 def loan_reject(request, pk):
     loan   = get_object_or_404(Loan, pk=pk, status=Loan.Status.PENDING)
@@ -2155,3 +2201,58 @@ def loan_product_edit(request, pk: int):
             "frequency_choices": LoanProduct.RepaymentFrequency.choices,
         },
     )
+
+
+@login_required
+@require_POST
+def guarantor_quick_create(request):
+    """Save a guarantor entered on the loan form and return it for selection.
+
+    Returns JSON {id, text, existing}. If a guarantor with the same NIN already
+    exists, that record is returned instead of creating a duplicate.
+    """
+    from django.http import JsonResponse
+    d = request.POST
+    first_name = d.get("first_name", "").strip()
+    last_name = d.get("last_name", "").strip()
+    phone = d.get("phone_primary", "").strip()
+    address = d.get("physical_address", "").strip()
+    nin = d.get("nin", "").strip().upper()
+
+    errors = []
+    if not first_name:
+        errors.append("First name is required.")
+    if not last_name:
+        errors.append("Last name is required.")
+    if not phone:
+        errors.append("Phone number is required.")
+    if not address:
+        errors.append("Physical address is required.")
+    if errors:
+        return JsonResponse({"error": " ".join(errors)}, status=400)
+
+    if nin:
+        existing = Guarantor.objects.filter(nin=nin).first()
+        if existing:
+            return JsonResponse({"id": existing.pk, "text": f"{existing.full_name} — {existing.phone_primary}", "existing": True})
+
+    try:
+        guarantor = Guarantor.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            other_names=d.get("other_names", "").strip(),
+            guarantor_type=Guarantor.Type.INDIVIDUAL,
+            nin=nin,
+            phone_primary=phone,
+            phone_secondary=d.get("phone_secondary", "").strip(),
+            physical_address=address,
+            district=d.get("district", "").strip() or "Kampala",
+            employer_name=d.get("employer_name", "").strip(),
+            job_title=d.get("job_title", "").strip(),
+            monthly_income=d.get("monthly_income") or "0",
+            notes="Added from a loan application.",
+        )
+    except Exception as exc:
+        return JsonResponse({"error": f"Could not save guarantor: {exc}"}, status=400)
+
+    return JsonResponse({"id": guarantor.pk, "text": f"{guarantor.full_name} — {guarantor.phone_primary}", "existing": False})

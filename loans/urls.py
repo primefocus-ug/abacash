@@ -28,6 +28,7 @@ urlpatterns = [
     path("<uuid:pk>/regenerate-schedule/undo/", views.loan_undo_regenerate_schedule, name="undo_regenerate_schedule"),
     path("<uuid:pk>/delete-draft/",  views.loan_draft_delete, name="draft_delete"),
     path("search/",                  views.loan_search,    name="search"),
+    path("guarantors/quick/",        views.guarantor_quick_create, name="guarantor_quick_create"),
     # Loan products (CEO config)
     path("products/",                views.loan_product_list,   name="products"),
     path("products/new/",           views.loan_product_create, name="products_create"),
