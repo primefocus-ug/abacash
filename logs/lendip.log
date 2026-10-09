@@ -10870,3 +10870,22 @@ django.template.base.VariableDoesNotExist: Failed lookup for key [name] in <Comp
 2026-10-09 16:34:26 [INFO] django.server: "GET /media/aba/photos/client_c739ce9b-da28-4714-989a-fba9332b52a9/bbb.png HTTP/1.1" 200 1232733
 2026-10-09 16:34:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-10-09 16:34:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-09 21:10:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-09 21:10:53 [INFO] django.server: "GET / HTTP/1.1" 200 14292
+2026-10-09 21:10:54 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-10-09 21:10:54 [INFO] django.server: "GET /media/pay/company/ura_logo_lKfqFQw.png HTTP/1.1" 200 27227
+2026-10-09 21:11:00 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-09 21:11:00 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-10-09 21:11:14 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-10-09 21:11:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 191865
+2026-10-09 21:11:15 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 816
+2026-10-09 21:11:16 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 27649
+2026-10-09 21:11:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-09 21:11:19 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-09 21:11:19 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 149208
+2026-10-09 21:11:19 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 10774
+2026-10-09 21:11:20 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 191865
+2026-10-09 21:23:29 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/accounts/views.py changed, reloading.
+2026-10-09 21:23:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-09 21:23:57 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/accounts/cash.py changed, reloading.
+2026-10-09 21:24:18 [INFO] django.utils.autoreload: Watching for file changes with StatReloader

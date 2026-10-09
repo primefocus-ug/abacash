@@ -198,36 +198,50 @@ def dashboard(request):
 
 
 def _cashier_dashboard(request, today):
-    # Loans with payments due today
-    due_today = scope_to_branch(LoanSchedule.objects.filter(
-        due_date=today,
-        status__in=["PENDING", "OVERDUE", "PARTIAL"],
-        loan__status__in=["ACTIVE", "RESTRUCTURED"],
-    ), request.user, "loan__branch").select_related("loan__client").order_by("loan__client__last_name")[:20]
+    user = request.user
+    month_start = today.replace(day=1)
 
-    # Recent payments recorded by this cashier
-    recent_payments = Payment.objects.filter(
-        recorded_by=request.user,
-    ).select_related("loan__client").order_by("-created_at")[:10]
+    # Schedules due today or overdue, limited to the cashier's branch.
+    # Overdue rows are included so missed payments stay visible.
+    schedules = scope_to_branch(
+        LoanSchedule.objects.filter(
+            due_date__lte=today,
+            status__in=[LoanSchedule.Status.PENDING,
+                        LoanSchedule.Status.OVERDUE,
+                        LoanSchedule.Status.PARTIAL],
+            loan__status__in=["ACTIVE", "RESTRUCTURED"],
+        ),
+        user, "loan__branch",
+    ).select_related("loan__client")
 
-    # Today's collection total
-    collected_today = Payment.objects.cash_receipts().filter(
-        recorded_by=request.user,
-        payment_date=today,
-        status="ALLOCATED",
-    ).aggregate(total=Sum("amount_received"))["total"] or 0
+    due_count = schedules.count()  # count BEFORE slicing
+    due_list = list(schedules.order_by("loan__client__last_name")[:20])
+    for entry in due_list:
+        # Same formula as Loan.next_due_amount: unpaid balance on this period.
+        entry.balance_due = entry.total_payment + entry.penalty_due - entry.amount_paid
 
-    # My performance stats
-    my_loans_count = Loan.objects.filter(applied_by=request.user).count()
-    my_active_loans = Loan.objects.filter(applied_by=request.user, status__in=["ACTIVE", "RESTRUCTURED"]).count()
+    # Branch-wide cash payments, not just this cashier's own receipts.
+    payments = scope_to_branch(
+        Payment.objects.cash_receipts().filter(status=Payment.Status.ALLOCATED),
+        user, "loan__branch",
+    )
+    collected_today = payments.filter(payment_date=today).aggregate(
+        total=Sum("amount_received"))["total"] or 0
+    recent_payments = payments.select_related("client", "loan").order_by("-created_at")[:10]
+
+    cash_now = cash_movement(user=user)
+    cash_month = cash_movement(user=user, start_date=month_start, end_date=today)
 
     context = {
-        "due_today":             due_today,
-        "recent_payments":       recent_payments,
+        "due_today": due_list,
+        "due_today_count": due_count,
         "collected_today_total": collected_today,
-        "due_today_count":       due_today.count(),
-        "my_loans_count":        my_loans_count,
-        "my_active_loans":       my_active_loans,
+        "collected_this_month": cash_month["payments"],
+        "cash_at_hand": cash_now["cash_at_hand"],
+        "recent_payments": recent_payments,
+        # Cashiers get payments and disbursements only, not owner-level entries.
+        "recent_cash": recent_cash_transactions(
+            user=user, limit=10, include_owner_entries=False),
     }
     return render(request, "accounts/dashboard_cashier.html", context)
 
@@ -1769,7 +1783,7 @@ def capital_injection_list(request):
     page = request.GET.get("page", 1)
     injections = paginator.get_page(page)
 
-    total_amount = sum(i.amount for i in qs)
+    total_amount = qs.aggregate(total=Sum("amount"))["total"] or 0
 
     return render(request, "accounts/capital_injection_list.html", {
         "injections": injections,

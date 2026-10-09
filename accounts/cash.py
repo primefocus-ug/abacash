@@ -18,7 +18,8 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
     from loans.models import Loan
     from payments.models import Payment
 
-    payments = Payment.objects.filter(
+    # cash_receipts() excludes internal CREDIT_TRANSFER rows, which move no new cash.
+    payments = Payment.objects.cash_receipts().filter(
         status=Payment.Status.ALLOCATED,
         payment_method=Payment.PaymentMethod.CASH,
     )
@@ -76,26 +77,33 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
     }
 
 
-def recent_cash_transactions(*, user=None, branch_id=None, limit=6):
-    """Return the latest physical-cash movements for a dashboard preview."""
+def recent_cash_transactions(*, user=None, branch_id=None, limit=6, include_owner_entries=True):
+    """Return the latest physical-cash movements for a dashboard preview.
+
+    include_owner_entries=False drops capital injections and expenses, which
+    are owner-level figures that cashiers should not see. Pass False for
+    cashier views.
+    """
     from .models import CapitalInjection, Expense
     from loans.models import Loan
     from payments.models import Payment
 
-    payments = Payment.objects.filter(
+    # Filter first, then slice each queryset to `limit` so the database returns
+    # at most `limit` rows per table instead of the full history.
+    payments = Payment.objects.cash_receipts().filter(
         status=Payment.Status.ALLOCATED,
         payment_method=Payment.PaymentMethod.CASH,
-    ).select_related("client")
+    ).select_related("client").order_by("-created_at")
     disbursements = Loan.objects.filter(
         disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
-    ).select_related("client", "product")
+    ).select_related("client", "product").order_by("-created_at")
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,
-    ).select_related("expense_type", "category")
+    ).select_related("expense_type", "category").order_by("-created_at")
     injections = CapitalInjection.objects.filter(
         payment_method=CapitalInjection.PaymentMethod.CASH,
-    )
+    ).order_by("-created_at")
 
     if branch_id is not None:
         payments = payments.filter(loan__branch_id=branch_id)
@@ -107,6 +115,15 @@ def recent_cash_transactions(*, user=None, branch_id=None, limit=6):
         disbursements = scope_to_branch(disbursements, user)
         expenses = scope_to_branch(expenses, user)
         injections = scope_to_branch(injections, user)
+
+    payments = list(payments[:limit])
+    disbursements = list(disbursements[:limit])
+    if include_owner_entries:
+        expenses = list(expenses[:limit])
+        injections = list(injections[:limit])
+    else:
+        expenses = []
+        injections = []
 
     transactions = [
         {
