@@ -373,6 +373,26 @@
     </div>
   </div>
 
+  {% with loan.collateral_items.all as collateral_items %}
+  {% if collateral_items %}
+  <div style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
+    <div class="section-title">Collateral pledged</div>
+    {% for item in collateral_items %}
+    <div class="info-row" style="{% if not forloop.last %}border-bottom:1px solid #e8eef3;{% endif %}">
+      <span class="info-label">
+        {{ item.description }}
+        {% if item.document_number %}<br><small>Document: {{ item.document_number }}</small>{% endif %}
+        {% if item.storage_location %}<br><small>Held at: {{ item.storage_location }}</small>{% endif %}
+        {% if item.notes %}<br><small>{{ item.notes }}</small>{% endif %}
+        {% if item.release_date %}<br><small>Released {{ item.release_date }}{% if item.released_to %} to {{ item.released_to }}{% endif %}</small>{% endif %}
+      </span>
+      <span class="info-value mono">UGX {{ item.estimated_value|floatformat:0|intcomma }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
   <!-- Summary metrics -->
   <div class="metrics">
     <div class="metric">

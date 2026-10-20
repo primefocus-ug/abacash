@@ -40,8 +40,14 @@
 
         <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;">
           {% if client.passport_photo %}
-          <img src="{{ client.passport_photo.url }}" alt="{{ client.full_name }}"
-               style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid var(--teal-600);flex-shrink:0;">
+          <button type="button" class="client-photo-trigger"
+                  aria-label="View {{ client.full_name }}'s profile photo"
+                  aria-haspopup="dialog" aria-controls="client-photo-viewer"
+                  data-photo-src="{{ client.passport_photo.url }}"
+                  data-photo-alt="{{ client.full_name }}">
+            <img src="{{ client.passport_photo.url }}" alt=""
+                 style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid var(--teal-600);flex-shrink:0;">
+          </button>
           {% else %}
           <div style="width:64px;height:64px;border-radius:50%;background:var(--teal-600);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#fff;flex-shrink:0;">
             {{ client.first_name|first|upper }}{{ client.last_name|first|upper }}
@@ -272,4 +278,97 @@
   </div>
 
 </div>
+
+{% if client.passport_photo %}
+<div id="client-photo-viewer" class="client-photo-viewer" role="dialog"
+     aria-modal="true" aria-label="Client profile photo" aria-hidden="true" hidden>
+  <button type="button" class="client-photo-close" aria-label="Close photo viewer">&times;</button>
+  <img class="client-photo-large" alt="">
+</div>
+
+<style>
+  .client-photo-trigger {
+    display: block;
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: zoom-in;
+  }
+  .client-photo-trigger:focus-visible {
+    outline: 3px solid var(--teal-600);
+    outline-offset: 3px;
+  }
+  .client-photo-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px 20px;
+    background: rgba(0, 0, 0, .82);
+    cursor: zoom-out;
+  }
+  #client-photo-viewer[hidden] { display: none !important; }
+  .client-photo-large {
+    display: block;
+    max-width: min(100%, 900px);
+    max-height: calc(100vh - 76px);
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .35);
+    cursor: default;
+  }
+  .client-photo-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255, 255, 255, .5);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .35);
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  (() => {
+    const trigger = document.querySelector('.client-photo-trigger');
+    const viewer = document.getElementById('client-photo-viewer');
+    if (!trigger || !viewer) return;
+
+    const image = viewer.querySelector('.client-photo-large');
+    const closeButton = viewer.querySelector('.client-photo-close');
+
+    function closeViewer() {
+      viewer.hidden = true;
+      viewer.setAttribute('aria-hidden', 'true');
+      image.removeAttribute('src');
+      trigger.focus();
+    }
+
+    trigger.addEventListener('click', () => {
+      image.src = trigger.dataset.photoSrc;
+      image.alt = trigger.dataset.photoAlt || '';
+      viewer.hidden = false;
+      viewer.setAttribute('aria-hidden', 'false');
+      closeButton.focus();
+    });
+    closeButton.addEventListener('click', closeViewer);
+    viewer.addEventListener('click', event => {
+      if (event.target === viewer) closeViewer();
+    });
+    image.addEventListener('click', event => event.stopPropagation());
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !viewer.hidden) closeViewer();
+    });
+  })();
+</script>
+{% endif %}
 {% endblock %}

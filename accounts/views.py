@@ -4,7 +4,6 @@ accounts/views.py
 Authentication, role-based dashboard routing, and comprehensive admin panel for ABA Uganda.
 """
 
-import json
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -17,7 +16,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Sum, Count
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from dateutil.relativedelta import relativedelta
@@ -26,13 +25,27 @@ from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
-from .branch_scope import scope_to_branch, effective_branch_id, resolve_branch_for_write
+from .branch_scope import (
+    scope_to_branch,
+    effective_branch_id,
+    resolve_branch_for_write,
+    get_single_active_branch_id,
+)
 from .cash import cash_movement, recent_cash_transactions
 from .permissions import PERMISSIONS, ALL_GROUPS
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
 
 User = get_user_model()
+
+
+def _quick_form_saved(request):
+    if request.headers.get("HX-Request") == "true":
+        return HttpResponse(
+            status=204,
+            headers={"HX-Trigger": '{"quickFormSaved": null, "quickFormNotice": {"message": "Saved successfully."}}'},
+        )
+    return None
 
 
 def _permission_required(codename):
@@ -391,7 +404,11 @@ def _ceo_dashboard(request, today):
         d = today - relativedelta(months=i)
         ms = d.replace(day=1)
         me = ms + relativedelta(months=1)
-        expenses = Expense.objects.filter(expense_date__gte=ms, expense_date__lt=me)
+        expenses = Expense.objects.filter(
+            expense_date__gte=ms,
+            expense_date__lt=me,
+            status=Expense.Status.APPROVED,
+        )
         if branch_id is not None:
             expenses = expenses.filter(branch_id=branch_id)
         expense_history.append({
@@ -400,7 +417,11 @@ def _ceo_dashboard(request, today):
         })
 
     expense_start = (today - relativedelta(months=period_months - 1)).replace(day=1)
-    expenses = Expense.objects.filter(expense_date__gte=expense_start, expense_date__lte=today)
+    expenses = Expense.objects.filter(
+        expense_date__gte=expense_start,
+        expense_date__lte=today,
+        status=Expense.Status.APPROVED,
+    )
     if branch_id is not None:
         expenses = expenses.filter(branch_id=branch_id)
     total_expenses = expenses.aggregate(total=Sum("amount"))["total"] or 0
@@ -411,9 +432,6 @@ def _ceo_dashboard(request, today):
         label = expense.category.name if expense.category else "Uncategorised"
         cat_totals[label] += float(expense.amount)
     expense_data = [{"label": k, "value": v} for k, v in cat_totals.items() if v > 0]
-    if not expense_data:
-        expense_data = [{"label": "No Expenses", "value": 1}]
-
     # Capital injections are company-wide (not tied to a branch), so they
     # deliberately stay unfiltered regardless of the branch switcher.
     injections = CapitalInjection.objects.filter(injected_date__gte=expense_start, injected_date__lte=today)
@@ -448,15 +466,12 @@ def _ceo_dashboard(request, today):
         "total_clients": total_clients,
         "pending_count": pending_count,
         "monthly_data": monthly_data,
-        "monthly_data_json": json.dumps(historical_data),
-        "expense_history_json": json.dumps(expense_history),
+        "expense_history": expense_history[-period_months:],
         "recent_loans": recent_loans,
         "active_count": all_active.count(),
         "branches": branches,
         "risk_distribution": risk_distribution,
-        "risk_data_json": json.dumps(risk_distribution),
         "expense_data": expense_data,
-        "expense_data_json": json.dumps(expense_data),
         "total_expenses": total_expenses,
         "total_injections": total_injections,
         "cash_at_hand": cash_movement(user=request.user, branch_id=branch_id)["cash_at_hand"],
@@ -617,7 +632,7 @@ def user_create(request):
                 email      = d["email"].strip(),
                 phone      = d.get("phone", "").strip(),
                 role       = d["role"],
-                branch_id  = d.get("branch") or None,
+                branch_id  = d.get("branch") or get_single_active_branch_id(),
                 commission_rate = d.get("commission_rate", "0.00"),
                 is_active  = True,
                 password   = make_password(d["password1"]),
@@ -635,6 +650,9 @@ def user_create(request):
         "action":      "create",
         "role_choices": User.Role.choices,
         "branches": Branch.objects.filter(is_active=True),
+        "selected_branch_id": (
+            request.POST.get("branch") or get_single_active_branch_id()
+        ),
     })
 
 
@@ -788,6 +806,9 @@ def branch_create(request):
                 is_active=True,
             )
             messages.success(request, f"Branch '{branch.name}' created.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:branch_list")
         except Exception as e:
             messages.error(request, f"Could not create branch: {e}")
@@ -816,6 +837,9 @@ def branch_edit(request, pk):
             branch.is_active = d.get("is_active") == "on"
             branch.save()
             messages.success(request, f"Branch '{branch.name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:branch_list")
         except Exception as e:
             messages.error(request, f"Could not update branch: {e}")
@@ -947,6 +971,9 @@ def fee_type_create(request):
                 max_amount=d.get("max_amount", "0"),
             )
             messages.success(request, f"Fee type '{fee.name}' created.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:fee_type_list")
         except Exception as e:
             messages.error(request, f"Could not create fee type: {e}")
@@ -977,6 +1004,9 @@ def fee_type_edit(request, pk):
             fee_type.max_amount = d.get("max_amount", "0")
             fee_type.save()
             messages.success(request, f"Fee type '{fee_type.name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:fee_type_list")
         except Exception as e:
             messages.error(request, f"Could not update fee type: {e}")
@@ -1021,6 +1051,9 @@ def holiday_create(request):
                 is_active=d.get("is_active") == "on",
             )
             messages.success(request, f"Holiday '{holiday.name}' created.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:holiday_list")
         except Exception as e:
             messages.error(request, f"Could not create holiday: {e}")
@@ -1045,6 +1078,9 @@ def holiday_edit(request, pk):
             holiday.is_active = d.get("is_active") == "on"
             holiday.save()
             messages.success(request, f"Holiday '{holiday.name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:holiday_list")
         except Exception as e:
             messages.error(request, f"Could not update holiday: {e}")
@@ -1209,6 +1245,9 @@ def guarantor_create(request):
                 notes=d.get("notes", "").strip(),
             )
             messages.success(request, f"Guarantor '{guarantor.full_name}' created.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:guarantor_detail", pk=guarantor.pk)
         except Exception as e:
             messages.error(request, f"Could not create guarantor: {e}")
@@ -1290,6 +1329,9 @@ def guarantor_edit(request, pk):
 
             guarantor.save()
             messages.success(request, f"Guarantor '{guarantor.full_name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:guarantor_detail", pk=guarantor.pk)
         except Exception as e:
             messages.error(request, f"Could not update guarantor: {e}")
@@ -1621,6 +1663,9 @@ def expense_list(request):
                 created_by=request.user,
             )
             messages.success(request, "Expense recorded successfully.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:expense_list")
         except Exception as e:
             messages.error(request, f"Could not save expense: {e}")
@@ -1694,6 +1739,9 @@ def expense_create(request):
                 created_by=request.user,
             )
             messages.success(request, f"Expense {expense.reference_number} recorded.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:expense_list")
         except Exception as e:
             messages.error(request, f"Could not create expense: {e}")
@@ -1734,6 +1782,9 @@ def expense_edit(request, pk):
             expense.description = d.get("description", "").strip()
             expense.save()
             messages.success(request, "Expense updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:expense_list")
         except Exception as e:
             messages.error(request, f"Could not update expense: {e}")
@@ -1812,6 +1863,9 @@ def capital_injection_create(request):
             )
             amount_display = f"{injection.amount:,.2f}".rstrip("0").rstrip(".") if hasattr(injection.amount, "quantize") else str(injection.amount)
             messages.success(request, f"Capital injection recorded: UGX {amount_display} from {injection.source}")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:capital_injection_list")
         except Exception as e:
             messages.error(request, f"Could not create capital injection: {e}")
@@ -1839,6 +1893,9 @@ def capital_injection_edit(request, pk):
             injection.notes = d.get("notes", "").strip()
             injection.save()
             messages.success(request, f"Capital injection updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:capital_injection_list")
         except Exception as e:
             messages.error(request, f"Could not update capital injection: {e}")
@@ -1893,6 +1950,9 @@ def bank_account_create(request):
                 is_active=d.get("is_active") == "on",
             )
             messages.success(request, f"Bank account '{acc.account_name}' added.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:bank_account_list")
         except Exception as e:
             messages.error(request, f"Could not create bank account: {e}")
@@ -1920,6 +1980,9 @@ def bank_account_edit(request, pk):
             acc.is_active     = d.get("is_active") == "on"
             acc.save()
             messages.success(request, f"Bank account '{acc.account_name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:bank_account_list")
         except Exception as e:
             messages.error(request, f"Could not update bank account: {e}")
@@ -2013,6 +2076,9 @@ def bank_transaction_create(request):
             bank_account.save()
 
             messages.success(request, "Bank transaction recorded successfully.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:bank_transaction_list")
         except Exception as e:
             messages.error(request, f"Could not save bank transaction: {e}")
@@ -2066,6 +2132,9 @@ def bank_transaction_edit(request, pk):
             transaction.bank_account.save()
 
             messages.success(request, "Bank transaction updated successfully.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
             return redirect("accounts:bank_transaction_list")
         except Exception as e:
             messages.error(request, f"Could not update bank transaction: {e}")

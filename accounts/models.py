@@ -378,6 +378,18 @@ class Holiday(models.Model):
         ]
 
 
+DEFAULT_PROCESSING_FEE_RANGES = (
+    "0-50000:4000\n"
+    "100000-200000:8000\n"
+    "200001-300001:10000\n"
+    "300001-450000:12000\n"
+    "450001-600000:15000\n"
+    "600001-800000:20000\n"
+    "800001-1000000:30000\n"
+    "1000001-:40000"
+)
+
+
 class CompanySettings(models.Model):
     """
     Singleton model for company-wide configuration.
@@ -421,13 +433,17 @@ class CompanySettings(models.Model):
     processing_fee_method = models.CharField(
         max_length=20,
         choices=[("PERCENTAGE", "Percentage"), ("RANGE", "Range")],
-        default="PERCENTAGE",
+        default="RANGE",
         help_text=_("Choose whether processing fees are calculated using a percentage or amount ranges."),
     )
     processing_fee_ranges = models.TextField(
         blank=True,
-        default="",
-        help_text=_("Processing fee ranges as 'MIN-MAX:AMOUNT' per line, for example '0-500000:5000'."),
+        default=DEFAULT_PROCESSING_FEE_RANGES,
+        help_text=_(
+            "Processing fee ranges as 'MIN-MAX:AMOUNT' per line. Endpoints are "
+            "inclusive; unmatched amounts have no range fee, and the first "
+            "matching range wins."
+        ),
     )
     early_repayment_penalty_percent = models.DecimalField(
         max_digits=5, decimal_places=2, default=0,

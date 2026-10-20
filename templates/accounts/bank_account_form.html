@@ -8,11 +8,13 @@
 {% endblock %}
 
 {% block content %}
+<div id="quick-form-content">
+  {% include "accounts/includes/quick_form_messages.html" %}
 <div style="max-width:640px;">
   <div class="card">
     <div class="card-header"><span class="card-title">{{ title }}</span></div>
     <div class="card-body">
-      <form method="post">
+      <form method="post" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
         {% csrf_token %}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
@@ -85,10 +87,11 @@
 
         <div style="display:flex;gap:12px;margin-top:8px;">
           <button type="submit" class="btn btn-primary">Save Account</button>
-          <a href="{% url 'accounts:bank_account_list' %}" class="btn btn-secondary">Cancel</a>
+          <a href="{% url 'accounts:bank_account_list' %}" class="btn btn-secondary" data-quick-form-cancel>Cancel</a>
         </div>
       </form>
     </div>
   </div>
+</div>
 </div>
 {% endblock %}

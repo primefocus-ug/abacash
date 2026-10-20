@@ -4,7 +4,7 @@
 {% block page_title %}Bank Transactions{% endblock %}
 
 {% block topbar_actions %}
-  <a href="{% url 'accounts:bank_transaction_create' %}" class="btn btn-primary btn-sm">
+  <a href="{% url 'accounts:bank_transaction_create' %}" class="btn btn-primary btn-sm" hx-get="{% url 'accounts:bank_transaction_create' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Transaction
   </a>
@@ -93,7 +93,7 @@
           <td class="mono">{{ transaction.amount|ugx }}</td>
           <td class="mono">{{ transaction.transaction_date|date:'Y-m-d H:i:s' }}</td>
           <td style="text-align:right;">
-            <a href="{% url 'accounts:bank_transaction_edit' transaction.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'accounts:bank_transaction_edit' transaction.pk %}" class="btn btn-secondary btn-sm" hx-get="{% url 'accounts:bank_transaction_edit' transaction.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Edit</a>
           </td>
         </tr>
         {% endfor %}

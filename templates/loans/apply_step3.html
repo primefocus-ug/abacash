@@ -117,7 +117,7 @@
                       {% endfor %}
                     </select>
                   </div>
-                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000" value="{{ row.amount }}"></div>
+                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount (optional, {% currency_symbol %})" min="0" step="1000" value="{{ row.amount }}"></div>
                   <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
                 </div>
                 {% endfor %}
@@ -129,7 +129,7 @@
                       {% for g in available_guarantors %}<option value="{{ g.pk }}">{{ g.full_name }} — {{ g.phone_primary }}</option>{% endfor %}
                     </select>
                   </div>
-                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount ({% currency_symbol %})" min="0" step="1000"></div>
+                  <div class="form-group" style="margin:0;"><input type="number" name="guarantor_amount" class="form-control" placeholder="Amount (optional, {% currency_symbol %})" min="0" step="1000"></div>
                   <button type="button" onclick="this.closest('.row-item').remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 4px;margin-bottom:2px;">✕</button>
                 </div>
               {% endif %}
@@ -138,6 +138,7 @@
               <button type="button" onclick="toggleNewGuarantor(true)" class="btn btn-primary btn-sm">+ Add Guarantor</button>
               <button type="button" onclick="addGuarantor()" class="btn btn-secondary btn-sm">+ Select Existing</button>
             </div>
+            <div class="form-hint">Guaranteed amount is optional. Leave it blank if no specific amount is being recorded.</div>
 
             <div id="new-guarantor-panel" style="display:none;border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:12px;background:var(--surface-2);">
               <div style="font-weight:600;font-size:13px;margin-bottom:10px;">New guarantor</div>

@@ -18,11 +18,12 @@
       </div>
       <button type="button" id="capital-injection-modal-close" class="btn btn-secondary btn-sm">Close</button>
     </div>
-    <div style="padding:20px;">
+    <div id="quick-form-content" style="padding:20px;">
+      {% include "accounts/includes/quick_form_messages.html" %}
       <div class="card">
         <div class="card-body">
           <h3 style="margin-bottom:20px;">{{ title }}</h3>
-          <form method="post">
+          <form method="post" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
             {% csrf_token %}
       <div class="form-grid">
         <div>
@@ -72,7 +73,7 @@
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Update{% else %}Record{% endif %} Injection</button>
-        <a href="{% url 'accounts:capital_injection_list' %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'accounts:capital_injection_list' %}" class="btn btn-secondary" data-quick-form-cancel>Cancel</a>
       </div>
     </form>
   </div>

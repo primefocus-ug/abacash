@@ -5,7 +5,7 @@
 {% block page_title %}{{ branch.name }}{% endblock %}
 
 {% block topbar_actions %}
-  <a href="{% url 'accounts:branch_edit' branch.pk %}" class="btn btn-secondary btn-sm">Edit Branch</a>
+  <a href="{% url 'accounts:branch_edit' branch.pk %}" class="btn btn-secondary btn-sm" hx-get="{% url 'accounts:branch_edit' branch.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Edit Branch</a>
   <a href="{% url 'accounts:branch_list' %}" class="btn btn-secondary btn-sm">All Branches</a>
 {% endblock %}
 
@@ -162,7 +162,7 @@
           <td style="color:var(--red-400)">{{ entry.due_date }}</td>
           <td class="mono" style="color:var(--red-400)">{{ entry.total_payment|money }}</td>
           <td>{{ entry.period_number }}</td>
-          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a></td>
+          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm" hx-get="{% url 'payments:record_for_loan' entry.loan.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Collect</a></td>
         </tr>
         {% endfor %}
       </tbody>

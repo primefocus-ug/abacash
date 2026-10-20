@@ -9,7 +9,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import Client, NextOfKin
 from accounts.audit import log_action
 from accounts.models import AuditLog, Branch
-from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
+from accounts.branch_scope import (
+    scope_to_branch,
+    can_access_branch_object,
+    scope_to_branch_request,
+    get_single_active_branch_id,
+)
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -182,7 +187,7 @@ def client_create(request):
         client_branch = None
         branch_error = None
         if request.user.can("can_view_all_branches"):
-            branch_id = d.get("branch", "").strip()
+            branch_id = d.get("branch", "").strip() or get_single_active_branch_id()
             client_branch = Branch.objects.filter(pk=branch_id, is_active=True).first() if branch_id else None
             if not client_branch:
                 branch_error = "Please select which branch this client belongs to."
@@ -284,6 +289,9 @@ def client_create(request):
         "client":             client_data,
         "duplicates":        duplicates,
         "branches":          Branch.objects.filter(is_active=True).order_by("name"),
+        "selected_branch_id": (
+            request.POST.get("branch") or get_single_active_branch_id()
+        ),
     })
 
 

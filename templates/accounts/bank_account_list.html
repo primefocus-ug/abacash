@@ -4,7 +4,7 @@
 {% block page_title %}Bank Accounts{% endblock %}
 
 {% block topbar_actions %}
-  <a href="{% url 'accounts:bank_account_create' %}" class="btn btn-primary btn-sm">
+  <a href="{% url 'accounts:bank_account_create' %}" class="btn btn-primary btn-sm" hx-get="{% url 'accounts:bank_account_create' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Account
   </a>
@@ -69,7 +69,7 @@
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'accounts:bank_account_edit' acc.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'accounts:bank_account_edit' acc.pk %}" class="btn btn-secondary btn-sm" hx-get="{% url 'accounts:bank_account_edit' acc.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Edit</a>
           </td>
         </tr>
         {% empty %}

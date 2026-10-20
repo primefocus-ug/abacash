@@ -55,6 +55,18 @@ def can_access_branch_object(user, obj, field="branch"):
 SESSION_KEY = "ceo_branch_filter"
 
 
+def get_single_active_branch_id():
+    """Return the sole active branch ID, or None when branch selection is ambiguous."""
+    from accounts.models import Branch
+
+    branch_ids = list(
+        Branch.objects.filter(is_active=True)
+        .order_by("pk")
+        .values_list("pk", flat=True)[:2]
+    )
+    return branch_ids[0] if len(branch_ids) == 1 else None
+
+
 def effective_branch_id(request, param="branch"):
     """Resolve which branch a list/report page should be scoped to.
 
@@ -103,7 +115,8 @@ def resolve_branch_for_write(request, posted_branch_id):
     silently fall into "general" because a dropdown was left blank.
 
     CEOs (and superusers): an explicit choice in the form wins; otherwise the
-    nav switcher's session branch; otherwise None (company-wide). The page's
+    nav switcher's session branch; otherwise the sole active branch is used.
+    If multiple active branches exist, no implicit choice is made. The page's
     ?branch= query param is deliberately ignored here, since it belongs to the
     list filter, not to the record being written.
 
@@ -120,4 +133,4 @@ def resolve_branch_for_write(request, posted_branch_id):
     session_val = request.session.get(SESSION_KEY)
     if session_val and str(session_val).isdigit():
         return int(session_val)
-    return None
+    return get_single_active_branch_id()

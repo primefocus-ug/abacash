@@ -10889,3 +10889,1674 @@ django.template.base.VariableDoesNotExist: Failed lookup for key [name] in <Comp
 2026-10-09 21:23:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-10-09 21:23:57 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/accounts/cash.py changed, reloading.
 2026-10-09 21:24:18 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 16:29:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 16:29:55 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py", line 98, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\models.py", line 525, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-10-18 16:29:55 [ERROR] django.server: "GET / HTTP/1.1" 500 188394
+2026-10-18 16:29:56 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-18 16:29:56 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-10-18 16:45:00 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 16:45:05 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py", line 98, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\models.py", line 525, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-10-18 16:45:05 [ERROR] django.server: "GET / HTTP/1.1" 500 188531
+2026-10-18 16:45:06 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py", line 98, in login_view
+    "company": CompanySettings.get(),
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\models.py", line 525, in get
+    obj, _ = cls.objects.get_or_create(pk=1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "accounts_companysettings" does not exist
+LINE 1: ..., "accounts_companysettings"."updated_by_id" FROM "accounts_...
+                                                             ^
+
+2026-10-18 16:45:06 [ERROR] django.server: "GET / HTTP/1.1" 500 188531
+2026-10-18 17:02:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 17:02:40 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+2026-10-18 17:02:40 [ERROR] django.server: "GET / HTTP/1.1" 500 165374
+2026-10-18 17:02:41 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+2026-10-18 17:02:41 [ERROR] django.server: "GET / HTTP/1.1" 500 165374
+2026-10-18 17:02:53 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+2026-10-18 17:02:53 [ERROR] django.server: "GET / HTTP/1.1" 500 165374
+2026-10-18 17:03:39 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+2026-10-18 17:03:39 [ERROR] django.server: "GET / HTTP/1.1" 500 165374
+2026-10-18 17:03:40 [ERROR] django.request: Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "tenants_domain" does not exist
+LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
+                                                             ^
+
+2026-10-18 17:03:40 [ERROR] django.server: "GET / HTTP/1.1" 500 165374
+2026-10-18 17:04:39 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 17:04:39 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-10-18 17:04:39 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-10-18 17:04:40 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-10-18 17:07:09 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 17:07:12 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 17:08:46 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-10-18 17:08:46 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-10-18 17:08:46 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 28091
+2026-10-18 17:08:47 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-18 17:08:47 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-10-18 17:08:59 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:09:16 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:09:21 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:09:32 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28486
+2026-10-18 17:09:42 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:09:52 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:10:06 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 28477
+2026-10-18 17:10:21 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 17:10:21 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-10-18 17:10:21 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-10-18 17:10:22 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-10-18 17:12:29 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 17:12:29 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-10-18 17:12:29 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-10-18 17:12:30 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-10-18 17:12:30 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-18 17:12:30 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4323
+2026-10-18 17:12:45 [INFO] django.server: "GET / HTTP/1.1" 200 14149
+2026-10-18 17:12:45 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-10-18 17:13:11 [INFO] django.server: "POST / HTTP/1.1" 200 14328
+2026-10-18 17:14:30 [INFO] django.server: "POST / HTTP/1.1" 200 14328
+2026-10-18 17:14:39 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-10-18 17:14:40 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183230
+2026-10-18 17:14:40 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 28490
+2026-10-18 17:14:40 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-18 17:14:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:14:45 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-18 17:14:45 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 148391
+2026-10-18 17:14:45 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183230
+2026-10-18 17:14:50 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 1161
+2026-10-18 17:15:05 [WARNING] django.request: Not Found: /dashboard/
+2026-10-18 17:15:31 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 183230
+2026-10-18 17:15:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:15:38 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 154130
+2026-10-18 17:15:39 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 154130
+2026-10-18 17:15:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:15:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:15:45 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:15:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:15:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183230
+2026-10-18 17:15:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:17:30 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183230
+2026-10-18 17:17:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:22:12 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\config\settings.py changed, reloading.
+2026-10-18 17:22:15 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 17:22:33 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:22:35 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159094
+2026-10-18 17:22:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:22:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:19 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 200 159874
+2026-10-18 17:24:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:33 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:24:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:35 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159094
+2026-10-18 17:24:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:44 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:24:45 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:24:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:46 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159094
+2026-10-18 17:24:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:24:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:27:18 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 200 159864
+2026-10-18 17:27:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:27:21 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:27:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:27:27 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159094
+2026-10-18 17:27:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:29:16 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 154865
+2026-10-18 17:29:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:29:24 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\config\settings.py changed, reloading.
+2026-10-18 17:29:27 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 17:29:43 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159094
+2026-10-18 17:29:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:31:10 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 302 0
+2026-10-18 17:31:11 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 154902
+2026-10-18 17:31:11 [INFO] django.server: "GET /media/dre/photos/client_b021bc5c-ba7a-4a39-b769-7bb0127c1922/ID_JAMES.jpg HTTP/1.1" 200 165689
+2026-10-18 17:31:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:31:35 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 147666
+2026-10-18 17:31:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:31:39 [INFO] django.server: "GET /accounts/guarantors/1/ HTTP/1.1" 200 147871
+2026-10-18 17:31:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:31:49 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183230
+2026-10-18 17:31:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:31:59 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 156890
+2026-10-18 17:32:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:32:02 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 154354
+2026-10-18 17:32:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:32:06 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 17:32:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 17:54:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:12 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 17:54:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 17:54:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:41 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 17:54:41 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 17:54:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:43 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 17:54:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:54:57 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=sKWIXpsqX1aeCIWgGdGaickClgdwnt7pGyKOHQ1l6fzj6ShjT5JKRUWs3z4wTITJ&product=3&principal=600000&term_months=6&frequency=WEEKLY&purpose= HTTP/1.1" 200 10277
+2026-10-18 17:54:58 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158329
+2026-10-18 17:55:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:55:08 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=E5mEiTvUMwIXzF3cu5huWGRCcACdlK0iSTaK2k4PVK723PofHXk4votsUTtdRZMC&product=3&principal=100000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4447
+2026-10-18 17:55:11 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158329
+2026-10-18 17:55:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:55:34 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=FCC8cd8jNSaYhmNsqHYZBckm4tZdDdhNTqqeWEHeW6z3Lw8vDz1zaUWcMMQd9s37&product=3&principal=100000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3159
+2026-10-18 17:55:36 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158310
+2026-10-18 17:55:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:55:46 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 17:55:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:55:56 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 156911
+2026-10-18 17:55:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:00 [INFO] django.server: "GET /accounts/admin-panel/branches/1/edit/ HTTP/1.1" 200 150477
+2026-10-18 17:56:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:05 [INFO] django.server: "POST /accounts/admin-panel/branches/1/edit/ HTTP/1.1" 302 0
+2026-10-18 17:56:06 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 157450
+2026-10-18 17:56:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:12 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 17:56:12 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 17:56:14 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 17:56:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:23 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=xN9NwOQ6Yf7vYMdXdqVZll1zyx45DE3ULBXTgfp17twAsWy0qiYzU3DpgQV59TPe&product=2&principal=300000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4454
+2026-10-18 17:56:25 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=xN9NwOQ6Yf7vYMdXdqVZll1zyx45DE3ULBXTgfp17twAsWy0qiYzU3DpgQV59TPe&product=2&principal=300000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3165
+2026-10-18 17:56:26 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158326
+2026-10-18 17:56:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:56:43 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=itwsPfAe78evBXdYd3S6v35ZzI5W6nUiwhkyzG99gmDA57y1qVVG4LHPh1WWCCGC&product=3&principal=1000000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4486
+2026-10-18 17:56:45 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=itwsPfAe78evBXdYd3S6v35ZzI5W6nUiwhkyzG99gmDA57y1qVVG4LHPh1WWCCGC&product=3&principal=1000000&term_months=2&frequency=MONTHLY&purpose= HTTP/1.1" 200 3176
+2026-10-18 17:56:46 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158310
+2026-10-18 17:56:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:57:17 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 17:57:18 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 17:57:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:57:20 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 17:57:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:57:34 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=8U52w6PDkIaPMTUcISDp8B0JRB04PlExmIT8gxoytWzUg3ffVKGZHjCzzUR4lAqR&product=3&principal=1200000&term_months=6&frequency=MONTHLY&purpose=&action=save_draft HTTP/1.1" 200 4490
+2026-10-18 17:57:37 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=8U52w6PDkIaPMTUcISDp8B0JRB04PlExmIT8gxoytWzUg3ffVKGZHjCzzUR4lAqR&product=3&principal=1200000&term_months=3&frequency=MONTHLY&purpose=&action=save_draft HTTP/1.1" 200 3502
+2026-10-18 17:57:42 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158324
+2026-10-18 17:57:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:59:12 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 154034
+2026-10-18 17:59:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 17:59:15 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 17:59:16 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 17:59:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:00:00 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 18:00:00 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 18:00:02 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 18:00:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:00:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:00:13 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158329
+2026-10-18 18:00:13 [INFO] django.server: - Broken pipe from ('127.0.0.1', 55004)
+2026-10-18 18:00:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:00:21 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 162202
+2026-10-18 18:00:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:28:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 18:28:04 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-18 18:28:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:28:16 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151458
+2026-10-18 18:28:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:28:22 [INFO] django.server: "GET /loans/products/3/edit/ HTTP/1.1" 200 152485
+2026-10-18 18:28:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:36:38 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\models.py changed, reloading.
+2026-10-18 18:36:42 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:37:55 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\models.py changed, reloading.
+2026-10-18 18:37:58 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:38:02 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\migrations\0009_alter_companysettings_processing_fee_method_and_more.py changed, reloading.
+2026-10-18 18:38:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:42:08 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-18 18:42:08 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 304 0
+2026-10-18 18:42:08 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-10-18 18:42:08 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 304 0
+2026-10-18 18:42:18 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-18 18:42:19 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 18:42:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:44:48 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 18:44:48 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 18:44:50 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 18:44:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:44:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:04 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=fQslOerfkOTDddf98Wy0piy5v4jA8GoltEgryF0at2iIHnAclOBAY0aVdnaAEVaF&product=3&principal=46000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4433
+2026-10-18 18:45:10 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158324
+2026-10-18 18:45:10 [INFO] django.server: - Broken pipe from ('127.0.0.1', 59757)
+2026-10-18 18:45:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:23 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151458
+2026-10-18 18:45:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:30 [INFO] django.server: "GET /loans/products/2/edit/ HTTP/1.1" 200 152485
+2026-10-18 18:45:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:43 [INFO] django.server: "POST /loans/products/2/edit/ HTTP/1.1" 302 0
+2026-10-18 18:45:43 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151997
+2026-10-18 18:45:45 [INFO] django.server: "GET /loans/products/2/edit/ HTTP/1.1" 200 152485
+2026-10-18 18:45:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:48 [INFO] django.server: "POST /loans/products/2/edit/ HTTP/1.1" 302 0
+2026-10-18 18:45:48 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151997
+2026-10-18 18:45:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:51 [INFO] django.server: "GET /loans/products/3/edit/ HTTP/1.1" 200 152485
+2026-10-18 18:45:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:45:56 [INFO] django.server: "POST /loans/products/3/edit/ HTTP/1.1" 302 0
+2026-10-18 18:45:56 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151998
+2026-10-18 18:45:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:46:06 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155306
+2026-10-18 18:46:07 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 639
+2026-10-18 18:46:08 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 157727
+2026-10-18 18:46:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:46:21 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\branch_scope.py changed, reloading.
+2026-10-18 18:46:24 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:46:28 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 302 0
+2026-10-18 18:46:29 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 165891
+2026-10-18 18:46:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:46:54 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\branch_scope.py changed, reloading.
+2026-10-18 18:46:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:47:00 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 162042
+2026-10-18 18:47:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:47:05 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 302 0
+2026-10-18 18:47:05 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 165891
+2026-10-18 18:47:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:47:24 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 166480
+2026-10-18 18:47:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:47:38 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 166526
+2026-10-18 18:47:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:47:48 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 166480
+2026-10-18 18:47:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:49:18 [INFO] django.server: "POST /loans/guarantors/quick/ HTTP/1.1" 200 67
+2026-10-18 18:49:21 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 166619
+2026-10-18 18:49:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:50:27 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 302 0
+2026-10-18 18:50:27 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 200 157935
+2026-10-18 18:50:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:50:37 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 200 157390
+2026-10-18 18:50:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:50:40 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 183823
+2026-10-18 18:50:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:50:46 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 156558
+2026-10-18 18:50:48 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 200 162042
+2026-10-18 18:50:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:50:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:00 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 302 0
+2026-10-18 18:51:01 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 165984
+2026-10-18 18:51:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:04 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 302 0
+2026-10-18 18:51:04 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 200 157935
+2026-10-18 18:51:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:07 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=25169e9f-f74a-46f1-87ae-6128313f4ddf HTTP/1.1" 302 0
+2026-10-18 18:51:07 [INFO] django.server: "GET /loans/25169e9f-f74a-46f1-87ae-6128313f4ddf/ HTTP/1.1" 200 167269
+2026-10-18 18:51:08 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\loans\views.py changed, reloading.
+2026-10-18 18:51:12 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:51:13 [INFO] django.server: "POST /loans/25169e9f-f74a-46f1-87ae-6128313f4ddf/approve/ HTTP/1.1" 302 0
+2026-10-18 18:51:14 [INFO] django.server: "GET /loans/25169e9f-f74a-46f1-87ae-6128313f4ddf/ HTTP/1.1" 200 167727
+2026-10-18 18:51:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:20 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185534
+2026-10-18 18:51:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:40 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 157113
+2026-10-18 18:51:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:51:43 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 150371
+2026-10-18 18:51:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:52:15 [INFO] django.server: "POST /accounts/admin-panel/branches/new/ HTTP/1.1" 302 0
+2026-10-18 18:52:15 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 160103
+2026-10-18 18:52:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:52:25 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185681
+2026-10-18 18:52:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:53:51 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 157037
+2026-10-18 18:53:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:53:54 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159241
+2026-10-18 18:53:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:54:46 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 302 0
+2026-10-18 18:54:46 [INFO] django.server: "GET /clients/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 154500
+2026-10-18 18:54:46 [INFO] django.server: "GET /media/dre/photos/client_49c1840b-01e4-4787-8a32-9ca56a68acd0/WhatsApp_Image_2026-09-29_at_6.03.59_PM.jpeg HTTP/1.1" 200 43716
+2026-10-18 18:54:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:54:51 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 157800
+2026-10-18 18:54:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:02 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=vSufQzgVVJfqdquiqnIBUl88tVYRlK0tJGilA0PQ4XEvHAPlDfLbt3KYbePRRZMN&product=3&principal=900000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4482
+2026-10-18 18:55:03 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 158402
+2026-10-18 18:55:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:27 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151543
+2026-10-18 18:55:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:30 [INFO] django.server: "GET /loans/products/3/edit/ HTTP/1.1" 200 152570
+2026-10-18 18:55:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:36 [INFO] django.server: "POST /loans/products/3/edit/ HTTP/1.1" 302 0
+2026-10-18 18:55:36 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 152084
+2026-10-18 18:55:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:38 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 152563
+2026-10-18 18:55:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:50 [INFO] django.server: "POST /loans/products/1/edit/ HTTP/1.1" 302 0
+2026-10-18 18:55:50 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 152081
+2026-10-18 18:55:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:55:57 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155391
+2026-10-18 18:55:57 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1101
+2026-10-18 18:55:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:56:00 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 157800
+2026-10-18 18:56:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:56:10 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=u24Re5643m3skgZZnHseJM9akJDXLbeOIQSXYwFZcAsxOqk2AzvOiuL022uXhq08&product=2&principal=300000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4454
+2026-10-18 18:56:11 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 158383
+2026-10-18 18:56:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:56:27 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 158383
+2026-10-18 18:56:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:58:17 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\loans\views.py changed, reloading.
+2026-10-18 18:58:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:58:34 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\loans\views.py changed, reloading.
+2026-10-18 18:58:36 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 18:58:51 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 302 0
+2026-10-18 18:58:51 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=fRp0cZZOz804ytU2Ya6JEzKLw5ZjrbhxtFd6WqyJImp92Df5b29jdhmBeoQjXq3R&product=2&principal=1000000&term_months=6&frequency=MONTHLY&purpose=&action=continue HTTP/1.1" 200 4480
+2026-10-18 18:58:52 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/step3/ HTTP/1.1" 200 166229
+2026-10-18 18:58:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:58:56 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/step3/ HTTP/1.1" 302 0
+2026-10-18 18:58:56 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/review/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 200 158687
+2026-10-18 18:58:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:59:28 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/step3/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 200 166229
+2026-10-18 18:59:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:59:31 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 200 162691
+2026-10-18 18:59:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 18:59:53 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 302 0
+2026-10-18 18:59:53 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/step3/ HTTP/1.1" 200 166229
+2026-10-18 18:59:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:01:59 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/step3/ HTTP/1.1" 302 0
+2026-10-18 19:02:00 [INFO] django.server: "GET /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/review/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 200 158687
+2026-10-18 19:02:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:02:06 [INFO] django.server: "POST /loans/apply/49c1840b-01e4-4787-8a32-9ca56a68acd0/review/?draft_id=b817f008-32be-4ffb-8c24-b7b740eec110 HTTP/1.1" 302 0
+2026-10-18 19:02:06 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 167373
+2026-10-18 19:02:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:08:33 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185681
+2026-10-18 19:08:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:08:37 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185681
+2026-10-18 19:08:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:08:46 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 157497
+2026-10-18 19:08:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:08:50 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 166839
+2026-10-18 19:08:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:08:54 [INFO] django.server: "POST /loans/b817f008-32be-4ffb-8c24-b7b740eec110/approve/ HTTP/1.1" 302 0
+2026-10-18 19:08:55 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 167825
+2026-10-18 19:08:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:00 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 187547
+2026-10-18 19:09:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:08 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 157706
+2026-10-18 19:09:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:11 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 187547
+2026-10-18 19:09:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:26 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 157610
+2026-10-18 19:09:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:29 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 167291
+2026-10-18 19:09:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:33 [INFO] django.server: "GET /payments/record/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 161357
+2026-10-18 19:09:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:35 [INFO] django.server: "POST /payments/record/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 302 0
+2026-10-18 19:09:36 [INFO] django.server: "GET /payments/receipt/0d1db02c-aa0d-4d5a-8bab-1914239c0cb7/ HTTP/1.1" 200 165038
+2026-10-18 19:09:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:41 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188110
+2026-10-18 19:09:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:09:53 [INFO] django.server: "GET /reports/collections/ HTTP/1.1" 200 149949
+2026-10-18 19:09:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:10:05 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188110
+2026-10-18 19:10:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:16:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185023
+2026-10-18 19:16:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:16:58 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 148225
+2026-10-18 19:17:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:18:25 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185023
+2026-10-18 19:18:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:19:46 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185023
+2026-10-18 19:19:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:21:17 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158678
+2026-10-18 19:21:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:21:22 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185018
+2026-10-18 19:21:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:22:23 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185018
+2026-10-18 19:22:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:22:37 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185018
+2026-10-18 19:22:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:22:54 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158678
+2026-10-18 19:22:56 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 157608
+2026-10-18 19:22:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:23:02 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158678
+2026-10-18 19:23:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:23:05 [INFO] django.server: "GET /accounts/admin-panel/ HTTP/1.1" 200 157611
+2026-10-18 19:23:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:23:11 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185018
+2026-10-18 19:23:11 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-18 19:23:17 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-18 19:26:28 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185527
+2026-10-18 19:26:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:26:32 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185527
+2026-10-18 19:26:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:27:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185527
+2026-10-18 19:27:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:27:24 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185527
+2026-10-18 19:27:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:27:26 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185527
+2026-10-18 19:27:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:27:43 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158678
+2026-10-18 19:27:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:30:07 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185490
+2026-10-18 19:30:08 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-18 19:30:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:30:56 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-18 19:30:56 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-18 19:31:15 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 154121
+2026-10-18 19:31:15 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-18 19:31:15 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-18 19:31:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:00 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 154454
+2026-10-18 19:33:01 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-18 19:33:01 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-18 19:33:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:14 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185823
+2026-10-18 19:33:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:20 [INFO] django.server: "GET /icons/512-maskable.png HTTP/1.1" 200 2357
+2026-10-18 19:33:20 [INFO] django.server: "GET /icons/512.png HTTP/1.1" 200 2983
+2026-10-18 19:33:40 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-18 19:33:46 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185621
+2026-10-18 19:33:46 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 155445
+2026-10-18 19:33:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:52 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-18 19:33:52 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 154454
+2026-10-18 19:33:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185823
+2026-10-18 19:33:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:33:59 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 185823
+2026-10-18 19:34:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:34:16 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156573
+2026-10-18 19:34:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:34:34 [INFO] django.server: "POST /payments/record/ HTTP/1.1" 302 0
+2026-10-18 19:34:34 [INFO] django.server: "GET /payments/receipt/850d31b6-659d-4320-b735-9462c72d8b5c/ HTTP/1.1" 200 165332
+2026-10-18 19:34:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:34:38 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186372
+2026-10-18 19:34:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:35:05 [INFO] django.server: "GET /clients/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 155128
+2026-10-18 19:35:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:43:52 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186372
+2026-10-18 19:43:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:30 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 154454
+2026-10-18 19:44:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:34 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 161894
+2026-10-18 19:44:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:48 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 148235
+2026-10-18 19:44:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:51 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 151840
+2026-10-18 19:44:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:54 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158974
+2026-10-18 19:44:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:44:57 [INFO] django.server: "GET /clients/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 155128
+2026-10-18 19:44:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:46:53 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-18 19:46:54 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186372
+2026-10-18 19:46:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:00 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155687
+2026-10-18 19:47:00 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1104
+2026-10-18 19:47:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:02 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 157904
+2026-10-18 19:47:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:07 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158974
+2026-10-18 19:47:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:09 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186372
+2026-10-18 19:47:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:12 [INFO] django.server: "GET /accounts/dashboard/?period=12 HTTP/1.1" 200 187029
+2026-10-18 19:47:13 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 186045
+2026-10-18 19:47:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:43 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 155687
+2026-10-18 19:47:44 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1104
+2026-10-18 19:47:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:46 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 157904
+2026-10-18 19:47:47 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 158974
+2026-10-18 19:47:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 19:47:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:56:26 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186372
+2026-10-18 23:56:26 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-18 23:56:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:56:53 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 160775
+2026-10-18 23:56:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:57:09 [INFO] django.server: "POST /accounts/admin-panel/transaction-categories/ajax-create/ HTTP/1.1" 200 27
+2026-10-18 23:57:25 [INFO] django.server: "POST /accounts/admin-panel/expense-types/ajax-create/ HTTP/1.1" 200 47
+2026-10-18 23:57:36 [INFO] django.server: "POST /accounts/admin-panel/expenses/ HTTP/1.1" 302 0
+2026-10-18 23:57:36 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 163143
+2026-10-18 23:57:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:57:43 [INFO] django.server: "GET /accounts/admin-panel/expense-types/for-category/?category_id=1 HTTP/1.1" 200 42
+2026-10-18 23:58:04 [INFO] django.server: "POST /accounts/admin-panel/transaction-categories/ajax-create/ HTTP/1.1" 200 25
+2026-10-18 23:58:20 [INFO] django.server: "POST /accounts/admin-panel/expense-types/ajax-create/ HTTP/1.1" 200 44
+2026-10-18 23:58:28 [INFO] django.server: "POST /accounts/admin-panel/expenses/ HTTP/1.1" 302 0
+2026-10-18 23:58:28 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 164797
+2026-10-18 23:58:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:34 [INFO] django.server: "GET /accounts/admin-panel/expenses/1/edit/ HTTP/1.1" 200 151076
+2026-10-18 23:58:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:39 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 164275
+2026-10-18 23:58:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:45 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 149192
+2026-10-18 23:58:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:49 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186500
+2026-10-18 23:58:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:54 [INFO] django.server: "GET /reports/collections/ HTTP/1.1" 200 150634
+2026-10-18 23:58:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-18 23:58:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186500
+2026-10-18 23:58:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:07 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 164447
+2026-10-19 00:00:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:12 [INFO] django.server: "GET /accounts/admin-panel/ HTTP/1.1" 200 158079
+2026-10-19 00:00:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:18 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:00:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:33 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 152830
+2026-10-19 00:00:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:37 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 148407
+2026-10-19 00:00:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:43 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 159146
+2026-10-19 00:00:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:48 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 159709
+2026-10-19 00:00:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:52 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 159146
+2026-10-19 00:00:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:00:54 [INFO] django.server: "GET /clients/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 158293
+2026-10-19 00:00:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:01:05 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 159146
+2026-10-19 00:01:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:01:07 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 158746
+2026-10-19 00:01:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:01:41 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 152936
+2026-10-19 00:01:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:01:45 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 158076
+2026-10-19 00:01:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:01:50 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:01:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:02:23 [INFO] django.server: "GET /accounts/dashboard/?period=12 HTTP/1.1" 200 187329
+2026-10-19 00:02:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:02:27 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 164447
+2026-10-19 00:02:29 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 152936
+2026-10-19 00:02:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:02:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:02:31 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 154626
+2026-10-19 00:02:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:03:42 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-19 00:03:43 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:03:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:03:54 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:03:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:03:58 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:04:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:02 [INFO] django.server: "GET /reports/collections/ HTTP/1.1" 200 150806
+2026-10-19 00:04:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:10 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 186672
+2026-10-19 00:04:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:18 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 188246
+2026-10-19 00:04:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:21 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 188573
+2026-10-19 00:04:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:24 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 188246
+2026-10-19 00:04:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:34 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 188246
+2026-10-19 00:04:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:43 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 150594
+2026-10-19 00:04:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:04:45 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188573
+2026-10-19 00:04:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:17 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 150308
+2026-10-19 00:05:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:25 [INFO] django.server: "GET /accounts/guarantors/1/ HTTP/1.1" 200 150325
+2026-10-19 00:05:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:29 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 163479
+2026-10-19 00:05:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:42 [INFO] django.server: "POST /payments/record/ HTTP/1.1" 302 0
+2026-10-19 00:05:42 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 167563
+2026-10-19 00:05:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:45 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 161050
+2026-10-19 00:05:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:05:51 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 161610
+2026-10-19 00:05:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:03 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 302 0
+2026-10-19 00:07:03 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 159848
+2026-10-19 00:07:04 [INFO] django.server: "GET /media/dre/photos/client_8de2901c-de9c-4216-b0f4-3121d1d8f9c2/PFU_banner.png HTTP/1.1" 200 1057606
+2026-10-19 00:07:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:10 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 159299
+2026-10-19 00:07:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:14 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 160728
+2026-10-19 00:07:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:24 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=6ZtItqE20VlCuSvXvO0ZwUXO6u2gSWJckNhOdRdX99KHY2Q0IG3z5CzEONTgobvw&branch=2&product=3&principal=325000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4460
+2026-10-19 00:07:27 [INFO] django.server: "POST /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 302 0
+2026-10-19 00:07:27 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/step3/ HTTP/1.1" 200 168674
+2026-10-19 00:07:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:44 [INFO] django.server: "POST /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/step3/ HTTP/1.1" 302 0
+2026-10-19 00:07:45 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/review/?draft_id=585b0589-c63f-4d60-83c6-dafc2357b2af HTTP/1.1" 200 161163
+2026-10-19 00:07:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:07:56 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188771
+2026-10-19 00:07:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 00:08:56 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188771
+2026-10-19 00:08:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:36:01 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 162376
+2026-10-19 08:36:02 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-19 08:36:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:36:06 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 151265
+2026-10-19 08:36:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:36:09 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 153555
+2026-10-19 08:36:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:36:48 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 302 0
+2026-10-19 08:36:48 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 152601
+2026-10-19 08:36:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:36:55 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 188777
+2026-10-19 08:36:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:03 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 162710
+2026-10-19 08:37:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:06 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 160152
+2026-10-19 08:37:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:10 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 163386
+2026-10-19 08:37:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:24 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-10-19 08:37:27 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 160152
+2026-10-19 08:37:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:32 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 163386
+2026-10-19 08:37:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:44 [INFO] django.server: "GET /loans/recall/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 302 0
+2026-10-19 08:37:45 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/?draft_id=585b0589-c63f-4d60-83c6-dafc2357b2af HTTP/1.1" 200 165610
+2026-10-19 08:37:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:37:50 [INFO] django.server: "POST /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/?draft_id=585b0589-c63f-4d60-83c6-dafc2357b2af HTTP/1.1" 302 0
+2026-10-19 08:37:51 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/step3/ HTTP/1.1" 200 168820
+2026-10-19 08:37:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:38:02 [INFO] django.server: "POST /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/step3/ HTTP/1.1" 302 0
+2026-10-19 08:38:02 [INFO] django.server: "GET /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/review/?draft_id=585b0589-c63f-4d60-83c6-dafc2357b2af HTTP/1.1" 200 161218
+2026-10-19 08:38:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:38:09 [INFO] django.server: "POST /loans/apply/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/review/?draft_id=585b0589-c63f-4d60-83c6-dafc2357b2af HTTP/1.1" 302 0
+2026-10-19 08:38:09 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 170036
+2026-10-19 08:38:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:38:26 [INFO] django.server: "POST /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/approve/ HTTP/1.1" 302 0
+2026-10-19 08:38:26 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 171375
+2026-10-19 08:38:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:38:34 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-19 08:38:34 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-19 08:38:53 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/regenerate-schedule/ HTTP/1.1" 200 1338
+2026-10-19 08:39:08 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 189743
+2026-10-19 08:39:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:27 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 160790
+2026-10-19 08:39:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:32 [INFO] django.server: "GET /loans/25169e9f-f74a-46f1-87ae-6128313f4ddf/ HTTP/1.1" 200 167397
+2026-10-19 08:39:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:37 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 166975
+2026-10-19 08:39:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:43 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172063
+2026-10-19 08:39:44 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172063
+2026-10-19 08:39:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:46 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=classic HTTP/1.1" 200 166975
+2026-10-19 08:39:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:39:49 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172063
+2026-10-19 08:39:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:40:11 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=classic HTTP/1.1" 200 166975
+2026-10-19 08:40:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:40:16 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 164891
+2026-10-19 08:40:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:40:36 [INFO] django.server: "POST /accounts/admin-panel/settings/ HTTP/1.1" 302 0
+2026-10-19 08:40:37 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 166288
+2026-10-19 08:40:37 [INFO] django.server: "GET /media/dre/company/DERRR.png HTTP/1.1" 200 25559
+2026-10-19 08:40:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:40:43 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 165773
+2026-10-19 08:40:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:41:19 [INFO] django.server: "GET / HTTP/1.1" 200 14225
+2026-10-19 08:41:19 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-10-19 08:41:19 [INFO] django.server: "GET /media/dre/company/DERRR.png HTTP/1.1" 200 25559
+2026-10-19 08:41:20 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-19 08:41:20 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-10-19 08:41:35 [INFO] django.server: "POST / HTTP/1.1" 200 14404
+2026-10-19 08:41:36 [INFO] django.server: "GET /media/dre/company/DERRR.png HTTP/1.1" 304 0
+2026-10-19 08:41:48 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-10-19 08:41:49 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 190394
+2026-10-19 08:41:49 [INFO] django.server: "GET /static/js/aba.js HTTP/1.1" 200 28490
+2026-10-19 08:41:50 [INFO] django.server: "GET /media/dre/company/DERRR.png HTTP/1.1" 304 0
+2026-10-19 08:41:50 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-19 08:41:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:41:51 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 19754
+2026-10-19 08:41:51 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-19 08:41:51 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 151496
+2026-10-19 08:41:53 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 190394
+2026-10-19 08:41:56 [INFO] django.server: "GET /icons/512-maskable.png HTTP/1.1" 200 23897
+2026-10-19 08:41:57 [INFO] django.server: "GET /icons/512.png HTTP/1.1" 200 23035
+2026-10-19 08:42:43 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-19 08:42:45 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 190394
+2026-10-19 08:42:45 [INFO] django.server: "GET /media/dre/company/DERRR.png HTTP/1.1" 304 0
+2026-10-19 08:42:46 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163358
+2026-10-19 08:42:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:42:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:42:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 190394
+2026-10-19 08:42:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:42:58 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/ HTTP/1.1" 200 171631
+2026-10-19 08:43:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:03 [INFO] django.server: "GET /loans/b817f008-32be-4ffb-8c24-b7b740eec110/print/ HTTP/1.1" 200 15345
+2026-10-19 08:43:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:15 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 160845
+2026-10-19 08:43:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:20 [INFO] django.server: "GET /payments/?q=&branch=2 HTTP/1.1" 200 160131
+2026-10-19 08:43:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:23 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 190394
+2026-10-19 08:43:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:32 [INFO] django.server: "GET /loans/?status=PENDING HTTP/1.1" 200 157235
+2026-10-19 08:43:33 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 158411
+2026-10-19 08:43:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:34 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1573
+2026-10-19 08:43:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:40 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 161377
+2026-10-19 08:43:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:43:59 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=9WmIK9K1NVN9ih7RGqtqP6LRtUbtkvzj4sRUmWCV1FVrLIYe6gOVfBsfDSYf3Bs9&branch=2&product=1&principal=200000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4454
+2026-10-19 08:44:03 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 302 0
+2026-10-19 08:44:04 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 200 169229
+2026-10-19 08:44:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:44:13 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/step3/ HTTP/1.1" 302 0
+2026-10-19 08:44:14 [INFO] django.server: "GET /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=af492788-eb61-463a-9160-951490684491 HTTP/1.1" 200 161035
+2026-10-19 08:44:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:44:18 [INFO] django.server: "POST /loans/apply/b021bc5c-ba7a-4a39-b769-7bb0127c1922/review/?draft_id=af492788-eb61-463a-9160-951490684491 HTTP/1.1" 302 0
+2026-10-19 08:44:18 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 170371
+2026-10-19 08:44:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:44:46 [INFO] django.server: "POST /loans/af492788-eb61-463a-9160-951490684491/approve/ HTTP/1.1" 302 0
+2026-10-19 08:44:46 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 171709
+2026-10-19 08:44:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:45:02 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 191213
+2026-10-19 08:45:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:48:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 08:48:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:51:04 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-19 08:51:10 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-19 08:51:30 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 08:51:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:51:32 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 08:51:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:51:36 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 192026
+2026-10-19 08:51:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:51:40 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 157178
+2026-10-19 08:51:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:51:44 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 162702
+2026-10-19 08:51:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:02 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 150959
+2026-10-19 08:52:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:05 [INFO] django.server: "GET /accounts/guarantors/1/ HTTP/1.1" 200 151021
+2026-10-19 08:52:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:13 [INFO] django.server: "GET /accounts/guarantors/1/edit/ HTTP/1.1" 200 151939
+2026-10-19 08:52:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:21 [INFO] django.server: "POST /accounts/guarantors/1/edit/ HTTP/1.1" 302 0
+2026-10-19 08:52:21 [INFO] django.server: "GET /accounts/guarantors/1/ HTTP/1.1" 200 151557
+2026-10-19 08:52:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:26 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 166999
+2026-10-19 08:52:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:30 [INFO] django.server: "GET /accounts/admin-panel/expenses/1/edit/ HTTP/1.1" 200 153800
+2026-10-19 08:52:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:52:37 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 166999
+2026-10-19 08:52:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:14 [INFO] django.server: "GET /accounts/admin-panel/expenses/2/edit/ HTTP/1.1" 200 153808
+2026-10-19 08:53:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:17 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 166999
+2026-10-19 08:53:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:19 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 155488
+2026-10-19 08:53:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:29 [INFO] django.server: "POST /accounts/admin-panel/expense-types/ HTTP/1.1" 302 0
+2026-10-19 08:53:30 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 156767
+2026-10-19 08:53:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:38 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 152710
+2026-10-19 08:53:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:42 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 154206
+2026-10-19 08:53:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:45 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 152710
+2026-10-19 08:53:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:47 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 154206
+2026-10-19 08:53:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 08:53:50 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 152710
+2026-10-19 08:53:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 15:00:39 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 15:00:39 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-19 15:00:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 15:00:53 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 162192
+2026-10-19 15:00:53 [INFO] django.server: "GET /media/dre/photos/client_b021bc5c-ba7a-4a39-b769-7bb0127c1922/ID_JAMES.jpg HTTP/1.1" 200 165689
+2026-10-19 15:00:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 15:01:00 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 171175
+2026-10-19 15:01:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 15:01:13 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/print/ HTTP/1.1" 200 15286
+2026-10-19 15:01:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 19:51:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-19 20:10:40 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-19 20:10:40 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-10-19 20:10:40 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-10-19 20:10:41 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-10-19 20:10:41 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-19 20:10:41 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-10-19 20:10:43 [WARNING] django.request: Not Found: /sw.js
+2026-10-19 20:10:43 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4301
+2026-10-19 20:10:48 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-19 20:10:49 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 20:10:49 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-19 20:10:50 [WARNING] django.request: Not Found: /favicon.ico
+2026-10-19 20:10:50 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-10-19 20:10:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 20:10:57 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 157178
+2026-10-19 20:10:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 20:11:00 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 167492
+2026-10-19 20:11:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 20:11:09 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 164361
+2026-10-19 20:11:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 20:11:16 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-19 20:11:16 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-19 20:11:25 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163355
+2026-10-19 20:11:26 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-19 20:11:26 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-19 20:11:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 20:11:31 [INFO] django.server: "GET /accounts/admin-panel/bank-accounts/ HTTP/1.1" 200 152198
+2026-10-19 20:11:31 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-19 20:11:31 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-19 20:11:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:54:17 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-10-19 21:54:19 [WARNING] django.request: Not Found: /sw.js
+2026-10-19 21:54:19 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 4301
+2026-10-19 21:54:25 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-10-19 21:54:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 21:54:27 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-19 21:54:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:54:40 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 192026
+2026-10-19 21:54:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:54:59 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163355
+2026-10-19 21:55:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:55:02 [INFO] django.server: "GET /clients/49c1840b-01e4-4787-8a32-9ca56a68acd0/ HTTP/1.1" 200 160845
+2026-10-19 21:55:02 [INFO] django.server: "GET /media/dre/photos/client_49c1840b-01e4-4787-8a32-9ca56a68acd0/WhatsApp_Image_2026-09-29_at_6.03.59_PM.jpeg HTTP/1.1" 200 43716
+2026-10-19 21:55:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:55:15 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-19 21:55:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-19 21:55:23 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 167492
+2026-10-19 21:55:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:17:57 [INFO] django.server: "GET /accounts/dashboard/?source=pwa HTTP/1.1" 200 192353
+2026-10-20 08:17:58 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-20 08:18:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:18:05 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 162238
+2026-10-20 08:18:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:18:09 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-20 08:18:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:20:10 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 192026
+2026-10-20 08:20:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:34:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-20 08:34:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:35:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 192353
+2026-10-20 08:35:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:38:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 193627
+2026-10-20 08:38:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:39:05 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 193627
+2026-10-20 08:39:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:39:09 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 193627
+2026-10-20 08:39:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:39:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:39:40 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 193627
+2026-10-20 08:39:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 193627
+2026-10-20 08:39:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:40:03 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:40:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:40:21 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:40:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:40:53 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:40:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:41:24 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:41:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:41:55 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:41:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:42:26 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:42:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:42:57 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:42:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:43:28 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:43:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:44:00 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:44:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:44:31 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:44:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:45:03 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:45:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:45:34 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:45:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:46:05 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:46:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:46:37 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:46:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:47:09 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:47:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:47:40 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:47:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:47:49 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193300
+2026-10-20 08:47:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:48:18 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 08:48:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 08:48:48 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 08:48:53 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 08:49:22 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193891
+2026-10-20 08:49:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:49:45 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 194176
+2026-10-20 08:49:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:50:16 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 194176
+2026-10-20 08:50:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:50:46 [INFO] django.server: "GET /loans/25169e9f-f74a-46f1-87ae-6128313f4ddf/ HTTP/1.1" 200 168048
+2026-10-20 08:50:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:52:38 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 167750
+2026-10-20 08:52:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:52:46 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172478
+2026-10-20 08:52:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:53:20 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-20 08:53:20 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 173527
+2026-10-20 08:53:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:53:24 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-20 08:53:25 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 172478
+2026-10-20 08:53:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:53:32 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=classic HTTP/1.1" 200 167750
+2026-10-20 08:53:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:53:36 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172478
+2026-10-20 08:53:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:54:30 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=classic HTTP/1.1" 200 167750
+2026-10-20 08:54:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:54:32 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172478
+2026-10-20 08:54:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:54:43 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=classic HTTP/1.1" 200 167750
+2026-10-20 08:54:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:54:50 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/?style=modern HTTP/1.1" 200 172478
+2026-10-20 08:54:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:55:05 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 194176
+2026-10-20 08:55:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:55:26 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 193891
+2026-10-20 08:55:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:55:29 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 194176
+2026-10-20 08:55:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:55:59 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 157178
+2026-10-20 08:56:00 [INFO] django.server: "GET /accounts/dashboard/?period=6 HTTP/1.1" 200 194176
+2026-10-20 08:56:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:56:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:56:02 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 167492
+2026-10-20 08:56:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:56:12 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 163489
+2026-10-20 08:56:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:56:16 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 171175
+2026-10-20 08:56:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:56:28 [INFO] django.server: "GET /payments/record/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 164375
+2026-10-20 08:56:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 08:58:05 [INFO] django.server: "GET /payments/record/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 164375
+2026-10-20 08:58:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:03:29 [INFO] django.server: "GET /payments/record/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 164375
+2026-10-20 09:03:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:04:43 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 195564
+2026-10-20 09:04:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:05:00 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163355
+2026-10-20 09:05:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:05:04 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 160823
+2026-10-20 09:05:04 [INFO] django.server: "GET /media/dre/photos/client_8de2901c-de9c-4216-b0f4-3121d1d8f9c2/PFU_banner.png HTTP/1.1" 200 1057606
+2026-10-20 09:05:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:05:08 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 171492
+2026-10-20 09:05:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:05:36 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 150960
+2026-10-20 09:05:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:05:41 [INFO] django.server: "GET /accounts/guarantors/new/ HTTP/1.1" 200 151811
+2026-10-20 09:05:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:06:41 [INFO] django.server: "POST /accounts/guarantors/new/ HTTP/1.1" 302 0
+2026-10-20 09:06:41 [INFO] django.server: "GET /accounts/guarantors/3/ HTTP/1.1" 200 151500
+2026-10-20 09:06:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:06:45 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 151149
+2026-10-20 09:06:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:07:31 [INFO] django.server: "GET /accounts/guarantors/2/ HTTP/1.1" 200 150971
+2026-10-20 09:07:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:07:37 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 156231
+2026-10-20 09:07:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:07:41 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 167082
+2026-10-20 09:07:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:07:57 [INFO] django.server: "POST /accounts/admin-panel/expense-types/ajax-create/ HTTP/1.1" 200 41
+2026-10-20 09:08:00 [INFO] django.server: "GET /accounts/admin-panel/expense-types/for-category/?category_id=2 HTTP/1.1" 200 72
+2026-10-20 09:08:12 [INFO] django.server: "POST /accounts/admin-panel/expenses/ HTTP/1.1" 302 0
+2026-10-20 09:08:12 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 169099
+2026-10-20 09:08:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:08:33 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 157178
+2026-10-20 09:08:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:08:36 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 157105
+2026-10-20 09:08:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:08:47 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 161090
+2026-10-20 09:08:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:08:50 [INFO] django.server: "GET /payments/receipt/850d31b6-659d-4320-b735-9462c72d8b5c/ HTTP/1.1" 200 172366
+2026-10-20 09:08:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:11:29 [INFO] django.server: "GET /payments/receipt/850d31b6-659d-4320-b735-9462c72d8b5c/?style=classic HTTP/1.1" 200 167632
+2026-10-20 09:11:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:11:31 [INFO] django.server: "GET /payments/receipt/850d31b6-659d-4320-b735-9462c72d8b5c/?style=modern HTTP/1.1" 200 172366
+2026-10-20 09:11:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:13:39 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 161090
+2026-10-20 09:13:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:13:44 [INFO] django.server: "GET /payments/receipt/8de9dd51-e82e-49e8-83eb-1296421737ad/ HTTP/1.1" 200 172478
+2026-10-20 09:13:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:17:37 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163355
+2026-10-20 09:17:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:17:44 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 160823
+2026-10-20 09:17:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:17:48 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 171492
+2026-10-20 09:17:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:17:54 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 164379
+2026-10-20 09:17:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:18:07 [INFO] django.server: "POST /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 302 0
+2026-10-20 09:18:07 [INFO] django.server: "GET /payments/receipt/703bdde2-52c3-4b4c-ac32-83a5d7525cb6/ HTTP/1.1" 200 172918
+2026-10-20 09:18:07 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-20 09:18:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:22:09 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 163355
+2026-10-20 09:22:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:26:52 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 162261
+2026-10-20 09:26:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:27:14 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 163489
+2026-10-20 09:27:17 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 195604
+2026-10-20 09:27:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:27:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 195604
+2026-10-20 09:27:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:28:08 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 195319
+2026-10-20 09:28:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:28:23 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 162192
+2026-10-20 09:28:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:28:37 [INFO] django.server: "GET /payments/credit-refund/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 151976
+2026-10-20 09:28:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 09:33:59 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 09:34:07 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 09:36:40 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 09:36:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 09:40:07 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 09:40:16 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:07:25 [INFO] django.server: "GET /payments/credit-refund/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 153121
+2026-10-20 10:07:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:07:31 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 196708
+2026-10-20 10:07:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:07:36 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 159508
+2026-10-20 10:07:37 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 10:07:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:07:56 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 162961
+2026-10-20 10:07:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:19 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 170064
+2026-10-20 10:13:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:23 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 164448
+2026-10-20 10:13:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:29 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 164580
+2026-10-20 10:13:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:36 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 159508
+2026-10-20 10:13:37 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 159508
+2026-10-20 10:13:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:38 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 10:13:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:54 [INFO] django.server: "GET /loans/?q=&status=&staff= HTTP/1.1" 200 164606
+2026-10-20 10:13:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:13:57 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 158271
+2026-10-20 10:14:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:14:02 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 170563
+2026-10-20 10:14:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:15:18 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\accounts\views.py changed, reloading.
+2026-10-20 10:15:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:24:51 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 159821
+2026-10-20 10:24:52 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-20 10:24:52 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 10:24:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:24:54 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 164893
+2026-10-20 10:24:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:24:57 [INFO] django.server: "GET /loans/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 173700
+2026-10-20 10:25:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:25:00 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:25:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:25:14 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:25:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:25:36 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:25:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:25:47 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:25:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:26:40 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:26:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:32:16 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:32:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:32:24 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\payments\urls.py changed, reloading.
+2026-10-20 10:32:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:32:41 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\payments\views.py changed, reloading.
+2026-10-20 10:32:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:32:48 [INFO] django.server: "GET /payments/record/585b0589-c63f-4d60-83c6-dafc2357b2af/ HTTP/1.1" 200 165830
+2026-10-20 10:32:49 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\payments\views.py changed, reloading.
+2026-10-20 10:32:51 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:33:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197021
+2026-10-20 10:33:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:33:26 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 196745
+2026-10-20 10:33:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:33:56 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 196745
+2026-10-20 10:33:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:34:27 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 196745
+2026-10-20 10:34:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:34:59 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 196745
+2026-10-20 10:35:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:35:30 [INFO] django.server: "GET /accounts/dashboard/?period=3 HTTP/1.1" 200 196993
+2026-10-20 10:35:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:35:39 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:35:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:35:43 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 10:35:43 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 10:35:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:36:00 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-20 10:36:00 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-20 10:36:06 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197269
+2026-10-20 10:36:06 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-20 10:36:06 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-20 10:36:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:36:57 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\common\pdf_utils.py changed, reloading.
+2026-10-20 10:37:00 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:37:28 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 10:37:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:37:59 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 10:38:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:38:10 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 10:38:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:38:14 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\common\pdf_utils.py changed, reloading.
+2026-10-20 10:38:16 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:38:39 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:38:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:38:57 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\AI-CODED\abacash\common\pdf_utils.py changed, reloading.
+2026-10-20 10:38:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 10:44:21 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:44:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:23 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 10:44:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:28 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 10:44:28 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 10:44:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:32 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156098
+2026-10-20 10:44:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:35 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 165976
+2026-10-20 10:44:41 [INFO] django.server: "GET /payments/receipt/0d1db02c-aa0d-4d5a-8bab-1914239c0cb7/ HTTP/1.1" 200 174066
+2026-10-20 10:44:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:45 [INFO] django.server: "GET /payments/receipt/0d1db02c-aa0d-4d5a-8bab-1914239c0cb7/?style=classic HTTP/1.1" 200 169348
+2026-10-20 10:44:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:49 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156098
+2026-10-20 10:44:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:44:58 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 10:45:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:45:02 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 173013
+2026-10-20 10:45:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:45:05 [INFO] django.server: "GET /payments/record/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 166061
+2026-10-20 10:46:49 [INFO] django.server: "GET /payments/record/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 166061
+2026-10-20 10:46:53 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156098
+2026-10-20 10:46:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:46:57 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 165976
+2026-10-20 10:47:10 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 10:47:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:17 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 10:50:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:34 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:50:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:39 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 158832
+2026-10-20 10:50:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:46 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156098
+2026-10-20 10:50:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:51 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:50:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:55 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 10:50:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:50:59 [INFO] django.server: "GET /accounts/admin-panel/ HTTP/1.1" 200 162298
+2026-10-20 10:51:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:03 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 154930
+2026-10-20 10:51:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:07 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 164641
+2026-10-20 10:51:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:11 [INFO] django.server: "GET /accounts/admin-panel/branches/new/ HTTP/1.1" 200 155342
+2026-10-20 10:51:20 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 154930
+2026-10-20 10:51:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:23 [INFO] django.server: "GET /accounts/admin-panel/users/new/ HTTP/1.1" 200 156395
+2026-10-20 10:51:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:32 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 10:51:33 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:51:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:35 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 163919
+2026-10-20 10:51:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:42 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 10:51:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 10:51:46 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 163883
+2026-10-20 10:51:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

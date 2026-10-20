@@ -57,6 +57,8 @@
   </div>
 </div>
 
+{% include "accounts/includes/dashboard_live_refresh.html" %}
+
 <style>
   .cash-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; padding:0; border:0; background:none; color:inherit; cursor:pointer; text-align:left; }
   .cash-toggle > span:last-child { font-size:20px; transition:transform .2s ease; }
@@ -223,7 +225,7 @@
           <td style="color:var(--red-400)">{{ entry.due_date }}</td>
           <td class="mono" style="color:var(--red-400)">{{ entry.total_payment|money }}</td>
           <td>{{ entry.period_number }}</td>
-          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a></td>
+          <td><a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm" hx-get="{% url 'payments:record_for_loan' entry.loan.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Collect</a></td>
         </tr>
         {% endfor %}
       </tbody>

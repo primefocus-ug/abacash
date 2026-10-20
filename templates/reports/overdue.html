@@ -59,7 +59,7 @@
           <td class="mono" style="color:var(--green-400)">{{ row.entry.amount_paid|ugx_plain }}</td>
           <td class="mono fw-500" style="color:var(--red-400)">{{ row.overdue_amount|ugx_plain }}</td>
           <td>
-            <a href="{% url 'payments:record_for_loan' row.entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a>
+            <a href="{% url 'payments:record_for_loan' row.entry.loan.pk %}" class="btn btn-primary btn-sm" hx-get="{% url 'payments:record_for_loan' row.entry.loan.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Collect</a>
           </td>
         </tr>
         {% endfor %}

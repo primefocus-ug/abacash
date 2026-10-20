@@ -87,7 +87,7 @@
           <td class="text-sm">{{ expense.created_by.full_name|default:"—" }}</td>
           <td style="text-align:right;">
             <div class="row-actions">
-              <a href="{% url 'accounts:expense_edit' expense.pk %}" class="btn-icon" onclick="event.stopPropagation()" title="Edit">
+              <a href="{% url 'accounts:expense_edit' expense.pk %}" class="btn-icon" hx-get="{% url 'accounts:expense_edit' expense.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML" onclick="event.stopPropagation()" title="Edit">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </a>
               <a href="{% url 'accounts:expense_delete' expense.pk %}" class="btn-icon btn-icon-danger" onclick="event.stopPropagation()" title="Delete">
@@ -128,8 +128,9 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <form method="post" action="">
+    <form method="post" action="" hx-post="{{ request.get_full_path }}" hx-target="#expense-modal" hx-select="#expense-modal" hx-swap="outerHTML">
       {% csrf_token %}
+      {% include "accounts/includes/quick_form_messages.html" %}
       <div class="modal-body" style="display:grid;gap:16px;">
         <div class="form-row">
           <div>
@@ -380,5 +381,12 @@ document.querySelectorAll('.clickable-row[data-href]').forEach(function(row) {
 {% if show_modal %}
 document.addEventListener('DOMContentLoaded', function() { openModal('expense-modal'); });
 {% endif %}
+if (!window.expenseModalHandlersInstalled) {
+  window.expenseModalHandlersInstalled = true;
+  document.body.addEventListener('quickFormSaved', function() { closeModal('expense-modal'); });
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'expense-modal') openModal('expense-modal');
+  });
+}
 </script>
 {% endblock %}

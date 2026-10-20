@@ -33,6 +33,23 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+### Terminal debug logging
+
+With `DEBUG=True` in `.env`, the development console shows `DEBUG` and higher
+logs with their logger name and source line, for example
+`[DEBUG   ] accounts.views:42 | ...`. Use a module logger in application code
+to emit a diagnostic:
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+logger.debug("Loaded %s records", records.count())
+```
+
+Keep credentials, passwords, tokens, and other sensitive values out of log
+messages. Production (`DEBUG=False`) keeps debug-level console output disabled.
+
 ## Setup (Ubuntu VPS production)
 
 ```bash

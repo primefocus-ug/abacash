@@ -5,8 +5,13 @@
 {% block page_title %}Record Payment{% endblock %}
 
 {% block content %}
+{% if request.htmx %}
+<div id="quick-form-content">
+  <div id="payment-modal">
+{% else %}
 <div id="payment-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
   <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:720px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+{% endif %}
     <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
       <div>
         <h2 style="margin:0;">Record Payment</h2>
@@ -18,7 +23,8 @@
       <div class="card">
         <div class="card-header"><span class="card-title">Payment Details</span></div>
         <div class="card-body">
-          <form method="post">
+          {% if request.htmx and payment_error %}<div class="alert alert-error" role="alert">{{ payment_error }}</div>{% endif %}
+          <form method="post" {% if request.htmx %}hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML"{% endif %}>
             {% csrf_token %}
 
         {% if not loan %}
@@ -27,7 +33,7 @@
           <select name="loan_id" id="loan_id" required class="select2-init form-control">
             <option value="">— Search for loan —</option>
             {% for l in active_loans %}
-            <option value="{{ l.pk }}" data-outstanding="{{ l.outstanding_balance }}" data-next-due="{{ l.next_due_amount }}">
+            <option value="{{ l.pk }}" data-outstanding="{{ l.outstanding_balance }}" data-next-due="{{ l.next_due_amount }}" {% if selected_loan_id == l.pk|stringformat:"s" %}selected{% endif %}>
               {{ l.loan_number }} — {{ l.client.full_name }} ({{ l.outstanding_balance|money }} outstanding)
             </option>
             {% endfor %}
@@ -51,7 +57,7 @@
         <div class="form-group">
           <label for="amount">Amount Received ({% currency_symbol %})</label>
           <input type="number" name="amount" id="amount" min="0" step="0.01"
-                 placeholder="e.g. 250000" required autofocus class="form-control" value="{{ loan.next_due_amount|default_if_none:'' }}">
+                 placeholder="e.g. 250000" required autofocus class="form-control" value="{% if posted_amount %}{{ posted_amount }}{% else %}{{ loan.next_due_amount|default_if_none:'' }}{% endif %}">
           <small class="text-muted">Enter any amount received from the client</small>
           <div id="payment-balance-summary" class="text-muted text-sm mt-2"></div>
 
@@ -98,15 +104,15 @@
         <div class="form-row">
           <div class="form-group">
             <label for="payment_date">Payment Date</label>
-            <input type="date" name="payment_date" id="payment_date" value="{{ today }}" required class="form-control">
+            <input type="date" name="payment_date" id="payment_date" value="{% if posted_payment_date %}{{ posted_payment_date }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" required class="form-control">
           </div>
           <div class="form-group">
             <label for="payment_method">Payment Method</label>
             <select name="payment_method" id="payment_method" class="select2-init form-control">
-              <option value="CASH">Cash</option>
-              <option value="MOMO">Mobile Money (MTN/Airtel)</option>
-              <option value="BANK">Bank Transfer</option>
-              <option value="OTHER">Other</option>
+              <option value="CASH" {% if posted_payment_method == 'CASH' %}selected{% endif %}>Cash</option>
+              <option value="MOMO" {% if posted_payment_method == 'MOMO' %}selected{% endif %}>Mobile Money (MTN/Airtel)</option>
+              <option value="BANK" {% if posted_payment_method == 'BANK' %}selected{% endif %}>Bank Transfer</option>
+              <option value="OTHER" {% if posted_payment_method == 'OTHER' %}selected{% endif %}>Other</option>
             </select>
           </div>
         </div>
@@ -114,7 +120,7 @@
         <div class="form-group">
           <label for="reference_number">Reference / Transaction Number</label>
           <input type="text" name="reference_number" id="reference_number"
-                 placeholder="Mobile money ID or bank ref (optional)" class="form-control">
+                 placeholder="Mobile money ID or bank ref (optional)" class="form-control" value="{{ posted_reference_number }}">
         </div>
 
         <div class="flex gap-2 mt-3">
@@ -126,7 +132,6 @@
       </div>
     </div>
   </div>
-</div>
 <style>
   .payment-warning-shell {
     display: flex;
@@ -165,7 +170,7 @@
   }
 </style>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+(function () {
     const closeBtn = document.getElementById('payment-modal-close');
     const modal = document.getElementById('payment-modal');
     const loanElement = document.getElementById('loan_id');
@@ -173,14 +178,23 @@
     const warningBox = document.getElementById('payment-warning');
     const balanceSummary = document.getElementById('payment-balance-summary');
 
+    function closePaymentDialog() {
+      const sharedModal = document.getElementById('modal');
+      if (sharedModal && sharedModal.getAttribute('aria-hidden') === 'false' && window.hideModal) {
+        window.hideModal();
+      } else if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
     closeBtn?.addEventListener('click', function () {
       // Hide the modal instead of immediately navigating away — prevents accidental redirects
-      if (modal) modal.style.display = 'none';
+      closePaymentDialog();
     });
     modal?.addEventListener('click', function (event) {
       // Only hide modal when clicking the backdrop itself
       if (event.target === modal) {
-        if (modal) modal.style.display = 'none';
+        closePaymentDialog();
       }
     });
 
@@ -282,7 +296,7 @@
     }
 
     // Stop propagation for other interactive fields inside the modal to avoid accidental backdrop clicks
-    document.querySelectorAll('#payment-modal input, #payment-modal select, #payment-modal textarea, #payment-modal .select2-init').forEach(function(el){
+    modal?.querySelectorAll('input, select, textarea, .select2-init').forEach(function(el){
       el.addEventListener('click', function(e){ e.stopPropagation(); });
       el.addEventListener('dblclick', function(e){ e.stopPropagation(); });
       el.addEventListener('mousedown', function(e){ e.stopPropagation(); });
@@ -290,7 +304,7 @@
 
     // Wire the Cancel button to hide the modal (rather than navigate away)
     const paymentCancelBtn = document.getElementById('payment-cancel-btn');
-    paymentCancelBtn?.addEventListener('click', function(){ if (modal) modal.style.display = 'none'; });
+    paymentCancelBtn?.addEventListener('click', closePaymentDialog);
 
     // Transfer credit UI wiring (if present)
     const enableTransferCheckbox = document.getElementById('enable-transfer');
@@ -328,6 +342,7 @@
     `;
 
     updatePaymentWarning();
-  });
+  })();
 </script>
+{% if request.htmx %}</div></div>{% else %}</div></div>{% endif %}
 {% endblock %}

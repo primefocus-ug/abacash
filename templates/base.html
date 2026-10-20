@@ -27,8 +27,16 @@
          prompt to show, even though it becomes visible. -->
     <script>
         window.__pwaDeferredPrompt = null;
-        window.__pwaIsInstalled = window.matchMedia('(display-mode: standalone)').matches ||
-            window.navigator.standalone === true;
+        var installedDisplayModes = [
+            'standalone',
+            'minimal-ui',
+            'fullscreen',
+            'window-controls-overlay'
+        ];
+        window.__pwaIsInstalled = window.navigator.standalone === true ||
+            installedDisplayModes.some(function (mode) {
+                return window.matchMedia('(display-mode: ' + mode + ')').matches;
+            });
 
         function pwaIsInstalled() {
             if (window.__pwaIsInstalled) return Promise.resolve(true);
@@ -67,6 +75,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     {% block extra_css %}{% endblock %}
 
@@ -752,6 +762,10 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        #pwaInstallBtn[hidden] {
+            display: none !important;
         }
 
         /* ── ALERTS ─────────────────────────────────────────────── */
@@ -1523,32 +1537,38 @@
             }
         }
 
-        /* Narrow phones: topbar title + action buttons (Download/Print/Back)
-           no longer fit on one row. Keep the topbar a single fixed-height
-           row — ellipsize the title and let the actions become a swipeable
-           strip, the same horizontal-scroll pattern used by the filter
-           bars, instead of wrapping and breaking the topbar height. */
+        /* On narrow screens, keep the title and every header action visible
+           by stacking them and allowing action buttons to wrap. */
         @media (max-width: 640px) {
+            .topbar {
+                height: auto;
+                min-height: var(--topbar-h);
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 10px 12px;
+            }
+
             .topbar-title {
+                flex: 0 0 100%;
                 min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+                overflow-wrap: anywhere;
+                white-space: normal;
             }
 
             .topbar-actions {
-                flex-shrink: 0;
-                max-width: 62vw;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
+                width: 100%;
+                max-width: none;
+                flex-wrap: wrap;
+                gap: 8px;
+                overflow: visible;
             }
 
-            .topbar-actions::-webkit-scrollbar {
-                display: none;
+            .topbar-actions > * {
+                max-width: 100%;
             }
 
-            .topbar-actions .btn {
+            .topbar-actions .btn,
+            .topbar-actions form {
                 white-space: nowrap;
                 flex-shrink: 0;
             }
@@ -3414,7 +3434,75 @@
             }
         }
 
+        @keyframes page-enter {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-body {
+            animation: page-enter .32s cubic-bezier(.2, .7, .2, 1) both;
+        }
+
+        .btn {
+            transition: transform .16s ease, box-shadow .2s ease, filter .16s ease;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px) scale(.98);
+            filter: brightness(.96);
+        }
+
+        .btn:focus-visible,
+        .nav-link:focus-visible,
+        .nav-group-toggle:focus-visible,
+        .bottom-nav .nav-item:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .card {
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+
+        .metric-icon-wrap {
+            transition: transform .22s cubic-bezier(.2, .7, .2, 1);
+        }
+
+        .aba-table tbody tr {
+            transition: background-color .16s ease;
+        }
+
+        @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+            .card:not(.modal):hover {
+                transform: translateY(-2px);
+                box-shadow: 0 14px 32px rgba(15, 23, 42, .1);
+            }
+
+            .metric-card:hover .metric-icon-wrap {
+                transform: translateY(-2px) scale(1.06) rotate(-3deg);
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+
+            .page-body {
+                animation: none;
+            }
+
             .clickable-row:hover {
                 box-shadow: none !important;
             }
@@ -3571,6 +3659,7 @@
                     </a>
 
                     <a href="{% url 'payments:record' %}"
+                       hx-get="{% url 'payments:record' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML"
                        class="nav-link {% if ns == 'payments' and name == 'record' or ns == 'payments' and name == 'record_for_loan' %}active{% endif %}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <rect x="1" y="4" width="22" height="16" rx="2"/>
@@ -3907,7 +3996,11 @@
         </div>
 
         <!-- Page content -->
-        <div class="page-body">
+        <div class="page-body" id="page-body"
+             hx-get="{{ request.get_full_path }}"
+             hx-trigger="quickFormSaved from:body"
+             hx-select="#page-body"
+             hx-swap="outerHTML">
             {% block content %}{% endblock %}
         </div>
 
@@ -4061,6 +4154,7 @@
                 </a>
 
                 <a href="{% url 'payments:record' %}"
+                   hx-get="{% url 'payments:record' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML"
                    class="more-sheet-link {% if ns == 'payments' and name == 'record' or ns == 'payments' and name == 'record_for_loan' %}active{% endif %}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <rect x="1" y="4" width="22" height="16" rx="2"/>
@@ -4469,10 +4563,34 @@
         document.addEventListener('click', function (e) {
             if (e.target && e.target.id === 'modal-backdrop') hideModal();
             if (e.target && e.target.id === 'modal-close') hideModal();
+            var cancelLink = e.target && e.target.closest ? e.target.closest('[data-quick-form-cancel]') : null;
+            var modal = document.getElementById('modal');
+            if (cancelLink && modal && modal.getAttribute('aria-hidden') === 'false') {
+                e.preventDefault();
+                hideModal();
+            }
         });
         document.body.addEventListener('htmx:afterSwap', function (evt) {
             var target = evt.detail.target;
             if (target && target.id === 'modal-body') showModal();
+        });
+        document.body.addEventListener('quickFormSaved', function () {
+            hideModal();
+        });
+        document.body.addEventListener('quickFormNotice', function (evt) {
+            var alerts = document.querySelector('.alerts-wrap');
+            if (!alerts || !evt.detail || !evt.detail.message) return;
+            var notice = document.createElement('div');
+            notice.className = 'alert alert-success';
+            notice.setAttribute('data-autohide', '');
+            notice.textContent = evt.detail.message;
+            alerts.appendChild(notice);
+            setTimeout(function () {
+                notice.style.transition = 'opacity .4s ease, transform .4s ease';
+                notice.style.opacity = '0';
+                notice.style.transform = 'translateY(-4px)';
+                setTimeout(function () { notice.remove(); }, 400);
+            }, 5000);
         });
         document.body.addEventListener('htmx:afterRequest', function (evt) {
             if (evt.detail.xhr && evt.detail.xhr.status >= 400) {

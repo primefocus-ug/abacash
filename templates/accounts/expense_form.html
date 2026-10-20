@@ -9,15 +9,17 @@
 {% endblock %}
 
 {% block content %}
+<div id="quick-form-content">
+  {% include "accounts/includes/quick_form_messages.html" %}
 <div class="card" style="max-width:640px;">
   <div class="card-header"><span class="card-title">{{ title }}</span></div>
   <div class="card-body">
-    <form method="post" style="display:grid;gap:16px;">
+    <form method="post" style="display:grid;gap:16px;" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
       {% csrf_token %}
       <div class="form-row">
         <div>
           <label>Category</label>
-          <select id="form-category" name="category" onchange="loadTypes(this.value)">
+          <select id="form-category" name="category">
             <option value="">— Select Category —</option>
             {% for cat in categories %}
               <option value="{{ cat.pk }}" {% if expense.category_id == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
@@ -62,42 +64,58 @@
       </div>
       <div style="display:flex;gap:10px;">
         <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Update{% else %}Record{% endif %} Expense</button>
-        <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary" data-quick-form-cancel>Cancel</a>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-const URL_TYPES = '{% url "accounts:expense_types_for_category" %}';
+(function () {
+  var typesUrl = '{% url "accounts:expense_types_for_category" %}';
+  var formContent = document.getElementById('quick-form-content');
+  if (!formContent) return;
+  var categorySelect = formContent.querySelector('#form-category');
+  var typeSelect = formContent.querySelector('#form-type');
+  if (!categorySelect || !typeSelect) return;
 
-function loadTypes(categoryId) {
-  var sel = document.getElementById('form-type');
-  sel.innerHTML = '<option value="">— Select Type —</option>';
-  if (!categoryId) return;
-  fetch(URL_TYPES + '?category_id=' + categoryId)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      data.types.forEach(function(t) {
-        var o = document.createElement('option');
-        o.value = t.id; o.textContent = t.name;
-        sel.appendChild(o);
+  function loadTypes(categoryId) {
+    typeSelect.innerHTML = '<option value="">— Select Type —</option>';
+    if (!categoryId) return;
+    fetch(typesUrl + '?category_id=' + encodeURIComponent(categoryId))
+      .then(function (response) {
+        if (!response.ok) throw new Error('Could not load expense types.');
+        return response.json();
+      })
+      .then(function (data) {
+        data.types.forEach(function (type) {
+          var option = document.createElement('option');
+          option.value = type.id;
+          option.textContent = type.name;
+          option.dataset.cat = categoryId;
+          typeSelect.appendChild(option);
+        });
+      })
+      .catch(function () {
+        typeSelect.innerHTML = '<option value="">Could not load types</option>';
       });
-    });
-}
-
-/* On edit: filter type options to only show the selected category's types */
-document.addEventListener('DOMContentLoaded', function() {
-  var catSel  = document.getElementById('form-category');
-  var typeSel = document.getElementById('form-type');
-  var selectedCat = catSel.value;
-  if (selectedCat) {
-    var currentType = typeSel.value;
-    Array.from(typeSel.options).forEach(function(o) {
-      if (o.value && o.dataset.cat && o.dataset.cat !== selectedCat) o.style.display = 'none';
-    });
-    typeSel.value = currentType;
   }
-});
+
+  categorySelect.addEventListener('change', function () {
+    loadTypes(categorySelect.value);
+  });
+
+  var selectedCategory = categorySelect.value;
+  if (selectedCategory) {
+    var selectedType = typeSelect.value;
+    Array.from(typeSelect.options).forEach(function (option) {
+      if (option.value && option.dataset.cat && option.dataset.cat !== selectedCategory) {
+        option.style.display = 'none';
+      }
+    });
+    typeSelect.value = selectedType;
+  }
+})();
 </script>
+</div>
 {% endblock %}

@@ -48,6 +48,20 @@
     </div>
   </div>
 
+  {% if collateral_items %}
+  <div style="padding:12px 14px;border-bottom:1px solid var(--border);">
+    <div class="metric-label" style="margin-bottom:8px;">Collateral pledged</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;">
+      {% for item in collateral_items %}
+      <div class="text-sm" style="padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;">
+        <div>{{ item.description }}</div>
+        <div class="text-muted">{{ item.estimated_value|floatformat:0|intcomma }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="table-wrap" style="overflow-x:auto; padding:8px 10px 12px;">
     <table class="aba-table" style="font-size:12px; margin-bottom:0;">
       <thead>

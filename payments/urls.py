@@ -8,6 +8,7 @@ urlpatterns = [
     path("record/",                  views.record_payment, name="record"),
     path("record/<uuid:loan_pk>/",   views.record_payment, name="record_for_loan"),
     path("receipt/<uuid:pk>/",       views.receipt_view,   name="receipt"),
+    path("receipt/combined/<uuid:transfer_pk>/<uuid:payment_pk>/", views.combined_receipt_view, name="combined_receipt"),
     path("history/<uuid:loan_pk>/",  views.payment_history,name="history"),
     path("credit-refund/<uuid:client_pk>/", views.credit_refund, name="credit_refund"),
 ]

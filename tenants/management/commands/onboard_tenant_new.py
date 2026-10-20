@@ -173,7 +173,7 @@ class Command(BaseCommand):
         return log_file
 
     def _seed_settings(self, name, phone, address, plan_cfg, company_email):
-        from accounts.models import CompanySettings
+        from accounts.models import CompanySettings, DEFAULT_PROCESSING_FEE_RANGES
         _, created = CompanySettings.objects.get_or_create(pk=1, defaults={
             "company_name": name,
             "company_phone": phone,
@@ -181,8 +181,8 @@ class Command(BaseCommand):
             "company_email": company_email,
             "manager_approval_limit": plan_cfg["manager_limit"],
             "max_active_loans_per_client": plan_cfg["max_loans"],
-            "processing_fee_method": "PERCENTAGE",
-            "default_processing_fee_percent": "1.00",
+            "processing_fee_method": "RANGE",
+            "processing_fee_ranges": DEFAULT_PROCESSING_FEE_RANGES,
             "currency_symbol": "UGX",
         })
         self.stdout.write(f"    ✔  CompanySettings {'created' if created else 'exists'}")

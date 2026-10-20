@@ -19,8 +19,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from accounts.models import CompanySettings
-from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request, resolve_branch_for_write
+from accounts.models import Branch, CompanySettings
+from accounts.branch_scope import (
+    SESSION_KEY,
+    scope_to_branch,
+    can_access_branch_object,
+    scope_to_branch_request,
+    resolve_branch_for_write,
+)
 from clients.models import Client
 from .models import (
     Loan,
@@ -106,13 +112,53 @@ def _build_security_data(loan=None):
         }
     collateral_items = list(loan.collateral_items.values("description", "estimated_value"))
     guarantor_rows = [
-        {"guarantor_id": str(g.guarantor_id), "amount": str(g.guaranteed_amount)}
+        {
+            "guarantor_id": str(g.guarantor_id),
+            "amount": str(g.guaranteed_amount) if g.guaranteed_amount else "",
+        }
         for g in loan.guarantees.filter(is_active=False)
     ]
     return {
         "collateral_items": collateral_items,
         "guarantor_rows": guarantor_rows,
     }
+
+
+def _resolve_loan_branch(request, client, posted_branch_id):
+    """Resolve an active loan branch, defaulting privileged users to the client's branch."""
+    can_choose_branch = request.user.is_superuser or request.user.can("can_view_all_branches")
+
+    if can_choose_branch and posted_branch_id:
+        branch = Branch.objects.filter(pk=posted_branch_id, is_active=True).first()
+        if branch is None:
+            raise ValueError("Select an active branch for this loan.")
+        return branch.pk
+
+    branch_id = resolve_branch_for_write(request, None if can_choose_branch else posted_branch_id)
+    if branch_id:
+        branch = Branch.objects.filter(pk=branch_id, is_active=True).first()
+        if branch is not None:
+            return branch.pk
+
+    if can_choose_branch and client.branch_id:
+        branch = Branch.objects.filter(pk=client.branch_id, is_active=True).first()
+        if branch is not None:
+            return branch.pk
+
+    raise ValueError("Select an active branch for this loan.")
+
+
+def _parse_optional_guarantor_amount(amount):
+    """Return zero when omitted; validate a supplied guarantee amount."""
+    if not amount:
+        return Decimal("0")
+    try:
+        parsed_amount = Decimal(amount)
+    except (ValueError, ArithmeticError) as exc:
+        raise ValueError("the amount must be a positive number.") from exc
+    if parsed_amount <= 0:
+        raise ValueError("the amount must be a positive number.")
+    return parsed_amount
 
 
 # ------------------------------------------------------------------ #
@@ -216,6 +262,8 @@ def loan_apply_step2(request, client_id):
         can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and request.user.can("can_approve_loans"))
 
     products = LoanProduct.objects.filter(is_active=True)
+    active_branches = Branch.objects.filter(is_active=True).order_by("name")
+    can_choose_branch = request.user.is_superuser or request.user.can("can_view_all_branches")
     company_default_fee = CompanySettings.get().default_processing_fee_percent
 
     loan = _get_client_loan_draft(client)
@@ -264,9 +312,7 @@ def loan_apply_step2(request, client_id):
             loan.purpose = purpose
 
             # Set on every save, including reused drafts that were saved with no branch.
-            loan.branch_id = resolve_branch_for_write(request, data.get("branch"))
-            if loan.branch_id is None:
-                raise ValueError("Select a branch before creating a loan.")
+            loan.branch_id = _resolve_loan_branch(request, client, data.get("branch"))
 
             schedule_rows, totals, processing_fee, fee_percent, fee_source = build_loan_schedule_context(
                 principal=principal,
@@ -317,9 +363,27 @@ def loan_apply_step2(request, client_id):
             import logging
             logging.error(f"Error generating schedule for loan {loan.id}: {e}")
 
+    selected_branch_id = ""
+    if can_choose_branch:
+        requested_branch_id = request.POST.get("branch", "").strip() if request.method == "POST" else ""
+        if requested_branch_id:
+            selected_branch_id = requested_branch_id
+        elif loan and loan.branch_id:
+            selected_branch_id = str(loan.branch_id)
+        elif request.session.get(SESSION_KEY):
+            selected_branch_id = str(request.session[SESSION_KEY])
+        elif client.branch_id:
+            selected_branch_id = str(client.branch_id)
+        else:
+            from accounts.branch_scope import get_single_active_branch_id
+            selected_branch_id = str(get_single_active_branch_id() or "")
+
     return render(request, "loans/apply_step2.html", {
         "client": client,
         "products": products,
+        "branches": active_branches if can_choose_branch else (),
+        "can_choose_branch": can_choose_branch,
+        "selected_branch_id": selected_branch_id,
         "schedule_rows": schedule_rows,
         "totals": totals,
         "form_data": form_data,
@@ -547,19 +611,15 @@ def loan_apply_step3(request, client_id):
                 if not gid:
                     guarantor_errors.append(f"Guarantor row {index}: choose a guarantor.")
                     continue
-                if not amt:
-                    guarantor_errors.append(f"Guarantor row {index}: enter the guaranteed amount.")
-                    continue
                 try:
-                    if Decimal(amt) <= 0:
-                        raise ValueError
-                except (ValueError, ArithmeticError):
-                    guarantor_errors.append(f"Guarantor row {index}: the amount must be a positive number.")
+                    parsed_amount = _parse_optional_guarantor_amount(amt)
+                except ValueError as exc:
+                    guarantor_errors.append(f"Guarantor row {index}: {exc}")
                     continue
                 if not Guarantor.objects.filter(pk=gid, is_active=True).exists():
                     guarantor_errors.append(f"Guarantor row {index}: that guarantor is not active or does not exist.")
                     continue
-                guarantor_rows.append({"guarantor_id": gid, "amount": amt})
+                guarantor_rows.append({"guarantor_id": gid, "amount": str(parsed_amount)})
             if guarantor_errors:
                 raise ValueError(" ".join(guarantor_errors))
 
@@ -668,7 +728,10 @@ def loan_apply_review(request, client_id):
 
     collateral_items = list(loan.collateral_items.values("description", "estimated_value"))
     guarantor_rows = [
-        {"guarantor": g.guarantor, "amount": g.guaranteed_amount}
+        {
+            "guarantor": g.guarantor,
+            "amount": g.guaranteed_amount if g.guaranteed_amount else None,
+        }
         for g in loan.guarantees.filter(is_active=False)
     ]
 
@@ -787,7 +850,11 @@ def loan_edit(request, pk):
         "purpose": loan.purpose,
         "collateral_items": list(loan.collateral_items.values("description", "estimated_value")) if hasattr(loan, 'collateral_items') else [],
         "guarantor_rows": [
-            {"guarantor_id": str(g.guarantor_id), "amount": str(g.guaranteed_amount)} for g in loan.guarantees.all()
+            {
+                "guarantor_id": str(g.guarantor_id),
+                "amount": str(g.guaranteed_amount) if g.guaranteed_amount else "",
+            }
+            for g in loan.guarantees.all()
         ],
     }
 
@@ -892,13 +959,13 @@ def loan_edit(request, pk):
                 # Create new guarantees
                 new_guarantees = []
                 for gid, amt in zip(guarantor_ids, guarantor_amounts):
-                    if not gid or not amt:
+                    if not gid:
                         continue
                     try:
                         g = Guarantor.objects.get(pk=gid, is_active=True)
                     except Guarantor.DoesNotExist:
                         continue
-                    ga = Decimal(str(amt))
+                    ga = _parse_optional_guarantor_amount(amt)
                     if g.available_capacity < ga and g.max_liability != 0:
                         raise ValueError(f"Guarantor {g} does not have enough available capacity for UGX {ga}")
                     new_guarantees.append(LoanGuarantee(guarantor=g, loan=loan, guaranteed_amount=ga))

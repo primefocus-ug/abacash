@@ -12,7 +12,9 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from loans.models import Loan, LoanSchedule
@@ -67,6 +69,7 @@ def record_payment(request, loan_pk=None):
         Loan.objects.filter(status="ACTIVE"), request.user
     ).select_related("client").order_by("client__last_name")
     selected_loan = None
+    payment_error = None
 
     if request.method == "POST":
         try:
@@ -378,6 +381,16 @@ def record_payment(request, loan_pk=None):
             # If a transfer occurred and produced a transfer_receipt, render a combined receipt view
             try:
                 if transfer_receipt is not None:
+                    if request.headers.get("HX-Request") == "true":
+                        return HttpResponse(
+                            status=204,
+                            headers={
+                                "HX-Redirect": reverse(
+                                    "payments:combined_receipt",
+                                    kwargs={"transfer_pk": transfer_receipt.pk, "payment_pk": receipt.pk},
+                                )
+                            },
+                        )
                     # Render combined receipts for printing/viewing
                     return render(request, "payments/combined_receipt.html", {
                         "receipts": [transfer_receipt, receipt],
@@ -387,11 +400,18 @@ def record_payment(request, loan_pk=None):
                 # If something goes wrong rendering combined receipts, fall back to single receipt redirect
                 logger.exception("Failed to render combined receipt for payment=%s", payment.pk)
 
+            if request.headers.get("HX-Request") == "true":
+                return HttpResponse(
+                    status=204,
+                    headers={"HX-Redirect": reverse("payments:receipt", kwargs={"pk": receipt.pk})},
+                )
             return redirect("payments:receipt", pk=receipt.pk)
 
         except ValueError as e:
+            payment_error = f"Payment Error: {e}"
             messages.error(request, f"Payment Error: {str(e)}")
         except TypeError as e:
+            payment_error = f"Invalid input: {e}"
             messages.error(request, f"Invalid input: {str(e)}")
         except Exception as e:
             logger.exception(
@@ -400,6 +420,7 @@ def record_payment(request, loan_pk=None):
                 request.user,
                 request.POST.get("amount", ""),
             )
+            payment_error = "Unexpected server error while recording payment. The issue has been logged."
             messages.error(request, "Unexpected server error while recording payment. The issue has been logged.")
 
         # If submitted from the list-page modal, re-render the list with the modal open
@@ -432,6 +453,12 @@ def record_payment(request, loan_pk=None):
         "active_loans": active_loans,
         "today":        date.today(),
         "client_other_loans": client_other_loans,
+        "payment_error": payment_error,
+        "posted_amount": request.POST.get("amount", ""),
+        "posted_payment_date": request.POST.get("payment_date", ""),
+        "posted_payment_method": request.POST.get("payment_method", "CASH"),
+        "posted_reference_number": request.POST.get("reference_number", ""),
+        "selected_loan_id": request.POST.get("loan_id", ""),
     })
 
 
@@ -488,6 +515,34 @@ def receipt_view(request, pk):
         filename = f"Receipt-{receipt.receipt_number}.pdf"
         return render_pdf_response(request, "payments/receipt.html", context, filename=filename)
     return render(request, "payments/receipt.html", context)
+
+
+@login_required
+def combined_receipt_view(request, transfer_pk, payment_pk):
+    receipts = list(
+        Receipt.objects.select_related(
+            "payment__loan__client",
+            "payment__loan__product",
+            "payment__loan__branch",
+            "payment__recorded_by",
+        ).filter(pk__in=[transfer_pk, payment_pk])
+    )
+    receipts_by_id = {receipt.pk: receipt for receipt in receipts}
+    transfer_receipt = receipts_by_id.get(transfer_pk)
+    payment_receipt = receipts_by_id.get(payment_pk)
+    if not transfer_receipt or not payment_receipt:
+        raise Http404
+    if (
+        transfer_receipt.payment.client_id != payment_receipt.payment.client_id
+        or not can_access_branch_object(request.user, transfer_receipt.payment.loan)
+        or not can_access_branch_object(request.user, payment_receipt.payment.loan)
+    ):
+        messages.error(request, "Those receipts cannot be viewed together.")
+        return redirect("payments:list")
+    return render(request, "payments/combined_receipt.html", {
+        "receipts": [transfer_receipt, payment_receipt],
+        "auto_print": True,
+    })
 
 
 @login_required

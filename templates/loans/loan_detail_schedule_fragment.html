@@ -26,6 +26,25 @@
       {% endif %}
     </span>
   </div>
+  {% with loan.collateral_items.all as collateral_items %}
+  {% if collateral_items %}
+  <div style="padding:12px 18px;border-bottom:1px solid var(--border);">
+    <div class="text-sm fw-500" style="margin-bottom:8px;">Collateral pledged</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;">
+      {% for item in collateral_items %}
+      <div style="padding:9px 11px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;">
+        <div>{{ item.description }}</div>
+        <div class="text-sm text-muted">{{ item.estimated_value|floatformat:0|intcomma }}</div>
+        {% if item.document_number %}<div class="text-sm text-muted">Document: {{ item.document_number }}</div>{% endif %}
+        {% if item.storage_location %}<div class="text-sm text-muted">Held at: {{ item.storage_location }}</div>{% endif %}
+        {% if item.notes %}<div class="text-sm text-muted">{{ item.notes }}</div>{% endif %}
+        {% if item.release_date %}<div class="text-sm text-muted">Released {{ item.release_date }}{% if item.released_to %} to {{ item.released_to }}{% endif %}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
   <div class="table-wrap">
     <table class="aba-table schedule-table">
       <thead>

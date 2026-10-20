@@ -11,19 +11,121 @@ from accounts.models import CompanySettings
 from clients.models import Client
 from loans import views as loan_views
 from loans.models import Loan, LoanProduct
-from loans.utils import resolve_processing_fee_rate
+from loans.utils import calculate_processing_fee_amount, resolve_processing_fee_rate
 
 
 class ProcessingFeeResolutionTests(SimpleTestCase):
+    def test_new_company_settings_use_default_range_fees(self):
+        settings = CompanySettings()
+        self.assertEqual(settings.processing_fee_method, "RANGE")
+        self.assertEqual(
+            settings.processing_fee_ranges,
+            "0-50000:4000\n"
+            "100000-200000:8000\n"
+            "200001-300001:10000\n"
+            "300001-450000:12000\n"
+            "450001-600000:15000\n"
+            "600001-800000:20000\n"
+            "800001-1000000:30000\n"
+            "1000001-:40000",
+        )
+
+    def test_range_fees_match_configured_inclusive_tiers_and_gaps(self):
+        settings = CompanySettings()
+        cases = (
+            ("50000", "4000"),
+            ("50001", "0"),
+            ("99999", "0"),
+            ("100000", "8000"),
+            ("200000", "8000"),
+            ("200001", "10000"),
+            ("300001", "10000"),
+            ("300002", "12000"),
+            ("450000", "12000"),
+            ("450001", "15000"),
+            ("600001", "20000"),
+            ("800001", "30000"),
+            ("1000000", "30000"),
+            ("1000001", "40000"),
+        )
+
+        for principal, expected_fee in cases:
+            with self.subTest(principal=principal):
+                self.assertEqual(
+                    calculate_processing_fee_amount(Decimal(principal), company_settings=settings),
+                    Decimal(expected_fee),
+                )
+
     def test_uses_product_rate_when_available(self):
         product = SimpleNamespace(processing_fee_percent=Decimal("1.50"))
 
         self.assertEqual(resolve_processing_fee_rate(product), Decimal("1.50"))
 
     def test_falls_back_to_company_default_when_product_is_missing(self):
-        settings = CompanySettings(default_processing_fee_percent=Decimal("2.25"))
+        settings = CompanySettings(
+            processing_fee_method="PERCENTAGE",
+            default_processing_fee_percent=Decimal("2.25"),
+        )
 
         self.assertEqual(resolve_processing_fee_rate(None, settings), Decimal("2.25"))
+
+
+class OptionalGuarantorAmountTests(SimpleTestCase):
+    def test_blank_guaranteed_amount_is_allowed(self):
+        self.assertEqual(loan_views._parse_optional_guarantor_amount(""), Decimal("0"))
+
+    def test_supplied_guaranteed_amount_must_be_positive(self):
+        self.assertEqual(
+            loan_views._parse_optional_guarantor_amount("25000"),
+            Decimal("25000"),
+        )
+        with self.assertRaisesMessage(ValueError, "positive number"):
+            loan_views._parse_optional_guarantor_amount("0")
+        with self.assertRaisesMessage(ValueError, "positive number"):
+            loan_views._parse_optional_guarantor_amount("not-a-number")
+
+
+class LoanBranchResolutionTests(SimpleTestCase):
+    @patch("loans.views.resolve_branch_for_write", return_value=None)
+    @patch("loans.views.Branch.objects.filter")
+    def test_privileged_user_defaults_to_clients_active_branch(self, branch_filter, _resolver):
+        client_branch = SimpleNamespace(pk=12)
+        branch_filter.return_value.first.return_value = client_branch
+        client = SimpleNamespace(branch_id=12)
+        request = SimpleNamespace(
+            user=SimpleNamespace(is_superuser=True),
+            session={},
+        )
+
+        self.assertEqual(loan_views._resolve_loan_branch(request, client, ""), 12)
+        branch_filter.assert_called_once_with(pk=12, is_active=True)
+
+    @patch("loans.views.Branch.objects.filter")
+    def test_privileged_user_can_select_an_active_branch(self, branch_filter):
+        branch_filter.return_value.first.return_value = SimpleNamespace(pk=15)
+        request = SimpleNamespace(
+            user=SimpleNamespace(
+                is_superuser=False,
+                can=lambda permission: permission == "can_view_all_branches",
+            ),
+            session={},
+        )
+
+        self.assertEqual(loan_views._resolve_loan_branch(request, SimpleNamespace(branch_id=12), "15"), 15)
+        branch_filter.assert_called_once_with(pk="15", is_active=True)
+
+    def test_staff_remain_restricted_to_their_assigned_branch(self):
+        request = SimpleNamespace(
+            user=SimpleNamespace(is_superuser=False, can=lambda _permission: False, branch_id=21),
+            session={},
+        )
+        with (
+            patch("loans.views.resolve_branch_for_write", return_value=21) as resolver,
+            patch("loans.views.Branch.objects.filter") as branch_filter,
+        ):
+            branch_filter.return_value.first.return_value = SimpleNamespace(pk=21)
+            self.assertEqual(loan_views._resolve_loan_branch(request, SimpleNamespace(branch_id=12), ""), 21)
+        resolver.assert_called_once_with(request, "")
 
 
 class LoanListStaffFilterTests(TestCase):

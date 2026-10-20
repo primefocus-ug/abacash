@@ -52,9 +52,21 @@ else:
         default="postgres://postgres:@Developer25@localhost:5432/lendip_db"
     )
 
-DATABASES = {
-    "default": _database_from_url(DATABASE_URL)
-}
+if DEBUG and not config("DATABASE_URL", default=None):
+    # Keep the DB_* convenience settings confined to local development.
+    # Production continues to use the existing DATABASE_URL fallback above.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django_tenants.postgresql_backend",
+            "NAME": config("DB_NAME", default="lendip_db"),
+            "USER": config("DB_USER", default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default=""),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": str(config("DB_PORT", default=5432, cast=int)),
+        }
+    }
+else:
+    DATABASES = {"default": _database_from_url(DATABASE_URL)}
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
@@ -197,11 +209,16 @@ LOGGING = {
             "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
+        "terminal": {
+            "format": "%(asctime)s [%(levelname)-8s] %(name)s:%(lineno)d | %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
     },
     "handlers": {
         "console": {
+            "level": "DEBUG" if DEBUG else "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "terminal",
         },
         "file": {
             "level": "INFO",
@@ -228,19 +245,23 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console", "file"],
-            "level": "INFO",
+            "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "payments": {
             "handlers": ["console", "payments_file"],
-            "level": "ERROR",
+            "level": "DEBUG" if DEBUG else "ERROR",
             "propagate": False,
         },
         "tenants": {
             "handlers": ["console", "onboarding_file"],
-            "level": "INFO",
+            "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG" if DEBUG else "WARNING",
     },
 }
 

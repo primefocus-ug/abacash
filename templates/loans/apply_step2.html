@@ -61,6 +61,20 @@
               hx-include="#loan-form">
           {% csrf_token %}
 
+          {% if can_choose_branch %}
+          <div class="form-group">
+            <label for="branch">Branch <span style="color:var(--danger);">*</span></label>
+            <select name="branch" id="branch" required>
+              <option value="">— Select branch —</option>
+              {% for branch in branches %}
+              <option value="{{ branch.pk }}" {% if selected_branch_id == branch.pk|stringformat:"s" %}selected{% endif %}>
+                {{ branch.name }} ({{ branch.code }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
           <div class="form-group">
             <label for="product">Loan Product <span style="color:var(--danger);">*</span></label>
             <select name="product" id="product" class="select2-init" required>

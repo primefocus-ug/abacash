@@ -78,7 +78,7 @@
           <select name="branch" id="branch">
             <option value="">— No branch —</option>
             {% for b in branches %}
-            <option value="{{ b.pk }}" {% if staff.branch_id == b.pk %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
+            <option value="{{ b.pk }}" {% if staff.branch_id == b.pk or selected_branch_id|stringformat:'s' == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
             {% endfor %}
           </select>
           <div class="form-hint">Cashiers and Managers only see clients, loans, and payments for their assigned branch. CEOs see every branch regardless of this setting.</div>

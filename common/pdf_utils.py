@@ -130,6 +130,7 @@ def render_pdf_response(request, template_name, context, filename="document.pdf"
 def generate_loan_schedule_pdf(loan):
     """Generate PDF for a loan schedule."""
     from datetime import datetime
+    from xml.sax.saxutils import escape
 
     styles = getSampleStyleSheet()
     normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=9, spaceAfter=2)
@@ -145,6 +146,23 @@ def generate_loan_schedule_pdf(loan):
     story.append(Paragraph(f"<b>Loan:</b> {loan.loan_number} | <b>Client:</b> {loan.client.full_name} | <b>Amount:</b> UGX {loan.principal_amount:,.0f}", normal))
     story.append(Paragraph(f"<b>Product:</b> {loan.product.name} | <b>Status:</b> {loan.get_status_display()}", normal))
     story.append(Spacer(1, 8))
+
+    collateral_items = loan.collateral_items.all()
+    if collateral_items.exists():
+        story.append(Paragraph("<b>Collateral pledged</b>", normal))
+        for item in collateral_items:
+            details = [escape(item.description), f"UGX {item.estimated_value:,.0f}"]
+            if item.document_number:
+                details.append(f"Document: {escape(item.document_number)}")
+            if item.storage_location:
+                details.append(f"Held at: {escape(item.storage_location)}")
+            if item.notes:
+                details.append(escape(item.notes))
+            if item.release_date:
+                released_to = f" to {escape(item.released_to)}" if item.released_to else ""
+                details.append(f"Released {item.release_date}{released_to}")
+            story.append(Paragraph(" — ".join(details), small))
+        story.append(Spacer(1, 8))
 
     # Schedule table
     schedule_items = getattr(loan, "schedule", None)

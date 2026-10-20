@@ -158,8 +158,8 @@
 
       <div class="form-group">
         <label for="processing_fee_ranges">Processing Fee Ranges</label>
-        <textarea name="processing_fee_ranges" id="processing_fee_ranges" rows="5" placeholder="0-500000:5000&#10;500001-1000000:10000">{{ s.processing_fee_ranges }}</textarea>
-        <div class="form-hint">Enter each range as MIN-MAX:AMOUNT per line. Use a blank upper limit such as 500001-:10000 for an 'and above' tier.</div>
+        <textarea name="processing_fee_ranges" id="processing_fee_ranges" rows="8" placeholder="0-50000:4000&#10;100000-200000:8000&#10;200001-300001:10000&#10;300001-450000:12000&#10;450001-600000:15000&#10;600001-800000:20000&#10;800001-1000000:30000&#10;1000001-:40000">{{ s.processing_fee_ranges }}</textarea>
+        <div class="form-hint">Enter each range as MIN-MAX:AMOUNT per line. Endpoints are inclusive, unmatched amounts have no range fee, and the first matching range wins. Use a blank upper limit such as 1000001-:40000 for an 'and above' tier.</div>
       </div>
 
       <div class="form-row">

@@ -5,7 +5,7 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block topbar_actions %}
-  <a href="{% url 'payments:record' %}" class="btn btn-primary btn-sm">
+  <a href="{% url 'payments:record' %}" class="btn btn-primary btn-sm" hx-get="{% url 'payments:record' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Record Payment
   </a>
@@ -65,7 +65,7 @@
           <td>Period {{ entry.period_number }}</td>
           <td><span class="badge badge-muted">{{ entry.get_status_display }}</span></td>
           <td>
-            <a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm">Collect</a>
+            <a href="{% url 'payments:record_for_loan' entry.loan.pk %}" class="btn btn-primary btn-sm" hx-get="{% url 'payments:record_for_loan' entry.loan.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Collect</a>
           </td>
         </tr>
         {% endfor %}

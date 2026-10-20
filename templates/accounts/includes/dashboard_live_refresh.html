@@ -1,0 +1,83 @@
+<div id="dashboard-live-status" class="text-sm text-muted" role="status" aria-live="polite" style="text-align:right;margin:8px 0">
+  Dashboard data refreshes automatically every 30 seconds.
+</div>
+<script>
+  (function () {
+    const refreshInterval = 30000;
+    const retryInterval = 5000;
+    const status = document.getElementById('dashboard-live-status');
+    let refreshTimer;
+    let lastActivity = Date.now();
+    const dirtyForms = new WeakSet();
+
+    if (status) {
+      status.textContent = 'Loaded at ' + new Date().toLocaleTimeString() +
+        ' · auto-refreshes every 30 seconds.';
+    }
+
+    function hasSelectedText() {
+      const selection = window.getSelection();
+      return Boolean(selection && !selection.isCollapsed);
+    }
+
+    function dialogIsOpen() {
+      const sharedModal = document.getElementById('modal');
+      if (sharedModal && sharedModal.getAttribute('aria-hidden') === 'false') return true;
+      return Array.from(document.querySelectorAll('.modal-overlay, #payment-modal'))
+        .some(dialog => window.getComputedStyle(dialog).display !== 'none');
+    }
+
+    function formIsBeingEdited() {
+      const activeElement = document.activeElement;
+      return Boolean(
+        dialogIsOpen() ||
+        (activeElement && activeElement.closest('form')) ||
+        Array.from(document.forms).some(form => dirtyForms.has(form))
+      );
+    }
+
+    function scheduleRefresh(delay) {
+      window.clearTimeout(refreshTimer);
+      if (document.visibilityState !== 'visible') return;
+      refreshTimer = window.setTimeout(refreshDashboard, delay);
+    }
+
+    function refreshDashboard() {
+      if (document.visibilityState !== 'visible') return;
+      const idleFor = Date.now() - lastActivity;
+      if (formIsBeingEdited() || hasSelectedText() || idleFor < refreshInterval) {
+        if (status) status.textContent = 'Refresh paused while you are interacting with the page.';
+        scheduleRefresh(retryInterval);
+        return;
+      }
+      window.location.reload();
+    }
+
+    function noteActivity(event) {
+      lastActivity = Date.now();
+      if (event && event.target && event.target.form &&
+          (event.type === 'input' || event.type === 'change')) {
+        dirtyForms.add(event.target.form);
+      }
+      if (status) status.textContent = 'Auto-refresh delayed while you work.';
+      scheduleRefresh(refreshInterval);
+    }
+
+    ['pointerdown', 'keydown', 'input', 'change', 'selectionchange'].forEach(function (eventName) {
+      document.addEventListener(eventName, noteActivity, true);
+    });
+    document.addEventListener('submit', function (event) {
+      if (event.target instanceof HTMLFormElement) dirtyForms.delete(event.target);
+    }, true);
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        lastActivity = Date.now();
+        scheduleRefresh(refreshInterval);
+      } else {
+        window.clearTimeout(refreshTimer);
+      }
+    });
+    scheduleRefresh(refreshInterval);
+  })();
+</script>
