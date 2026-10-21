@@ -14,8 +14,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum, Count
+from django.db.models.functions import TruncMonth
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.conf import settings
@@ -342,7 +345,31 @@ def _ceo_dashboard(request, today):
         period = "6"
     period_months = int(period)
 
-    month_start = today.replace(day=1)
+    date_from = parse_date(request.GET.get("date_from", ""))
+    date_to = parse_date(request.GET.get("date_to", ""))
+    has_custom_range = bool(request.GET.get("date_from") or request.GET.get("date_to"))
+    date_error = ""
+    if has_custom_range and (
+        date_from is None or date_to is None or date_from > date_to or date_to > today
+    ):
+        date_error = "Enter a valid date range ending today or earlier."
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"error": date_error}, status=400)
+        date_from = date_to = None
+        has_custom_range = False
+
+    period_start = (
+        date_from
+        if has_custom_range
+        else (today - relativedelta(months=period_months - 1)).replace(day=1)
+    )
+    period_end = date_to if has_custom_range else today
+
+    month_buckets = []
+    bucket_start = period_start.replace(day=1)
+    while bucket_start <= period_end:
+        month_buckets.append(bucket_start)
+        bucket_start += relativedelta(months=1)
 
     # CEO's nav-switcher branch selection (None = all branches). This makes
     # the dashboard consistent with Loans/Clients/Payments/Reports, which
@@ -350,7 +377,11 @@ def _ceo_dashboard(request, today):
     branch_id = effective_branch_id(request)
 
     all_active = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
-    allocated_month = Payment.objects.filter(payment_date__gte=month_start, status="ALLOCATED")
+    allocated_period = Payment.objects.filter(
+        payment_date__gte=period_start,
+        payment_date__lte=period_end,
+        status="ALLOCATED",
+    )
     overdue_30 = Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
         schedule__due_date__lt=today,
@@ -363,7 +394,7 @@ def _ceo_dashboard(request, today):
 
     if branch_id is not None:
         all_active = all_active.filter(branch_id=branch_id)
-        allocated_month = allocated_month.filter(loan__branch_id=branch_id)
+        allocated_period = allocated_period.filter(loan__branch_id=branch_id)
         overdue_30 = overdue_30.filter(branch_id=branch_id)
         total_clients_qs = total_clients_qs.filter(branch_id=branch_id)
         pending_loans_qs = pending_loans_qs.filter(branch_id=branch_id)
@@ -376,50 +407,62 @@ def _ceo_dashboard(request, today):
 
     # Cash collected excludes internal credit transfers (cash already counted when
     # the overpayment arrived); interest income includes them (real allocation).
-    collected_total = allocated_month.cash_receipts().aggregate(total=Sum("amount_received"))["total"] or 0
-    interest_income = allocated_month.aggregate(total=Sum("interest_paid"))["total"] or 0
+    collected_total = allocated_period.cash_receipts().aggregate(total=Sum("amount_received"))["total"] or 0
+    interest_income = allocated_period.aggregate(total=Sum("interest_paid"))["total"] or 0
 
     overdue_count = overdue_30.count()
     total_clients = total_clients_qs.count()
     pending_count = pending_loans_qs.count()
 
-    # Last 12 months collection for chart
-    historical_data = []
-    for i in range(11, -1, -1):
-        d = today - relativedelta(months=i)
-        ms = d.replace(day=1)
-        me = ms + relativedelta(months=1)
-        pmts = Payment.objects.cash_receipts().filter(payment_date__gte=ms, payment_date__lt=me, status="ALLOCATED")
-        if branch_id is not None:
-            pmts = pmts.filter(loan__branch_id=branch_id)
-        historical_data.append({
-            "label": ms.strftime("%b %Y"),
-            "collected": float(pmts.aggregate(total=Sum("amount_received"))["total"] or 0),
-            "interest": float(pmts.aggregate(total=Sum("interest_paid"))["total"] or 0),
-        })
-    monthly_data = historical_data[-period_months:]
+    # Aggregate chart values in two queries regardless of the selected range length.
+    payments_by_month = Payment.objects.cash_receipts().filter(
+        payment_date__gte=period_start,
+        payment_date__lte=period_end,
+        status="ALLOCATED",
+    )
+    expenses_by_month = Expense.objects.filter(
+        expense_date__gte=period_start,
+        expense_date__lte=period_end,
+        status=Expense.Status.APPROVED,
+    )
+    if branch_id is not None:
+        payments_by_month = payments_by_month.filter(loan__branch_id=branch_id)
+        expenses_by_month = expenses_by_month.filter(branch_id=branch_id)
 
-    expense_history = []
-    for i in range(11, -1, -1):
-        d = today - relativedelta(months=i)
-        ms = d.replace(day=1)
-        me = ms + relativedelta(months=1)
-        expenses = Expense.objects.filter(
-            expense_date__gte=ms,
-            expense_date__lt=me,
-            status=Expense.Status.APPROVED,
+    payment_month_totals = {
+        row["month"].strftime("%Y-%m"): row
+        for row in payments_by_month.annotate(month=TruncMonth("payment_date"))
+        .values("month")
+        .annotate(
+            collected=Sum("amount_received"),
+            interest=Sum("interest_paid"),
         )
-        if branch_id is not None:
-            expenses = expenses.filter(branch_id=branch_id)
+    }
+    expense_month_totals = {
+        row["month"].strftime("%Y-%m"): row["total"]
+        for row in expenses_by_month.annotate(month=TruncMonth("expense_date"))
+        .values("month")
+        .annotate(total=Sum("amount"))
+    }
+
+    monthly_data = []
+    expense_history = []
+    for month_start in month_buckets:
+        month_key = month_start.strftime("%Y-%m")
+        payment_totals = payment_month_totals.get(month_key, {})
+        monthly_data.append({
+            "label": month_start.strftime("%b %Y"),
+            "collected": float(payment_totals.get("collected") or 0),
+            "interest": float(payment_totals.get("interest") or 0),
+        })
         expense_history.append({
-            "label": ms.strftime("%b %Y"),
-            "value": float(expenses.aggregate(total=Sum("amount"))["total"] or 0),
+            "label": month_start.strftime("%b %Y"),
+            "value": float(expense_month_totals.get(month_key) or 0),
         })
 
-    expense_start = (today - relativedelta(months=period_months - 1)).replace(day=1)
     expenses = Expense.objects.filter(
-        expense_date__gte=expense_start,
-        expense_date__lte=today,
+        expense_date__gte=period_start,
+        expense_date__lte=period_end,
         status=Expense.Status.APPROVED,
     )
     if branch_id is not None:
@@ -434,11 +477,14 @@ def _ceo_dashboard(request, today):
     expense_data = [{"label": k, "value": v} for k, v in cat_totals.items() if v > 0]
     # Capital injections are company-wide (not tied to a branch), so they
     # deliberately stay unfiltered regardless of the branch switcher.
-    injections = CapitalInjection.objects.filter(injected_date__gte=expense_start, injected_date__lte=today)
+    injections = CapitalInjection.objects.filter(injected_date__gte=period_start, injected_date__lte=period_end)
     total_injections = injections.aggregate(total=Sum("amount"))["total"] or 0
 
     # Recent loans for loan book table
-    recent_loans = recent_loans_qs.select_related("client", "product").order_by("-disbursement_date")[:20]
+    recent_loans = recent_loans_qs.filter(
+        disbursement_date__gte=period_start,
+        disbursement_date__lte=period_end,
+    ).select_related("client", "product").order_by("-disbursement_date")[:20]
 
     # Branch performance — when a single branch is selected, show just that
     # branch instead of the full company-wide comparison table.
@@ -447,7 +493,13 @@ def _ceo_dashboard(request, today):
         branches_qs = branches_qs.filter(pk=branch_id)
     branches = branches_qs.annotate(
         loan_count=Count("loans", filter=Q(loans__status__in=["ACTIVE", "RESTRUCTURED"])),
-        total_disbursed=Sum("loans__principal_amount", filter=Q(loans__disbursement_date__gte=month_start)),
+        total_disbursed=Sum(
+            "loans__principal_amount",
+            filter=Q(
+                loans__disbursement_date__gte=period_start,
+                loans__disbursement_date__lte=period_end,
+            ),
+        ),
     )
 
     # Risk distribution
@@ -456,27 +508,12 @@ def _ceo_dashboard(request, today):
         for rating in ["LOW", "NORMAL", "WATCH", "SUBSTANDARD", "DOUBTFUL", "LOSS"]
     }
 
-    context = {
-        "total_portfolio": total_portfolio,
-        "total_outstanding": total_outstanding,
-        "total_interest": total_interest,
-        "collected_month": collected_total,
-        "interest_income": interest_income,
-        "overdue_count": overdue_count,
-        "total_clients": total_clients,
-        "pending_count": pending_count,
-        "monthly_data": monthly_data,
-        "expense_history": expense_history[-period_months:],
-        "recent_loans": recent_loans,
-        "active_count": all_active.count(),
-        "branches": branches,
-        "risk_distribution": risk_distribution,
-        "expense_data": expense_data,
-        "total_expenses": total_expenses,
-        "total_injections": total_injections,
-        "cash_at_hand": cash_movement(user=request.user, branch_id=branch_id)["cash_at_hand"],
-        "recent_cash": recent_cash_transactions(user=request.user, branch_id=branch_id),
-        "cash_switch_data": [
+    is_ajax_request = request.headers.get("x-requested-with") == "XMLHttpRequest"
+    selected_cash = cash_movement(user=request.user, branch_id=branch_id)["cash_at_hand"]
+    selected_recent_cash = recent_cash_transactions(user=request.user, branch_id=branch_id)
+    cash_switch_data = []
+    if not is_ajax_request:
+        cash_switch_data = [
             {
                 "id": selected_id,
                 "label": label,
@@ -494,11 +531,99 @@ def _ceo_dashboard(request, today):
             for selected_id, label in [(None, "All")] + list(
                 Branch.objects.filter(is_active=True).values_list("pk", "code")
             )
-        ],
+        ]
+
+    context = {
+        "total_portfolio": total_portfolio,
+        "total_outstanding": total_outstanding,
+        "total_interest": total_interest,
+        "collected_period": collected_total,
+        "interest_income": interest_income,
+        "overdue_count": overdue_count,
+        "total_clients": total_clients,
+        "pending_count": pending_count,
+        "monthly_data": monthly_data,
+        "expense_history": expense_history,
+        "recent_loans": recent_loans,
+        "active_count": all_active.count(),
+        "branches": branches,
+        "risk_distribution": risk_distribution,
+        "expense_data": expense_data,
+        "total_expenses": total_expenses,
+        "total_injections": total_injections,
+        "cash_at_hand": selected_cash,
+        "recent_cash": selected_recent_cash,
+        "cash_switch_data": cash_switch_data,
         "cash_branch_id": branch_id,
+        "branch_id": branch_id,
+        "branch_options": Branch.objects.filter(is_active=True).order_by("name"),
         "period": int(period),
         "period_options": [3, 6, 12],
+        "date_from": date_from if has_custom_range else None,
+        "date_to": date_to if has_custom_range else None,
+        "date_error": date_error,
+        "today": today,
     }
+    if is_ajax_request:
+        return JsonResponse({
+            "period": period,
+            "date_from": period_start.isoformat(),
+            "date_to": period_end.isoformat(),
+            "custom_date_from": date_from.isoformat() if has_custom_range else "",
+            "custom_date_to": date_to.isoformat() if has_custom_range else "",
+            "date_label": (
+                f"{period_start:%d %b %Y} – {period_end:%d %b %Y}"
+                if has_custom_range else f"Last {period} months"
+            ),
+            "custom_range": has_custom_range,
+            "currency_symbol": CompanySettings.get().currency_symbol or "UGX",
+            "branch_label": (
+                Branch.objects.filter(pk=branch_id).values_list("name", flat=True).first() or "Selected branch"
+                if branch_id is not None else "All branches"
+            ),
+            "metrics": {
+                "total_portfolio": float(total_portfolio),
+                "total_outstanding": float(total_outstanding),
+                "collected_period": float(collected_total),
+                "interest_income": float(interest_income),
+                "total_expenses": float(total_expenses),
+                "total_injections": float(total_injections),
+                "overdue_count": overdue_count,
+                "pending_count": pending_count,
+                "cash_at_hand": float(selected_cash),
+            },
+            "monthly_data": monthly_data,
+            "expense_history": expense_history,
+            "expense_data": expense_data,
+            "risk_distribution": risk_distribution,
+            "recent_loans": [
+                {
+                    "loan_number": loan.loan_number,
+                    "loan_url": reverse("loans:detail", kwargs={"pk": loan.pk}),
+                    "client_name": loan.client.full_name,
+                    "client_url": reverse("clients:detail", kwargs={"pk": loan.client.pk}),
+                    "product_name": loan.product.name,
+                    "principal": float(loan.principal_amount),
+                    "outstanding": float(loan.outstanding_balance),
+                    "next_due": loan.next_due_date.isoformat() if loan.next_due_date else "",
+                    "status": loan.get_status_display(),
+                    "status_code": loan.status,
+                }
+                for loan in recent_loans
+            ],
+            "active_count": context["active_count"],
+            "recent_cash": [
+                {
+                    "type": item["type"],
+                    "description": item["description"],
+                    "date": item["date"].isoformat(),
+                    "timestamp": item["timestamp"].strftime("%H:%M"),
+                    "direction": item["direction"],
+                    "amount": float(item["amount"]),
+                }
+                for item in selected_recent_cash
+            ],
+        })
     return render(request, "accounts/dashboard_ceo.html", context)
 
 @_permission_required("can_view_admin_panel")

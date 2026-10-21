@@ -2074,6 +2074,7 @@
 
         input[type="date"], input[type="datetime-local"], input[type="time"] {
             color-scheme: dark;
+            cursor: pointer;
         }
 
         input[type="date"]::-webkit-calendar-picker-indicator {
@@ -4504,6 +4505,28 @@
 </script>
 
 {% block extra_js %}{% endblock %}
+
+<script>
+    document.addEventListener('click', function (event) {
+        if (!(event.target instanceof Element)) return;
+        var dateInput = event.target.closest(
+            'input[type="date"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="time"]'
+        );
+        if (!dateInput || dateInput.disabled || dateInput.readOnly ||
+            typeof dateInput.showPicker !== 'function') {
+            return;
+        }
+
+        try {
+            dateInput.showPicker();
+        } catch (error) {
+            if (!(error instanceof DOMException) ||
+                !['InvalidStateError', 'NotAllowedError', 'SecurityError'].includes(error.name)) {
+                console.error('Could not open the date/time picker.', error);
+            }
+        }
+    }, true);
+</script>
 
 <!-- Print footer -->
 <div class="print-footer print-only" style="display:none;">
