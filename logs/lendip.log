@@ -12560,3 +12560,208 @@ LINE 1: ...tenants_company"."provisioning_completed_at" FROM "tenants_d...
 2026-10-20 10:51:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-10-20 10:51:46 [INFO] django.server: "GET /clients/b021bc5c-ba7a-4a39-b769-7bb0127c1922/ HTTP/1.1" 200 163883
 2026-10-20 10:51:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:13:37 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-20 21:13:44 [INFO] django.server: "GET /loans/af492788-eb61-463a-9160-951490684491/ HTTP/1.1" 200 173013
+2026-10-20 21:13:44 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-20 21:13:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:13:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 21:13:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:21 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 21:14:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:29 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 21:14:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:32 [INFO] django.server: "GET /clients/8de2901c-de9c-4216-b0f4-3121d1d8f9c2/ HTTP/1.1" 200 162514
+2026-10-20 21:14:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:41 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 21:14:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:51 [INFO] django.server: "GET /accounts/admin-panel/ HTTP/1.1" 200 162298
+2026-10-20 21:14:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:14:55 [INFO] django.server: "GET /accounts/admin-panel/users/new/ HTTP/1.1" 200 156395
+2026-10-20 21:14:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:15:03 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 156225
+2026-10-20 21:15:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:15:06 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 157059
+2026-10-20 21:15:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:15:14 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156098
+2026-10-20 21:15:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:15:17 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 21:15:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:15:32 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 21:15:33 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 21:15:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:23:36 [ERROR] django.request: Internal Server Error: /loans/apply/
+Traceback (most recent call last):
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\loans\views.py", line 67, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\loans\views.py", line 229, in loan_apply_step1
+    return render(request, "loans/apply_step1.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\defaulttags.py", line 326, in render
+    return nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\base.py", line 961, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\template\defaulttags.py", line 479, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aggyd\Documents\AI-CODED\abacash\venv\Lib\site-packages\django\urls\resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'apply_terms' not found. 'apply_terms' is not a valid view function or pattern name.
+2026-10-20 21:23:36 [ERROR] django.server: "GET /loans/apply/ HTTP/1.1" 500 204287
+2026-10-20 21:23:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:27:25 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 167498
+2026-10-20 21:27:26 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 21:27:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:27:44 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 163919
+2026-10-20 21:27:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:16 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 165009
+2026-10-20 21:28:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:19 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 167498
+2026-10-20 21:28:19 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 21:28:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:29 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 21:28:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:40 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 165141
+2026-10-20 21:28:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:44 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 21:28:44 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 21:28:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:28:54 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 163919
+2026-10-20 21:28:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:34:26 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 163919
+2026-10-20 21:34:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:34:56 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 197645
+2026-10-20 21:34:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:35:19 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 21:35:20 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 1576
+2026-10-20 21:35:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:35:32 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 163919
+2026-10-20 21:35:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:03 [INFO] django.server: "POST /clients/new/ HTTP/1.1" 302 0
+2026-10-20 21:37:03 [INFO] django.server: "GET /clients/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 200 161922
+2026-10-20 21:37:04 [INFO] django.server: "GET /media/dre/photos/client_371692e3-f942-4a94-8119-650df0e2d6e8/logo.svg HTTP/1.1" 200 309
+2026-10-20 21:37:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:12 [INFO] django.server: "GET /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 200 163064
+2026-10-20 21:37:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:22 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-20 21:37:23 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 2039
+2026-10-20 21:37:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:36 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 166670
+2026-10-20 21:37:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:39 [INFO] django.server: "GET /clients/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 200 161378
+2026-10-20 21:37:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:37:42 [INFO] django.server: "GET /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 200 163064
+2026-10-20 21:37:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:38:04 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=LyLpHE0UYVjPCoQvDDKZNI7ptZ20xr3dG4gBjrSOcFr75PHS3t5uddONDXPMgxW3&branch=1&product=3&principal=3590000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4510
+2026-10-20 21:38:18 [INFO] django.server: "POST /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 200 163661
+2026-10-20 21:38:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:38:41 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=uVKS7sSmCaBxISAGXoGXdMgtsrzo9Pnlprf4JfKgQUJPbjr3ne1sDhXRCpmaSVgb&branch=1&product=2&principal=3050000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 4503
+2026-10-20 21:38:42 [INFO] django.server: "POST /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/ HTTP/1.1" 302 0
+2026-10-20 21:38:43 [INFO] django.server: "GET /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/step3/ HTTP/1.1" 200 171078
+2026-10-20 21:38:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:38:51 [INFO] django.server: "POST /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/step3/ HTTP/1.1" 302 0
+2026-10-20 21:38:51 [INFO] django.server: "GET /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/review/?draft_id=3f04895b-9b56-4c17-be1d-de515bde7cf2 HTTP/1.1" 200 162841
+2026-10-20 21:38:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:01 [INFO] django.server: "POST /loans/apply/371692e3-f942-4a94-8119-650df0e2d6e8/review/?draft_id=3f04895b-9b56-4c17-be1d-de515bde7cf2 HTTP/1.1" 302 0
+2026-10-20 21:39:01 [INFO] django.server: "GET /loans/3f04895b-9b56-4c17-be1d-de515bde7cf2/ HTTP/1.1" 200 172108
+2026-10-20 21:39:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:19 [INFO] django.server: "POST /loans/3f04895b-9b56-4c17-be1d-de515bde7cf2/approve/ HTTP/1.1" 302 0
+2026-10-20 21:39:20 [INFO] django.server: "GET /loans/3f04895b-9b56-4c17-be1d-de515bde7cf2/ HTTP/1.1" 200 172700
+2026-10-20 21:39:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:26 [INFO] django.server: "GET /payments/record/3f04895b-9b56-4c17-be1d-de515bde7cf2/ HTTP/1.1" 200 166065
+2026-10-20 21:39:36 [INFO] django.server: "POST /payments/record/3f04895b-9b56-4c17-be1d-de515bde7cf2/ HTTP/1.1" 204 0
+2026-10-20 21:39:37 [INFO] django.server: "GET /payments/receipt/2a3b9959-7276-48bb-bf45-700943214168/ HTTP/1.1" 200 169906
+2026-10-20 21:39:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:43 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 166615
+2026-10-20 21:39:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:46 [INFO] django.server: "GET /loans/3f04895b-9b56-4c17-be1d-de515bde7cf2/ HTTP/1.1" 200 172973
+2026-10-20 21:39:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-20 21:39:57 [INFO] django.server: "GET /payments/receipt/2a3b9959-7276-48bb-bf45-700943214168/ HTTP/1.1" 200 169356
+2026-10-20 21:39:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:06:30 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-21 10:07:48 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-21 10:07:56 [INFO] django.server: "GET /payments/receipt/2a3b9959-7276-48bb-bf45-700943214168/ HTTP/1.1" 200 169356
+2026-10-21 10:07:56 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 779
+2026-10-21 10:07:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:02 [INFO] django.server: "GET /payments/receipt/2a3b9959-7276-48bb-bf45-700943214168/ HTTP/1.1" 200 169356
+2026-10-21 10:08:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:06 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 198890
+2026-10-21 10:08:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:17 [INFO] django.server: "GET /loans/?status=ACTIVE HTTP/1.1" 200 165378
+2026-10-21 10:08:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:19 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 166667
+2026-10-21 10:08:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:49 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 198890
+2026-10-21 10:08:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:53 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 156873
+2026-10-21 10:08:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:08:56 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 158832
+2026-10-21 10:08:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:09:10 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 164989
+2026-10-21 10:09:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:11:12 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 166667
+2026-10-21 10:11:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:11:19 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 160069
+2026-10-21 10:11:20 [INFO] django.server: "GET /loans/apply/client-search/ HTTP/1.1" 200 2042
+2026-10-21 10:11:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-21 10:12:19 [INFO] django.utils.autoreload: C:\Users\aggyd\Documents\VICTOUS\AI-CODED\abacash\accounts\templatetags\aba_filters.py changed, reloading.
+2026-10-21 10:12:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader

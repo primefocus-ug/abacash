@@ -26,6 +26,7 @@
       <div><strong>Loan:</strong> {{ r.payment.loan.loan_number }} — {{ r.payment.loan.client.full_name }}</div>
       {% if r.payment.loan.branch %}<div><strong>Branch:</strong> {{ r.payment.loan.branch.name }}</div>{% endif %}
       <div><strong>Amount:</strong> {{ r.amount_received|money }}</div>
+      <div><strong>Amount in words:</strong> {{ r.amount_received|amount_in_words }}</div>
       <div><strong>Principal paid:</strong> {{ r.principal_paid|money }}</div>
       <div><strong>Interest paid:</strong> {{ r.interest_paid|money }}</div>
       <div><strong>Penalty paid:</strong> {{ r.penalty_paid|money }}</div>

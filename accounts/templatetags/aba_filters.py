@@ -67,6 +67,60 @@ def ugx_plain(value):
         return "0"
 
 
+def _integer_to_words(number):
+    ones = (
+        "zero", "one", "two", "three", "four", "five", "six", "seven",
+        "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
+        "fifteen", "sixteen", "seventeen", "eighteen", "nineteen",
+    )
+    tens = (
+        "", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
+        "eighty", "ninety",
+    )
+    scales = ("", "thousand", "million", "billion", "trillion")
+
+    def under_one_thousand(value):
+        parts = []
+        if value >= 100:
+            parts.extend((ones[value // 100], "hundred"))
+            value %= 100
+        if value >= 20:
+            tens_word = tens[value // 10]
+            if value % 10:
+                tens_word += f"-{ones[value % 10]}"
+            parts.append(tens_word)
+        elif value:
+            parts.append(ones[value])
+        return " ".join(parts)
+
+    if number == 0:
+        return ones[0]
+
+    parts = []
+    scale_index = 0
+    while number:
+        group = number % 1000
+        if group:
+            group_words = under_one_thousand(group)
+            if scales[scale_index]:
+                group_words = f"{group_words} {scales[scale_index]}"
+            parts.append(group_words)
+        number //= 1000
+        scale_index += 1
+    return " ".join(reversed(parts))
+
+
+@register.filter
+def amount_in_words(value):
+    """Render whole Uganda shillings in words, matching the receipt's amount display."""
+    amount = int(Decimal(str(value)))
+    if amount < 0:
+        amount_words = f"minus {_integer_to_words(abs(amount))}"
+    else:
+        amount_words = _integer_to_words(amount)
+    return f"{amount_words} Uganda shillings only"
+
+
 @register.filter
 def pct(value, decimals=2):
     try:

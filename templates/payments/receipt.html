@@ -566,6 +566,11 @@
             <td>Total Paid</td>
             <td class="rcpt2-num">{{ receipt.amount_received|money }}</td>
           </tr>
+          <tr>
+            <td colspan="2" style="font-size:12px;font-weight:600;">
+              Amount in words: {{ receipt.amount_received|amount_in_words }}
+            </td>
+          </tr>
         </tfoot>
       </table>
     </div>
@@ -726,6 +731,10 @@
     <tr class="rcpt-total-row">
       <td class="rcpt-label">Amount Received</td>
       <td class="rcpt-value rcpt-amount">{{ receipt.amount_received|money }}</td>
+    </tr>
+    <tr>
+      <td class="rcpt-label">Amount in words</td>
+      <td class="rcpt-value" style="white-space:normal;">{{ receipt.amount_received|amount_in_words }}</td>
     </tr>
     <tr>
       <td class="rcpt-label">Balance Before</td>
