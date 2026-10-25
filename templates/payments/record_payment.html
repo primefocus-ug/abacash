@@ -58,7 +58,7 @@
           <label for="amount">Amount Received ({% currency_symbol %})</label>
           <input type="number" name="amount" id="amount" min="0" step="0.01"
                  placeholder="e.g. 250000" required autofocus class="form-control" value="{% if posted_amount %}{{ posted_amount }}{% else %}{{ loan.next_due_amount|default_if_none:'' }}{% endif %}">
-          <small class="text-muted">Enter any amount received from the client</small>
+          <small class="text-muted"></small>
           <div id="payment-balance-summary" class="text-muted text-sm mt-2"></div>
 
           {% if loan and client_other_loans and loan.client.credit_balance and loan.client.credit_balance > 0 %}
@@ -222,10 +222,6 @@
       const amount = parseDecimal(amountInput.value);
       const nextDue = getNextDue();
 
-      if (nextDue > 0) {
-        amountInput.value = amountInput.value && amount > 0 ? amountInput.value : nextDue;
-      }
-
       const coverageAmount = Math.min(amount, nextDue);
       const coveragePercent = nextDue > 0 ? Math.min(100, (coverageAmount / nextDue) * 100) : 0;
       const coverageText = nextDue > 0
@@ -265,7 +261,7 @@
             </div>
             <div style="min-width:0;flex:1;">
               <div style="font-size:12px;font-weight:600;color:var(--text-primary);">Coverage preview</div>
-              <div style="font-size:12px;color:var(--text-muted);">No expected amount available — select a loan to preview coverage.</div>
+              
             </div>
             <div style="font-size:12px;font-weight:600;color:var(--amber-400);white-space:nowrap;">Pending</div>
           </div>
@@ -283,7 +279,13 @@
     }
 
     if (loanElement) {
-      loanElement.addEventListener('change', updatePaymentWarning);
+      loanElement.addEventListener('change', function () {
+        const nextDue = getNextDue();
+        if (amountInput && !amountInput.value && nextDue > 0) {
+          amountInput.value = nextDue;
+        }
+        updatePaymentWarning();
+      });
       // stop propagation on loan select so interactions don't close the modal
       loanElement.addEventListener('click', function(e){ e.stopPropagation(); });
       loanElement.addEventListener('mousedown', function(e){ e.stopPropagation(); });

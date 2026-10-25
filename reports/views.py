@@ -16,21 +16,31 @@ Conventions used throughout:
 import logging
 from collections import defaultdict
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from io import BytesIO
+from xml.sax.saxutils import escape
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db import IntegrityError, transaction
+from django.db.models import CharField, Count, DateField, Q, Sum, Case, When
+from django.db.models.functions import Abs, Cast
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from reportlab.lib.units import mm
 
-from accounts.models import Branch, Expense, CapitalInjection
-from accounts.branch_scope import scope_to_branch, can_access_branch_object
+from accounts.models import AuditLog, BankTransaction, Branch, CapitalInjection, Expense, SalesAdjustment
+from accounts.audit import log_action
+from accounts.branch_scope import (
+    can_access_branch_object, resolve_branch_for_write, scope_to_branch,
+)
 from loans.models import Loan, LoanSchedule, LoanProduct
 from payments.models import Payment
-from clients.models import Client
+from clients.models import Client, CreditTransaction
 from .pdf_utils import build_report_pdf, p, CELL_BOLD
 
 logger = logging.getLogger("reports")
@@ -396,6 +406,286 @@ def _cash_flow_data(request):
     }
 
 
+def _fund_movement_data(request):
+    """Build a reconciled, all-channel fund ledger for the selected period."""
+    today = _today()
+    injection_scope = _branch(CapitalInjection.objects.all(), request)
+    earliest_injection = injection_scope.order_by("injected_date").values_list(
+        "injected_date", flat=True
+    ).first()
+    default_from = earliest_injection or today.replace(day=1)
+    date_from = parse_date(request.GET.get("date_from", "")) or default_from
+    date_to = parse_date(request.GET.get("date_to", "")) or today
+    date_to = min(date_to, today)
+    if date_from > date_to:
+        date_from = date_to
+    branch_id = _effective_branch_id(request)
+    branch_label = (
+        Branch.objects.filter(pk=branch_id).values_list("name", flat=True).first() or "Selected branch"
+        if branch_id else "All branches"
+    )
+
+    payments = list(_branch(
+        Payment.objects.cash_receipts().filter(
+            payment_date__gte=date_from,
+            payment_date__lte=date_to,
+            status__in=[Payment.Status.ALLOCATED, Payment.Status.REVERSED],
+        ), request, "loan__branch_id",
+    ).select_related("loan__branch", "client").order_by("payment_date", "created_at"))
+    payment_reversals = list(_branch(
+        Payment.objects.cash_receipts().filter(
+            status=Payment.Status.REVERSED,
+        ).filter(
+            Q(reversal_date__gte=date_from, reversal_date__lte=date_to)
+            | Q(
+                reversal_date__isnull=True,
+                payment_date__gte=date_from,
+                payment_date__lte=date_to,
+            ),
+        ), request, "loan__branch_id",
+    ).select_related("loan__branch", "client", "reversed_by").order_by("reversal_date", "created_at"))
+    refunds = list(_branch(
+        CreditTransaction.objects.filter(
+            tx_type=CreditTransaction.TxType.REFUNDED,
+            created_at__date__gte=date_from,
+            created_at__date__lte=date_to,
+        ), request, "client__branch_id",
+    ).select_related("client", "client__branch", "created_by").order_by("created_at"))
+    injections = list(_branch(
+        CapitalInjection.objects.filter(injected_date__gte=date_from, injected_date__lte=date_to),
+        request,
+    ).select_related("branch", "created_by").order_by("injected_date", "created_at"))
+    expenses = list(_branch(
+        Expense.objects.filter(
+            expense_date__gte=date_from,
+            expense_date__lte=date_to,
+            status=Expense.Status.APPROVED,
+        ), request,
+    ).select_related("branch", "category", "expense_type", "approved_by").order_by("expense_date", "created_at"))
+    adjustments = list(_branch(
+        SalesAdjustment.objects.filter(
+            adjustment_date__gte=date_from,
+            adjustment_date__lte=date_to,
+        ), request,
+    ).select_related("branch", "created_by").order_by("adjustment_date", "created_at"))
+    disbursements = list(_disbursed_qs(request, date_from, date_to)
+                         .select_related("client", "product", "branch")
+                         .order_by("disbursement_date", "created_at"))
+
+    prior_payments = _branch(Payment.objects.cash_receipts().filter(
+        payment_date__lt=date_from,
+        status__in=[Payment.Status.ALLOCATED, Payment.Status.REVERSED],
+    ).filter(
+        Q(status=Payment.Status.ALLOCATED)
+        | Q(reversal_date__gte=date_from),
+    ), request, "loan__branch_id")
+    prior_injections = _branch(CapitalInjection.objects.filter(injected_date__lt=date_from), request)
+    prior_expenses = _branch(Expense.objects.filter(
+        expense_date__lt=date_from, status=Expense.Status.APPROVED,
+    ), request)
+    prior_adjustments = _branch(SalesAdjustment.objects.filter(
+        adjustment_date__lt=date_from,
+    ), request)
+    prior_refunds = _branch(CreditTransaction.objects.filter(
+        tx_type=CreditTransaction.TxType.REFUNDED,
+        created_at__date__lt=date_from,
+    ), request, "client__branch_id")
+    prior_disbursements = list(_disbursed_qs(request, date_from="1900-01-01", date_to=date_from - timedelta(days=1))
+                               .select_related("product"))
+
+    opening_balance = (
+        _sum(prior_payments, "amount_received")
+        + _sum(prior_injections, "amount")
+        + sum((loan.effective_processing_fee for loan in prior_disbursements), ZERO)
+        + _sum(prior_adjustments.filter(direction=SalesAdjustment.Direction.CASH_IN), "amount")
+        - _sum(prior_expenses, "amount")
+        - (prior_refunds.aggregate(total=Sum(Abs("amount")))["total"] or ZERO)
+        - _sum(prior_adjustments.filter(direction=SalesAdjustment.Direction.CASH_OUT), "amount")
+        - sum((loan.principal_amount for loan in prior_disbursements), ZERO)
+    )
+
+    ledger = []
+
+    def add_row(*, event_date, event_time, kind, counterparty, method, reference,
+                description, cash_in=ZERO, cash_out=ZERO, branch="", sort_order=0):
+        ledger.append({
+            "date": event_date,
+            "time": event_time,
+            "type": kind,
+            "counterparty": counterparty or "—",
+            "method": method or "—",
+            "reference": reference or "—",
+            "description": description or "",
+            "cash_in": cash_in,
+            "cash_out": cash_out,
+            "branch": branch or "—",
+            "sort_order": sort_order,
+        })
+
+    for payment in payments:
+        add_row(
+            event_date=payment.payment_date,
+            event_time=payment.created_at,
+            kind="Repayment",
+            counterparty=payment.client.full_name,
+            method=payment.get_payment_method_display(),
+            reference=payment.reference_number or payment.loan.loan_number,
+            description=(
+                f"Loan {payment.loan.loan_number}: principal {_ugx(payment.principal_paid)}, "
+                f"interest {_ugx(payment.interest_paid)}, penalty {_ugx(payment.penalty_paid)}"
+            ),
+            cash_in=payment.amount_received,
+            branch=payment.loan.branch.name if payment.loan.branch else "",
+            sort_order=1,
+        )
+    for payment in payment_reversals:
+        add_row(
+            event_date=payment.reversal_date or payment.payment_date,
+            event_time=payment.updated_at,
+            kind="Payment reversal",
+            counterparty=payment.client.full_name,
+            method=payment.get_payment_method_display(),
+            reference=payment.reference_number or payment.loan.loan_number,
+            description=payment.reversal_reason or f"Reversed payment for {payment.loan.loan_number}",
+            cash_out=payment.amount_received,
+            branch=payment.loan.branch.name if payment.loan.branch else "",
+            sort_order=2,
+        )
+    for refund in refunds:
+        add_row(
+            event_date=timezone.localtime(refund.created_at).date(),
+            event_time=refund.created_at,
+            kind="Client refund",
+            counterparty=refund.client.full_name,
+            method="Client credit",
+            reference=f"CR-{refund.pk}",
+            description=refund.notes,
+            cash_out=abs(refund.amount),
+            branch=refund.client.branch.name if refund.client.branch else "",
+            sort_order=2,
+        )
+    for injection in injections:
+        add_row(
+            event_date=injection.injected_date,
+            event_time=injection.created_at,
+            kind="Capital injection",
+            counterparty=injection.investor or injection.source,
+            method=injection.get_payment_method_display(),
+            reference=f"INJ-{injection.pk}",
+            description=injection.notes or injection.source,
+            cash_in=injection.amount,
+            branch=injection.branch.name if injection.branch else "",
+            sort_order=0,
+        )
+    for expense in expenses:
+        category = expense.expense_type.name if expense.expense_type else (
+            expense.category.name if expense.category else "Operating expense"
+        )
+        add_row(
+            event_date=expense.expense_date,
+            event_time=expense.created_at,
+            kind="Expense",
+            counterparty=expense.vendor or "—",
+            method=expense.get_payment_method_display(),
+            reference=expense.receipt_number or expense.reference_number,
+            description=f"{category}: {expense.description}".strip(": "),
+            cash_out=expense.amount,
+            branch=expense.branch.name if expense.branch else "",
+            sort_order=2,
+        )
+    for adjustment in adjustments:
+        add_row(
+            event_date=adjustment.adjustment_date,
+            event_time=adjustment.created_at,
+            kind="Sales adjustment",
+            counterparty=adjustment.created_by.get_full_name() if adjustment.created_by else "—",
+            method=adjustment.get_direction_display(),
+            reference=adjustment.reference,
+            description=adjustment.notes,
+            cash_in=adjustment.amount if adjustment.direction == SalesAdjustment.Direction.CASH_IN else ZERO,
+            cash_out=adjustment.amount if adjustment.direction == SalesAdjustment.Direction.CASH_OUT else ZERO,
+            branch=adjustment.branch.name if adjustment.branch else "",
+            sort_order=2,
+        )
+    for loan in disbursements:
+        add_row(
+            event_date=loan.disbursement_date,
+            event_time=loan.created_at,
+            kind="Loan disbursement",
+            counterparty=loan.client.full_name,
+            method="Not recorded",
+            reference=loan.loan_number,
+            description=f"{loan.product.name} principal disbursed",
+            cash_out=loan.principal_amount,
+            branch=loan.branch.name if loan.branch else "",
+            sort_order=3,
+        )
+        fee = loan.effective_processing_fee
+        if fee:
+            add_row(
+                event_date=loan.disbursement_date,
+                event_time=loan.created_at,
+                kind="Processing fee",
+                counterparty=loan.client.full_name,
+                method="Collected at disbursement",
+                reference=loan.loan_number,
+                description=f"Processing fee for {loan.product.name}",
+                cash_in=fee,
+                branch=loan.branch.name if loan.branch else "",
+                sort_order=4,
+            )
+
+    ledger.sort(key=lambda row: (row["date"], row["time"], row["sort_order"], row["type"]))
+    running_balance = opening_balance
+    for row in ledger:
+        running_balance += row["cash_in"] - row["cash_out"]
+        row["balance_after"] = running_balance
+
+    total_injections = sum((item.amount for item in injections), ZERO)
+    total_repayments = sum((item.amount_received for item in payments), ZERO)
+    total_processing_fees = sum((loan.effective_processing_fee for loan in disbursements), ZERO)
+    total_disbursed = sum((loan.principal_amount for loan in disbursements), ZERO)
+    total_expenses = sum((item.amount for item in expenses), ZERO)
+    total_adjustment_in = sum(
+        (item.amount for item in adjustments if item.direction == SalesAdjustment.Direction.CASH_IN), ZERO,
+    )
+    total_adjustment_out = sum(
+        (item.amount for item in adjustments if item.direction == SalesAdjustment.Direction.CASH_OUT), ZERO,
+    )
+    total_refunds = sum((abs(item.amount) for item in refunds), ZERO)
+    total_reversals = sum((item.amount_received for item in payment_reversals), ZERO)
+    total_inflows = total_injections + total_repayments + total_processing_fees + total_adjustment_in
+    total_outflows = total_disbursed + total_expenses + total_adjustment_out + total_refunds + total_reversals
+
+    return {
+        "date_from": date_from,
+        "date_to": date_to,
+        "branch_label": branch_label,
+        "opening_balance": opening_balance,
+        "total_injections": total_injections,
+        "total_repayments": total_repayments,
+        "total_processing_fees": total_processing_fees,
+        "total_adjustment_in": total_adjustment_in,
+        "total_adjustment_out": total_adjustment_out,
+        "total_refunds": total_refunds,
+        "total_reversals": total_reversals,
+        "total_inflows": total_inflows,
+        "total_disbursed": total_disbursed,
+        "total_expenses": total_expenses,
+        "total_outflows": total_outflows,
+        "net_movement": total_inflows - total_outflows,
+        "closing_balance": opening_balance + total_inflows - total_outflows,
+        "payment_count": len(payments),
+        "injection_count": len(injections),
+        "expense_count": len(expenses),
+        "adjustment_count": len(adjustments),
+        "refund_count": len(refunds),
+        "reversal_count": len(payment_reversals),
+        "disbursement_count": len(disbursements),
+        "ledger": ledger,
+    }
+
+
 def _staff_rows(request, date_from, date_to):
     today = _today()
     branch_id = _effective_branch_id(request)
@@ -460,6 +750,481 @@ def _staff_rows(request, date_from, date_to):
 # ---------------------------------------------------------------------------
 # Index
 # ---------------------------------------------------------------------------
+LEDGER_CATEGORIES = {
+    "payment": "Payments and reversals",
+    "refund": "Client refunds",
+    "credit": "Client credit movements",
+    "injection": "Capital injections",
+    "expense": "Expenses",
+    "loan": "Loan disbursements",
+    "client": "Client registrations",
+    "product": "Loan products",
+    "bank": "Bank transactions",
+    "adjustment": "Sales adjustments",
+    "audit": "Accountability activity",
+}
+LEDGER_PAGE_SIZE = 100
+
+
+@_require_manager
+def company_ledger(request):
+    today = _today()
+    errors = []
+    form_values = {
+        "reference": request.POST.get("reference", ""),
+        "direction": request.POST.get("direction", SalesAdjustment.Direction.CASH_OUT),
+        "amount": request.POST.get("amount", ""),
+        "adjustment_date": request.POST.get("adjustment_date", today.isoformat()),
+        "adjustment_branch": request.POST.get("adjustment_branch", ""),
+        "notes": request.POST.get("notes", ""),
+    }
+    if request.method == "POST":
+        if not request.user.can("can_manage_expenses"):
+            return HttpResponse("You do not have permission to record sales adjustments.", status=403)
+        reference = form_values["reference"].strip()
+        if not reference:
+            errors.append("A reference is required for every sales adjustment.")
+        elif SalesAdjustment.objects.filter(reference=reference).exists():
+            errors.append("That reference is already in use.")
+        if form_values["direction"] not in SalesAdjustment.Direction.values:
+            errors.append("Choose whether the adjustment is cash in or cash out.")
+        try:
+            amount = Decimal(form_values["amount"])
+            if not amount.is_finite() or amount <= ZERO:
+                raise InvalidOperation
+        except (InvalidOperation, TypeError, ValueError):
+            amount = ZERO
+            errors.append("Enter an adjustment amount greater than zero.")
+        adjustment_date = parse_date(form_values["adjustment_date"])
+        if adjustment_date is None or adjustment_date > today:
+            errors.append("Enter a valid adjustment date that is today or earlier.")
+        try:
+            write_branch_id = resolve_branch_for_write(request, form_values["adjustment_branch"])
+            if write_branch_id is None or not Branch.objects.filter(
+                pk=write_branch_id, is_active=True,
+            ).exists():
+                errors.append("Choose an active branch for this adjustment.")
+        except ValueError as error:
+            errors.append(str(error))
+            write_branch_id = None
+        if not errors:
+            try:
+                with transaction.atomic():
+                    adjustment = SalesAdjustment.objects.create(
+                        reference=reference,
+                        direction=form_values["direction"],
+                        amount=amount,
+                        adjustment_date=adjustment_date,
+                        branch_id=write_branch_id,
+                        notes=form_values["notes"].strip(),
+                        created_by=request.user,
+                    )
+                    log_action(
+                        request.user,
+                        AuditLog.Action.CREATE,
+                        adjustment,
+                        changes={
+                            "reference": reference,
+                            "direction": adjustment.get_direction_display(),
+                            "amount": str(amount),
+                        },
+                        request=request,
+                        remarks=f"Sales adjustment {reference} recorded",
+                    )
+            except IntegrityError:
+                if SalesAdjustment.objects.filter(reference=reference).exists():
+                    errors.append("That reference is already in use.")
+                else:
+                    raise
+            else:
+                messages.success(request, "Sales adjustment recorded.")
+                target = reverse("reports:company_ledger")
+                if request.GET:
+                    target = f"{target}?{request.GET.urlencode()}"
+                return redirect(target)
+
+    default_from = today.replace(day=1)
+    raw_from = request.GET.get("date_from") or default_from.isoformat()
+    raw_to = request.GET.get("date_to") or today.isoformat()
+    date_from = parse_date(raw_from)
+    date_to = parse_date(raw_to)
+    if date_from is None or date_to is None:
+        errors.append("Enter valid start and end dates.")
+        date_from, date_to = default_from, today
+    elif date_from > date_to:
+        errors.append("The start date must be on or before the end date.")
+        date_from, date_to = default_from, today
+    if date_to > today:
+        errors.append("The end date cannot be in the future.")
+        date_to = today
+        if date_from > date_to:
+            date_from = default_from
+
+    branch_id = _effective_branch_id(request)
+    raw_category = request.GET.get("category", "")
+    visible_categories = dict(LEDGER_CATEGORIES)
+    if not request.user.can("can_view_audit_log"):
+        visible_categories.pop("audit")
+    if not (
+        request.user.can("can_manage_bank_accounts")
+        or request.user.can("can_view_financial_overview")
+    ):
+        visible_categories.pop("bank")
+    category = raw_category if raw_category in visible_categories else ""
+    if raw_category and not category:
+        errors.append("Choose a valid ledger category.")
+    search = request.GET.get("q", "").strip()[:100]
+
+    def search_in(queryset, *fields):
+        if not search:
+            return queryset
+        condition = Q()
+        for field in fields:
+            condition |= Q(**{f"{field}__icontains": search})
+        return queryset.filter(condition)
+
+    payment_period = (
+        Q(payment_date__gte=date_from, payment_date__lte=date_to)
+        & ~Q(status=Payment.Status.REVERSED)
+    ) | Q(
+        status=Payment.Status.REVERSED,
+        reversal_date__gte=date_from,
+        reversal_date__lte=date_to,
+    ) | Q(
+        status=Payment.Status.REVERSED,
+        reversal_date__isnull=True,
+        payment_date__gte=date_from,
+        payment_date__lte=date_to,
+    )
+    payments = _branch(Payment.objects.filter(payment_period).annotate(
+        ledger_date=Case(
+            When(
+                status=Payment.Status.REVERSED,
+                reversal_date__isnull=False,
+                then="reversal_date",
+            ),
+            default="payment_date",
+            output_field=DateField(),
+        ),
+    ), request, "loan__branch_id").select_related(
+        "loan__branch", "loan", "client", "recorded_by", "reversed_by",
+    )
+    payments = search_in(
+        payments, "reference_number", "loan__loan_number", "client__first_name",
+        "client__last_name", "recorded_by__first_name", "recorded_by__last_name",
+    )
+
+    credits = _branch(CreditTransaction.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to,
+    ), request, "client__branch_id").select_related(
+        "client", "client__branch", "loan", "created_by",
+    )
+    credits = search_in(
+        credits, "client__client_number", "client__first_name", "client__last_name",
+        "notes", "tx_type",
+    )
+
+    injections = _branch(CapitalInjection.objects.filter(
+        injected_date__gte=date_from, injected_date__lte=date_to,
+    ), request).select_related("branch", "created_by")
+    injections = search_in(injections, "source", "investor", "notes", "created_by__first_name",
+                           "created_by__last_name")
+
+    expenses = _branch(Expense.objects.filter(
+        expense_date__gte=date_from, expense_date__lte=date_to,
+    ), request).select_related("branch", "category", "expense_type", "created_by", "approved_by")
+    expenses = search_in(
+        expenses, "reference_number", "receipt_number", "vendor", "description",
+        "created_by__first_name", "created_by__last_name",
+    )
+
+    loans = _branch(Loan.objects.filter(
+        disbursement_date__gte=date_from, disbursement_date__lte=date_to,
+        status__in=DISBURSED,
+    ), request).select_related("branch", "client", "product", "applied_by")
+    loans = search_in(
+        loans, "loan_number", "client__first_name", "client__last_name",
+        "product__name", "applied_by__first_name", "applied_by__last_name",
+    )
+
+    clients = _branch(Client.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to,
+    ), request).select_related("branch", "registered_by")
+    clients = search_in(
+        clients, "client_number", "first_name", "last_name", "other_names",
+        "registered_by__first_name", "registered_by__last_name",
+    )
+
+    products = LoanProduct.objects.filter(
+        created_at__date__gte=date_from, created_at__date__lte=date_to,
+    ).select_related("created_by")
+    products = search_in(products, "name", "description", "created_by__first_name",
+                         "created_by__last_name")
+
+    bank_transactions = BankTransaction.objects.none()
+    if request.user.can("can_manage_bank_accounts") or request.user.can("can_view_financial_overview"):
+        bank_transactions = _branch(BankTransaction.objects.filter(
+            transaction_date__date__gte=date_from, transaction_date__date__lte=date_to,
+        ), request).select_related("branch", "bank_account", "created_by")
+    bank_transactions = search_in(
+        bank_transactions, "reference_number", "category", "notes",
+        "bank_account__account_name", "created_by__first_name", "created_by__last_name",
+    )
+
+    adjustments = _branch(SalesAdjustment.objects.filter(
+        adjustment_date__gte=date_from, adjustment_date__lte=date_to,
+    ), request).select_related("branch", "created_by")
+    adjustments = search_in(
+        adjustments, "reference", "notes", "created_by__first_name", "created_by__last_name",
+    )
+
+    audit_logs = AuditLog.objects.none()
+    if request.user.can("can_view_audit_log"):
+        audit_logs = AuditLog.objects.filter(
+            created_at__date__gte=date_from, created_at__date__lte=date_to,
+        ).select_related("user")
+        if branch_id is not None:
+            scoped_entities = (
+                ("Loan", Loan.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("Client", Client.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("Payment", Payment.objects.filter(loan__branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("Expense", Expense.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("CapitalInjection", CapitalInjection.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("BankTransaction", BankTransaction.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+                ("SalesAdjustment", SalesAdjustment.objects.filter(branch_id=branch_id).annotate(
+                    entity_pk=Cast("pk", output_field=CharField()),
+                ).values("entity_pk")),
+            )
+            scope_query = Q(pk__in=[])
+            for entity_type, entity_ids in scoped_entities:
+                scope_query |= Q(entity_type=entity_type, entity_id__in=entity_ids)
+            audit_logs = audit_logs.filter(scope_query)
+        audit_logs = search_in(audit_logs, "entity_type", "entity_repr", "action", "remarks")
+
+    querysets = {
+        "payment": (payments, "ledger_date"),
+        "refund": (credits.filter(tx_type=CreditTransaction.TxType.REFUNDED), "created_at"),
+        "credit": (credits.exclude(tx_type=CreditTransaction.TxType.REFUNDED), "created_at"),
+        "injection": (injections, "injected_date"),
+        "expense": (expenses, "expense_date"),
+        "loan": (loans, "disbursement_date"),
+        "client": (clients, "created_at"),
+        "product": (products, "created_at"),
+        "bank": (bank_transactions, "transaction_date"),
+        "adjustment": (adjustments, "adjustment_date"),
+        "audit": (audit_logs, "created_at"),
+    }
+    selected_querysets = (
+        {category: querysets[category]} if category else querysets
+    )
+
+    try:
+        page_number = max(1, int(request.GET.get("page", "1")))
+    except ValueError:
+        page_number = 1
+    start = (page_number - 1) * LEDGER_PAGE_SIZE
+    end = start + LEDGER_PAGE_SIZE
+    total_count = sum(queryset.count() for queryset, _date_field in selected_querysets.values())
+    page_count = max(1, (total_count + LEDGER_PAGE_SIZE - 1) // LEDGER_PAGE_SIZE)
+    if page_number > page_count:
+        page_number = page_count
+        start = (page_number - 1) * LEDGER_PAGE_SIZE
+        end = start + LEDGER_PAGE_SIZE
+
+    rows = []
+
+    def add_row(kind, event_date, timestamp, reference, description, branch, user,
+                amount=ZERO, cash_in=ZERO, cash_out=ZERO, status=""):
+        rows.append({
+            "category": kind,
+            "type": LEDGER_CATEGORIES[kind],
+            "date": event_date,
+            "time": timestamp,
+            "reference": reference or "—",
+            "description": description or "",
+            "branch": branch or "—",
+            "user": user.get_full_name() if user else "—",
+            "amount": amount or ZERO,
+            "cash_in": cash_in or ZERO,
+            "cash_out": cash_out or ZERO,
+            "status": status,
+        })
+
+    for kind, (queryset, date_field) in selected_querysets.items():
+        for item in queryset.order_by(f"-{date_field}", "-created_at")[:end]:
+            event_time = getattr(item, date_field)
+            event_date = (
+                timezone.localtime(event_time).date()
+                if hasattr(event_time, "tzinfo") and event_time.tzinfo
+                else event_time.date() if hasattr(event_time, "date") else event_time
+            )
+            branch = None
+            user = None
+            amount = ZERO
+            cash_in = cash_out = ZERO
+            reference = description = status = ""
+            if kind == "payment":
+                branch = item.loan.branch.name if item.loan.branch else None
+                user = item.reversed_by if item.status == Payment.Status.REVERSED else item.recorded_by
+                amount = item.amount_received
+                cash_in = amount if item.status == Payment.Status.ALLOCATED else ZERO
+                cash_out = amount if item.status == Payment.Status.REVERSED else ZERO
+                reference = item.reference_number or item.loan.loan_number
+                description = f"{item.client.full_name} · Loan {item.loan.loan_number}"
+                status = item.get_status_display()
+            elif kind in {"refund", "credit"}:
+                branch = item.client.branch.name if item.client.branch else None
+                user = item.created_by
+                amount = abs(item.amount)
+                cash_out = amount if item.tx_type == CreditTransaction.TxType.REFUNDED else ZERO
+                reference = f"CR-{item.pk}"
+                description = f"{item.client.full_name} · {item.get_tx_type_display()}: {item.notes}".strip()
+                status = item.get_tx_type_display()
+            elif kind == "injection":
+                branch, user, amount = item.branch, item.created_by, item.amount
+                cash_in = amount
+                reference = f"INJ-{item.pk}"
+                description = f"{item.investor or item.source}: {item.notes}".strip(": ")
+                status = item.get_payment_method_display()
+            elif kind == "expense":
+                branch, user, amount = item.branch, item.created_by, item.amount
+                cash_out = amount if item.status == Expense.Status.APPROVED else ZERO
+                reference = item.receipt_number or item.reference_number
+                description = f"{item.vendor or 'Expense'} · {item.description}".strip(" ·")
+                status = item.get_status_display()
+            elif kind == "loan":
+                branch, user, amount = item.branch, item.applied_by, item.principal_amount
+                cash_out = amount
+                reference = item.loan_number
+                description = f"{item.client.full_name} · {item.product.name}"
+                status = item.get_status_display()
+            elif kind == "client":
+                branch, user = item.branch, item.registered_by
+                reference = item.client_number
+                description = item.full_name
+                status = "Active" if item.is_active else "Inactive"
+            elif kind == "product":
+                user = item.created_by
+                reference = f"PRODUCT-{item.pk}"
+                description = item.name
+                status = "Active" if item.is_active else "Inactive"
+            elif kind == "bank":
+                branch, user, amount = item.branch, item.created_by, item.amount
+                reference = item.reference_number or f"BANK-{item.pk}"
+                description = f"{item.bank_account.account_name} · {item.category or item.notes}"
+                status = item.get_transaction_type_display()
+                if item.transaction_type == BankTransaction.TransactionType.CREDIT:
+                    cash_in = amount
+                else:
+                    cash_out = amount
+            elif kind == "adjustment":
+                branch, user, amount = item.branch, item.created_by, item.amount
+                reference = item.reference
+                description = item.notes
+                status = item.get_direction_display()
+                if item.direction == SalesAdjustment.Direction.CASH_IN:
+                    cash_in = amount
+                else:
+                    cash_out = amount
+            else:
+                user = item.user
+                reference = f"AUDIT-{item.pk}"
+                description = f"{item.get_action_display()} · {item.entity_repr}: {item.remarks}".strip(" ·")
+                status = item.entity_type
+            add_row(
+                kind, event_date, item.created_at, reference, description,
+                branch.name if hasattr(branch, "name") else branch,
+                user, amount, cash_in, cash_out, status,
+            )
+
+    rows.sort(key=lambda row: (
+        row["date"], row["time"], row["type"], row["reference"],
+    ), reverse=True)
+    rows = rows[start:end]
+
+    branch_analysis = {}
+    branch_fields = {
+        "payment": ("loan__branch", "amount_received"),
+        "refund": ("client__branch", "amount"),
+        "credit": ("client__branch", "amount"),
+        "injection": ("branch", "amount"),
+        "expense": ("branch", "amount"),
+        "loan": ("branch", "principal_amount"),
+        "client": ("branch", None),
+        "bank": ("branch", "amount"),
+        "adjustment": ("branch", "amount"),
+        "audit": (None, None),
+    }
+    for kind, (queryset, _date_field) in selected_querysets.items():
+        field, amount_field = branch_fields.get(kind, (None, None))
+        if not field:
+            continue
+        branch_id_key = f"{field}__pk"
+        branch_name_key = f"{field}__name"
+        aggregates = {"count": Count("pk")}
+        if amount_field:
+            aggregates["amount"] = Sum(Abs(amount_field) if kind == "refund" else amount_field)
+        summary = queryset.values(branch_id_key, branch_name_key).annotate(**aggregates)
+        for item in summary:
+            key = item[branch_id_key]
+            row = branch_analysis.setdefault(key, {
+                "name": item[branch_name_key] or "Unassigned",
+                "count": 0,
+                "amount": ZERO,
+            })
+            row["count"] += item["count"]
+            if amount_field:
+                row["amount"] += item["amount"] or ZERO
+    branch_analysis = sorted(
+        branch_analysis.values(), key=lambda row: (row["count"], row["name"]), reverse=True,
+    )
+
+    performance_rows = _staff_rows(request, date_from, date_to)
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+    filter_query = query_params.urlencode()
+    branch_options = Branch.objects.filter(is_active=True).order_by("name")
+    if not request.user.can("can_view_all_branches"):
+        branch_options = branch_options.filter(pk=request.user.branch_id)
+    return render(request, "reports/company_ledger.html", {
+        "rows": rows,
+        "date_from": date_from,
+        "date_to": date_to,
+        "today": today,
+        "category": category,
+        "categories": visible_categories,
+        "category_label": visible_categories.get(category, "All record types"),
+        "search": search,
+        "total_count": total_count,
+        "page_number": page_number,
+        "page_count": page_count,
+        "has_previous": page_number > 1,
+        "has_next": page_number < page_count,
+        "previous_page": page_number - 1,
+        "next_page": page_number + 1,
+        "filter_query": filter_query,
+        "branch_id": "" if branch_id is None else str(branch_id),
+        "branch_options": branch_options,
+        "branch_analysis": branch_analysis,
+        "performance_rows": performance_rows,
+        "can_record_adjustment": request.user.can("can_manage_expenses"),
+        "form_errors": errors,
+        "form_values": form_values,
+    })
+
+
 @_require_manager
 def report_index(request):
     return render(request, "reports/index.html")
@@ -626,6 +1391,177 @@ def cash_flow_download(request):
                    "col_widths": [24*mm, 18*mm, 30*mm, 55*mm, 70*mm, 35*mm, 35*mm],
                    "body_rows": body_rows, "totals_row": totals_row}],
     )
+
+
+# ---------------------------------------------------------------------------
+# Capital and fund movement
+# ---------------------------------------------------------------------------
+@_require_manager
+def fund_movement_report(request):
+    return render(request, "reports/fund_movement.html", _fund_movement_data(request))
+
+
+@_require_manager
+def fund_movement_pdf(request):
+    data = _fund_movement_data(request)
+    summary_rows = [
+        [p("Opening balance"), p(_ugx(data["opening_balance"]))],
+        [p("Capital injections"), p(_ugx(data["total_injections"]))],
+        [p("Client repayments"), p(_ugx(data["total_repayments"]))],
+        [p("Payment reversals"), p(_ugx(data["total_reversals"]))],
+        [p("Client refunds"), p(_ugx(data["total_refunds"]))],
+        [p("Processing fees"), p(_ugx(data["total_processing_fees"]))],
+        [p("Sales adjustments — cash in"), p(_ugx(data["total_adjustment_in"]))],
+        [p("Sales adjustments — cash out"), p(_ugx(data["total_adjustment_out"]))],
+        [p("Total inflows"), p(_ugx(data["total_inflows"]))],
+        [p("Loan principal disbursed"), p(_ugx(data["total_disbursed"]))],
+        [p("Approved expenses"), p(_ugx(data["total_expenses"]))],
+        [p("Total outflows"), p(_ugx(data["total_outflows"]))],
+        [p("Net movement"), p(_ugx(data["net_movement"]))],
+        [p("Closing balance"), p(_ugx(data["closing_balance"]))],
+        [p("Capital injection count"), p(data["injection_count"])],
+        [p("Repayment count"), p(data["payment_count"])],
+        [p("Loan disbursement count"), p(data["disbursement_count"])],
+        [p("Approved expense count"), p(data["expense_count"])],
+        [p("Sales adjustment count"), p(data["adjustment_count"])],
+        [p("Payment reversal count"), p(data["reversal_count"])],
+        [p("Client refund count"), p(data["refund_count"])],
+    ]
+    body_rows = [
+        [
+            p(row["date"].isoformat()),
+            p(timezone.localtime(row["time"]).strftime("%H:%M:%S")),
+            p(escape(row["type"])),
+            p(escape(row["counterparty"])),
+            p(escape(row["method"])),
+            p(escape(row["reference"])),
+            p(escape(row["description"])),
+            p(_ugx(row["cash_in"])),
+            p(_ugx(row["cash_out"])),
+            p(_ugx(row["balance_after"])),
+        ]
+        for row in data["ledger"]
+    ]
+    return build_report_pdf(
+        request,
+        filename=f"Fund-Movement-{data['date_from']}-{data['date_to']}.pdf",
+        title="Capital & Fund Movement Report",
+        subtitle=(
+            f"Period: {data['date_from']} to {data['date_to']} | "
+            f"Branch: {data['branch_label']} | Generated: {_stamp()}"
+        ),
+        landscape=True,
+        sections=[
+            {"heading": "Fund Reconciliation", "head_row": ["Summary", "Amount"],
+             "col_widths": [110*mm, 70*mm], "body_rows": summary_rows},
+            {"heading": "Transaction Ledger",
+             "head_row": ["Date", "Time", "Type", "Counterparty", "Channel", "Reference", "Description", "In", "Out", "Balance"],
+             "col_widths": [20*mm, 14*mm, 24*mm, 30*mm, 21*mm, 26*mm, 55*mm, 28*mm, 28*mm, 27*mm],
+             "body_rows": body_rows},
+        ],
+    )
+
+
+def _excel_safe_text(value):
+    text = str(value or "")
+    return f"'{text}" if text.startswith(("=", "+", "-", "@")) else text
+
+
+@_require_manager
+def fund_movement_excel(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+
+    data = _fund_movement_data(request)
+    workbook = Workbook()
+    summary = workbook.active
+    summary.title = "Fund Summary"
+    summary.append(["Capital & Fund Movement Report"])
+    summary.append(["Period", f"{data['date_from']} to {data['date_to']}"])
+    summary.append(["Branch", data["branch_label"]])
+    summary.append(["Generated", _stamp()])
+    summary.append([])
+    summary.append(["Measure", "Amount (UGX)"])
+    for label, key in (
+        ("Opening balance", "opening_balance"),
+        ("Capital injections", "total_injections"),
+        ("Client repayments", "total_repayments"),
+        ("Payment reversals", "total_reversals"),
+        ("Client refunds", "total_refunds"),
+        ("Processing fees", "total_processing_fees"),
+        ("Sales adjustments — cash in", "total_adjustment_in"),
+        ("Sales adjustments — cash out", "total_adjustment_out"),
+        ("Total inflows", "total_inflows"),
+        ("Loan principal disbursed", "total_disbursed"),
+        ("Approved expenses", "total_expenses"),
+        ("Total outflows", "total_outflows"),
+        ("Net movement", "net_movement"),
+        ("Closing balance", "closing_balance"),
+    ):
+        summary.append([label, float(data[key])])
+    summary.append(["Capital injection count", data["injection_count"]])
+    summary.append(["Repayment count", data["payment_count"]])
+    summary.append(["Loan disbursement count", data["disbursement_count"]])
+    summary.append(["Approved expense count", data["expense_count"]])
+    summary.append(["Sales adjustment count", data["adjustment_count"]])
+    summary.append(["Payment reversal count", data["reversal_count"]])
+    summary.append(["Client refund count", data["refund_count"]])
+
+    ledger_sheet = workbook.create_sheet("Movement Ledger")
+    ledger_sheet.append([
+        "Date", "Time", "Type", "Counterparty", "Payment Method", "Reference",
+        "Description", "Branch", "Funds In (UGX)", "Funds Out (UGX)", "Balance After (UGX)",
+    ])
+    for row in data["ledger"]:
+        ledger_sheet.append([
+            row["date"],
+            timezone.localtime(row["time"]).replace(tzinfo=None),
+            _excel_safe_text(row["type"]),
+            _excel_safe_text(row["counterparty"]),
+            _excel_safe_text(row["method"]),
+            _excel_safe_text(row["reference"]),
+            _excel_safe_text(row["description"]),
+            _excel_safe_text(row["branch"]),
+            float(row["cash_in"]),
+            float(row["cash_out"]),
+            float(row["balance_after"]),
+        ])
+
+    header_fill = PatternFill("solid", fgColor="163B50")
+    for sheet in (summary, ledger_sheet):
+        sheet.freeze_panes = "A2" if sheet is ledger_sheet else "A7"
+        for cell in sheet[1]:
+            cell.font = Font(color="FFFFFF", bold=True)
+            cell.fill = header_fill
+        for column_cells in sheet.columns:
+            column = column_cells[0].column
+            longest = max((len(str(cell.value or "")) for cell in column_cells), default=0)
+            sheet.column_dimensions[get_column_letter(column)].width = min(max(longest + 2, 12), 48)
+    summary[6][0].font = Font(bold=True)
+    summary[6][1].font = Font(bold=True)
+    for row in range(7, 21):
+        summary.cell(row, 2).number_format = '#,##0.00;[Red]-#,##0.00'
+    for row in range(2, ledger_sheet.max_row + 1):
+        ledger_sheet.cell(row, 1).number_format = "dd mmm yyyy"
+        ledger_sheet.cell(row, 2).number_format = "hh:mm:ss"
+        for column in range(9, 12):
+            ledger_sheet.cell(row, column).number_format = '#,##0.00;[Red]-#,##0.00'
+    ledger_sheet.auto_filter.ref = ledger_sheet.dimensions
+    for cell in ledger_sheet[1]:
+        cell.alignment = Alignment(wrap_text=True)
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = (
+        f"attachment; filename=Fund-Movement-{data['date_from']}-{data['date_to']}.xlsx"
+    )
+    return response
 
 
 # ---------------------------------------------------------------------------

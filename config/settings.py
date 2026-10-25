@@ -196,6 +196,7 @@ SITE_ID = 1
 
 # Defaults used when seeding a fresh tenant after migrations
 TENANT_INITIAL_ADMIN_USERNAME = config('TENANT_INITIAL_ADMIN_USERNAME', default='admin')
+TENANT_INITIAL_ADMIN_EMAIL = config('TENANT_INITIAL_ADMIN_EMAIL', default='primefocusug@gmail.com')
 TENANT_INITIAL_ADMIN_PASSWORD = config('TENANT_INITIAL_ADMIN_PASSWORD', default='@Developer25')
 
 # ------------------------------------------------------------------ #

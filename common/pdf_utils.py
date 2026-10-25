@@ -1,6 +1,6 @@
 from io import BytesIO
 from django.http import HttpResponse
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm
@@ -131,20 +131,78 @@ def generate_loan_schedule_pdf(loan):
     """Generate PDF for a loan schedule."""
     from datetime import datetime
     from xml.sax.saxutils import escape
+    from accounts.models import BankAccount
 
     styles = getSampleStyleSheet()
     normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=9, spaceAfter=2)
     header_style = ParagraphStyle("Header", parent=styles["Heading1"], fontSize=14, alignment=TA_CENTER, spaceAfter=8)
     small = ParagraphStyle("Small", parent=normal, fontSize=8, textColor=colors.grey)
+    table_text = ParagraphStyle("ScheduleCell", parent=normal, fontSize=7, leading=8)
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=15*mm, leftMargin=15*mm, topMargin=15*mm, bottomMargin=15*mm)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=12*mm,
+        leftMargin=12*mm,
+        topMargin=14*mm,
+        bottomMargin=16*mm,
+    )
     story = []
+    generated_at = datetime.now()
+    nominal_apr = loan.interest_rate_monthly * 12
+    total_cost_of_credit = loan.total_interest + loan.processing_fee
 
     # Header
     story.append(Paragraph("Loan Schedule", header_style))
     story.append(Paragraph(f"<b>Loan:</b> {loan.loan_number} | <b>Client:</b> {loan.client.full_name} | <b>Amount:</b> UGX {loan.principal_amount:,.0f}", normal))
     story.append(Paragraph(f"<b>Product:</b> {loan.product.name} | <b>Status:</b> {loan.get_status_display()}", normal))
+    disbursement_date = loan.disbursement_date.strftime("%d %b %Y") if loan.disbursement_date else "—"
+    maturity_date = loan.maturity_date.strftime("%d %b %Y") if loan.maturity_date else "—"
+    story.append(Paragraph(
+        f"<b>Disbursement:</b> {disbursement_date} | <b>Maturity:</b> {maturity_date} | "
+        f"<b>Interest:</b> {loan.get_interest_method_display()} at {loan.interest_rate_monthly}%/month "
+        f"(<b>Nominal APR:</b> {nominal_apr:.2f}%)",
+        normal,
+    ))
+    story.append(Paragraph(
+        f"<b>Total interest:</b> {_format_money(loan.total_interest)} | "
+        f"<b>Processing fee:</b> {_format_money(loan.processing_fee)} | "
+        f"<b>Total cost of credit:</b> {_format_money(total_cost_of_credit)} | "
+        f"<b>Scheduled repayment:</b> {_format_money(loan.total_repayable)}",
+        normal,
+    ))
+    story.append(Spacer(1, 8))
+
+    story.append(Paragraph("<b>Payment instructions</b>", normal))
+    story.append(Paragraph(
+        f"Pay by mobile money or bank transfer using an active account below. "
+        f"Enter loan number <b>{escape(loan.loan_number)}</b> as the payment reference.",
+        small,
+    ))
+    accounts = BankAccount.objects.filter(
+        is_active=True,
+        account_type__in=(
+            BankAccount.AccountType.CURRENT,
+            BankAccount.AccountType.SAVINGS,
+            BankAccount.AccountType.MOBILE,
+        ),
+    ).order_by("account_type", "bank_name")
+    if accounts.exists():
+        for account in accounts:
+            account_details = " · ".join(filter(None, [
+                account.get_account_type_display(),
+                account.bank_name,
+                account.branch_name,
+                account.account_name,
+                account.account_number,
+            ]))
+            story.append(Paragraph(escape(account_details), small))
+    else:
+        story.append(Paragraph(
+            "Contact your branch for current mobile money or bank account details.",
+            small,
+        ))
     story.append(Spacer(1, 8))
 
     collateral_items = loan.collateral_items.all()
@@ -169,21 +227,24 @@ def generate_loan_schedule_pdf(loan):
     if schedule_items is None:
         schedule_items = []
     elif hasattr(schedule_items, 'all'):
-        schedule_items = list(schedule_items.all())
+        schedule_items = list(schedule_items.select_related("paid_by_payment").all())
     else:
         schedule_items = list(schedule_items)
 
     schedule_items = sorted(schedule_items, key=lambda item: getattr(item, "due_date", ""))
     table_data = [[
-        Paragraph("<b>#</b>", normal),
-        Paragraph("<b>Due Date</b>", normal),
-        Paragraph("<b>Opening Bal.</b>", normal),
-        Paragraph("<b>Principal</b>", normal),
-        Paragraph("<b>Interest</b>", normal),
-        Paragraph("<b>Penalty</b>", normal),
-        Paragraph("<b>Total Due</b>", normal),
-        Paragraph("<b>Paid</b>", normal),
-        Paragraph("<b>Status</b>", normal),
+        Paragraph("<b>#</b>", table_text),
+        Paragraph("<b>Due date</b>", table_text),
+        Paragraph("<b>Opening</b>", table_text),
+        Paragraph("<b>Principal</b>", table_text),
+        Paragraph("<b>Interest</b>", table_text),
+        Paragraph("<b>Penalty</b>", table_text),
+        Paragraph("<b>Total due</b>", table_text),
+        Paragraph("<b>Paid</b>", table_text),
+        Paragraph("<b>Date paid</b>", table_text),
+        Paragraph("<b>Payment ref.</b>", table_text),
+        Paragraph("<b>Closing bal.</b>", table_text),
+        Paragraph("<b>Status</b>", table_text),
     ]]
 
     for idx, item in enumerate(schedule_items, 1):
@@ -192,35 +253,61 @@ def generate_loan_schedule_pdf(loan):
             due_date_text = due_date.strftime("%d %b %Y")
         else:
             due_date_text = str(due_date or "")
+        paid_date = getattr(item, "paid_date", None)
+        paid_date_text = paid_date.strftime("%d %b %Y") if paid_date else "—"
+        payment = getattr(item, "paid_by_payment", None)
+        payment_reference = escape(payment.reference_number) if payment and payment.reference_number else "—"
 
         table_data.append([
-            Paragraph(str(idx), normal),
-            Paragraph(due_date_text, normal),
-            Paragraph(f"UGX {item.opening_balance:,.0f}", normal),
-            Paragraph(f"UGX {item.principal_due:,.0f}", normal),
-            Paragraph(f"UGX {item.interest_due:,.0f}", normal),
-            Paragraph(f"UGX {item.penalty_due:,.0f}", normal),
-            Paragraph(f"UGX {item.total_payment:,.0f}", normal),
-            Paragraph(f"UGX {item.amount_paid:,.0f}", normal),
-            Paragraph(item.get_status_display(), normal),
+            Paragraph(str(idx), table_text),
+            Paragraph(due_date_text, table_text),
+            Paragraph(f"{item.opening_balance:,.0f}", table_text),
+            Paragraph(f"{item.principal_due:,.0f}", table_text),
+            Paragraph(f"{item.interest_due:,.0f}", table_text),
+            Paragraph(f"{item.penalty_due:,.0f}", table_text),
+            Paragraph(f"{item.total_payment:,.0f}", table_text),
+            Paragraph(f"{item.amount_paid:,.0f}", table_text),
+            Paragraph(paid_date_text, table_text),
+            Paragraph(payment_reference, table_text),
+            Paragraph(f"{item.closing_balance:,.0f}", table_text),
+            Paragraph(escape(item.get_status_display()), table_text),
         ])
 
-    table = Table(table_data, colWidths=[8*mm, 16*mm, 18*mm, 16*mm, 16*mm, 14*mm, 16*mm, 16*mm, 14*mm])
+    if schedule_items:
+        table_data.append([
+            Paragraph("<b>Totals</b>", table_text), "",
+            "—", f"{loan.principal_amount:,.0f}", f"{loan.total_interest:,.0f}", "—",
+            f"{loan.total_repayable:,.0f}", f"{loan.total_paid:,.0f}", "", "", "0", "",
+        ])
+
+    table = Table(
+        table_data,
+        colWidths=[8*mm, 20*mm, 20*mm, 19*mm, 19*mm, 16*mm, 20*mm, 18*mm, 20*mm, 28*mm, 20*mm, 18*mm],
+        repeatRows=1,
+    )
     table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#E5E7EB")),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
         ("ALIGN", (0, 0), (1, -1), "CENTER"),
+        ("ALIGN", (9, 1), (9, -1), "LEFT"),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#E5E7EB")),
+        ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
     ]))
     story.append(table)
 
-    story.append(Spacer(1, 12))
-    story.append(Paragraph(f"Generated on {datetime.now():%d %b %Y %H:%M}", small))
+    def draw_page_footer(canvas, document):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.grey)
+        canvas.drawString(document.leftMargin, 8*mm, f"Generated on {generated_at:%d %b %Y %H:%M}")
+        canvas.drawRightString(landscape(A4)[0] - document.rightMargin, 8*mm, f"Page {document.page}")
+        canvas.restoreState()
 
-    doc.build(story)
+    doc.build(story, onFirstPage=draw_page_footer, onLaterPages=draw_page_footer)
     pdf_bytes = buffer.getvalue()
     buffer.close()
 

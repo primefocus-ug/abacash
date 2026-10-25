@@ -9,340 +9,744 @@
 {% endblock %}
 
 {% block content %}
-<div id="client-modal" style="display:flex;position:fixed;inset:0;z-index:220;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding:16px;">
-  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;max-width:960px;width:100%;max-height:calc(100vh - 48px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);">
+<style>
+  /* ============ Modal Shell ============ */
+  #client-modal {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 220;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 18, 25, 0);
+    backdrop-filter: blur(0px);
+    animation: overlayFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes overlayFadeIn {
+    to {
+      background: rgba(15, 18, 25, 0.55);
+      backdrop-filter: blur(6px);
+    }
+  }
+
+  .client-modal-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    max-width: 980px;
+    width: 100%;
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.04),
+      0 12px 24px rgba(0,0,0,0.08),
+      0 32px 80px rgba(0,0,0,0.18);
+    animation: panelSpringIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center bottom;
+  }
+  @keyframes panelSpringIn {
+    0%   { opacity: 0; transform: scale(0.94) translateY(24px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ============ Header ============ */
+  .client-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    position: relative;
+  }
+  .client-modal-header::after {
+    content: "";
+    position: absolute;
+    left: 28px;
+    right: 28px;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary, #4f7cff), transparent);
+    opacity: 0.4;
+  }
+  .client-modal-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  .client-modal-header p {
+    margin: 6px 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted, #8a92a6);
+  }
+  .modal-close-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted, #8a92a6);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .modal-close-btn:hover {
+    background: rgba(255, 80, 80, 0.1);
+    border-color: rgba(255, 80, 80, 0.35);
+    color: #ff5c5c;
+    transform: rotate(90deg);
+  }
+  .modal-close-btn:active { transform: rotate(90deg) scale(0.92); }
+
+  /* ============ Scrollable Body ============ */
+  .client-modal-body {
+    padding: 24px 28px 8px;
+    overflow-y: auto;
+    flex: 1;
+    scroll-behavior: smooth;
+  }
+  .client-modal-body::-webkit-scrollbar { width: 10px; }
+  .client-modal-body::-webkit-scrollbar-track { background: transparent; }
+  .client-modal-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+    border: 3px solid var(--bg-surface);
+  }
+  .client-modal-body::-webkit-scrollbar-thumb:hover { background: var(--text-muted, #8a92a6); }
+
+  /* ============ Cards ============ */
+  .client-form .card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-surface);
+    margin-bottom: 20px;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: cardRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .client-form .card:nth-child(1) { animation-delay: 0.04s; }
+  .client-form .card:nth-child(2) { animation-delay: 0.08s; }
+  .client-form .card:nth-child(3) { animation-delay: 0.12s; }
+  .client-form .card:nth-child(4) { animation-delay: 0.16s; }
+  .client-form .card:nth-child(5) { animation-delay: 0.20s; }
+  .client-form .card:nth-child(6) { animation-delay: 0.24s; }
+  @keyframes cardRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .client-form .card:hover {
+    border-color: rgba(79, 124, 255, 0.35);
+    box-shadow: 0 6px 24px rgba(79, 124, 255, 0.06);
+  }
+
+  .client-form .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(79,124,255,0.04), transparent);
+  }
+  .client-form .card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.005em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .client-form .card-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, var(--primary, #4f7cff), #7c5cff);
+    flex-shrink: 0;
+  }
+  .client-form .card-body { padding: 20px; }
+
+  /* ============ Form Controls ============ */
+  .client-form .form-group { margin-bottom: 18px; }
+  .client-form label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 550;
+    color: var(--text-muted, #8a92a6);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
+  .client-form input[type="text"],
+  .client-form input[type="email"],
+  .client-form input[type="tel"],
+  .client-form input[type="number"],
+  .client-form input[type="date"],
+  .client-form input[type="file"],
+  .client-form select,
+  .client-form textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: inherit;
+    font-size: 0.92rem;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    outline: none;
+  }
+  .client-form select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a92a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .client-form input:hover,
+  .client-form select:hover,
+  .client-form textarea:hover {
+    border-color: rgba(79, 124, 255, 0.35);
+  }
+  .client-form input:focus,
+  .client-form select:focus,
+  .client-form textarea:focus {
+    border-color: var(--primary, #4f7cff);
+    box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.14);
+    background: rgba(79, 124, 255, 0.03);
+  }
+  .client-form textarea { resize: vertical; min-height: 60px; }
+  .client-form .form-hint {
+    font-size: 0.76rem;
+    color: var(--text-muted, #8a92a6);
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+
+  /* ============ File Inputs ============ */
+  .client-form input[type="file"] {
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .client-form input[type="file"]::file-selector-button {
+    padding: 6px 14px;
+    margin-right: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(79,124,255,0.08);
+    color: inherit;
+    font-weight: 550;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .client-form input[type="file"]::file-selector-button:hover {
+    background: rgba(79,124,255,0.18);
+    border-color: rgba(79,124,255,0.4);
+  }
+
+  /* ============ Grids ============ */
+  .client-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .client-form .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .client-form .attachment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .client-form .attachment-grid .form-group { margin-bottom: 12px; }
+  .client-form .client-attachment-list { margin: 0 0 14px; padding-left: 20px; }
+  .client-form .client-attachment-list li { margin-bottom: 5px; overflow-wrap: anywhere; }
+  @media (max-width: 720px) {
+    .client-form .form-row,
+    .client-form .form-row-3,
+    .client-form .attachment-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============ Photo Preview ============ */
+  .photo-preview {
+    display: inline-block;
+    margin-bottom: 14px;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+  .photo-preview img {
+    width: 104px;
+    height: 104px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: transform 0.25s ease;
+  }
+  .photo-preview:hover img { transform: scale(1.04); }
+
+  /* ============ Alerts ============ */
+  .client-form .alert-warning {
+    border-radius: 12px;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 170, 0, 0.35);
+    background: linear-gradient(135deg, rgba(255,170,0,0.10), rgba(255,170,0,0.04));
+    animation: cardRise 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .client-form .list-group-item {
+    transition: background 0.2s ease;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .client-form .list-group-item:hover { background: rgba(79,124,255,0.05); }
+
+  /* ============ Submit Bar ============ */
+  .client-form .submit-bar {
+    display: flex;
+    gap: 12px;
+    margin: 8px 0 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent, var(--bg-surface) 30%);
+    padding-bottom: 8px;
+  }
+  .client-form .btn {
+    border-radius: 10px;
+    font-weight: 550;
+    letter-spacing: 0.01em;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .client-form .btn:active { transform: scale(0.97); }
+  .client-form .btn-primary {
+    box-shadow: 0 4px 14px rgba(79, 124, 255, 0.3);
+  }
+  .client-form .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(79, 124, 255, 0.45);
+    transform: translateY(-1px);
+  }
+  .client-form .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(79, 124, 255, 0.3);
+  }
+
+  /* ============ Checkbox rows ============ */
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .checkbox-row:hover {
+    border-color: rgba(79,124,255,0.35);
+    background: rgba(79,124,255,0.04);
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary, #4f7cff);
+    cursor: pointer;
+  }
+
+  .divider-fade {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 18px 0;
+  }
+
+  /* ============ Reduced Motion ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+
+<div id="client-modal">
+  <div class="client-modal-panel">
+    <div class="client-modal-header">
       <div>
-        <h2 style="margin:0;">{{ title }}</h2>
-        <p class="text-sm text-muted" style="margin:6px 0 0;">Register a new client without leaving the current workflow.</p>
+        <h2>{{ title }}</h2>
+        
       </div>
-      <button type="button" id="client-modal-close" class="btn btn-secondary btn-sm">Close</button>
+      <button type="button" id="client-modal-close" class="modal-close-btn" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 3l10 10M13 3L3 13"/>
+        </svg>
+      </button>
     </div>
-    <form method="post" enctype="multipart/form-data" style="padding:20px;max-width:860px;width:100%;">
-      {% csrf_token %}
 
-      {% if duplicates %}
-  <div class="alert alert-warning mb-3">
-    <strong>Potential duplicate client found.</strong>
-    A client with the same National ID or primary phone already exists. Please edit the existing record or cancel registration.
-  </div>
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Matching Client Records</span></div>
-    <div class="card-body">
-      <ul class="list-group">
-        {% for dup in duplicates %}
-        <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
-          <div>
-            <strong>{{ dup.full_name }}</strong> — {{ dup.client_number }}<br>
-            NIN: {{ dup.nin }}<br>
-            Phone: {{ dup.phone_primary }}
-          </div>
-          <div class="btn-group" role="group" aria-label="Duplicate actions">
-            <a href="{% url 'clients:detail' pk=dup.pk %}" class="btn btn-secondary btn-sm">View</a>
-            {% if perms.accounts.can_manage_clients %}
-            <a href="{% url 'clients:edit' pk=dup.pk %}" class="btn btn-primary btn-sm">Edit</a>
-            {% endif %}
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      <div class="mt-3">
-        <a href="{% url 'clients:list' %}" class="btn btn-outline-secondary btn-sm">Cancel registration</a>
-      </div>
-    </div>
-  </div>
-  {% endif %}
+    <div class="client-modal-body">
+      <form method="post" enctype="multipart/form-data" class="client-form">
+        {% csrf_token %}
 
-  <!-- Passport Photo -->
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Passport Photo <span style="color:var(--red-400)">*</span></span></div>
-    <div class="card-body">
-      <div class="form-group">
-        {% if client.passport_photo %}
-        <div style="margin-bottom:10px;">
-          <img src="{{ client.passport_photo.url }}" alt="Current photo"
-               style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
-          <div class="form-hint">Current photo — upload a new one to replace it.</div>
+        {% if duplicates %}
+        <div class="alert alert-warning mb-3">
+          <strong>⚠ Potential duplicate client found.</strong><br>
+          A client with the same National ID or primary phone already exists. Please edit the existing record or cancel registration.
+        </div>
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Matching Client Records</span></div>
+          <div class="card-body">
+            <ul class="list-group">
+              {% for dup in duplicates %}
+              <li class="list-group-item d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <strong>{{ dup.full_name }}</strong> — {{ dup.client_number }}<br>
+                  NIN: {{ dup.nin }}<br>
+                  Phone: {{ dup.phone_primary }}
+                </div>
+                <div class="btn-group" role="group" aria-label="Duplicate actions">
+                  <a href="{% url 'clients:detail' pk=dup.pk %}" class="btn btn-secondary btn-sm">View</a>
+                  {% if perms.accounts.can_manage_clients %}
+                  <a href="{% url 'clients:edit' pk=dup.pk %}" class="btn btn-primary btn-sm">Edit</a>
+                  {% endif %}
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            <div class="mt-3">
+              <a href="{% url 'clients:list' %}" class="btn btn-outline-secondary btn-sm">Cancel registration</a>
+            </div>
+          </div>
         </div>
         {% endif %}
-        <label for="passport_photo">Upload Passport Photo</label>
-        <input type="file" name="passport_photo" id="passport_photo"
-               accept="image/*" {% if action == 'create' %}required{% endif %}>
-        <div class="form-hint">JPEG or PNG, max 2 MB. Clear background, face clearly visible.</div>
-      </div>
+
+        <!-- Client Attachments -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Client Attachments <span class="text-muted">Optional</span></span></div>
+          <div class="card-body">
+            {% if action == "edit" %}
+            <ul class="client-attachment-list">
+              {% if client.passport_photo %}
+              <li><a href="{{ client.passport_photo.url }}" target="_blank" rel="noopener">Passport Photo — {{ client.passport_photo.name }}</a></li>
+              {% endif %}
+              {% for document in client.documents.all %}
+              <li><a href="{{ document.file.url }}" target="_blank" rel="noopener">{{ document.get_document_type_display }} — {{ document.description|default:document.file.name }}</a></li>
+              {% empty %}
+              {% if not client.passport_photo %}<li class="text-muted">No attachments yet.</li>{% endif %}
+              {% endfor %}
+            </ul>
+            {% endif %}
+            <div class="attachment-grid">
+              <div class="form-group">
+                <label>Passport Photo</label>
+                {% if client.passport_photo %}
+                <div class="photo-preview">
+                  <img src="{{ client.passport_photo.url }}" alt="Current passport photo">
+                  <div class="form-hint">Current photo — upload a replacement if needed.</div>
+                </div>
+                {% endif %}
+                <label for="passport_photo">Take a photo or choose an existing photo</label>
+                <input type="file" name="passport_photo" id="passport_photo" accept="image/*" capture="environment">
+              </div>
+              <div class="form-group">
+                <label for="attachment_type">Supporting Attachment Name / Type</label>
+                <select name="attachment_type" id="attachment_type">
+                  {% for value, label in document_type_choices %}
+                  <option value="{{ value }}" {% if value == "OTHER" %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <label for="attachments" style="margin-top:12px;">Choose supporting files</label>
+                <input type="file" name="attachments" id="attachments" accept="image/*,.pdf,.doc,.docx" multiple>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if perms.accounts.can_view_all_branches %}
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Branch <span style="color:var(--red-400)">*</span></span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <select name="branch" id="branch" required>
+                <option value="">— Select branch —</option>
+                {% for b in branches %}
+                <option value="{{ b.pk }}" {% if client.branch_id == b.pk or selected_branch_id|stringformat:'s' == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
+                {% endfor %}
+              </select>
+
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Personal Information -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Personal Information</span></div>
+          <div class="card-body">
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="first_name">First Name <span style="color:var(--red-400)">*</span></label>
+                <input type="text" name="first_name" id="first_name" required
+                       value="{{ client.first_name|default:'' }}" placeholder="e.g. John">
+              </div>
+              <div class="form-group">
+                <label for="other_names">Other Names</label>
+                <input type="text" name="other_names" id="other_names"
+                       value="{{ client.other_names|default:'' }}" placeholder="Middle name(s)">
+              </div>
+              <div class="form-group">
+                <label for="last_name">Last Name / Surname <span style="color:var(--red-400)">*</span></label>
+                <input type="text" name="last_name" id="last_name" required
+                       value="{{ client.last_name|default:'' }}" placeholder="e.g. Mukasa">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nin">National ID Number (NIN) <span style="color:var(--red-400)">*</span></label>
+                <input type="text" name="nin" id="nin" required maxlength="20"
+                       value="{{ client.nin|default:'' }}" placeholder="e.g. CF20100122XXXXXX"
+                       style="text-transform:uppercase;font-family:var(--font-mono)">
+                <div class="form-hint">14-character Uganda NIN on the back of the National ID card.</div>
+              </div>
+              <div class="form-group">
+                <label for="date_of_birth">Date of Birth <span style="color:var(--red-400)">*</span></label>
+                <input type="date" name="date_of_birth" id="date_of_birth" required
+                       value="{{ client.date_of_birth|default:'' }}">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="gender">Gender <span style="color:var(--red-400)">*</span></label>
+                <select name="gender" id="gender" required>
+                  <option value="">— Select —</option>
+                  {% for val, label in gender_choices %}
+                  <option value="{{ val }}" {% if client.gender == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="marital_status">Marital Status <span style="color:var(--red-400)">*</span></label>
+                <select name="marital_status" id="marital_status" required>
+                  <option value="">— Select —</option>
+                  {% for val, label in marital_choices %}
+                  <option value="{{ val }}" {% if client.marital_status == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Contact Information</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone_primary">Primary Phone <span style="color:var(--red-400)">*</span></label>
+                <input type="tel" name="phone_primary" id="phone_primary" required
+                       value="{{ client.phone_primary|default:'' }}" placeholder="+256700123456">
+                <div class="form-hint">Uganda format: +256XXXXXXXXX — used for SMS reminders.</div>
+              </div>
+              <div class="form-group">
+                <label for="phone_secondary">Secondary Phone</label>
+                <input type="tel" name="phone_secondary" id="phone_secondary"
+                       value="{{ client.phone_secondary|default:'' }}" placeholder="+256700123456">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" id="email"
+                       value="{{ client.email|default:'' }}" placeholder="client@example.com">
+              </div>
+              <div class="form-group">
+                <label for="district">District <span style="color:var(--red-400)">*</span></label>
+                <input type="text" name="district" id="district"
+                       value="{{ client.district|default:'Kampala' }}" placeholder="e.g. Kampala" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="physical_address">Physical Address <span style="color:var(--red-400)">*</span></label>
+              <textarea name="physical_address" id="physical_address" rows="2" required
+                        placeholder="Plot number, street, LC1 area, district">{{ client.physical_address|default:'' }}</textarea>
+              <div class="form-hint">Include enough detail for a field officer to locate the client.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employment -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Employment &amp; Income</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="employment_status">Employment Status <span style="color:var(--red-400)">*</span></label>
+                <select name="employment_status" id="employment_status" required>
+                  <option value="">— Select —</option>
+                  {% for val, label in employment_choices %}
+                  <option value="{{ val }}" {% if client.employment_status == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="monthly_income">Monthly Income ({% currency_symbol %}) <span style="color:var(--red-400)">*</span></label>
+                <input type="number" name="monthly_income" id="monthly_income" min="0" step="10000"
+                       value="{{ client.monthly_income|default:'' }}" placeholder="e.g. 800000" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="employer_name">Employer / Business Name</label>
+                <input type="text" name="employer_name" id="employer_name"
+                       value="{{ client.employer_name|default:'' }}" placeholder="e.g. Kampala City Council">
+              </div>
+              <div class="form-group">
+                <label for="job_title">Job Title / Business Type</label>
+                <input type="text" name="job_title" id="job_title"
+                       value="{{ client.job_title|default:'' }}" placeholder="e.g. Teacher, Trader">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="employer_address">Employer / Business Address</label>
+              <input type="text" name="employer_address" id="employer_address"
+                     value="{{ client.employer_address|default:'' }}" placeholder="Work location or business address">
+            </div>
+          </div>
+        </div>
+
+        <!-- Next of Kin (only shown on create) -->
+        {% if action == "create" %}
+        <div class="card mb-3">
+          <div class="card-header">
+            <span class="card-title">Next of Kin</span>
+            <span class="text-sm text-muted">Recommended before loan approval</span>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="kin_name">Full Name</label>
+                <input type="text" name="kin_name" id="kin_name" placeholder="Next of kin full name">
+              </div>
+              <div class="form-group">
+                <label for="kin_relationship">Relationship</label>
+                <input type="text" name="kin_relationship" id="kin_relationship"
+                       placeholder="e.g. Spouse, Parent, Sibling">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="kin_phone">Phone Number</label>
+                <input type="tel" name="kin_phone" id="kin_phone" placeholder="+256700123456">
+              </div>
+              <div class="form-group">
+                <label for="kin_phone2">Second Phone</label>
+                <input type="tel" name="kin_phone2" id="kin_phone2" placeholder="+256700123456">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="kin_address">Physical Address</label>
+              <input type="text" name="kin_address" id="kin_address" placeholder="Next of kin address">
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-row">
+                <input type="checkbox" name="kin_is_guarantor" id="kin_is_guarantor">
+                <span>This person is also acting as loan guarantor</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes + blacklist (edit only, CEO) -->
+        <div class="card mb-3">
+          <div class="card-header"><span class="card-title">Additional Notes</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="notes">Internal Notes</label>
+              <textarea name="notes" id="notes" rows="3"
+                        placeholder="Any internal notes about this client (not shown to client)">{{ client.notes|default:'' }}</textarea>
+            </div>
+            {% if action == "edit" and perms.accounts.can_view_all_branches %}
+            <hr class="divider-fade">
+            <div class="form-group">
+              <label class="checkbox-row">
+                <input type="checkbox" name="is_active" id="is_active"
+                       {% if client.is_active %}checked{% endif %}>
+                <span>Account is active</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="checkbox-row" style="border-color:rgba(255,80,80,0.25);">
+                <input type="checkbox" name="is_blacklisted" id="is_blacklisted"
+                       {% if client.is_blacklisted %}checked{% endif %}>
+                <span style="color:var(--red-400)">Blacklist this client</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="blacklist_reason">Blacklist Reason</label>
+              <textarea name="blacklist_reason" id="blacklist_reason" rows="2"
+                        placeholder="Required if blacklisting">{{ client.blacklist_reason|default:'' }}</textarea>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-bar">
+          <button type="submit" class="btn btn-primary btn-lg">
+            {% if action == "create" %}Register Client{% else %}Save Changes{% endif %}
+          </button>
+          <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-lg">Cancel</a>
+        </div>
+      </form>
     </div>
-  </div>
-
-  {% if perms.accounts.can_view_all_branches %}
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Branch <span style="color:var(--red-400)">*</span></span></div>
-    <div class="card-body">
-      <div class="form-group">
-        <label for="branch">Register under branch</label>
-        <select name="branch" id="branch" required>
-          <option value="">— Select branch —</option>
-          {% for b in branches %}
-          <option value="{{ b.pk }}" {% if client.branch_id == b.pk or selected_branch_id|stringformat:'s' == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
-          {% endfor %}
-        </select>
-        <div class="form-hint">As CEO you're not tied to a single branch, so pick which branch this client belongs to.</div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Personal Information -->
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Personal Information</span></div>
-    <div class="card-body">
-
-      <div class="form-row-3">
-        <div class="form-group">
-          <label for="first_name">First Name <span style="color:var(--red-400)">*</span></label>
-          <input type="text" name="first_name" id="first_name" required
-                 value="{{ client.first_name|default:'' }}" placeholder="e.g. John">
-        </div>
-        <div class="form-group">
-          <label for="other_names">Other Names</label>
-          <input type="text" name="other_names" id="other_names"
-                 value="{{ client.other_names|default:'' }}" placeholder="Middle name(s)">
-        </div>
-        <div class="form-group">
-          <label for="last_name">Last Name / Surname <span style="color:var(--red-400)">*</span></label>
-          <input type="text" name="last_name" id="last_name" required
-                 value="{{ client.last_name|default:'' }}" placeholder="e.g. Mukasa">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="nin">National ID Number (NIN) <span style="color:var(--red-400)">*</span></label>
-          <input type="text" name="nin" id="nin" required maxlength="20"
-                 value="{{ client.nin|default:'' }}" placeholder="e.g. CF20100122XXXXXX"
-                 style="text-transform:uppercase;font-family:var(--font-mono)">
-          <div class="form-hint">14-character Uganda NIN on the back of the National ID card.</div>
-        </div>
-        <div class="form-group">
-          <label for="date_of_birth">Date of Birth <span style="color:var(--red-400)">*</span></label>
-          <input type="date" name="date_of_birth" id="date_of_birth" required
-                 value="{{ client.date_of_birth|default:'' }}">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="gender">Gender <span style="color:var(--red-400)">*</span></label>
-          <select name="gender" id="gender" required>
-            <option value="">— Select —</option>
-            {% for val, label in gender_choices %}
-            <option value="{{ val }}" {% if client.gender == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="marital_status">Marital Status <span style="color:var(--red-400)">*</span></label>
-          <select name="marital_status" id="marital_status" required>
-            <option value="">— Select —</option>
-            {% for val, label in marital_choices %}
-            <option value="{{ val }}" {% if client.marital_status == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Contact Information -->
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Contact Information</span></div>
-    <div class="card-body">
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="phone_primary">Primary Phone <span style="color:var(--red-400)">*</span></label>
-          <input type="tel" name="phone_primary" id="phone_primary" required
-                 value="{{ client.phone_primary|default:'' }}" placeholder="+256700123456">
-          <div class="form-hint">Uganda format: +256XXXXXXXXX — used for SMS reminders.</div>
-        </div>
-        <div class="form-group">
-          <label for="phone_secondary">Secondary Phone</label>
-          <input type="tel" name="phone_secondary" id="phone_secondary"
-                 value="{{ client.phone_secondary|default:'' }}" placeholder="+256700123456">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input type="email" name="email" id="email"
-                 value="{{ client.email|default:'' }}" placeholder="client@example.com">
-        </div>
-        <div class="form-group">
-          <label for="district">District <span style="color:var(--red-400)">*</span></label>
-          <input type="text" name="district" id="district"
-                 value="{{ client.district|default:'Kampala' }}" placeholder="e.g. Kampala" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="physical_address">Physical Address <span style="color:var(--red-400)">*</span></label>
-        <textarea name="physical_address" id="physical_address" rows="2" required
-                  placeholder="Plot number, street, LC1 area, district">{{ client.physical_address|default:'' }}</textarea>
-        <div class="form-hint">Include enough detail for a field officer to locate the client.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Employment -->
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Employment & Income</span></div>
-    <div class="card-body">
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="employment_status">Employment Status <span style="color:var(--red-400)">*</span></label>
-          <select name="employment_status" id="employment_status" required>
-            <option value="">— Select —</option>
-            {% for val, label in employment_choices %}
-            <option value="{{ val }}" {% if client.employment_status == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="monthly_income">Monthly Income ({% currency_symbol %}) <span style="color:var(--red-400)">*</span></label>
-          <input type="number" name="monthly_income" id="monthly_income" min="0" step="10000"
-                 value="{{ client.monthly_income|default:'' }}" placeholder="e.g. 800000" required>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="employer_name">Employer / Business Name</label>
-          <input type="text" name="employer_name" id="employer_name"
-                 value="{{ client.employer_name|default:'' }}" placeholder="e.g. Kampala City Council">
-        </div>
-        <div class="form-group">
-          <label for="job_title">Job Title / Business Type</label>
-          <input type="text" name="job_title" id="job_title"
-                 value="{{ client.job_title|default:'' }}" placeholder="e.g. Teacher, Trader">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="employer_address">Employer / Business Address</label>
-        <input type="text" name="employer_address" id="employer_address"
-               value="{{ client.employer_address|default:'' }}" placeholder="Work location or business address">
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Next of Kin (only shown on create) -->
-  {% if action == "create" %}
-  <div class="card mb-3">
-    <div class="card-header">
-      <span class="card-title">Next of Kin</span>
-      <span class="text-sm text-muted">Recommended before loan approval</span>
-    </div>
-    <div class="card-body">
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="kin_name">Full Name</label>
-          <input type="text" name="kin_name" id="kin_name" placeholder="Next of kin full name">
-        </div>
-        <div class="form-group">
-          <label for="kin_relationship">Relationship</label>
-          <input type="text" name="kin_relationship" id="kin_relationship"
-                 placeholder="e.g. Spouse, Parent, Sibling">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="kin_phone">Phone Number</label>
-          <input type="tel" name="kin_phone" id="kin_phone" placeholder="+256700123456">
-        </div>
-        <div class="form-group">
-          <label for="kin_phone2">Second Phone</label>
-          <input type="tel" name="kin_phone2" id="kin_phone2" placeholder="+256700123456">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="kin_address">Physical Address</label>
-        <input type="text" name="kin_address" id="kin_address" placeholder="Next of kin address">
-      </div>
-
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" name="kin_is_guarantor" id="kin_is_guarantor" style="width:auto;">
-          <span>This person is also acting as loan guarantor</span>
-        </label>
-      </div>
-
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- Notes + blacklist (edit only, CEO) -->
-  <div class="card mb-3">
-    <div class="card-header"><span class="card-title">Additional Notes</span></div>
-    <div class="card-body">
-      <div class="form-group">
-        <label for="notes">Internal Notes</label>
-        <textarea name="notes" id="notes" rows="3"
-                  placeholder="Any internal notes about this client (not shown to client)">{{ client.notes|default:'' }}</textarea>
-      </div>
-      {% if action == "edit" and perms.accounts.can_view_all_branches %}
-      <hr style="border-color:var(--border);margin:16px 0;">
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" name="is_active" id="is_active" style="width:auto;"
-                 {% if client.is_active %}checked{% endif %}>
-          <span>Account is active</span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" name="is_blacklisted" id="is_blacklisted" style="width:auto;"
-                 {% if client.is_blacklisted %}checked{% endif %}>
-          <span style="color:var(--red-400)">Blacklist this client</span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label for="blacklist_reason">Blacklist Reason</label>
-        <textarea name="blacklist_reason" id="blacklist_reason" rows="2"
-                  placeholder="Required if blacklisting">{{ client.blacklist_reason|default:'' }}</textarea>
-      </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Submit -->
-  <div class="flex gap-2 mb-4">
-    <button type="submit" class="btn btn-primary btn-lg">
-      {% if action == "create" %}Register Client{% else %}Save Changes{% endif %}
-    </button>
-    <a href="{% url 'clients:list' %}" class="btn btn-secondary btn-lg">Cancel</a>
-  </div>
-
-</form>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const closeBtn = document.getElementById('client-modal-close');
     const modal = document.getElementById('client-modal');
-    closeBtn?.addEventListener('click', function () {
-      window.location.href = '{% url "clients:list" %}';
-    });
-    modal?.addEventListener('click', function (event) {
-      if (event.target === modal) {
-        window.location.href = '{% url "clients:list" %}';
+    const panel = modal?.querySelector('.client-modal-panel');
+
+    function closeModal() {
+      if (panel) {
+        panel.style.animation = 'none';
+        panel.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        panel.style.opacity = '0';
+        panel.style.transform = 'scale(0.96) translateY(10px)';
       }
+      modal.style.transition = 'background 0.2s ease, backdrop-filter 0.2s ease';
+      modal.style.background = 'rgba(15,18,25,0)';
+      modal.style.backdropFilter = 'blur(0px)';
+      setTimeout(function () {
+        window.location.href = '{% url "clients:list" %}';
+      }, 220);
+    }
+
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', function (event) {
+      if (event.target === modal) closeModal();
+    });
+
+    // ESC to close
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Smooth scroll focus on invalid inputs
+    document.querySelectorAll('.client-form input, .client-form select, .client-form textarea').forEach(function (el) {
+      el.addEventListener('invalid', function () {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
     });
   });
 </script>

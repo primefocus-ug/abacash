@@ -77,7 +77,10 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
     }
 
 
-def recent_cash_transactions(*, user=None, branch_id=None, limit=6, include_owner_entries=True):
+def recent_cash_transactions(
+    *, user=None, branch_id=None, limit=6, include_owner_entries=True,
+    start_date=None, end_date=None,
+):
     """Return the latest physical-cash movements for a dashboard preview.
 
     include_owner_entries=False drops capital injections and expenses, which
@@ -104,6 +107,17 @@ def recent_cash_transactions(*, user=None, branch_id=None, limit=6, include_owne
     injections = CapitalInjection.objects.filter(
         payment_method=CapitalInjection.PaymentMethod.CASH,
     ).order_by("-created_at")
+
+    if start_date is not None:
+        payments = payments.filter(payment_date__gte=start_date)
+        disbursements = disbursements.filter(disbursement_date__gte=start_date)
+        expenses = expenses.filter(expense_date__gte=start_date)
+        injections = injections.filter(injected_date__gte=start_date)
+    if end_date is not None:
+        payments = payments.filter(payment_date__lte=end_date)
+        disbursements = disbursements.filter(disbursement_date__lte=end_date)
+        expenses = expenses.filter(expense_date__lte=end_date)
+        injections = injections.filter(injected_date__lte=end_date)
 
     if branch_id is not None:
         payments = payments.filter(loan__branch_id=branch_id)

@@ -1,17 +1,34 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
+from django.utils import timezone
 from unittest.mock import patch
 
 from accounts.models import CompanySettings
 from clients.models import Client
+from common.pdf_utils import generate_loan_schedule_pdf
 from loans import views as loan_views
 from loans.models import Loan, LoanProduct
 from loans.utils import calculate_processing_fee_amount, resolve_processing_fee_rate
+
+
+class _RelatedList(list):
+    def all(self):
+        return self
+
+    def exists(self):
+        return bool(self)
+
+    def order_by(self, *fields):
+        return self
+
+    def select_related(self, *fields):
+        return self
 
 
 class ProcessingFeeResolutionTests(SimpleTestCase):
@@ -68,6 +85,224 @@ class ProcessingFeeResolutionTests(SimpleTestCase):
         )
 
         self.assertEqual(resolve_processing_fee_rate(None, settings), Decimal("2.25"))
+
+
+class LoanProductCreateDefaultsTests(SimpleTestCase):
+    def test_new_product_form_defaults_to_active(self):
+        request = RequestFactory().get("/loans/products/new/")
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+
+        with patch("loans.views.render") as render:
+            loan_views.loan_product_create(request)
+
+        context = render.call_args.args[2]
+        self.assertTrue(context["product_form_defaults"]["is_active"])
+        self.assertFalse(context["product_form_defaults"]["requires_collateral"])
+
+    def test_htmx_request_renders_product_creation_popover(self):
+        request = RequestFactory().get(
+            "/loans/products/new/",
+            HTTP_HX_REQUEST="true",
+        )
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+
+        with patch("loans.views.render") as render:
+            loan_views.loan_product_create(request)
+
+        self.assertEqual(render.call_args.args[1], "loans/product_form_modal.html")
+
+    def test_htmx_product_create_redirects_to_product_list(self):
+        request = RequestFactory().post(
+            "/loans/products/new/",
+            {
+                "name": "Short Term",
+                "interest_rate_monthly": "2",
+                "interest_method": "FLAT",
+                "default_repayment_frequency": "MONTHLY",
+                "min_amount": "100000",
+                "max_amount": "500000",
+                "min_term_months": "1",
+                "max_term_months": "6",
+                "penalty_rate_monthly": "1",
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+        product = SimpleNamespace(name="Short Term", full_clean=lambda: None, save=lambda: None)
+
+        with (
+            patch("loans.views.LoanProduct", return_value=product),
+            patch("loans.views.messages.success"),
+        ):
+            response = loan_views.loan_product_create(request)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["HX-Redirect"], reverse("loans:products"))
+
+
+class LoanProductEditPopoverTests(SimpleTestCase):
+    def setUp(self):
+        self.product = SimpleNamespace(
+            pk=1,
+            name="Short Term",
+            description="",
+            interest_rate_monthly=Decimal("2"),
+            interest_method="FLAT",
+            default_repayment_frequency="MONTHLY",
+            min_amount=Decimal("100000"),
+            max_amount=Decimal("500000"),
+            min_term_months=1,
+            max_term_months=6,
+            penalty_rate_monthly=Decimal("1"),
+            processing_fee_percent=Decimal("0"),
+            requires_guarantor=False,
+            requires_collateral=False,
+            is_active=True,
+            full_clean=lambda: None,
+            save=lambda: None,
+        )
+
+    def test_htmx_get_renders_product_edit_popover(self):
+        request = RequestFactory().get(
+            "/loans/products/1/edit/",
+            HTTP_HX_REQUEST="true",
+        )
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.product),
+            patch("loans.views.render") as render,
+        ):
+            loan_views.loan_product_edit(request, pk=1)
+
+        self.assertEqual(render.call_args.args[1], "loans/product_form_modal.html")
+        self.assertEqual(render.call_args.args[2]["action"], "edit")
+        self.assertEqual(render.call_args.args[2]["product_form_defaults"]["name"], "Short Term")
+
+    def test_htmx_edit_saves_and_redirects_to_product_list(self):
+        request = RequestFactory().post(
+            "/loans/products/1/edit/",
+            {
+                "name": "Updated Term",
+                "interest_rate_monthly": "2",
+                "interest_method": "FLAT",
+                "default_repayment_frequency": "MONTHLY",
+                "min_amount": "100000",
+                "max_amount": "500000",
+                "min_term_months": "1",
+                "max_term_months": "6",
+                "penalty_rate_monthly": "1",
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.product),
+            patch("loans.views.messages.success"),
+        ):
+            response = loan_views.loan_product_edit(request, pk=1)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["HX-Redirect"], reverse("loans:products"))
+        self.assertEqual(self.product.name, "Updated Term")
+
+    def test_invalid_htmx_edit_renders_errors_inside_the_popover(self):
+        request = RequestFactory().post(
+            "/loans/products/1/edit/",
+            {
+                "name": "Updated Term",
+                "interest_rate_monthly": "2",
+                "interest_method": "FLAT",
+                "default_repayment_frequency": "MONTHLY",
+                "min_amount": "100000",
+                "max_amount": "500000",
+                "min_term_months": "1",
+                "max_term_months": "6",
+                "penalty_rate_monthly": "1",
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        request.user = SimpleNamespace(role="CEO", is_authenticated=True)
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.product),
+            patch.object(self.product, "full_clean", side_effect=ValueError("Invalid product terms.")),
+            patch.object(self.product, "save") as save,
+            patch("loans.views.render") as render,
+        ):
+            loan_views.loan_product_edit(request, pk=1)
+
+        self.assertEqual(render.call_args.args[1], "loans/product_form_modal.html")
+        self.assertIn("Invalid product terms.", render.call_args.args[2]["form_error"])
+        save.assert_not_called()
+
+
+class LoanProductRangeValidationTests(SimpleTestCase):
+    def test_rejects_maximum_amount_below_minimum(self):
+        product = LoanProduct(min_amount=Decimal("100000"), max_amount=Decimal("1"))
+
+        with self.assertRaises(ValidationError) as error:
+            product.clean()
+
+        self.assertIn("max_amount", error.exception.message_dict)
+
+    def test_rejects_maximum_term_below_minimum(self):
+        product = LoanProduct(min_term_months=6, max_term_months=1)
+
+        with self.assertRaises(ValidationError) as error:
+            product.clean()
+
+        self.assertIn("max_term_months", error.exception.message_dict)
+
+
+class SchedulePdfGenerationTests(SimpleTestCase):
+    def test_generates_pdf_with_payment_reconciliation_fields(self):
+        payment = SimpleNamespace(reference_number="MOMO-12345")
+        schedule_row = SimpleNamespace(
+            due_date=date(2026, 11, 1),
+            paid_date=date(2026, 11, 1),
+            paid_by_payment=payment,
+            opening_balance=Decimal("110000"),
+            principal_due=Decimal("100000"),
+            interest_due=Decimal("10000"),
+            penalty_due=Decimal("0"),
+            total_payment=Decimal("110000"),
+            amount_paid=Decimal("110000"),
+            closing_balance=Decimal("0"),
+            get_status_display=lambda: "Paid",
+        )
+        collateral = SimpleNamespace(
+            description="Motorcycle",
+            estimated_value=Decimal("5000000"),
+            document_number="LOG-123",
+            storage_location="Kampala branch",
+            notes="",
+            release_date=None,
+            released_to="",
+        )
+        loan = SimpleNamespace(
+            loan_number="LN-00001",
+            client=SimpleNamespace(full_name="Test Client"),
+            principal_amount=Decimal("100000"),
+            product=SimpleNamespace(name="Salary Loan"),
+            get_status_display=lambda: "Active",
+            disbursement_date=date(2026, 10, 1),
+            maturity_date=date(2026, 11, 1),
+            get_interest_method_display=lambda: "Flat Rate",
+            interest_rate_monthly=Decimal("5.00"),
+            total_interest=Decimal("10000"),
+            processing_fee=Decimal("4000"),
+            total_repayable=Decimal("110000"),
+            total_paid=Decimal("110000"),
+            collateral_items=_RelatedList([collateral]),
+            schedule=_RelatedList([schedule_row]),
+        )
+
+        with patch("accounts.models.BankAccount.objects.filter", return_value=_RelatedList()):
+            pdf = generate_loan_schedule_pdf(loan)
+
+        self.assertTrue(pdf.startswith(b"%PDF"))
 
 
 class OptionalGuarantorAmountTests(SimpleTestCase):
@@ -193,6 +428,71 @@ class LoanListStaffFilterTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "LN-2024-00002")
         self.assertNotContains(response, "LN-2024-00001")
+
+
+class LoanApplicationClientSearchTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="loan_search_cashier",
+            email="loan-search@example.com",
+            password="test-password",
+            role=User.Role.CASHIER,
+        )
+        self.client.force_login(self.user)
+
+    def create_client(self, first_name, last_name, **overrides):
+        details = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "gender": Client.Gender.FEMALE,
+            "date_of_birth": "1990-01-01",
+            "marital_status": Client.MaritalStatus.SINGLE,
+            "nin": overrides.pop("nin", f"NIN-{first_name}-{last_name}"),
+            "phone_primary": "+256700000001",
+            "physical_address": "Kampala",
+            "district": "Kampala",
+            "employment_status": Client.EmploymentStatus.EMPLOYED,
+            **overrides,
+        }
+        return Client.objects.create(**details)
+
+    def test_apply_page_shows_the_three_most_recent_clients_immediately(self):
+        created_clients = [
+            self.create_client(f"Recent{index}", "Client", nin=f"NIN-RECENT-{index}")
+            for index in range(4)
+        ]
+        created_at = timezone.now()
+        for index, client in enumerate(created_clients):
+            Client.objects.filter(pk=client.pk).update(
+                created_at=created_at + timedelta(seconds=index),
+            )
+
+        with patch("loans.views.scope_to_branch", side_effect=lambda queryset, _user: queryset):
+            response = self.client.get(reverse("loans:apply"))
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        visible_numbers = [
+            content.index(client.client_number)
+            for client in created_clients[1:]
+        ]
+        self.assertEqual(visible_numbers, sorted(visible_numbers, reverse=True))
+        self.assertNotContains(response, created_clients[0].client_number)
+
+    def test_search_matches_a_full_client_name(self):
+        client = self.create_client("Jane", "Doe", other_names="Ann", nin="NIN-JANE-DOE")
+
+        with patch("loans.views.scope_to_branch", side_effect=lambda queryset, _user: queryset):
+            response = self.client.get(
+                reverse("loans:client_search"),
+                {"q": "Jane Ann Doe"},
+                HTTP_HX_REQUEST="true",
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, client.client_number)
+        self.assertContains(response, "Jane Ann Doe")
 
 
 class LoanScheduleCalculationTests(SimpleTestCase):

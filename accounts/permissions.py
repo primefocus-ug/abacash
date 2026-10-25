@@ -37,7 +37,7 @@ PERMISSIONS = [
     ("can_manage_users",             "Manage staff accounts",                    [GROUP_CEO]),
     ("can_manage_branches",          "Manage branches",                          [GROUP_CEO]),
     ("can_manage_loan_products",     "Manage loan products & fee types",         [GROUP_CEO]),
-    ("can_manage_system_settings",   "Manage system settings (holidays, params)",[GROUP_CEO]),
+    ("can_manage_system_settings",   "Manage the holiday calendar",             [GROUP_CEO]),
     ("can_manage_company_settings",  "Manage company settings",                  [GROUP_CEO]),
     ("can_manage_guarantors",        "Manage guarantors",                        [GROUP_MANAGER, GROUP_CEO]),
     ("can_verify_guarantors",        "Verify guarantors",                        [GROUP_CEO]),

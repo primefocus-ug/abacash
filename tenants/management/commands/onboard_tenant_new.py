@@ -7,11 +7,15 @@ python manage.py onboard_tenant \
     --password=SecurePassword123 \
     --notify
 """
-from decimal import Decimal
 from django.core.management.base import BaseCommand, CommandError
 from django_tenants.utils import schema_context
 import logging
 import os
+from tenants.provisioning import (
+    _seed_branch as seed_branch,
+    _seed_expense_categories as seed_expense_categories,
+    _seed_products as seed_products,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +24,6 @@ PLANS = {
     "PROFESSIONAL": {"manager_limit": 20_000_000,  "max_loans": 3},
     "ENTERPRISE":   {"manager_limit": 999_999_999, "max_loans": 5},
 }
-
-DEFAULT_PRODUCTS = [
-    {"name": "Salary Loan",    "interest_rate_monthly": "5.00", "interest_method": "FLAT",     "min_amount": "100000",  "max_amount": "5000000",  "min_term": 1, "max_term": 12},
-    {"name": "Business Loan",  "interest_rate_monthly": "4.00", "interest_method": "REDUCING", "min_amount": "500000",  "max_amount": "50000000", "min_term": 3, "max_term": 24},
-    {"name": "Emergency Loan", "interest_rate_monthly": "6.00", "interest_method": "FLAT",     "min_amount": "50000",   "max_amount": "1000000",  "min_term": 1, "max_term": 3},
-]
-
 
 class Command(BaseCommand):
     help = "Provision a new tenant: schema + migrations + seed data + CEO user."
@@ -90,10 +87,15 @@ class Command(BaseCommand):
         created_user = None
         with schema_context(schema):
             self._seed_settings(name, options["phone"], options["address"], plan_cfg, company_email)
+            branch = seed_branch(name, options["phone"], options["address"], company_email)
             self._seed_sequence("accounts.models", "ReceiptSequence", "receipt")
             self._seed_sequence("loans.models",    "LoanSequence",    "loans")
             self._seed_products()
+            seed_expense_categories()
             created_user = self._create_ceo(name, email)
+            if branch is not None:
+                from accounts.models import User
+                User.objects.filter(branch__isnull=True).update(branch=branch)
 
         self._summary(name, schema, domain, email, plan)
 
@@ -195,20 +197,7 @@ class Command(BaseCommand):
         self.stdout.write(f"    ✔  {model_name}({seq_name}) {'created' if created else 'exists'}")
 
     def _seed_products(self):
-        from loans.models import LoanProduct
-        n = 0
-        for p in DEFAULT_PRODUCTS:
-            _, created = LoanProduct.objects.get_or_create(name=p["name"], defaults={
-                "interest_rate_monthly": Decimal(p["interest_rate_monthly"]),
-                "interest_method": p["interest_method"],
-                "min_amount": Decimal(p["min_amount"]),
-                "max_amount": Decimal(p["max_amount"]),
-                "min_term_months": p["min_term"],
-                "max_term_months": p["max_term"],
-                "is_active": True,
-            })
-            if created:
-                n += 1
+        n = seed_products()
         self.stdout.write(f"    ✔  {n} loan products seeded")
 
     def _create_ceo(self, company_name, email, password=None):

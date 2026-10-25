@@ -99,8 +99,7 @@ def create_initial_tenant_admin(sender, app_config, **kwargs):
 
     admin_username = getattr(settings, 'TENANT_INITIAL_ADMIN_USERNAME', 'admin')
     admin_password = getattr(settings, 'TENANT_INITIAL_ADMIN_PASSWORD', '@Developer25')
-    tenant_domain_root = getattr(settings, 'TENANT_PUBLIC_DOMAIN', 'localhost')
-    admin_email = f"{admin_username}@{schema}.{tenant_domain_root}" if schema else f"{admin_username}@{tenant_domain_root}"
+    admin_email = getattr(settings, 'TENANT_INITIAL_ADMIN_EMAIL', 'primefocusug@gmail.com')
 
     try:
         User.objects.create_superuser(username=admin_username, email=admin_email, password=admin_password)

@@ -37,10 +37,12 @@ import uuid
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from common.phone_numbers import PhoneNumberNormalizationMixin
 
 
 class LoanProduct(models.Model):
@@ -120,6 +122,11 @@ class LoanProduct(models.Model):
         help_text=_("If True, client must have at least one guarantor before approval."),
     )
 
+    requires_collateral = models.BooleanField(
+        default=False,
+        help_text=_("If True, client must provide at least one collateral item before approval."),
+    )
+
     max_guarantor_liability_percent = models.DecimalField(
         max_digits=5,
         decimal_places=2,
@@ -178,6 +185,22 @@ class LoanProduct(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.interest_rate_monthly}%/month {self.get_interest_method_display()})"
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.min_amount is not None and self.max_amount is not None:
+            if self.max_amount < self.min_amount:
+                errors["max_amount"] = _(
+                    "Maximum loan amount must be greater than or equal to minimum loan amount."
+                )
+        if self.min_term_months is not None and self.max_term_months is not None:
+            if self.max_term_months < self.min_term_months:
+                errors["max_term_months"] = _(
+                    "Maximum loan term must be greater than or equal to minimum loan term."
+                )
+        if errors:
+            raise ValidationError(errors)
 
     class Meta:
         verbose_name = _("Loan Product")
@@ -721,7 +744,7 @@ class LoanScheduleSnapshot(models.Model):
         return f"{self.loan.loan_number}: schedule snapshot by {who} on {self.created_at.date()}"
 
 
-class Guarantor(models.Model):
+class Guarantor(PhoneNumberNormalizationMixin, models.Model):
     """
     A person who provides a guarantee for a client's loan.
     Guarantors can guarantee multiple loans but have a maximum liability limit.
@@ -730,6 +753,8 @@ class Guarantor(models.Model):
     class Type(models.TextChoices):
         INDIVIDUAL = "INDIVIDUAL", _("Individual")
         CORPORATE = "CORPORATE", _("Corporate/Company")
+
+    phone_fields = ("phone_primary", "phone_secondary")
 
     # Personal details
     first_name = models.CharField(max_length=100)
@@ -1200,4 +1225,3 @@ class LoanScheduleExtension(models.Model):
         verbose_name = _("Loan Schedule Extension")
         verbose_name_plural = _("Loan Schedule Extensions")
         ordering = ["-extended_at"]
-

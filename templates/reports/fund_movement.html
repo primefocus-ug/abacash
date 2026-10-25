@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Capital &amp; Fund Movement{% endblock %}
+{% block page_title %}Capital &amp; Fund Movement{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:fund_movement_excel' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">Download Excel</a>
+  <a href="{% url 'reports:fund_movement_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">Download PDF</a>
+  <a href="{% url 'reports:fund_movement_pdf' %}?{{ request.GET.urlencode }}&amp;mode=inline" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Print</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
+      <div>
+        <label for="fund-date-from" style="display:block;margin-bottom:4px;">From</label>
+        <input id="fund-date-from" type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label for="fund-date-to" style="display:block;margin-bottom:4px;">To</label>
+        <input id="fund-date-to" type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
+      <a href="{% url 'reports:fund_movement' %}" class="btn btn-secondary btn-sm">Reset</a>
+    </form>
+    <div class="text-sm text-muted" style="margin-top:10px;">Branch: {{ branch_label }} · Period {{ date_from|date:"d M Y" }} to {{ date_to|date:"d M Y" }}</div>
+    <p class="text-sm text-muted" style="margin:12px 0 0;">
+      Funds are treated as one pooled balance; the ledger records movement but cannot attribute a specific injection to a particular expense. Loan disbursement method is not stored, so disbursements are shown as principal outflows without a channel. Standalone bank-ledger entries are not included in the reconciliation because they are not linked to source transactions and could duplicate them.
+    </p>
+  </div>
+</div>
+
+<div class="metrics-grid mb-3">
+  <div class="metric-card blue"><div class="metric-label">Opening Balance</div><div class="metric-value">{{ opening_balance|ugx_plain }}</div><div class="metric-sub">Before {{ date_from|date:"d M Y" }}</div></div>
+  <div class="metric-card teal"><div class="metric-label">Capital Injected</div><div class="metric-value">{{ total_injections|ugx_plain }}</div><div class="metric-sub">{{ injection_count }} injection{{ injection_count|pluralize }}</div></div>
+  <div class="metric-card green"><div class="metric-label">Repayments Received</div><div class="metric-value">{{ total_repayments|ugx_plain }}</div><div class="metric-sub">{{ payment_count }} cash receipt{{ payment_count|pluralize }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Payment Reversals</div><div class="metric-value">{{ total_reversals|ugx_plain }}</div><div class="metric-sub">{{ reversal_count }} reversal{{ reversal_count|pluralize }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Client Refunds</div><div class="metric-value">{{ total_refunds|ugx_plain }}</div><div class="metric-sub">{{ refund_count }} refund{{ refund_count|pluralize }}</div></div>
+  <div class="metric-card green"><div class="metric-label">Processing Fees</div><div class="metric-value">{{ total_processing_fees|ugx_plain }}</div></div>
+  <div class="metric-card green"><div class="metric-label">Sales Adjustments · In</div><div class="metric-value">{{ total_adjustment_in|ugx_plain }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Sales Adjustments · Out</div><div class="metric-value">{{ total_adjustment_out|ugx_plain }}</div><div class="metric-sub">{{ adjustment_count }} adjustment{{ adjustment_count|pluralize }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Principal Disbursed</div><div class="metric-value">{{ total_disbursed|ugx_plain }}</div><div class="metric-sub">{{ disbursement_count }} loan{{ disbursement_count|pluralize }}</div></div>
+  <div class="metric-card amber"><div class="metric-label">Approved Expenses</div><div class="metric-value">{{ total_expenses|ugx_plain }}</div><div class="metric-sub">{{ expense_count }} expense{{ expense_count|pluralize }}</div></div>
+  <div class="metric-card blue"><div class="metric-label">Total Inflows</div><div class="metric-value">{{ total_inflows|ugx_plain }}</div></div>
+  <div class="metric-card red"><div class="metric-label">Total Outflows</div><div class="metric-value">{{ total_outflows|ugx_plain }}</div></div>
+  <div class="metric-card {% if closing_balance < 0 %}red{% else %}teal{% endif %}"><div class="metric-label">Closing Balance</div><div class="metric-value">{{ closing_balance|ugx_plain }}</div><div class="metric-sub">Opening balance + net movement</div></div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <span class="card-title">Fund Reconciliation</span>
+    <span class="text-sm text-muted">Net movement: {{ net_movement|ugx_plain }}</span>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead><tr><th>Opening Balance</th><th>In-period Inflows</th><th>In-period Outflows</th><th>Net Movement</th><th>Closing Balance</th></tr></thead>
+      <tbody><tr>
+        <td class="mono">{{ opening_balance|ugx_plain }}</td>
+        <td class="mono">{{ total_inflows|ugx_plain }}</td>
+        <td class="mono">{{ total_outflows|ugx_plain }}</td>
+        <td class="mono">{{ net_movement|ugx_plain }}</td>
+        <td class="mono fw-500">{{ closing_balance|ugx_plain }}</td>
+      </tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Transaction Ledger</span><span class="text-sm text-muted">{{ date_from|date:"d M Y" }} – {{ date_to|date:"d M Y" }}</span></div>
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead><tr>
+        <th>Date</th><th>Time</th><th>Type</th><th>Counterparty</th><th>Method</th><th>Reference</th><th>Description</th><th>Branch</th><th class="num">Funds In</th><th class="num">Funds Out</th><th class="num">Balance After</th>
+      </tr></thead>
+      <tbody>
+        {% for row in ledger %}
+        <tr>
+          <td class="text-sm">{{ row.date|date:"d M Y" }}</td>
+          <td class="text-sm">{{ row.time|date:"H:i" }}</td>
+          <td>{{ row.type }}</td>
+          <td>{{ row.counterparty }}</td>
+          <td class="text-sm">{{ row.method }}</td>
+          <td class="mono text-sm">{{ row.reference }}</td>
+          <td class="text-sm">{{ row.description }}</td>
+          <td class="text-sm">{{ row.branch }}</td>
+          <td class="mono num">{% if row.cash_in %}{{ row.cash_in|ugx_plain }}{% else %}—{% endif %}</td>
+          <td class="mono num">{% if row.cash_out %}{{ row.cash_out|ugx_plain }}{% else %}—{% endif %}</td>
+          <td class="mono num">{{ row.balance_after|ugx_plain }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" class="text-center text-muted" style="padding:32px;">No fund movements found for these filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -6,14 +6,19 @@
     const refreshInterval = 30000;
     const retryInterval = 5000;
     const status = document.getElementById('dashboard-live-status');
+    const dashboardFilterForm = document.getElementById('dashboard-filter-form');
     let refreshTimer;
     let lastActivity = Date.now();
     const dirtyForms = new WeakSet();
 
     if (status) {
-      status.textContent = 'Loaded at ' + new Date().toLocaleTimeString() +
-        ' · auto-refreshes every 30 seconds.';
+      status.textContent = dashboardFilterForm
+        ? 'Loaded at ' + new Date().toLocaleTimeString() +
+          ' · auto-refreshes every 30 seconds.'
+        : 'Automatic refresh is paused on this dashboard to preserve your current page.';
     }
+
+    if (!dashboardFilterForm) return;
 
     function hasSelectedText() {
       const selection = window.getSelection();
@@ -50,7 +55,8 @@
         scheduleRefresh(retryInterval);
         return;
       }
-      window.location.reload();
+      dashboardFilterForm.requestSubmit();
+      scheduleRefresh(refreshInterval);
     }
 
     function noteActivity(event) {

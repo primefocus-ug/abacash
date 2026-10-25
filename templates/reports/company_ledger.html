@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load aba_filters humanize %}
+
+{% block title %}Company Ledger{% endblock %}
+{% block page_title %}Company Ledger{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:staff_performance' %}?date_from={{ date_from|date:'Y-m-d' }}&amp;date_to={{ date_to|date:'Y-m-d' }}&amp;branch={{ branch_id }}" class="btn btn-secondary btn-sm">Staff performance</a>
+  <a href="{% url 'reports:fund_movement' %}?date_from={{ date_from|date:'Y-m-d' }}&amp;date_to={{ date_to|date:'Y-m-d' }}&amp;branch={{ branch_id }}" class="btn btn-secondary btn-sm">Fund analysis</a>
+{% endblock %}
+
+{% block content %}
+<style>
+  .ledger-page { --ledger-line:var(--border); }
+  .ledger-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin:0 0 18px; }
+  .ledger-eyebrow,.ledger-micro-label { color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+  .ledger-heading h2 { margin:5px 0 4px; font-size:clamp(21px,3vw,29px); letter-spacing:-.035em; }
+  .ledger-heading p { margin:0; color:var(--text-muted); font-size:13px; }
+  .ledger-period { border:1px solid var(--ledger-line); border-radius:999px; padding:8px 12px; color:var(--text-muted); font-size:11px; white-space:nowrap; }
+  .ledger-toolbar,.ledger-card,.ledger-disclosure { background:var(--bg-surface); border:1px solid var(--ledger-line); border-radius:var(--radius-lg); }
+  .ledger-toolbar { padding:12px; margin-bottom:12px; }
+  .ledger-filter-main { display:grid; grid-template-columns:minmax(130px,.75fr) minmax(130px,.75fr) minmax(180px,1.4fr) auto; gap:10px; align-items:end; }
+  .ledger-filter label,.adjustment-grid label { display:block; margin:0 0 5px; color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+  .ledger-filter input,.ledger-filter select,.adjustment-grid input,.adjustment-grid select,.adjustment-grid textarea { width:100%; min-height:38px; margin:0; }
+  .ledger-filter-actions { display:flex; gap:7px; }
+  .ledger-filter-actions .btn { min-height:38px; display:inline-flex; align-items:center; justify-content:center; }
+  .ledger-advanced { margin-top:10px; border-top:1px solid var(--ledger-line); padding-top:9px; }
+  .ledger-advanced summary,.ledger-disclosure summary { display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--text-muted); cursor:pointer; list-style:none; font-size:12px; font-weight:600; }
+  .ledger-advanced summary::-webkit-details-marker,.ledger-disclosure summary::-webkit-details-marker { display:none; }
+  .ledger-advanced summary:after,.ledger-disclosure summary:after { content:"＋"; color:var(--text-muted); font-size:16px; }
+  .ledger-advanced[open] summary:after,.ledger-disclosure[open] summary:after { content:"−"; }
+  .ledger-advanced-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-top:12px; }
+  .ledger-matchline { display:flex; justify-content:space-between; gap:12px; margin:10px 2px 0; color:var(--text-muted); font-size:11px; }
+  .ledger-error { margin:0 0 10px; padding:10px 13px; border:1px solid color-mix(in srgb,var(--danger) 25%,transparent); border-radius:10px; color:var(--danger); background:var(--danger-bg,rgba(239,68,68,.08)); font-size:13px; }
+  .ledger-card { margin-bottom:12px; overflow:hidden; }
+  .ledger-card-header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--ledger-line); }
+  .ledger-card-header h2 { margin:0; font-size:14px; }
+  .ledger-card-header p { margin:3px 0 0; color:var(--text-muted); font-size:11px; }
+  .ledger-card-meta { color:var(--text-muted); font:11px ui-monospace,SFMono-Regular,Consolas,monospace; white-space:nowrap; }
+  .ledger-table-wrap { overflow:auto; }
+  .ledger-table { width:100%; min-width:760px; border-collapse:collapse; }
+  .ledger-table th { padding:9px 12px; border-bottom:1px solid var(--ledger-line); color:var(--text-muted); font-size:9px; font-weight:700; letter-spacing:.1em; text-align:left; text-transform:uppercase; white-space:nowrap; }
+  .ledger-table td { padding:10px 12px; border-bottom:1px solid var(--ledger-line); vertical-align:middle; }
+  .ledger-table tbody tr:last-child td { border-bottom:0; }
+  .ledger-table tbody tr:hover { background:color-mix(in srgb,var(--bg-surface) 92%,var(--primary) 8%); }
+  .ledger-date { color:var(--text-muted); font:11px ui-monospace,SFMono-Regular,Consolas,monospace; white-space:nowrap; }
+  .ledger-date time { display:block; margin-top:3px; font-size:9px; opacity:.75; }
+  .ledger-event { min-width:250px; }
+  .ledger-event-top { display:flex; align-items:center; gap:7px; }
+  .ledger-kind,.ledger-state { display:inline-flex; align-items:center; border:1px solid var(--ledger-line); border-radius:999px; padding:3px 7px; color:var(--text-muted); font-size:9px; font-weight:700; line-height:1.2; white-space:nowrap; }
+  .ledger-kind { color:var(--primary); border-color:color-mix(in srgb,var(--primary) 30%,var(--ledger-line)); background:color-mix(in srgb,var(--primary) 7%,transparent); }
+  .ledger-reference { color:var(--text); font:11px ui-monospace,SFMono-Regular,Consolas,monospace; }
+  .ledger-description { max-width:430px; overflow:hidden; margin-top:4px; color:var(--text-muted); font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
+  .ledger-accountability { min-width:130px; }
+  .ledger-accountability strong { display:block; font-size:11px; font-weight:600; }
+  .ledger-accountability .ledger-state { margin-top:4px; }
+  .ledger-amount { font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace; text-align:right!important; white-space:nowrap; }
+  .ledger-in { color:var(--success,var(--green-400)); }
+  .ledger-out { color:var(--danger,var(--red-400)); }
+  .ledger-zero { color:var(--text-muted); font-weight:400; }
+  .ledger-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 14px; border-top:1px solid var(--ledger-line); }
+  .ledger-pagination-actions { display:flex; gap:7px; }
+  .ledger-disclosure { margin-bottom:10px; padding:0 14px; }
+  .ledger-disclosure summary { min-height:43px; }
+  .ledger-disclosure[open] { padding-bottom:12px; }
+  .ledger-disclosure-title { display:flex; align-items:center; gap:9px; color:var(--text); }
+  .ledger-disclosure-title span:last-child { color:var(--text-muted); font-size:11px; font-weight:400; }
+  .adjustment-form { padding-top:12px; }
+  .adjustment-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:11px; align-items:end; }
+  .adjustment-grid .wide { grid-column:1/-1; }
+  .ledger-analysis-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; }
+  .ledger-analysis-grid .ledger-card { margin:0; }
+  .ledger-analysis-grid .table-wrap { overflow:auto; }
+  .ledger-empty { padding:32px 16px!important; color:var(--text-muted); text-align:center; }
+  @media(max-width:700px) {
+    .ledger-heading { align-items:flex-start; flex-direction:column; }
+    .ledger-period { align-self:flex-start; }
+    .ledger-filter-main { grid-template-columns:1fr 1fr; }
+    .ledger-filter-search { grid-column:1/-1; }
+    .ledger-filter-actions { grid-column:1/-1; }
+    .ledger-filter-actions .btn { flex:1; }
+    .ledger-matchline { flex-direction:column; gap:3px; }
+  }
+  @media(max-width:430px) { .ledger-filter-main { grid-template-columns:1fr; } .ledger-filter-search,.ledger-filter-actions { grid-column:auto; } }
+</style>
+
+<main class="ledger-page">
+  <header class="ledger-heading">
+    <div>
+      <div class="ledger-eyebrow">Financial intelligence / 01</div>
+      <h2>Company ledger</h2>
+      <p>Trace cash movement, operational events, and accountability in one view.</p>
+    </div>
+    <div class="ledger-period">{{ date_from|date:"d M Y" }} <span aria-hidden="true">→</span> {{ date_to|date:"d M Y" }}</div>
+  </header>
+
+  <form method="get" class="ledger-toolbar ledger-filter" aria-label="Filter company ledger">
+    <div class="ledger-filter-main">
+      <div>
+        <label for="ledger-date-from">Period from</label>
+        <input id="ledger-date-from" type="date" name="date_from" value="{{ date_from|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}">
+      </div>
+      <div>
+        <label for="ledger-date-to">Period to</label>
+        <input id="ledger-date-to" type="date" name="date_to" value="{{ date_to|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}">
+      </div>
+      <div class="ledger-filter-search">
+        <label for="ledger-search">Search records</label>
+        <input id="ledger-search" name="q" type="search" value="{{ search }}" placeholder="Reference, client, staff, notes">
+      </div>
+      <div class="ledger-filter-actions">
+        <button class="btn btn-primary btn-sm" type="submit">Run query</button>
+        <a class="btn btn-secondary btn-sm" href="{% url 'reports:company_ledger' %}">Reset</a>
+      </div>
+    </div>
+    <details class="ledger-advanced" {% if category or branch_id %}open{% endif %}>
+      <summary>Advanced filters <span>{{ category_label }}{% if branch_id %} · Branch selected{% endif %}</span></summary>
+      <div class="ledger-advanced-fields">
+        <div>
+          <label for="ledger-category">Record type</label>
+          <select id="ledger-category" name="category">
+            <option value="">All record types</option>
+            {% for value, label in categories.items %}
+            <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% if perms.accounts.can_view_all_branches %}
+        <div>
+          <label for="ledger-branch">Branch</label>
+          <select id="ledger-branch" name="branch">
+            <option value="" {% if not branch_id %}selected{% endif %}>All branches</option>
+            {% for branch in branch_options %}
+            <option value="{{ branch.pk }}" {% if branch_id == branch.pk|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+      </div>
+    </details>
+    <div class="ledger-matchline">
+      <span>{{ total_count|intcomma }} matching record{{ total_count|pluralize }}</span>
+      <span>Query scope: {{ date_from|date:"Y-m-d" }} — {{ date_to|date:"Y-m-d" }}{% if category %} · {{ category_label }}{% endif %}</span>
+    </div>
+  </form>
+
+{% for error in form_errors %}
+  <p class="ledger-error" role="alert">{{ error }}</p>
+{% endfor %}
+
+{% if can_record_adjustment %}
+<details class="ledger-disclosure" {% if form_errors %}open{% endif %}>
+  <summary>
+    <span class="ledger-disclosure-title"><strong>＋</strong><span>Manual cash correction</span><span>Controlled, referenced ledger entry</span></span>
+  </summary>
+  <form method="post" class="adjustment-form">
+    {% csrf_token %}
+    <div class="adjustment-grid">
+      <div>
+        <label for="adjustment-reference">Reference *</label>
+        <input id="adjustment-reference" name="reference" required maxlength="100" value="{{ form_values.reference }}">
+      </div>
+      <div>
+        <label for="adjustment-direction">Direction *</label>
+        <select id="adjustment-direction" name="direction" required>
+          <option value="CASH_IN" {% if form_values.direction == "CASH_IN" %}selected{% endif %}>Cash in</option>
+          <option value="CASH_OUT" {% if form_values.direction == "CASH_OUT" %}selected{% endif %}>Cash out</option>
+        </select>
+      </div>
+      <div>
+        <label for="adjustment-amount">Amount (UGX) *</label>
+        <input id="adjustment-amount" name="amount" type="number" min="0.01" step="0.01" required value="{{ form_values.amount }}">
+      </div>
+      <div>
+        <label for="adjustment-date">Date *</label>
+        <input id="adjustment-date" name="adjustment_date" type="date" max="{{ today|date:'Y-m-d' }}" required value="{{ form_values.adjustment_date }}">
+      </div>
+      {% if perms.accounts.can_view_all_branches %}
+      <div>
+        <label for="adjustment-branch">Branch *</label>
+        <select id="adjustment-branch" name="adjustment_branch" required>
+          <option value="">Choose a branch</option>
+          {% for branch in branch_options %}
+          <option value="{{ branch.pk }}" {% if form_values.adjustment_branch == branch.pk|stringformat:"s" %}selected{% endif %}>{{ branch.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+      <div class="wide">
+        <label for="adjustment-notes">Notes</label>
+        <textarea id="adjustment-notes" name="notes" rows="2">{{ form_values.notes }}</textarea>
+      </div>
+      <div class="wide"><button class="btn btn-primary btn-sm" type="submit">Record adjustment</button></div>
+    </div>
+  </form>
+</details>
+{% endif %}
+
+<section class="ledger-card">
+  <div class="ledger-card-header">
+    <div>
+      <h2>Transaction stream</h2>
+      <p>Chronological source events · cash columns show movement direction</p>
+    </div>
+    <span class="ledger-card-meta">PAGE {{ page_number|stringformat:"02d" }} / {{ page_count|stringformat:"02d" }}</span>
+  </div>
+  <div class="ledger-table-wrap">
+    <table class="ledger-table">
+      <thead><tr>
+        <th>Event time</th><th>Source record</th><th>Branch</th><th>Accountability</th><th class="num">Cash in · UGX</th><th class="num">Cash out · UGX</th>
+      </tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="ledger-date">{{ row.date|date:"d M Y" }}<time>{{ row.time|date:"H:i" }}</time></td>
+          <td class="ledger-event">
+            <div class="ledger-event-top"><span class="ledger-kind">{{ row.type }}</span><span class="ledger-reference">{{ row.reference }}</span></div>
+            <div class="ledger-description" title="{{ row.description|default:'—' }}">{{ row.description|default:"—" }}</div>
+          </td>
+          <td>{{ row.branch }}</td>
+          <td class="ledger-accountability"><strong>{{ row.user }}</strong><span class="ledger-state">{{ row.status|default:"Unspecified" }}</span></td>
+          <td class="ledger-amount ledger-in">{% if row.cash_in %}{{ row.cash_in|ugx_plain }}{% else %}<span class="ledger-zero">—</span>{% endif %}</td>
+          <td class="ledger-amount ledger-out">{% if row.cash_out %}{{ row.cash_out|ugx_plain }}{% else %}<span class="ledger-zero">—</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="ledger-empty">No source events match this query. Try widening the period or clearing a filter.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="ledger-pagination">
+    <span class="ledger-card-meta">ROWS {{ rows|length }} / {{ total_count|intcomma }}</span>
+    <div class="ledger-pagination-actions">
+      {% if has_previous %}<a class="btn btn-secondary btn-sm" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ previous_page }}">← Previous</a>{% endif %}
+      {% if has_next %}<a class="btn btn-secondary btn-sm" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ next_page }}">Next →</a>{% endif %}
+    </div>
+  </div>
+</section>
+
+<details class="ledger-disclosure">
+  <summary>
+    <span class="ledger-disclosure-title"><strong>∿</strong><span>Analysis panels</span><span>Branch distribution and staff performance</span></span>
+  </summary>
+  <div class="ledger-analysis-grid">
+  <section class="ledger-card">
+    <div class="ledger-card-header"><div><h2>Branch distribution</h2><p>Record count and recorded value by branch</p></div></div>
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr><th>Branch</th><th class="num">Records</th><th class="num">Value</th></tr></thead>
+        <tbody>
+          {% for branch in branch_analysis %}
+          <tr><td>{{ branch.name }}</td><td class="num">{{ branch.count|intcomma }}</td><td class="mono num">{{ branch.amount|ugx_plain }}</td></tr>
+          {% empty %}<tr><td colspan="3" class="text-center text-muted">No branch activity in this view.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="ledger-card">
+    <div class="ledger-card-header"><div><h2>Staff performance</h2><p>Disbursements and collections · same period and branch</p></div></div>
+    <div class="table-wrap">
+      <table class="aba-table">
+        <thead><tr><th>Staff member</th><th class="num">Loans</th><th class="num">Disbursed</th><th class="num">Collected</th><th class="num">Overdue</th><th class="num">Score</th></tr></thead>
+        <tbody>
+          {% for row in performance_rows %}
+          <tr><td>{{ row.user.get_full_name }}</td><td class="num">{{ row.disbursed_count|intcomma }}</td><td class="mono num">{{ row.disbursed_amount|ugx_plain }}</td><td class="mono num">{{ row.collected_amount|ugx_plain }}</td><td class="num">{{ row.overdue_count|intcomma }}</td><td class="num">{{ row.quality_score }}%</td></tr>
+          {% empty %}<tr><td colspan="6" class="text-center text-muted">No staff performance data for this period.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</details>
+</main>
+{% endblock %}

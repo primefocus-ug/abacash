@@ -7,6 +7,15 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
+  @page {
+    size: A4 landscape;
+    margin: 14mm 12mm;
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font: 9px 'Plus Jakarta Sans', sans-serif;
+      color: #6d7e8f;
+    }
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
@@ -92,7 +101,7 @@
   /* ── Summary metrics ── */
   .metrics {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0;
     border: 1px solid #c9d6e0;
     border-radius: 8px;
@@ -163,6 +172,7 @@
     font-size: 12px;
   }
   td:nth-child(2) { color: #516a7f; font-size: 12px; }
+  td:nth-child(10) { text-align: left !important; overflow-wrap: anywhere; }
 
   .td-period { color: #8a9bac; font-size: 11px; }
   .td-total { font-weight: 600; }
@@ -272,7 +282,7 @@
   @media print {
     .print-bar { display: none !important; }
     .doc-wrapper { padding-top: 0 !important; }
-    body { padding: 20px 28px; }
+    body { padding: 0; max-width: none; }
     thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tfoot tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -319,7 +329,7 @@
     <div class="doc-title-block">
       <div class="doc-title">Loan Repayment Schedule</div>
       <div class="doc-ref">{{ loan.loan_number }}</div>
-      <div class="doc-ref" style="margin-top:2px;font-size:11px;">Generated: {% now "d M Y" %}</div>
+      <div class="doc-ref" style="margin-top:2px;font-size:11px;">Generated: {% now "d M Y H:i" %}</div>
     </div>
   </div>
 
@@ -355,12 +365,12 @@
         <span class="info-value">{{ loan.get_interest_method_display }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Disbursed</span>
-        <span class="info-value">{{ loan.disbursement_date|default:"—" }}</span>
+        <span class="info-label">Disbursement Date</span>
+        <span class="info-value">{{ loan.disbursement_date|date:"d M Y"|default:"—" }}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Maturity Date</span>
-        <span class="info-value">{{ loan.maturity_date|default:"—" }}</span>
+        <span class="info-value">{{ loan.maturity_date|date:"d M Y"|default:"—" }}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Frequency</span>
@@ -393,6 +403,19 @@
   {% endif %}
   {% endwith %}
 
+  <div style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-bottom:24px;page-break-inside:avoid;">
+    <div class="section-title">Payment Instructions</div>
+    <div style="font-size:12px;margin-bottom:8px;">Use the loan number <strong class="doc-ref">{{ loan.loan_number }}</strong> as the payment reference for mobile money or bank payments.</div>
+    {% for account in company_accounts %}
+    <div class="info-row" style="border-top:1px solid #e8eef3;">
+      <span class="info-label">{{ account.get_account_type_display }}{% if account.bank_name %} · {{ account.bank_name }}{% endif %}{% if account.branch_name %} · {{ account.branch_name }}{% endif %}</span>
+      <span class="info-value">{{ account.account_name }} · {{ account.account_number }}</span>
+    </div>
+    {% empty %}
+    <div style="font-size:12px;color:#516a7f;">Contact your branch for current mobile money or bank account details. Always use the loan number above as the payment reference.</div>
+    {% endfor %}
+  </div>
+
   <!-- Summary metrics -->
   <div class="metrics">
     <div class="metric">
@@ -413,6 +436,16 @@
       <div class="metric-value">{{ loan.total_repayable|money }}</div>
       <div class="metric-sub">{{ schedule.count }} instalment{{ schedule.count|pluralize }}</div>
     </div>
+    <div class="metric">
+      <div class="metric-label">Nominal APR</div>
+      <div class="metric-value">{{ nominal_apr|floatformat:2 }}%</div>
+      <div class="metric-sub">Monthly rate × 12</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Cost of Credit</div>
+      <div class="metric-value">{{ total_cost_of_credit|money }}</div>
+      <div class="metric-sub">Interest + processing fee</div>
+    </div>
   </div>
 
   <!-- Schedule table -->
@@ -428,6 +461,9 @@
         <th>Penalty</th>
         <th>Total Due</th>
         <th>Paid</th>
+        <th>Date Paid</th>
+        <th>Payment Reference</th>
+        <th>Closing Balance</th>
         <th style="text-align:center;">Status</th>
       </tr>
     </thead>
@@ -442,12 +478,15 @@
         <td>{% if entry.penalty_due > 0 %}{{ entry.penalty_due|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
         <td class="td-total">{{ entry.total_payment|floatformat:0|intcomma }}</td>
         <td>{% if entry.amount_paid > 0 %}{{ entry.amount_paid|floatformat:0|intcomma }}{% else %}—{% endif %}</td>
+        <td>{{ entry.paid_date|date:"d M Y"|default:"—" }}</td>
+        <td>{{ entry.paid_by_payment.reference_number|default:"—" }}</td>
+        <td>{{ entry.closing_balance|floatformat:0|intcomma }}</td>
         <td style="text-align:center;">
           <span class="status-pill status-{{ entry.status }}">{{ entry.get_status_display }}</span>
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="9" style="text-align:center;padding:24px;color:#8a9bac;">No schedule generated yet.</td></tr>
+      <tr><td colspan="12" style="text-align:center;padding:24px;color:#8a9bac;">No schedule generated yet.</td></tr>
       {% endfor %}
     </tbody>
     {% if schedule %}
@@ -460,6 +499,9 @@
         <td>—</td>
         <td>{{ loan.total_repayable|floatformat:0|intcomma }}</td>
         <td>{{ loan.total_paid|floatformat:0|intcomma }}</td>
+        <td></td>
+        <td></td>
+        <td>0</td>
         <td></td>
       </tr>
     </tfoot>

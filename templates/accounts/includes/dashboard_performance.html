@@ -1,0 +1,93 @@
+{% load aba_filters %}
+<details class="metric-card dashboard-performance" id="dashboard-performance-card" aria-labelledby="dashboard-performance-title">
+  <summary class="performance-tile">
+    <span class="metric-icon-wrap purple"><i class="fas fa-gauge-high" aria-hidden="true"></i></span>
+    <span class="metric-body">
+      <strong class="metric-value performance-score" data-performance-score>{{ performance.score|floatformat:0 }}%</strong>
+      <span id="dashboard-performance-title" class="metric-label">Performance</span>
+      <span class="metric-sub"><span class="performance-eyebrow">{{ performance_period }}</span> · View analysis</span>
+    </span>
+    <i class="fas fa-chevron-down performance-chevron" aria-hidden="true"></i>
+  </summary>
+  <div class="performance-popover">
+    <div class="performance-popover-header">
+      <div>
+        <strong>Performance analysis</strong>
+        <span class="performance-eyebrow">{{ performance_period }}</span>
+        <span class="performance-comparison-period">Compared with {{ performance_comparison_period }}</span>
+      </div>
+      <span class="performance-popover-score"><span data-performance-score-copy>{{ performance.score|floatformat:0 }}%</span> overall</span>
+    </div>
+    <p class="performance-score-note">Period-over-period score: 50% means unchanged; above 50% means favorable movement, below 50% means unfavorable movement. Higher loan charges, interest collected, disbursements, injections, overdue recoveries and on-time payment rates improve the score; higher expenses and unpaid overdue balances reduce it. Payments received before or on the due date count as on time. “New” means there was no previous-period baseline.</p>
+    <div class="performance-metrics">
+      {% for key, metric in performance.metrics.items %}
+      <div class="performance-metric">
+        <span>{{ metric.label }}</span>
+        <strong data-performance-change="{{ key }}" class="performance-change-{{ metric.direction }}">{{ metric.change_label }}</strong>
+        <small class="performance-value-comparison" data-performance-values="{{ key }}">
+          {% if key == "on_time_rate" %}
+            {{ metric.current|floatformat:1 }}% current · {{ metric.previous|floatformat:1 }}% previous
+          {% else %}
+            {{ metric.current|money }} current · {{ metric.previous|money }} previous
+          {% endif %}
+        </small>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="performance-score-note">Unpaid overdue balance includes the remaining scheduled amount and penalties on pending, partial, or overdue installments past due by each range end. The system does not retain dated allocation history for every partial payment, so historical overdue balances can be approximate.</p>
+    <div class="performance-advice">
+      <h3><i class="fas fa-lightbulb" aria-hidden="true"></i> Decision notes &amp; improvement actions</h3>
+      <ul id="performance-recommendations">
+        {% for recommendation in performance.recommendations %}
+        <li class="performance-advice-{{ recommendation.level }}">
+          <strong>{{ recommendation.title }}</strong>
+          <span>{{ recommendation.detail }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</details>
+
+<style>
+  .metrics-grid > .dashboard-performance { --card-border:var(--border); display:block; z-index:1; min-width:0; padding:0!important; overflow:visible; }
+  .metrics-grid > .dashboard-performance[open] { z-index:50; }
+  .performance-tile { display:flex; align-items:flex-start; gap:14px; min-height:100%; padding:16px 18px; cursor:pointer; list-style:none; }
+  .performance-tile::-webkit-details-marker { display:none; }
+  .performance-tile:focus-visible { outline:2px solid var(--accent,var(--blue-400)); outline-offset:-3px; border-radius:var(--radius-lg); }
+  .performance-tile .metric-body { display:flex; flex-direction:column; min-width:0; flex:1; }
+  .performance-tile .metric-label { display:block; margin:3px 0 0; }
+  .performance-tile .metric-sub { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .performance-score { color:var(--accent,var(--blue-400))!important; font-size:20px!important; line-height:1.2!important; }
+  .performance-eyebrow { color:var(--text-muted); font:inherit; font-size:inherit; letter-spacing:0; text-transform:none; }
+  .performance-chevron { align-self:center; color:var(--text-muted); font-size:11px; transition:transform .2s ease; }
+  .dashboard-performance[open] .performance-chevron { transform:rotate(180deg); }
+  .performance-popover { position:absolute; top:calc(100% + 8px); right:0; z-index:51; width:min(430px,calc(100vw - 32px)); padding:0; border:1px solid var(--border); border-radius:12px; background:var(--bg-surface); box-shadow:0 16px 44px rgba(15,23,42,.2); }
+  .performance-popover-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px 9px; border-bottom:1px solid var(--border); }
+  .performance-popover-header > div { display:grid; gap:3px; }
+  .performance-popover-header strong { font-size:12px; }
+  .performance-popover-header .performance-eyebrow, .performance-comparison-period { color:var(--text-muted); font-size:10px; }
+  .performance-popover-score { color:var(--text-muted); font-size:10px; }
+  .performance-popover-score span { color:var(--accent,var(--blue-400)); font-weight:700; font-size:15px; }
+  .performance-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .performance-metric { min-width:0; padding:10px 12px; border-right:1px solid var(--card-border); border-bottom:1px solid var(--card-border); }
+  .performance-metric:nth-child(2n) { border-right:0; }
+  .performance-metric > span { display:block; min-height:25px; color:var(--text-muted); font-size:10px; font-weight:600; }
+  .performance-metric > strong { display:block; margin-top:5px; font:600 13px var(--font-mono,monospace); font-variant-numeric:tabular-nums; }
+  .performance-change-positive { color:var(--green-400,#059669); }
+  .performance-change-negative { color:var(--red-400,#dc2626); }
+  .performance-change-neutral { color:var(--text-muted); }
+  .performance-value-comparison { display:block; margin-top:5px; overflow:hidden; color:var(--text-muted); font-size:9px; text-overflow:ellipsis; white-space:nowrap; }
+  .performance-advice { padding:10px 14px 12px; }
+  .performance-advice h3 { margin:0 0 8px; color:var(--text-primary); font-size:11px; }
+  .performance-advice h3 i { margin-right:5px; color:var(--amber-400,#d97706); }
+  .performance-score-note { margin:10px 12px 0; color:var(--text-muted); font-size:10px; line-height:1.45; }
+  .performance-advice ul { display:grid; gap:7px; margin:0; padding:0; list-style:none; }
+  .performance-advice li { display:grid; gap:3px; padding:9px 10px; border-left:3px solid var(--border); border-radius:0 7px 7px 0; background:var(--surface-2,rgba(148,163,184,.08)); }
+  .performance-advice li strong { font-size:10px; }
+  .performance-advice li span { color:var(--text-muted); font-size:10px; line-height:1.45; }
+  .performance-advice .performance-advice-warning { border-left-color:var(--amber-400,#d97706); }
+  .performance-advice .performance-advice-positive { border-left-color:var(--green-400,#059669); }
+  .performance-advice .performance-advice-info { border-left-color:var(--blue-400,#2563eb); }
+  @media(max-width:600px) { .performance-tile { padding:10px!important; gap:8px; } .performance-tile .metric-icon-wrap { width:32px; height:32px; font-size:13px; } .performance-score { font-size:16px!important; } .performance-metric { padding:8px; } .performance-popover { right:0; } }
+</style>

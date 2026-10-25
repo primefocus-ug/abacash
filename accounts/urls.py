@@ -128,10 +128,6 @@ urlpatterns = [
     path("admin-panel/bank-transactions/new/",          views.bank_transaction_create, name="bank_transaction_create"),
     path("admin-panel/bank-transactions/<int:pk>/edit/", views.bank_transaction_edit,   name="bank_transaction_edit"),
 
-    # System Parameters
-    path("admin-panel/parameters/",         views.system_parameters,    name="system_parameters"),
-    path("admin-panel/parameters/<int:pk>/delete/", views.system_parameter_delete, name="system_parameter_delete"),
-
     # Password reset helper views for tenant and registration onboarding flow
     path(
         "password_reset/",

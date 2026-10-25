@@ -65,11 +65,16 @@
           <div class="fee-row"><span>Total Interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
           <div class="fee-row"><span>Processing Fee</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
           <div class="fee-row"><span>Total Repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
+          <div class="fee-row"><span>Nominal APR</span><span class="mono">{{ nominal_apr|floatformat:2 }}%</span></div>
+          <div class="fee-row"><span>Total Cost of Credit</span><span class="mono">{{ total_cost_of_credit|money }}</span></div>
         </div>
 
         {# Collateral #}
         <div class="review-section">
-          <div class="review-section-title">Collateral</div>
+          <div class="review-section-title">
+            Collateral
+            {% if loan.product.requires_collateral %}<span class="badge badge-warning" style="margin-left:6px;font-size:11px;">Required</span>{% endif %}
+          </div>
           {% if collateral_items %}
             {% for c in collateral_items %}
             <div class="review-row"><span>{{ c.description }}</span><span class="mono">{{ c.estimated_value|money }}</span></div>

@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);background:var(--surface-2);">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border-bottom:1px solid var(--border);background:var(--surface-2);">
     <div style="padding:12px 14px;border-right:1px solid var(--border);">
       <div class="metric-label">Principal</div>
       <div class="mono fw-500">{{ principal|default:totals.total_repayable|money }}</div>
@@ -45,6 +45,16 @@
           {{ processing_fee_percent|default:0|floatformat:2 }}%
         {% endif %}
       </div>
+    </div>
+    <div style="padding:12px 14px;border-left:1px solid var(--border);">
+      <div class="metric-label">Nominal APR</div>
+      <div class="mono fw-500">{{ nominal_apr|default:0|floatformat:2 }}%</div>
+      <div class="text-sm text-muted" style="margin-top:2px;">Monthly rate × 12</div>
+    </div>
+    <div style="padding:12px 14px;border-left:1px solid var(--border);">
+      <div class="metric-label">Total Cost of Credit</div>
+      <div class="mono fw-500">{{ total_cost_of_credit|default:0|money }}</div>
+      <div class="text-sm text-muted" style="margin-top:2px;">Interest + processing fee</div>
     </div>
   </div>
 

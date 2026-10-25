@@ -54,9 +54,12 @@
         <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
       </div>
       <div class="card-body">
-        <form id="loan-form" method="post"
+          <form id="loan-form" method="post"
+            data-processing-fee-method="{{ processing_fee_method }}"
+            data-processing-fee-ranges="{{ processing_fee_ranges }}"
+            data-company-fee-percent="{{ company_default_processing_fee_percent }}"
               hx-get="{% url 'loans:schedule_preview' %}"
-              hx-trigger="change delay:500ms"
+            hx-trigger="input changed delay:250ms, change delay:250ms"
               hx-target="#schedule-panel"
               hx-include="#loan-form">
           {% csrf_token %}
@@ -83,6 +86,7 @@
               <option value="{{ p.pk }}"
                       data-min="{{ p.min_amount }}" data-max="{{ p.max_amount }}"
                       data-rate="{{ p.interest_rate_monthly }}" data-method="{{ p.interest_method }}"
+                      data-processing-fee-percent="{{ p.processing_fee_percent }}"
                       {% if form_data.product and form_data.product.pk == p.pk %}selected{% endif %}>
                 {{ p.name }} — {{ p.interest_rate_monthly }}%/mo ({{ p.get_interest_method_display }})
               </option>
@@ -126,8 +130,12 @@
             <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);">Fee & Disbursement Summary</div>
             <div style="padding:12px 14px;">
               <div class="fee-row"><span>Principal</span><span id="s-principal" class="mono">—</span></div>
+              <div class="fee-row"><span>Total Interest</span><span id="s-interest" class="mono">—</span></div>
               <div class="fee-row"><span>Processing Fee <span id="s-fee-label" style="color:var(--text-muted);font-weight:400;"></span></span><span id="s-fee" class="mono">—</span></div>
               <div class="fee-row"><span>Net Disbursed to Client</span><span id="s-net" class="mono">—</span></div>
+              <div class="fee-row"><span>Scheduled Repayment</span><span id="s-total-repayable" class="mono">—</span></div>
+              <div class="fee-row"><span>Nominal APR</span><span id="s-apr" class="mono">—</span></div>
+              <div class="fee-row"><span>Total Cost of Credit</span><span id="s-credit-cost" class="mono">—</span></div>
               <div class="fee-row" style="color:var(--text-muted);font-size:12px;border-bottom:none;padding-top:4px;">
                 <span id="s-fee-source"></span>
               </div>
@@ -204,12 +212,18 @@
   const productSel  = document.getElementById('product');
   const principalIn = document.getElementById('principal');
   const termIn      = document.getElementById('term_months');
+  const frequencyIn = document.getElementById('frequency');
   const sPrincipal  = document.getElementById('s-principal');
+  const sInterest   = document.getElementById('s-interest');
   const sFee        = document.getElementById('s-fee');
   const sFeeLabel   = document.getElementById('s-fee-label');
   const sNet        = document.getElementById('s-net');
+  const sTotal       = document.getElementById('s-total-repayable');
+  const sApr         = document.getElementById('s-apr');
+  const sCreditCost  = document.getElementById('s-credit-cost');
   const sFeeSource  = document.getElementById('s-fee-source');
   const productHint = document.getElementById('product-hint');
+  const form = document.getElementById('loan-form');
 
   // Parse tier data from DOM
   const tiers = Array.from(document.querySelectorAll('.tier-row')).map(r => ({
@@ -230,8 +244,48 @@
     return 0;
   }
 
+  function getRangeFee(principal) {
+    for (const line of (form.dataset.processingFeeRanges || '').split(/\s+/)) {
+      const separator = line.indexOf(':');
+      if (separator < 0) continue;
+      const bounds = line.slice(0, separator).split('-', 2);
+      const minimum = bounds[0] ? parseFloat(bounds[0]) : null;
+      const maximum = bounds[1] ? parseFloat(bounds[1]) : null;
+      const amount = parseFloat(line.slice(separator + 1));
+      if (!Number.isFinite(amount)) continue;
+      if ((minimum === null || principal >= minimum) && (maximum === null || principal <= maximum)) return amount;
+    }
+    return 0;
+  }
+
+  function roundMoney(value) {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  function calculateInterest(principal, monthlyRatePercent, months, method, frequency) {
+    if (principal <= 0 || monthlyRatePercent <= 0 || months <= 0) return 0;
+    const rate = monthlyRatePercent / 100;
+    if (method === 'FLAT') return roundMoney(principal * rate * months);
+
+    const periodsPerMonth = {DAILY: 30, WEEKLY: 4, BIWEEKLY: 2, MONTHLY: 1}[frequency] || 1;
+    const periods = months * periodsPerMonth;
+    const payment = rate > 0
+      ? roundMoney(principal * rate / (1 - Math.pow(1 + rate, -periods)))
+      : roundMoney(principal / periods);
+    let balance = principal;
+    let totalInterest = 0;
+    for (let period = 1; period <= periods; period++) {
+      const interest = roundMoney(balance * rate);
+      const principalDue = period === periods ? balance : roundMoney(payment - interest);
+      balance = Math.max(roundMoney(balance - principalDue), 0);
+      totalInterest += interest;
+    }
+    return roundMoney(totalInterest);
+  }
+
   function updateSummary() {
     const p = parseFloat(principalIn.value) || 0;
+    const months = parseInt(termIn.value, 10) || 0;
     const opt = productSel.selectedOptions[0];
 
     // Product hint
@@ -241,23 +295,37 @@
       productHint.textContent = '';
     }
 
-    // Fee from HTMX meta if available, else from tiers
-    const meta = document.getElementById('schedule-preview-meta');
+    const companyRate = parseFloat(form.dataset.companyFeePercent) || 0;
+    const productRate = parseFloat(opt?.dataset.processingFeePercent) || 0;
     let fee = 0, feeLabel = '', feeSource = '';
-    if (meta && parseFloat(meta.dataset.processingFee) > 0) {
-      fee = parseFloat(meta.dataset.processingFee);
-      feeSource = meta.dataset.processingFeeSource || '';
-      const pct = meta.dataset.processingFeePercent;
-      feeLabel = meta.dataset.processingFeeRateText || (pct ? `(${pct}%)` : '');
+    if (form.dataset.processingFeeMethod === 'RANGE') {
+      fee = getRangeFee(p);
+      feeSource = fee > 0 ? 'Company settings (range)' : 'No matching fee range';
     } else {
-      fee = getOfficeCharge(p);
-      feeSource = fee > 0 ? 'Office charge tiers' : 'Company settings';
+      const feeRate = companyRate > 0 ? companyRate : productRate;
+      fee = roundMoney(p * feeRate / 100);
+      feeLabel = feeRate > 0 ? `(${feeRate}%)` : '';
+      feeSource = feeRate > 0 ? (companyRate > 0 ? 'Company settings' : opt?.textContent.split(' — ')[0]) : 'No processing fee';
     }
 
+    const interest = calculateInterest(
+      p,
+      parseFloat(opt?.dataset.rate) || 0,
+      months,
+      opt?.dataset.method || 'FLAT',
+      frequencyIn.value,
+    );
+    const totalRepayable = p + interest;
+    const nominalApr = (parseFloat(opt?.dataset.rate) || 0) * 12;
+
     sPrincipal.textContent = p > 0 ? fmt(p) : '—';
+    sInterest.textContent = p > 0 && opt?.value ? fmt(interest) : '—';
     sFee.textContent = p > 0 ? fmt(fee) : '—';
     sFeeLabel.textContent = feeLabel ? `· ${feeLabel}` : '';
     sNet.textContent = p > 0 ? fmt(Math.max(0, p - fee)) : '—';
+    sTotal.textContent = p > 0 && opt?.value ? fmt(totalRepayable) : '—';
+    sApr.textContent = opt?.value ? `${nominalApr.toFixed(2)}%` : '—';
+    sCreditCost.textContent = p > 0 && opt?.value ? fmt(interest + fee) : '—';
     sFeeSource.textContent = feeSource ? `Source: ${feeSource}` : '';
 
     // Highlight matching tier
@@ -267,7 +335,7 @@
     });
   }
 
-  [productSel, principalIn, termIn].forEach(el => {
+  [productSel, principalIn, termIn, frequencyIn].forEach(el => {
     el?.addEventListener('change', updateSummary);
     el?.addEventListener('input', updateSummary);
   });

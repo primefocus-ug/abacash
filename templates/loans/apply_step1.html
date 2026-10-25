@@ -4,179 +4,419 @@
 
 {% block content %}
 <style>
-  .wizard-progress { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; }
-  .wizard-chip { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-secondary); font-size:12px; font-weight:600; white-space:nowrap; }
-  .wizard-chip.active { background:var(--accent-soft); color:var(--accent); border-color:rgba(37,99,235,0.24); }
-  .wizard-required { padding:10px 12px; border-left:3px solid var(--accent); background:var(--surface-2); border-radius:8px; margin-bottom:12px; overflow-wrap:break-word; word-break:break-word; }
-  .wizard-required strong { display:block; margin-bottom:4px; }
-  .wizard-footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:12px; border-top:1px solid var(--border); margin-top:12px; flex-wrap:wrap; }
-  .search-spinner { display:none; width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; flex-shrink:0; }
-  .htmx-request .search-spinner { display:inline-block; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  /* Layout for the wizard shell (now a normal in-page panel, not a popup) */
-  #loan-apply-modal > div {
-    border-radius: 12px;
+  /* ============ Wizard Shell ============ */
+  #loan-apply-modal {
+    max-width: 860px;
+    margin: 0 auto;
+    animation: wizardRise 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  #loan-apply-modal > div > div:first-child {
+  @keyframes wizardRise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .wizard-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.04),
+      0 12px 28px rgba(0,0,0,0.08),
+      0 24px 60px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .wizard-panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #4f7cff, #7c5cff, #c05cff);
+    opacity: 0.85;
+    z-index: 2;
+  }
+
+  /* ============ Header ============ */
+  .wizard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+    background: linear-gradient(180deg, rgba(79,124,255,0.05), transparent);
+    position: relative;
+  }
+  .wizard-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* ============ Progress Chips ============ */
+  .wizard-progress {
+    display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    align-items: center;
+    margin-top: 10px;
   }
-  #loan-apply-modal > div > div:first-child h2 {
-    font-size: 16px;
+  .wizard-progress > span:not(.wizard-chip) {
+    color: var(--text-muted, #8a92a6);
+    font-size: 0.7rem;
+    opacity: 0.5;
+    user-select: none;
   }
-  #loan-apply-modal .wizard-progress {
-    gap: 4px;
-  }
-  #loan-apply-modal .wizard-chip {
-    font-size: 10px;
-    padding: 4px 8px;
+  .wizard-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2, rgba(255,255,255,0.02));
+    color: var(--text-secondary, #8a92a6);
+    font-size: 0.72rem;
+    font-weight: 600;
     white-space: nowrap;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: chipIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
-  #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
-    font-size: 10px;
+  .wizard-chip:nth-of-type(1) { animation-delay: 0.05s; }
+  .wizard-chip:nth-of-type(2) { animation-delay: 0.10s; }
+  .wizard-chip:nth-of-type(3) { animation-delay: 0.15s; }
+  .wizard-chip:nth-of-type(4) { animation-delay: 0.20s; }
+  @keyframes chipIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .wizard-chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+  }
+  .wizard-chip.active {
+    background: linear-gradient(135deg, rgba(79,124,255,0.18), rgba(124,92,255,0.14));
+    color: var(--accent, #4f7cff);
+    border-color: rgba(79,124,255,0.4);
+    box-shadow: 0 2px 10px rgba(79,124,255,0.18);
+  }
+  .wizard-chip.active::before {
+    opacity: 1;
+    background: var(--accent, #4f7cff);
+    box-shadow: 0 0 0 3px rgba(79,124,255,0.2);
+    animation: pulseDot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(79,124,255,0.2); }
+    50%      { box-shadow: 0 0 0 6px rgba(79,124,255,0.06); }
   }
 
+  /* ============ Required Banner ============ */
+  .wizard-required {
+    padding: 14px 16px;
+    border-left: 3px solid var(--accent, #4f7cff);
+    background: linear-gradient(90deg, rgba(79,124,255,0.08), rgba(79,124,255,0.02));
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    animation: cardRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s backwards;
+    position: relative;
+    padding-left: 44px;
+  }
+  .wizard-required::before {
+    content: "i";
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent, #4f7cff);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    font-style: italic;
+    font-family: Georgia, serif;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(79,124,255,0.3);
+  }
+  .wizard-required strong {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 650;
+    font-size: 0.88rem;
+  }
+  .wizard-required span {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.84rem;
+    color: var(--text-secondary, #8a92a6);
+  }
+
+  /* ============ Search ============ */
+  .wizard-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .wizard-search-wrap input#client-search {
+    flex: 1;
+    min-width: 160px;
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: inherit;
+    font-size: 0.92rem;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    outline: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a92a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 14px center;
+  }
+  .wizard-search-wrap input#client-search:hover {
+    border-color: rgba(79,124,255,0.35);
+  }
+  .wizard-search-wrap input#client-search:focus {
+    border-color: var(--accent, #4f7cff);
+    box-shadow: 0 0 0 4px rgba(79,124,255,0.14);
+    background-color: rgba(79,124,255,0.03);
+  }
+
+  .search-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent, #4f7cff);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .search-spinner.is-searching { display: inline-block; }
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  /* ============ Results Container ============ */
+  #client-results {
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    min-height: 120px;
+    position: relative;
+    transition: opacity 0.2s ease;
+    animation: cardRise 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.2s backwards;
+  }
+  #client-results.htmx-request { opacity: 0.55; }
+  #client-results table {
+    min-width: 320px;
+    width: 100%;
+    font-size: 0.82rem;
+    border-collapse: collapse;
+  }
+  #client-results table th {
+    background: rgba(79,124,255,0.04);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 0.72rem;
+    color: var(--text-muted, #8a92a6);
+  }
+  #client-results table th,
+  #client-results table td {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  #client-results table tr {
+    transition: background 0.18s ease;
+  }
+  #client-results table tbody tr:hover {
+    background: rgba(79,124,255,0.05);
+  }
+  #client-results table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  #client-results .empty-state {
+    padding: 28px 16px;
+    font-size: 0.88rem;
+    text-align: center;
+    color: var(--text-muted, #8a92a6);
+  }
+  #client-results .btn-sm {
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #client-results .btn-sm:hover { transform: translateY(-1px); }
+  #client-results .btn-sm:active { transform: translateY(0) scale(0.96); }
+  #client-results .badge {
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* ============ Footer ============ */
+  .wizard-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, transparent, rgba(79,124,255,0.02));
+    flex-wrap: wrap;
+  }
+  .wizard-footer .btn {
+    border-radius: 10px;
+    font-weight: 550;
+    transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .wizard-footer .btn:active { transform: scale(0.97); }
+  .wizard-footer .btn-primary {
+    box-shadow: 0 4px 14px rgba(79,124,255,0.3);
+  }
+  .wizard-footer .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(79,124,255,0.45);
+    transform: translateY(-1px);
+  }
+  .wizard-footer .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* ============ Footer Helper Link ============ */
+  .wizard-helper {
+    margin-top: 14px;
+    font-size: 0.86rem;
+    color: var(--text-muted, #8a92a6);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
+    animation: cardRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards;
+  }
+  .wizard-helper a {
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-block;
+  }
+  .wizard-helper a:hover { transform: translateX(2px); }
+
+  /* ============ Shared card animation ============ */
+  @keyframes cardRise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ Responsive ============ */
   @media (max-width: 640px) {
-    #loan-apply-modal {
-      padding: 4px;
-      padding-top: 4px;
-    }
-    #loan-apply-modal > div {
-      border-radius: 8px;
-    }
-    #loan-apply-modal > div > div:first-child {
-      padding: 12px 14px;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 6px;
-    }
-    #loan-apply-modal > div > div:first-child h2 {
-      font-size: 14px;
-      margin-bottom: 0;
-    }
-    #loan-apply-modal .wizard-progress {
-      gap: 2px;
-      flex-wrap: wrap;
-    }
-    #loan-apply-modal .wizard-chip {
-      font-size: 9px;
-      padding: 3px 6px;
-      gap: 4px;
-    }
-    #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
-      font-size: 9px;
-    }
-    #loan-apply-modal > div > div:first-child a.btn {
-      align-self: flex-end;
-      margin-top: -4px;
-    }
-    #loan-apply-modal > div > div:nth-child(2) {
-      padding: 12px;
-    }
-    #loan-apply-modal .card-header {
-      padding: 12px 14px;
-    }
-    #loan-apply-modal .card-header .card-title {
-      font-size: 13px;
-    }
-    #loan-apply-modal .card-body {
-      padding: 12px 14px;
-    }
-    #loan-apply-modal .flex.gap-2 {
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    #loan-apply-modal .flex.gap-2 input {
-      min-width: 0;
-      width: 100%;
-      font-size: 13px;
-      padding: 8px 10px;
-    }
-    #loan-apply-modal .wizard-footer {
+    #loan-apply-modal { padding: 4px; }
+    .wizard-panel { border-radius: 12px; }
+    .wizard-header {
+      padding: 14px 16px;
       flex-direction: column;
       align-items: stretch;
       gap: 8px;
     }
-    #loan-apply-modal .wizard-footer a,
-    #loan-apply-modal .wizard-footer .btn {
+    .wizard-header h2 { font-size: 1rem; }
+    .wizard-progress { gap: 4px; }
+    .wizard-chip {
+      font-size: 0.66rem;
+      padding: 4px 9px;
+      gap: 5px;
+    }
+    .wizard-chip::before { width: 5px; height: 5px; }
+    .wizard-header a.btn { align-self: flex-end; }
+    .wizard-panel > div:nth-child(2) { padding: 14px !important; }
+    .wizard-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 14px 16px;
+    }
+    .wizard-footer a,
+    .wizard-footer .btn {
       width: 100%;
       text-align: center;
       justify-content: center;
     }
-    #loan-apply-modal .mt-2.text-sm {
-      font-size: 12px;
+    #client-results table { min-width: 280px; font-size: 0.74rem; }
+    #client-results table th,
+    #client-results table td {
+      padding: 8px 10px;
+      font-size: 0.74rem;
+    }
+    #client-results .btn-sm {
+      font-size: 0.7rem;
+      padding: 4px 8px;
+    }
+    #client-results .badge {
+      font-size: 0.66rem;
+      padding: 2px 7px;
+    }
+    .wizard-search-wrap input#client-search {
+      font-size: 0.86rem;
+      padding: 10px 14px 10px 38px;
+      background-position: 12px center;
     }
   }
 
   @media (max-width: 400px) {
-    #loan-apply-modal .wizard-chip {
-      font-size: 8px;
-      padding: 2px 5px;
+    .wizard-chip {
+      font-size: 0.62rem;
+      padding: 3px 7px;
     }
-    #loan-apply-modal .wizard-progress > span:not(.wizard-chip) {
-      font-size: 8px;
+    .wizard-header h2 { font-size: 0.94rem; }
+    .wizard-required {
+      padding: 10px 12px 10px 38px;
+      font-size: 0.8rem;
     }
-    #loan-apply-modal > div > div:first-child h2 {
-      font-size: 13px;
-    }
-    #loan-apply-modal .card-header .card-title {
-      font-size: 12px;
-    }
-    #loan-apply-modal .wizard-required {
-      padding: 8px 10px;
-      font-size: 12px;
-    }
-    #loan-apply-modal .wizard-required strong {
-      font-size: 12px;
+    .wizard-required::before {
+      width: 18px; height: 18px;
+      left: 12px; top: 12px;
+      font-size: 0.68rem;
     }
   }
 
-  /* Fix for client results table overflow */
-  #client-results {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-  #client-results table {
-    min-width: 320px;
-    font-size: 12px;
-  }
-  #client-results table th,
-  #client-results table td {
-    padding: 8px 10px;
-    font-size: 12px;
-  }
-  #client-results .empty-state {
-    padding: 24px 12px;
-    font-size: 13px;
-  }
-
-  @media (max-width: 480px) {
-    #client-results table {
-      min-width: 280px;
-      font-size: 11px;
-    }
-    #client-results table th,
-    #client-results table td {
-      padding: 6px 8px;
-      font-size: 11px;
-    }
-    #client-results .btn-sm {
-      font-size: 10px;
-      padding: 3px 6px;
-    }
-    #client-results .badge {
-      font-size: 9px;
-      padding: 2px 6px;
+  /* ============ Reduced motion ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
     }
   }
 </style>
 
-<div id="loan-apply-modal" style="max-width:860px;margin:0 auto;">
-  <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;width:100%;box-shadow:var(--shadow-soft);">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;">
+<div id="loan-apply-modal">
+  <div class="wizard-panel">
+    <div class="wizard-header">
       <div style="min-width:0;max-width:100%;">
-        <h2 style="margin:0;font-size:18px;overflow-wrap:break-word;word-break:break-word;">New Loan Application</h2>
+        <h2>New Loan Application</h2>
         <div class="wizard-progress">
           <span class="wizard-chip active">1. Client</span>
           <span>→</span>
@@ -190,42 +430,41 @@
       <a href="{% url 'loans:list' %}" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Close</a>
     </div>
 
-    <div style="padding:20px;">
-      <div class="card" style="max-width:100%;overflow:hidden;">
-        <div class="card-header" style="flex-wrap:wrap;gap:8px;"><span class="card-title" style="overflow-wrap:break-word;word-break:break-word;">Step 1 of 4 · Select Client</span></div>
-        <div class="card-body" style="max-width:100%;overflow-x:hidden;">
+    <div style="padding:22px;">
+      <div class="card" style="max-width:100%;overflow:hidden;border-radius:14px;border:1px solid var(--border);">
+        <div class="card-header" style="flex-wrap:wrap;gap:8px;padding:16px 20px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(79,124,255,0.04), transparent);display:flex;align-items:center;justify-content:space-between;">
+          <span class="card-title" style="overflow-wrap:break-word;word-break:break-word;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
+            <span style="display:inline-block;width:4px;height:16px;border-radius:4px;background:linear-gradient(180deg,#4f7cff,#7c5cff);flex-shrink:0;"></span>
+            Step 1 of 4 · Select Client
+          </span>
+        </div>
+        <div class="card-body" style="max-width:100%;overflow-x:hidden;padding:20px;">
           <div class="wizard-required">
             <strong>Required before moving forward</strong>
-            <span style="display:block;margin-top:2px;">Choose a client to continue the application. Search by name, NIN, or client number.</span>
           </div>
 
-          <div class="flex gap-2 mb-3" style="align-items:center;flex-wrap:wrap;width:100%;">
+          <div class="wizard-search-wrap">
             <input
               type="search"
               id="client-search"
               name="q"
               class="form-control"
-              placeholder="Type client name, NIN, or client number…"
+              placeholder="Type client name, phone, NIN, or client number…"
               autocomplete="off"
               style="flex:1;min-width:160px;width:100%;"
-              hx-get="{% url 'loans:client_search' %}"
-              hx-trigger="input changed delay:250ms, search"
-              hx-target="#client-results"
-              hx-indicator="#search-indicator"
+              aria-controls="client-results"
             >
             <span id="search-indicator" class="search-spinner"></span>
           </div>
 
           <div id="client-results"
-               hx-get="{% url 'loans:client_search' %}"
-               hx-trigger="load"
-               hx-target="#client-results"
+               aria-live="polite"
                style="max-width:100%;overflow-x:auto;">
-            <div class="empty-state"><p>Loading clients…</p></div>
+            {% include "partials/client_search_results.html" with clients=recent_clients q="" %}
           </div>
         </div>
 
-        <div class="card-footer" style="padding:16px 20px;border-top:1px solid var(--border);background:var(--surface-2);">
+        <div style="padding:16px 20px;border-top:1px solid var(--border);background:var(--surface-2, rgba(255,255,255,0.02));">
           <div class="wizard-footer">
             <a href="{% url 'loans:list' %}" class="btn btn-tertiary" style="flex-shrink:0;">← Back</a>
             <a href="#" class="btn btn-primary" onclick="return false;" style="flex-shrink:0;">Next Step →</a>
@@ -233,11 +472,78 @@
         </div>
       </div>
 
-      <div class="mt-2 text-sm text-muted" style="overflow-wrap:break-word;word-break:break-word;">
+      <div class="wizard-helper">
         Client not registered yet?
         <a href="{% url 'clients:create' %}">Register new client →</a>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('client-search');
+    const results = document.getElementById('client-results');
+    const indicator = document.getElementById('search-indicator');
+    let searchTimer;
+    let activeSearch;
+
+    function searchClients() {
+      if (!searchInput || !results) return;
+      if (activeSearch) activeSearch.abort();
+      const controller = new AbortController();
+      activeSearch = controller;
+      const query = new URLSearchParams({ q: searchInput.value.trim() });
+      results.setAttribute('aria-busy', 'true');
+      if (indicator) indicator.classList.add('is-searching');
+
+      fetch('{% url "loans:client_search" %}?' + query.toString(), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' },
+        signal: controller.signal
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('Client search failed (' + response.status + ').');
+          return response.text();
+        })
+        .then(function (html) {
+          results.innerHTML = html;
+        })
+        .catch(function (error) {
+          if (error.name === 'AbortError') return;
+          console.error('Client search request failed.', error);
+          results.innerHTML = '<div class="empty-state" role="alert"><p>Client search is temporarily unavailable. Please try again.</p></div>';
+        })
+        .finally(function () {
+          if (activeSearch === controller) {
+            activeSearch = null;
+            results.removeAttribute('aria-busy');
+            if (indicator) indicator.classList.remove('is-searching');
+          }
+        });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(searchClients, 250);
+      });
+      searchInput.addEventListener('search', searchClients);
+    }
+
+    if (searchInput && window.matchMedia('(min-width: 641px)').matches) {
+      setTimeout(function () { searchInput.focus({ preventScroll: true }); }, 350);
+    }
+
+    // Keyboard shortcut: "/" or "Cmd/Ctrl+K" to focus search
+    document.addEventListener('keydown', function (e) {
+      const tag = document.activeElement?.tagName;
+      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+      if (typing) return;
+      if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        searchInput?.focus();
+      }
+    });
+  });
+</script>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import models
 from django_tenants.models import TenantMixin, DomainMixin
+from common.phone_numbers import PhoneNumberNormalizationMixin
 
 
 class Plan(models.TextChoices):
@@ -99,11 +100,12 @@ class PlatformAdmin(models.Model):
         return self.role == self.Role.SUPERADMIN
 
 
-class CompanyRegistration(models.Model):
+class CompanyRegistration(PhoneNumberNormalizationMixin, models.Model):
     """
     Stores interest/registration requests submitted via the public landing page.
     Lives in the public schema — no tenant context needed.
     """
+    phone_fields = ("phone",)
 
     Plan = Plan
 

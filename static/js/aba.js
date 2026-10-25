@@ -109,33 +109,200 @@ document.addEventListener('click', e => {
 });
 
 /* ----------------------------------------------------------------
-   Theme toggle (dark/light)
+   Theme controls (design styles, color palette, and light/dark mode)
    ---------------------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('theme-toggle');
-  const label = document.getElementById('theme-toggle-label');
-  if (!btn) return;
-
-  const updateToggleUI = (theme) => {
-    if (label) label.textContent = theme === 'light' ? 'Dark' : 'Light';
-  };
-
-  const setTheme = (theme) => {
+  const dock = document.getElementById('theme-dock');
+  const dockToggle = document.getElementById('theme-dock-toggle');
+  const panel = document.getElementById('theme-dock-panel');
+  const panelClose = document.getElementById('theme-dock-close');
+  const modeToggle = document.getElementById('theme-mode-toggle');
+  const colorOptions = document.querySelectorAll('.theme-color-option');
+  const designOptions = document.querySelectorAll('.theme-design-option');
+  const supportedColorThemes = ['blue', 'teal', 'violet', 'rose', 'amber'];
+  const supportedDesignThemes = ['minimal', 'glass', 'material', 'soft'];
+  const setTheme = theme => {
+    if (!['light', 'dark'].includes(theme)) return;
     document.documentElement.setAttribute('data-theme', theme);
     try { window.localStorage.setItem('aba_theme', theme); } catch (e) { /* ignore */ }
-    updateToggleUI(theme);
+    if (modeToggle) {
+      modeToggle.textContent = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+    }
   };
 
   const storedTheme = (() => {
     try { return window.localStorage.getItem('aba_theme'); } catch (e) { return null; }
   })();
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
+  const initialTheme = ['light', 'dark'].includes(storedTheme) ? storedTheme : (prefersDark ? 'dark' : 'light');
   setTheme(initialTheme);
 
-  btn.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+  const setColorTheme = theme => {
+    if (!supportedColorThemes.includes(theme)) return;
+    document.documentElement.setAttribute('data-color-theme', theme);
+    try { window.localStorage.setItem('aba_color_theme', theme); } catch (e) { /* ignore */ }
+    colorOptions.forEach(option => {
+      option.setAttribute('aria-pressed', String(option.dataset.colorTheme === theme));
+    });
+  };
+  const storedColorTheme = (() => {
+    try { return window.localStorage.getItem('aba_color_theme'); } catch (e) { return null; }
+  })();
+  setColorTheme(supportedColorThemes.includes(storedColorTheme) ? storedColorTheme : 'blue');
+
+  const setDesignTheme = theme => {
+    if (!supportedDesignThemes.includes(theme)) return;
+    document.documentElement.setAttribute('data-design-theme', theme);
+    try { window.localStorage.setItem('aba_design_theme', theme); } catch (e) { /* ignore */ }
+    designOptions.forEach(option => {
+      option.setAttribute('aria-pressed', String(option.dataset.designTheme === theme));
+    });
+  };
+  const storedDesignTheme = (() => {
+    try { return window.localStorage.getItem('aba_design_theme'); } catch (e) { return null; }
+  })();
+  setDesignTheme(supportedDesignThemes.includes(storedDesignTheme) ? storedDesignTheme : 'minimal');
+
+  colorOptions.forEach(option => {
+    option.addEventListener('click', () => setColorTheme(option.dataset.colorTheme));
+  });
+  designOptions.forEach(option => {
+    option.addEventListener('click', () => setDesignTheme(option.dataset.designTheme));
+  });
+  if (modeToggle) {
+    modeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+  }
+
+  if (!dock || !dockToggle || !panel) return;
+  const setPanelOpen = isOpen => {
+    panel.hidden = !isOpen;
+    dockToggle.setAttribute('aria-expanded', String(isOpen));
+    dockToggle.setAttribute('aria-label', isOpen
+      ? 'Close theme options. Drag to move. Alt plus arrow keys also move it.'
+      : 'Open theme options. Drag to move. Alt plus arrow keys also move it.');
+    if (isOpen) positionPanel();
+  };
+  const positionPanel = () => {
+    const bounds = dock.getBoundingClientRect();
+    const panelWidth = panel.getBoundingClientRect().width;
+    const availableAbove = bounds.top - 16;
+    const availableBelow = window.innerHeight - bounds.bottom - 16;
+    const panelHeight = panel.scrollHeight;
+    const openBelow = availableAbove < panelHeight + 10 && availableBelow > availableAbove;
+    const availableHeight = openBelow ? availableBelow : availableAbove;
+    dock.classList.toggle('theme-dock-panel-below', openBelow);
+    dock.classList.toggle(
+      'theme-dock-panel-left',
+      bounds.left + panelWidth <= window.innerWidth - 8
+    );
+    panel.style.maxHeight = `${Math.max(80, Math.min(window.innerHeight - 24, availableHeight - 10))}px`;
+  };
+  const clampDockPosition = (left, top) => ({
+    left: Math.max(8, Math.min(left, window.innerWidth - dock.offsetWidth - 8)),
+    top: Math.max(8, Math.min(top, window.innerHeight - dock.offsetHeight - 8))
+  });
+  const saveDockPosition = () => {
+    const bounds = dock.getBoundingClientRect();
+    try {
+      window.localStorage.setItem('aba_theme_dock_position', JSON.stringify({
+        left: Math.round(bounds.left),
+        top: Math.round(bounds.top)
+      }));
+    } catch (e) { /* ignore */ }
+  };
+  try {
+    const savedPosition = JSON.parse(window.localStorage.getItem('aba_theme_dock_position'));
+    if (savedPosition && Number.isFinite(savedPosition.left) && Number.isFinite(savedPosition.top)) {
+      const position = clampDockPosition(savedPosition.left, savedPosition.top);
+      dock.style.left = `${position.left}px`;
+      dock.style.top = `${position.top}px`;
+      dock.style.right = 'auto';
+    }
+  } catch (e) { /* ignore unavailable or malformed stored position */ }
+  positionPanel();
+
+  let dragStart = null;
+  let suppressNextClick = false;
+  dockToggle.addEventListener('pointerdown', event => {
+    if (event.button !== 0) return;
+    dragStart = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      left: dock.getBoundingClientRect().left,
+      top: dock.getBoundingClientRect().top,
+      moved: false
+    };
+    dockToggle.setPointerCapture(event.pointerId);
+  });
+  dockToggle.addEventListener('pointermove', event => {
+    if (!dragStart || event.pointerId !== dragStart.pointerId) return;
+    const deltaX = event.clientX - dragStart.x;
+    const deltaY = event.clientY - dragStart.y;
+    if (!dragStart.moved && Math.hypot(deltaX, deltaY) < 6) return;
+    dragStart.moved = true;
+    const position = clampDockPosition(dragStart.left + deltaX, dragStart.top + deltaY);
+    dock.style.left = `${position.left}px`;
+    dock.style.top = `${position.top}px`;
+    dock.style.right = 'auto';
+    positionPanel();
+  });
+  const finishDockDrag = event => {
+    if (!dragStart || event.pointerId !== dragStart.pointerId) return;
+    if (dragStart.moved) {
+      saveDockPosition();
+      suppressNextClick = true;
+      window.setTimeout(() => { suppressNextClick = false; }, 0);
+    }
+    dragStart = null;
+  };
+  dockToggle.addEventListener('pointerup', finishDockDrag);
+  dockToggle.addEventListener('pointercancel', finishDockDrag);
+  dockToggle.addEventListener('keydown', event => {
+    if (!event.altKey || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    const bounds = dock.getBoundingClientRect();
+    const offset = event.shiftKey ? 40 : 16;
+    const position = clampDockPosition(
+      bounds.left + (event.key === 'ArrowLeft' ? -offset : event.key === 'ArrowRight' ? offset : 0),
+      bounds.top + (event.key === 'ArrowUp' ? -offset : event.key === 'ArrowDown' ? offset : 0)
+    );
+    dock.style.left = `${position.left}px`;
+    dock.style.top = `${position.top}px`;
+    dock.style.right = 'auto';
+    saveDockPosition();
+    positionPanel();
+  });
+  dockToggle.addEventListener('click', () => {
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      return;
+    }
+    setPanelOpen(panel.hidden);
+  });
+  if (panelClose) panelClose.addEventListener('click', () => {
+    setPanelOpen(false);
+    dockToggle.focus();
+  });
+  document.addEventListener('click', event => {
+    if (!dock.contains(event.target)) setPanelOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !panel.hidden) {
+      setPanelOpen(false);
+      dockToggle.focus();
+    }
+  });
+  window.addEventListener('resize', () => {
+    const bounds = dock.getBoundingClientRect();
+    const position = clampDockPosition(bounds.left, bounds.top);
+    dock.style.left = `${position.left}px`;
+    dock.style.top = `${position.top}px`;
+    dock.style.right = 'auto';
+    positionPanel();
   });
 });
 

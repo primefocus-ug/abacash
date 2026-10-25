@@ -24,12 +24,14 @@ Design notes
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from common.phone_numbers import PhoneNumberNormalizationMixin
 
 
-class ReminderLog(models.Model):
+class ReminderLog(PhoneNumberNormalizationMixin, models.Model):
     """
     A record of every SMS or WhatsApp reminder message sent (or attempted).
     """
+    phone_fields = ("recipient_phone",)
 
     class Channel(models.TextChoices):
         SMS       = "SMS",      _("SMS")

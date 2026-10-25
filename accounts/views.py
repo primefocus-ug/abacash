@@ -4,7 +4,7 @@ accounts/views.py
 Authentication, role-based dashboard routing, and comprehensive admin panel for ABA Uganda.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
@@ -13,8 +13,8 @@ from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum, Count
-from django.db.models.functions import TruncMonth
+from django.db.models import F, Q, Sum, Count
+from django.db.models.functions import TruncDay, TruncMonth
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -27,7 +27,7 @@ from dateutil.relativedelta import relativedelta
 from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
-from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, SystemParameter, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
+from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
 from .branch_scope import (
     scope_to_branch,
     effective_branch_id,
@@ -262,6 +262,206 @@ def _cashier_dashboard(request, today):
     return render(request, "accounts/dashboard_cashier.html", context)
 
 
+def _build_dashboard_performance(current, previous):
+    """Compare period totals and derive a directional, neutral-at-50 score."""
+    definitions = (
+        ("loan_charges", "Loan charges (interest + fees)", 1),
+        ("interest_income", "Interest collected", 1),
+        ("disbursements", "Loan disbursements", 1),
+        ("expenses", "Approved expenses", -1),
+        ("injections", "Capital injections", 1),
+        ("overdue_recoveries", "Overdue recoveries", 1),
+        ("overdue_balance", "Unpaid overdue balance", -1),
+        ("on_time_rate", "On-time payment rate", 1),
+    )
+    metrics = {}
+    score_components = []
+    for key, label, direction in definitions:
+        current_value = float(current[key] or 0)
+        previous_value = float(previous[key] or 0)
+        if previous_value:
+            change_percent = round(
+                (current_value - previous_value) / abs(previous_value) * 100,
+                1,
+            )
+            change_label = f"{change_percent:+.1f}%"
+            component_score = max(
+                0.0,
+                min(100.0, 50 + direction * change_percent / 2),
+            )
+        elif current_value:
+            change_percent = None
+            change_label = "New"
+            component_score = (
+                current_value if key == "on_time_rate"
+                else 100.0 if direction > 0 else 0.0
+            )
+        else:
+            change_percent = 0.0
+            change_label = "0.0%"
+            component_score = 50.0
+
+        metrics[key] = {
+            "label": label,
+            "current": current_value,
+            "previous": previous_value,
+            "change_percent": change_percent,
+            "change_label": change_label,
+            "direction": (
+                "positive" if direction * (current_value - previous_value) > 0
+                else "negative" if direction * (current_value - previous_value) < 0
+                else "neutral"
+            ),
+        }
+        score_components.append(component_score)
+
+    score = round(sum(score_components) / len(score_components), 1)
+    recommendations = []
+    for key, metric in metrics.items():
+        if metric["direction"] != "negative":
+            continue
+        recommendations.append({
+            "level": "warning",
+            "title": f"{metric['label']} moved against the prior period",
+            "detail": (
+                f"{metric['change_label']} compared with the previous range. "
+                "Review the underlying activity before drawing a conclusion."
+            ),
+        })
+    if not recommendations:
+        recommendations.append({
+            "level": "positive",
+            "title": "No measured indicator declined",
+            "detail": "The selected-period comparisons were stable or favorable against the preceding range.",
+        })
+    return {
+        "score": score,
+        "metrics": metrics,
+        "recommendations": recommendations,
+    }
+
+
+def _on_time_schedule_payment_filter():
+    return Q(paid_date__lte=F("due_date"))
+
+
+def _unpaid_overdue_schedule_filter(as_of_date):
+    return Q(
+        due_date__lt=as_of_date,
+        status__in=[
+            LoanSchedule.Status.PENDING,
+            LoanSchedule.Status.PARTIAL,
+            LoanSchedule.Status.OVERDUE,
+        ],
+    )
+
+
+def _dashboard_performance_period(user, date_from, date_to, branch_id=None):
+    period_days = (date_to - date_from).days + 1
+    previous_to = date_from - timedelta(days=1)
+    previous_from = previous_to - timedelta(days=period_days - 1)
+
+    def collect_period(start, end):
+        loans = scope_to_branch(
+            Loan.objects.filter(
+                disbursement_date__range=(start, end),
+                status__in=[
+                    Loan.Status.ACTIVE, Loan.Status.COMPLETED, Loan.Status.DEFAULTED,
+                    Loan.Status.WRITTEN_OFF, Loan.Status.RESTRUCTURED,
+                ],
+            ),
+            user,
+        )
+        payments = scope_to_branch(
+            Payment.objects.filter(
+                payment_date__range=(start, end),
+                status=Payment.Status.ALLOCATED,
+            ),
+            user,
+            "loan__branch",
+        )
+        expenses = scope_to_branch(
+            Expense.objects.filter(
+                expense_date__range=(start, end),
+                status=Expense.Status.APPROVED,
+            ),
+            user,
+        )
+        schedules = scope_to_branch(
+            LoanSchedule.objects.filter(
+                status=LoanSchedule.Status.PAID,
+                paid_date__range=(start, end),
+            ),
+            user,
+            "loan__branch",
+        )
+        overdue_schedules = scope_to_branch(
+            LoanSchedule.objects.filter(_unpaid_overdue_schedule_filter(end)),
+            user,
+            "loan__branch",
+        )
+        if branch_id is not None:
+            loans = loans.filter(branch_id=branch_id)
+            payments = payments.filter(loan__branch_id=branch_id)
+            expenses = expenses.filter(branch_id=branch_id)
+            schedules = schedules.filter(loan__branch_id=branch_id)
+            overdue_schedules = overdue_schedules.filter(loan__branch_id=branch_id)
+
+        loan_totals = loans.aggregate(
+            disbursements=Sum("principal_amount"),
+            interest=Sum("total_interest"),
+            fees=Sum("processing_fee"),
+        )
+        schedule_totals = schedules.aggregate(
+            count=Count("pk"),
+            # A settlement before its due date is on time as well.
+            on_time=Count("pk", filter=_on_time_schedule_payment_filter()),
+            overdue_recoveries=Sum(
+                "total_payment",
+                filter=Q(due_date__lt=start),
+            ),
+            overdue_penalties=Sum(
+                "penalty_due",
+                filter=Q(due_date__lt=start),
+            ),
+        )
+        overdue_totals = overdue_schedules.aggregate(
+            scheduled=Sum("total_payment"),
+            penalties=Sum("penalty_due"),
+            paid=Sum("amount_paid"),
+        )
+        paid_count = schedule_totals["count"] or 0
+        return {
+            "loan_charges": (loan_totals["interest"] or Decimal("0"))
+            + (loan_totals["fees"] or Decimal("0")),
+            "interest_income": payments.aggregate(total=Sum("interest_paid"))["total"]
+            or Decimal("0"),
+            "disbursements": loan_totals["disbursements"] or Decimal("0"),
+            "expenses": expenses.aggregate(total=Sum("amount"))["total"]
+            or Decimal("0"),
+            # Capital injections remain company-wide, as in the cash summary.
+            "injections": CapitalInjection.objects.filter(
+                injected_date__range=(start, end),
+            ).aggregate(total=Sum("amount"))["total"] or Decimal("0"),
+            "overdue_recoveries": (schedule_totals["overdue_recoveries"] or Decimal("0"))
+            + (schedule_totals["overdue_penalties"] or Decimal("0")),
+            "overdue_balance": max(
+                Decimal("0"),
+                (overdue_totals["scheduled"] or Decimal("0"))
+                + (overdue_totals["penalties"] or Decimal("0"))
+                - (overdue_totals["paid"] or Decimal("0")),
+            ),
+            "on_time_rate": (
+                schedule_totals["on_time"] / paid_count * 100 if paid_count else 0
+            ),
+        }
+
+    current = collect_period(date_from, date_to)
+    previous = collect_period(previous_from, previous_to)
+    comparison_period = f"{previous_from:%d %b %Y} – {previous_to:%d %b %Y}"
+    return _build_dashboard_performance(current, previous), comparison_period
+
+
 def _manager_dashboard(request, today):
     # Pending approvals
     pending_loans = scope_to_branch(Loan.objects.filter(
@@ -281,6 +481,10 @@ def _manager_dashboard(request, today):
     total_outstanding  = active_loans.aggregate(total=Sum("outstanding_balance"))["total"] or 0
 
     month_start = today.replace(day=1)
+    performance, performance_comparison_period = _dashboard_performance_period(
+        request.user, month_start, today,
+    )
+    performance_period = "This month"
     collected_month = scope_to_branch(Payment.objects.cash_receipts().filter(
         payment_date__gte=month_start,
         status="ALLOCATED",
@@ -327,6 +531,9 @@ def _manager_dashboard(request, today):
         "total_portfolio":      total_portfolio,
         "total_outstanding":    total_outstanding,
         "collected_month":      collected_month,
+        "performance":          performance,
+        "performance_period":   performance_period,
+        "performance_comparison_period": performance_comparison_period,
         "overdue_count":        overdue_schedules.count(),
         "active_loan_count":    active_loans.count(),
         "pending_count":        pending_loans.count(),
@@ -341,9 +548,8 @@ def _manager_dashboard(request, today):
 
 def _ceo_dashboard(request, today):
     period = request.GET.get("period", "6")
-    if period not in {"3", "6", "12"}:
+    if period not in {"week", "month", "3", "6", "12"}:
         period = "6"
-    period_months = int(period)
 
     date_from = parse_date(request.GET.get("date_from", ""))
     date_to = parse_date(request.GET.get("date_to", ""))
@@ -358,25 +564,41 @@ def _ceo_dashboard(request, today):
         date_from = date_to = None
         has_custom_range = False
 
-    period_start = (
-        date_from
-        if has_custom_range
-        else (today - relativedelta(months=period_months - 1)).replace(day=1)
-    )
+    if has_custom_range:
+        period_start = date_from
+    elif period == "week":
+        period_start = today - timedelta(days=today.weekday())
+    elif period == "month":
+        period_start = today.replace(day=1)
+    else:
+        period_start = (today - relativedelta(months=int(period) - 1)).replace(day=1)
     period_end = date_to if has_custom_range else today
 
-    month_buckets = []
-    bucket_start = period_start.replace(day=1)
+    daily_activity = not has_custom_range and period in {"week", "month"}
+    activity_buckets = []
+    bucket_start = period_start if daily_activity else period_start.replace(day=1)
     while bucket_start <= period_end:
-        month_buckets.append(bucket_start)
-        bucket_start += relativedelta(months=1)
+        activity_buckets.append(bucket_start)
+        bucket_start += timedelta(days=1) if daily_activity else relativedelta(months=1)
 
     # CEO's nav-switcher branch selection (None = all branches). This makes
     # the dashboard consistent with Loans/Clients/Payments/Reports, which
     # all honour the same switcher via effective_branch_id/scope_to_branch.
     branch_id = effective_branch_id(request)
+    performance, performance_comparison_period = _dashboard_performance_period(
+        request.user, period_start, period_end, branch_id=branch_id,
+    )
+    performance_period = "Selected range" if has_custom_range else (
+        "This week" if period == "week" else
+        "This month" if period == "month" else
+        f"Last {period} months"
+    )
 
-    all_active = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
+    all_active = Loan.objects.filter(
+        status__in=["ACTIVE", "RESTRUCTURED"],
+        disbursement_date__gte=period_start,
+        disbursement_date__lte=period_end,
+    )
     allocated_period = Payment.objects.filter(
         payment_date__gte=period_start,
         payment_date__lte=period_end,
@@ -384,13 +606,22 @@ def _ceo_dashboard(request, today):
     )
     overdue_30 = Loan.objects.filter(
         status__in=["ACTIVE", "RESTRUCTURED"],
-        schedule__due_date__lt=today,
+        schedule__due_date__gte=period_start,
+        schedule__due_date__lte=period_end,
         schedule__status__in=["PENDING", "OVERDUE", "PARTIAL"],
     ).distinct()
     total_clients_qs = Client.objects.filter(is_active=True)
-    pending_loans_qs = Loan.objects.filter(status="PENDING")
+    pending_loans_qs = Loan.objects.filter(
+        status="PENDING",
+        application_date__gte=period_start,
+        application_date__lte=period_end,
+    )
     recent_loans_qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED", "COMPLETED"])
-    risk_base_qs = Loan.objects.filter(status__in=["ACTIVE", "RESTRUCTURED"])
+    risk_base_qs = Loan.objects.filter(
+        status__in=["ACTIVE", "RESTRUCTURED"],
+        disbursement_date__gte=period_start,
+        disbursement_date__lte=period_end,
+    )
 
     if branch_id is not None:
         all_active = all_active.filter(branch_id=branch_id)
@@ -429,35 +660,41 @@ def _ceo_dashboard(request, today):
         payments_by_month = payments_by_month.filter(loan__branch_id=branch_id)
         expenses_by_month = expenses_by_month.filter(branch_id=branch_id)
 
-    payment_month_totals = {
-        row["month"].strftime("%Y-%m"): row
-        for row in payments_by_month.annotate(month=TruncMonth("payment_date"))
-        .values("month")
+    bucket_truncation = TruncDay if daily_activity else TruncMonth
+    bucket_format = "%Y-%m-%d" if daily_activity else "%Y-%m"
+    payment_activity_totals = {
+        row["bucket"].strftime(bucket_format): row
+        for row in payments_by_month.annotate(bucket=bucket_truncation("payment_date"))
+        .values("bucket")
         .annotate(
             collected=Sum("amount_received"),
             interest=Sum("interest_paid"),
         )
     }
-    expense_month_totals = {
-        row["month"].strftime("%Y-%m"): row["total"]
-        for row in expenses_by_month.annotate(month=TruncMonth("expense_date"))
-        .values("month")
+    expense_activity_totals = {
+        row["bucket"].strftime(bucket_format): row["total"]
+        for row in expenses_by_month.annotate(bucket=bucket_truncation("expense_date"))
+        .values("bucket")
         .annotate(total=Sum("amount"))
     }
 
     monthly_data = []
     expense_history = []
-    for month_start in month_buckets:
-        month_key = month_start.strftime("%Y-%m")
-        payment_totals = payment_month_totals.get(month_key, {})
+    for bucket_start in activity_buckets:
+        bucket_key = bucket_start.strftime(bucket_format)
+        payment_totals = payment_activity_totals.get(bucket_key, {})
+        bucket_label = (
+            bucket_start.strftime("%a %d" if period == "week" else "%d %b")
+            if daily_activity else bucket_start.strftime("%b %Y")
+        )
         monthly_data.append({
-            "label": month_start.strftime("%b %Y"),
+            "label": bucket_label,
             "collected": float(payment_totals.get("collected") or 0),
             "interest": float(payment_totals.get("interest") or 0),
         })
         expense_history.append({
-            "label": month_start.strftime("%b %Y"),
-            "value": float(expense_month_totals.get(month_key) or 0),
+            "label": bucket_label,
+            "value": float(expense_activity_totals.get(bucket_key) or 0),
         })
 
     expenses = Expense.objects.filter(
@@ -492,7 +729,14 @@ def _ceo_dashboard(request, today):
     if branch_id is not None:
         branches_qs = branches_qs.filter(pk=branch_id)
     branches = branches_qs.annotate(
-        loan_count=Count("loans", filter=Q(loans__status__in=["ACTIVE", "RESTRUCTURED"])),
+        loan_count=Count(
+            "loans",
+            filter=Q(
+                loans__status__in=["ACTIVE", "RESTRUCTURED"],
+                loans__disbursement_date__gte=period_start,
+                loans__disbursement_date__lte=period_end,
+            ),
+        ),
         total_disbursed=Sum(
             "loans__principal_amount",
             filter=Q(
@@ -509,29 +753,47 @@ def _ceo_dashboard(request, today):
     }
 
     is_ajax_request = request.headers.get("x-requested-with") == "XMLHttpRequest"
-    selected_cash = cash_movement(user=request.user, branch_id=branch_id)["cash_at_hand"]
-    selected_recent_cash = recent_cash_transactions(user=request.user, branch_id=branch_id)
-    cash_switch_data = []
-    if not is_ajax_request:
-        cash_switch_data = [
-            {
-                "id": selected_id,
-                "label": label,
-                "balance": str(cash_movement(user=request.user, branch_id=selected_id)["cash_at_hand"]),
-                "transactions": [
-                    {
-                        **transaction,
-                        "date": transaction["date"].isoformat(),
-                        "timestamp": transaction["timestamp"].strftime("%d %b %Y at %H:%M"),
-                        "amount": str(transaction["amount"]),
-                    }
-                    for transaction in recent_cash_transactions(user=request.user, branch_id=selected_id)
-                ],
-            }
-            for selected_id, label in [(None, "All")] + list(
-                Branch.objects.filter(is_active=True).values_list("pk", "code")
-            )
-        ]
+    selected_cash = cash_movement(
+        user=request.user,
+        branch_id=branch_id,
+        start_date=period_start,
+        end_date=period_end,
+    )["cash_at_hand"]
+    selected_recent_cash = recent_cash_transactions(
+        user=request.user,
+        branch_id=branch_id,
+        start_date=period_start,
+        end_date=period_end,
+    )
+    cash_switch_data = [
+        {
+            "id": selected_id,
+            "label": label,
+            "balance": str(cash_movement(
+                user=request.user,
+                branch_id=selected_id,
+                start_date=period_start,
+                end_date=period_end,
+            )["cash_at_hand"]),
+            "transactions": [
+                {
+                    **transaction,
+                    "date": transaction["date"].isoformat(),
+                    "timestamp": transaction["timestamp"].strftime("%d %b %Y at %H:%M"),
+                    "amount": str(transaction["amount"]),
+                }
+                for transaction in recent_cash_transactions(
+                    user=request.user,
+                    branch_id=selected_id,
+                    start_date=period_start,
+                    end_date=period_end,
+                )
+            ],
+        }
+        for selected_id, label in [(None, "All")] + list(
+            Branch.objects.filter(is_active=True).values_list("pk", "code")
+        )
+    ]
 
     context = {
         "total_portfolio": total_portfolio,
@@ -550,6 +812,9 @@ def _ceo_dashboard(request, today):
         "risk_distribution": risk_distribution,
         "expense_data": expense_data,
         "total_expenses": total_expenses,
+        "performance": performance,
+        "performance_period": performance_period,
+        "performance_comparison_period": performance_comparison_period,
         "total_injections": total_injections,
         "cash_at_hand": selected_cash,
         "recent_cash": selected_recent_cash,
@@ -557,8 +822,13 @@ def _ceo_dashboard(request, today):
         "cash_branch_id": branch_id,
         "branch_id": branch_id,
         "branch_options": Branch.objects.filter(is_active=True).order_by("name"),
-        "period": int(period),
-        "period_options": [3, 6, 12],
+        "period": period,
+        "period_label": (
+            "This week" if period == "week" else
+            "This month" if period == "month" else
+            f"Last {period} months"
+        ),
+        "period_options": ["week", "month", 3, 6, 12],
         "date_from": date_from if has_custom_range else None,
         "date_to": date_to if has_custom_range else None,
         "date_error": date_error,
@@ -567,13 +837,14 @@ def _ceo_dashboard(request, today):
     if is_ajax_request:
         return JsonResponse({
             "period": period,
+            "period_label": context["period_label"],
             "date_from": period_start.isoformat(),
             "date_to": period_end.isoformat(),
             "custom_date_from": date_from.isoformat() if has_custom_range else "",
             "custom_date_to": date_to.isoformat() if has_custom_range else "",
             "date_label": (
                 f"{period_start:%d %b %Y} – {period_end:%d %b %Y}"
-                if has_custom_range else f"Last {period} months"
+                if has_custom_range or period in {"week", "month"} else context["period_label"]
             ),
             "custom_range": has_custom_range,
             "currency_symbol": CompanySettings.get().currency_symbol or "UGX",
@@ -592,6 +863,9 @@ def _ceo_dashboard(request, today):
                 "pending_count": pending_count,
                 "cash_at_hand": float(selected_cash),
             },
+            "performance": performance,
+            "performance_period": performance_period,
+            "performance_comparison_period": performance_comparison_period,
             "monthly_data": monthly_data,
             "expense_history": expense_history,
             "expense_data": expense_data,
@@ -623,6 +897,7 @@ def _ceo_dashboard(request, today):
                 }
                 for item in selected_recent_cash
             ],
+            "cash_switch_data": cash_switch_data,
         })
     return render(request, "accounts/dashboard_ceo.html", context)
 
@@ -1071,11 +1346,20 @@ def fee_type_list(request):
     if applied_to:
         qs = qs.filter(applied_to=applied_to)
 
+    processing_fee_search_text = (
+        "processing fee loan disbursement system-managed "
+        "automatically calculated from company settings"
+    )
     return render(request, "accounts/fee_type_list.html", {
         "fee_types": qs,
         "q": q,
         "applied_to_filter": applied_to,
         "applied_to_choices": FeeType.AppliedTo.choices,
+        "processing_fee_settings": CompanySettings.get(),
+        "show_processing_fee": (
+            (not applied_to or applied_to == FeeType.AppliedTo.LOAN_DISBURSEMENT)
+            and (not q or q.casefold() in processing_fee_search_text)
+        ),
     })
 
 
@@ -1591,48 +1875,6 @@ def permissions_manage(request):
         "groups_data": groups_data,
         "all_permissions": PERMISSIONS,
     })
-
-
-# ------------------------------------------------------------------ #
-# System Parameters                                                    #
-# ------------------------------------------------------------------ #
-
-@_permission_required("can_manage_system_settings")
-def system_parameters(request):
-    qs = SystemParameter.objects.order_by("key")
-
-    if request.method == "POST":
-        key = request.POST.get("key", "").strip()
-        value = request.POST.get("value", "").strip()
-        value_type = request.POST.get("value_type", "STRING")
-        description = request.POST.get("description", "").strip()
-
-        try:
-            param, created = SystemParameter.objects.update_or_create(
-                key=key,
-                defaults={
-                    "value": value,
-                    "value_type": value_type,
-                    "description": description,
-                    "updated_by": request.user,
-                }
-            )
-            messages.success(request, f"Parameter '{key}' {'created' if created else 'updated'}.")
-            return redirect("accounts:system_parameters")
-        except Exception as e:
-            messages.error(request, f"Error saving parameter: {e}")
-
-    return render(request, "accounts/system_parameters.html", {
-        "parameters": qs,
-    })
-
-
-@_permission_required("can_manage_system_settings")
-def system_parameter_delete(request, pk):
-    param = get_object_or_404(SystemParameter, pk=pk)
-    param.delete()
-    messages.success(request, f"Parameter '{param.key}' deleted.")
-    return redirect("accounts:system_parameters")
 
 
 @_permission_required("can_manage_expense_categories")

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from common.phone_numbers import PhoneNumberNormalizationMixin, normalize_phone_number
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -95,19 +96,23 @@ class UserManager(BaseUserManager):
             except self.model.MultipleObjectsReturned:
                 return self.filter(username__iexact=username).order_by("id").first()
             except self.model.DoesNotExist:
-                try:
-                    # Try by phone
-                    return self.get(phone=username)
-                except self.model.MultipleObjectsReturned:
-                    return self.filter(phone=username).order_by("id").first()
-                except self.model.DoesNotExist:
-                    raise self.model.DoesNotExist(
-                        f"No user found with email, username, or phone: {username}"
-                    )
+                if "@" not in username and not any(character.isalpha() for character in username):
+                    phone = normalize_phone_number(username)
+                    if phone:
+                        try:
+                            return self.get(phone=phone)
+                        except self.model.MultipleObjectsReturned:
+                            return self.filter(phone=phone).order_by("id").first()
+                        except self.model.DoesNotExist:
+                            pass
+                raise self.model.DoesNotExist(
+                    f"No user found with email, username, or phone: {username}"
+                )
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(PhoneNumberNormalizationMixin, AbstractBaseUser, PermissionsMixin):
     """Custom User model using email as the unique identifier."""
+    phone_fields = ("phone",)
 
     class Role(models.TextChoices):
         CASHIER = "CASHIER", _("Cashier")
@@ -247,11 +252,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         permissions = [(codename, label) for codename, label, _groups in PERMISSIONS]
 
 
-class Branch(models.Model):
+class Branch(PhoneNumberNormalizationMixin, models.Model):
     """
     Represents a branch/office location of the microfinance institution.
     Allows for multi-branch operations with branch-specific settings.
     """
+    phone_fields = ("phone",)
+
     name = models.CharField(max_length=200)
     code = models.CharField(max_length=10, unique=True, help_text=_("Short code for this branch, e.g., KLA, MBA"))
     address = models.TextField(blank=True)
@@ -390,11 +397,13 @@ DEFAULT_PROCESSING_FEE_RANGES = (
 )
 
 
-class CompanySettings(models.Model):
+class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
     """
     Singleton model for company-wide configuration.
     Only one row should ever exist — use CompanySettings.get() to access it.
     """
+    phone_fields = ("company_phone",)
+
     # Company Information
     company_name            = models.CharField(max_length=200, default="Abacash")
     currency_symbol         = models.CharField(max_length=10, default="UGX",
@@ -720,6 +729,50 @@ class CapitalInjection(models.Model):
         indexes = [models.Index(fields=["injected_date"])]
 
 
+class SalesAdjustment(models.Model):
+    class Direction(models.TextChoices):
+        CASH_IN = "CASH_IN", _("Cash In")
+        CASH_OUT = "CASH_OUT", _("Cash Out")
+
+    reference = models.CharField(max_length=100, unique=True)
+    direction = models.CharField(max_length=10, choices=Direction.choices)
+    amount = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    adjustment_date = models.DateField(default=timezone.localdate)
+    branch = models.ForeignKey(
+        "accounts.Branch",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sales_adjustments",
+    )
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_sales_adjustments",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.reference} — {self.get_direction_display()} UGX {self.amount:,.0f}"
+
+    class Meta:
+        ordering = ["-adjustment_date", "-created_at"]
+        indexes = [models.Index(fields=["adjustment_date"])]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(amount__gt=0),
+                name="sales_adjustment_amount_positive",
+            ),
+        ]
+
+
 class BankAccount(models.Model):
     """Institution's own bank accounts for tracking balances and reconciliation."""
 
@@ -888,19 +941,6 @@ class SystemParameter(models.Model):
         on_delete=models.SET_NULL,
         null=True, blank=True,
     )
-
-    def get_typed_value(self):
-        """Return the value converted to the appropriate type."""
-        if self.value_type == "INTEGER":
-            return int(self.value)
-        elif self.value_type == "DECIMAL":
-            return Decimal(self.value)
-        elif self.value_type == "BOOLEAN":
-            return self.value.lower() in ("true", "1", "yes")
-        elif self.value_type == "JSON":
-            import json
-            return json.loads(self.value)
-        return self.value
 
     def __str__(self):
         return f"{self.key} = {self.value}"

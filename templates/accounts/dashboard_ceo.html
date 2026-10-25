@@ -16,15 +16,17 @@
   <input type="hidden" name="period" id="dashboard-period" value="{{ period }}">
   <div class="dashboard-filter-intro">
     <strong>Analyze dashboard</strong>
-    <small id="dashboard-range-summary">{% if date_from and date_to %}{{ date_from|date:"d M Y" }} – {{ date_to|date:"d M Y" }}{% else %}Last {{ period }} months{% endif %}{% if branch_id == None %} · All branches{% endif %}</small>
+    <small id="dashboard-range-summary">{% if date_from and date_to %}{{ date_from|date:"d M Y" }} – {{ date_to|date:"d M Y" }}{% else %}{{ period_label }}{% endif %}{% if branch_id == None %} · All branches{% endif %}</small>
   </div>
   <div class="dashboard-filter-controls">
     <fieldset class="dashboard-period-field">
       <legend>Quick range</legend>
       <div class="period-pills" role="group" aria-label="Reporting period">
-        <button type="button" class="period-btn {% if period == 3 and not date_from %}active{% endif %}" data-period="3" aria-pressed="{% if period == 3 and not date_from %}true{% else %}false{% endif %}">3 months</button>
-        <button type="button" class="period-btn {% if period == 6 and not date_from %}active{% endif %}" data-period="6" aria-pressed="{% if period == 6 and not date_from %}true{% else %}false{% endif %}">6 months</button>
-        <button type="button" class="period-btn {% if period == 12 and not date_from %}active{% endif %}" data-period="12" aria-pressed="{% if period == 12 and not date_from %}true{% else %}false{% endif %}">12 months</button>
+        <button type="button" class="period-btn {% if period == 'week' and not date_from %}active{% endif %}" data-period="week" aria-pressed="{% if period == 'week' and not date_from %}true{% else %}false{% endif %}">This week</button>
+        <button type="button" class="period-btn {% if period == 'month' and not date_from %}active{% endif %}" data-period="month" aria-pressed="{% if period == 'month' and not date_from %}true{% else %}false{% endif %}">This month</button>
+        <button type="button" class="period-btn {% if period == '3' and not date_from %}active{% endif %}" data-period="3" aria-pressed="{% if period == '3' and not date_from %}true{% else %}false{% endif %}">3 months</button>
+        <button type="button" class="period-btn {% if period == '6' and not date_from %}active{% endif %}" data-period="6" aria-pressed="{% if period == '6' and not date_from %}true{% else %}false{% endif %}">6 months</button>
+        <button type="button" class="period-btn {% if period == '12' and not date_from %}active{% endif %}" data-period="12" aria-pressed="{% if period == '12' and not date_from %}true{% else %}false{% endif %}">12 months</button>
       </div>
     </fieldset>
     <fieldset class="dashboard-date-field">
@@ -35,7 +37,6 @@
         <span aria-hidden="true">to</span>
         <label class="visually-hidden" for="dashboard-date-to">To date</label>
         <input type="date" id="dashboard-date-to" name="date_to" value="{{ date_to|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}">
-        <button type="button" class="dashboard-apply-btn" id="dashboard-apply-range">Apply range</button>
       </div>
       {% if date_error %}<small class="dashboard-date-error" role="alert">{{ date_error }}</small>{% endif %}
     </fieldset>
@@ -50,10 +51,12 @@
       </select>
     </div>
     {% endif %}
+    <button type="submit" class="dashboard-apply-btn">Search</button>
   </div>
   <span class="dashboard-filter-status" id="dashboard-filter-status" aria-live="polite"></span>
 </form>
 
+<div id="dashboard-data-region" class="dashboard-data-region">
 <!-- ============================================================ -->
 <!--  SECTION: OVERVIEW METRICS (2 grouped rows)                  -->
 <!-- ============================================================ -->
@@ -64,23 +67,23 @@
     <div class="metric-icon-wrap teal"><i class="fas fa-coins"></i></div>
     <div class="metric-body">
       <div class="metric-value teal" data-dashboard-metric="total_portfolio">{{ total_portfolio|money }}</div>
-      <div class="metric-label">Total Portfolio</div>
-      <div class="metric-sub"><i class="fas fa-hand-holding-usd"></i> Disbursed (active)</div>
+      <div class="metric-label">Active Principal Disbursed</div>
+      <div class="metric-sub"><i class="fas fa-hand-holding-usd"></i> In <span data-dashboard-period-label>{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></div>
     </div>
   </a>
   <a class="metric-card" href="{% url 'loans:list' %}?status=ACTIVE">
     <div class="metric-icon-wrap blue"><i class="fas fa-credit-card"></i></div>
     <div class="metric-body">
       <div class="metric-value blue" data-dashboard-metric="total_outstanding">{{ total_outstanding|money }}</div>
-      <div class="metric-label">Outstanding Balance</div>
-      <div class="metric-sub"><i class="fas fa-hourglass-half"></i> To be recovered</div>
+      <div class="metric-label">Current Outstanding</div>
+      <div class="metric-sub"><i class="fas fa-hourglass-half"></i> Active loans disbursed in <span data-dashboard-period-label>{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></div>
     </div>
   </a>
   <a class="metric-card" href="{% url 'reports:collections' %}">
     <div class="metric-icon-wrap green"><i class="fas fa-hand-holding-heart"></i></div>
     <div class="metric-body">
       <div class="metric-value green" data-dashboard-metric="collected_period">{{ collected_period|money }}</div>
-      <div class="metric-label">Collected (<span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}Last {{ period }} months{% endif %}</span>)</div>
+      <div class="metric-label">Collected (<span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}{{ period_label }}{% endif %}</span>)</div>
       <div class="metric-sub"><i class="fas fa-receipt"></i> Total receipts</div>
     </div>
   </a>
@@ -89,7 +92,7 @@
     <div class="metric-body">
       <div class="metric-value amber" data-dashboard-metric="interest_income">{{ interest_income|money }}</div>
       <div class="metric-label">Interest Income</div>
-      <div class="metric-sub"><i class="fas fa-calendar-alt"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}Last {{ period }} months{% endif %}</span></div>
+      <div class="metric-sub"><i class="fas fa-calendar-alt"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}{{ period_label }}{% endif %}</span></div>
     </div>
   </a>
   <div class="metric-card">
@@ -97,7 +100,7 @@
     <div class="metric-body">
       <div class="metric-value red" data-dashboard-metric="total_expenses">{{ total_expenses|money }}</div>
       <div class="metric-label">Total Expenses</div>
-      <div class="metric-sub"><i class="fas fa-clock"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}Last {{ period }} months{% endif %}</span></div>
+      <div class="metric-sub"><i class="fas fa-clock"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}{{ period_label }}{% endif %}</span></div>
     </div>
   </div>
   <div class="metric-card">
@@ -105,23 +108,23 @@
     <div class="metric-body">
       <div class="metric-value indigo" data-dashboard-metric="total_injections">{{ total_injections|money }}</div>
       <div class="metric-label">Capital Injections</div>
-      <div class="metric-sub"><i class="fas fa-clock"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}Last {{ period }} months{% endif %}</span></div>
-    </div>
+      <div class="metric-sub"><i class="fas fa-clock"></i> <span data-dashboard-period-label>{% if date_from and date_to %}Selected range{% else %}{{ period_label }}{% endif %}</span></div>
+</div>
   </div>
   <a class="metric-card" href="{% url 'reports:overdue' %}">
     <div class="metric-icon-wrap red"><i class="fas fa-exclamation-triangle"></i></div>
     <div class="metric-body">
       <div class="metric-value red" data-dashboard-metric="overdue_count">{{ overdue_count }}</div>
       <div class="metric-label">Overdue Loans</div>
-      <div class="metric-sub"><i class="fas fa-times-circle"></i> missed payments</div>
+      <div class="metric-sub"><i class="fas fa-times-circle"></i> Currently unpaid dues in <span data-dashboard-period-label>{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></div>
     </div>
   </a>
   <a class="metric-card" href="{% url 'loans:list' %}?status=PENDING">
     <div class="metric-icon-wrap amber"><i class="fas fa-clock"></i></div>
     <div class="metric-body">
       <div class="metric-value amber" data-dashboard-metric="pending_count">{{ pending_count }}</div>
-      <div class="metric-label">Pending Approvals</div>
-      <div class="metric-sub"><i class="fas fa-hourglass-start"></i> awaiting review</div>
+      <div class="metric-label">Pending Applications</div>
+      <div class="metric-sub"><i class="fas fa-hourglass-start"></i> Applied in <span data-dashboard-period-label>{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></div>
     </div>
   </a>
   <div class="metric-card cash-card {% if cash_at_hand < 0 %}cash-neg{% endif %}" id="cash-at-hand-card">
@@ -133,8 +136,8 @@
         <div id="cash-at-hand-value" class="metric-value {% if cash_at_hand < 0 %}red{% else %}teal{% endif %}" data-dashboard-metric="cash_at_hand">{{ cash_at_hand|money }}</div>
         <span class="cash-chevron" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
       </button>
-      <div class="metric-label">Cash at Hand</div>
-      <div class="metric-sub"><i class="fas fa-balance-scale"></i> Running balance{% if not can_view_all_branches %} .{% endif %}</div>
+      <div class="metric-label">Net Cash Movement</div>
+      <div class="metric-sub"><i class="fas fa-balance-scale"></i> Cash in less cash out · <span data-dashboard-period-label>{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></div>
     </div>
     <div id="cash-at-hand-flow" class="cash-flow-preview" hidden>
       <div id="cash-branch-switcher" class="cash-branch-switcher"></div>
@@ -151,6 +154,7 @@
       <a href="{% url 'reports:cash_flow' %}">View full cash flow <span aria-hidden="true">→</span></a>
     </div>
   </div>
+  {% include "accounts/includes/dashboard_performance.html" %}
 </div>
 
 {{ cash_switch_data|json_script:"cash-switch-data" }}
@@ -160,7 +164,7 @@
 <!-- ============================================================ -->
 <div class="dashboard-grid">
   <div class="card chart-card">
-    <div class="card-header"><span class="card-title"><i class="fas fa-chart-bar"></i> <span id="collection-chart-title">{% if date_from and date_to %}Collections{% else %}{{ period }}-Month Collections{% endif %}</span></span></div>
+    <div class="card-header"><span class="card-title"><i class="fas fa-chart-bar"></i> <span id="collection-chart-title">{% if date_from and date_to %}Collections{% elif period == 'week' %}Weekly Collections{% elif period == 'month' %}Monthly Collections{% else %}{{ period }}-Month Collections{% endif %}</span></span></div>
     <div class="card-body">
       <div class="chart-wrap" data-chart-container="collection-chart"><canvas id="collection-chart"></canvas></div>
     </div>
@@ -195,7 +199,7 @@
 <!--  RISK DISTRIBUTION                                           -->
 <!-- ============================================================ -->
 <div class="card risk-card">
-  <div class="card-header"><span class="card-title"><i class="fas fa-shield-alt"></i> Portfolio Risk Distribution</span></div>
+  <div class="card-header"><span class="card-title"><i class="fas fa-shield-alt"></i> Risk Distribution · Active loans disbursed in <span id="risk-chart-period-label">{% if date_from and date_to %}selected range{% else %}{{ period_label|lower }}{% endif %}</span></span></div>
   <div class="card-body risk-body">
     <div class="chart-wrap risk-chart-wrap" data-chart-container="risk-chart">
       <canvas id="risk-chart"></canvas>
@@ -216,7 +220,7 @@
 <!-- ============================================================ -->
 <div class="card loan-book-card">
   <div class="card-header">
-    <span class="card-title"><i class="fas fa-book"></i> Recent Loan Book (<span id="loan-book-period-label">{% if date_from and date_to %}Selected range{% else %}Last {{ period }} months{% endif %}</span>)</span>
+    <span class="card-title"><i class="fas fa-book"></i> Recent Loan Book (<span id="loan-book-period-label">{% if date_from and date_to %}Selected range{% else %}{{ period_label }}{% endif %}</span>)</span>
     <div class="card-actions">
       <a href="{% url 'reports:loan_book' %}" class="btn btn-secondary btn-sm"><i class="fas fa-file-alt"></i> Full Report</a>
       <a href="{% url 'reports:loan_book' %}?export=excel" class="btn btn-secondary btn-sm"><i class="fas fa-file-excel"></i> Export Excel</a>
@@ -264,6 +268,8 @@
     </table>
   </div>
 </div>
+
+ </div>
 
 <!-- ============================================================ -->
 <!--  STYLES                                                      -->
@@ -536,16 +542,26 @@
   }
   .dashboard-filter-status:empty { display: none; }
   .dashboard-filter-status.is-error { color: #b91c1c; }
-  html.dashboard-loading::before {
-    content: ""; position: fixed; inset: 0 auto auto 0; z-index: 9999;
-    width: 100%; height: 3px; transform-origin: left;
-    background: linear-gradient(90deg, #2563eb, #14b8a6, #60a5fa);
-    animation: dashboard-loading-progress 1.1s ease-in-out infinite;
+  .dashboard-data-region .dashboard-card-loading {
+    position: relative;
+    opacity: .62;
+    transition: opacity .15s ease;
   }
-  @keyframes dashboard-loading-progress {
-    0% { transform: scaleX(.04); opacity: .7; }
-    65% { transform: scaleX(.78); opacity: 1; }
-    100% { transform: scaleX(.94); opacity: .8; }
+  .dashboard-data-region .dashboard-card-loading::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(37,99,235,.2);
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: dashboard-card-spin .7s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes dashboard-card-spin {
+    to { transform: rotate(360deg); }
   }
 
   /* ===================== DASHBOARD GRID ===================== */
@@ -669,8 +685,10 @@
     .dashboard-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 600px) {
-    .metrics-grid { grid-template-columns: 1fr; gap: 10px; }
-    .metric-card { padding: 14px; }
+    .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .metric-card { min-width: 0; padding: 10px; }
+    .metric-value { font-size: 15px; overflow-wrap: anywhere; }
+    .metric-label, .metric-sub { font-size: 9px; }
     .risk-body { flex-direction: column; align-items: stretch; }
     .risk-legend { grid-template-columns: 1fr 1fr; }
     .card-header { flex-wrap: wrap; gap: 8px; }
@@ -679,7 +697,7 @@
     .dashboard-filter-controls { justify-content: stretch; gap: 14px; }
     .dashboard-period-field, .dashboard-date-field, .dashboard-branch-field { width: 100%; }
     .dashboard-branch-field select { width: 100%; }
-    .period-pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .period-pills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .period-btn { padding: 9px 5px; font-size: 10px; }
     .dashboard-date-inputs input { width: 0; min-width: 0; flex: 1; }
     .dashboard-filter-status { position: static; width: 100%; }
@@ -710,8 +728,11 @@
   const dateFrom = document.getElementById('dashboard-date-from');
   const dateTo = document.getElementById('dashboard-date-to');
   const filterStatus = document.getElementById('dashboard-filter-status');
+  const dashboardDataRegion = document.getElementById('dashboard-data-region');
   let activeRequest = null;
   let dashboardCurrencySymbol = '{{ dashboard_currency_symbol|escapejs }}';
+  let cashSwitchData = [];
+  let refreshCashBranch = () => {};
 
   /* ---------- Cash-at-hand card ---------- */
   function initCashCard() {
@@ -737,17 +758,19 @@
 
     const dataEl   = document.getElementById('cash-switch-data');
     if (!dataEl) return;
-    const data     = JSON.parse(dataEl.textContent);
+    cashSwitchData = JSON.parse(dataEl.textContent);
     const value    = document.getElementById('cash-at-hand-value');
     const switcher = document.getElementById('cash-branch-switcher');
     const rows     = document.getElementById('cash-flow-rows');
     const initial  = {{ cash_branch_id|default:'null'|safe }};
+    let selectedBranchId = initial;
     const formatMoney = n => dashboardCurrencySymbol + ' ' + Number(n).toLocaleString('en-UG', {
       minimumFractionDigits: 2, maximumFractionDigits: 2
     });
     function selectBranch(id) {
-      const selected = data.find(i => i.id === id) || data[0];
+      const selected = cashSwitchData.find(i => i.id === id) || cashSwitchData[0];
       if (!selected) return;
+      selectedBranchId = selected.id;
       value.textContent = formatMoney(selected.balance);
       value.classList.toggle('red',  Number(selected.balance) < 0);
       value.classList.toggle('teal', Number(selected.balance) >= 0);
@@ -766,7 +789,7 @@
         : '<small class="cash-empty">No cash movements yet.</small>';
     }
     const frag = document.createDocumentFragment();
-    data.forEach(item => {
+    cashSwitchData.forEach(item => {
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'cash-branch-btn';
       btn.dataset.branch = item.id; btn.textContent = item.label;
@@ -775,6 +798,7 @@
     });
     switcher.appendChild(frag);
     selectBranch(initial === null ? null : Number(initial));
+    refreshCashBranch = () => selectBranch(selectedBranchId);
   }
 
   /* ---------- Dashboard filters ---------- */
@@ -782,6 +806,15 @@
     function showFilterError(message) {
       filterStatus.textContent = message;
       filterStatus.classList.add('is-error');
+    }
+
+    function setDashboardCardsLoading(isLoading) {
+      dashboardDataRegion.querySelectorAll('.metric-card, .chart-card, .risk-card, .loan-book-card')
+        .forEach(card => {
+          card.classList.toggle('dashboard-card-loading', isLoading);
+          if (isLoading) card.setAttribute('aria-busy', 'true');
+          else card.removeAttribute('aria-busy');
+        });
     }
 
     filterForm.querySelectorAll('.period-btn').forEach(button => {
@@ -799,23 +832,6 @@
       });
     });
 
-    const branchSelect = document.getElementById('dashboard-branch-filter');
-    if (branchSelect) {
-      branchSelect.addEventListener('change', () => filterForm.requestSubmit());
-    }
-
-    document.getElementById('dashboard-apply-range').addEventListener('click', () => {
-      if (!dateFrom.value || !dateTo.value) {
-        showFilterError('Choose both a start date and an end date.');
-        return;
-      }
-      if (dateFrom.value > dateTo.value) {
-        showFilterError('The start date must be before the end date.');
-        return;
-      }
-      filterForm.requestSubmit();
-    });
-
     filterForm.addEventListener('submit', async event => {
       event.preventDefault();
       if ((dateFrom.value && !dateTo.value) || (!dateFrom.value && dateTo.value)) {
@@ -830,9 +846,9 @@
       const request = new AbortController();
       activeRequest = request;
       filterForm.setAttribute('aria-busy', 'true');
-      filterStatus.textContent = 'Updating dashboard...';
+      filterStatus.textContent = 'Updating dashboard cards and charts...';
       filterStatus.classList.remove('is-error');
-      document.documentElement.classList.add('dashboard-loading');
+      setDashboardCardsLoading(true);
       const url = new URL(window.location.href);
       url.search = new URLSearchParams(new FormData(filterForm)).toString();
       try {
@@ -853,7 +869,7 @@
       } finally {
         if (activeRequest === request) {
           filterForm.removeAttribute('aria-busy');
-          document.documentElement.classList.remove('dashboard-loading');
+          setDashboardCardsLoading(false);
           activeRequest = null;
         }
       }
@@ -963,7 +979,8 @@
     if (!data || !data.metrics || !Array.isArray(data.monthly_data) ||
         !Array.isArray(data.expense_history) || !Array.isArray(data.expense_data) ||
         !Array.isArray(data.recent_loans) || !Array.isArray(data.recent_cash) ||
-        !data.risk_distribution) {
+        !data.risk_distribution || !data.performance ||
+        !data.performance.metrics || !Array.isArray(data.performance.recommendations)) {
       throw new TypeError('Dashboard response has an unexpected format.');
     }
 
@@ -981,15 +998,70 @@
         element.classList.toggle('teal', Number(value) >= 0);
       }
     });
-    const periodLabel = data.custom_range ? 'Selected range' : 'Last ' + data.period + ' months';
+    const performance = data.performance;
+    const score = document.querySelector('[data-performance-score]');
+    const scoreText = Number(performance.score || 0).toFixed(0) + '%';
+    if (score) score.textContent = scoreText;
+    const scoreCopy = document.querySelector('[data-performance-score-copy]');
+    if (scoreCopy) scoreCopy.textContent = scoreText;
+    Object.entries(performance.metrics).forEach(([key, metric]) => {
+      const change = document.querySelector('[data-performance-change="' + key + '"]');
+      if (change) {
+        change.textContent = metric.change_label;
+        change.classList.remove(
+          'performance-change-positive',
+          'performance-change-negative',
+          'performance-change-neutral'
+        );
+        change.classList.add('performance-change-' + metric.direction);
+      }
+      const values = document.querySelector('[data-performance-values="' + key + '"]');
+      if (values) {
+        const formatValue = key === 'on_time_rate'
+          ? value => Number(value || 0).toFixed(1) + '%'
+          : formatMoney;
+        values.textContent = formatValue(metric.current) + ' current · ' +
+          formatValue(metric.previous) + ' previous';
+      }
+    });
+    const recommendations = document.getElementById('performance-recommendations');
+    if (recommendations) {
+      recommendations.replaceChildren();
+      performance.recommendations.forEach(item => {
+        const entry = document.createElement('li');
+        entry.className = 'performance-advice-' + item.level;
+        const title = document.createElement('strong');
+        title.textContent = item.title;
+        const detail = document.createElement('span');
+        detail.textContent = item.detail;
+        entry.append(title, detail);
+        recommendations.appendChild(entry);
+      });
+    }
+    document.querySelectorAll('#dashboard-performance-card .performance-eyebrow')
+      .forEach(element => { element.textContent = data.performance_period; });
+    document.querySelectorAll('#dashboard-performance-card .performance-comparison-period')
+      .forEach(element => {
+        element.textContent = 'Compared with ' + data.performance_comparison_period;
+      });
+    if (Array.isArray(data.cash_switch_data)) {
+      cashSwitchData = data.cash_switch_data;
+      refreshCashBranch();
+    }
+    const periodLabel = data.custom_range ? 'Selected range' : data.period_label;
     document.querySelectorAll('[data-dashboard-period-label]').forEach(el => {
       el.textContent = periodLabel;
     });
     document.getElementById('loan-book-period-label').textContent = periodLabel;
     document.getElementById('dashboard-range-summary').textContent =
       data.date_label + ' · ' + data.branch_label;
-    document.getElementById('collection-chart-title').textContent =
-      data.custom_range ? 'Collections · ' + data.date_label : data.period + '-Month Collections';
+    document.getElementById('collection-chart-title').textContent = data.custom_range
+      ? 'Collections · ' + data.date_label
+      : data.period === 'week' ? 'Weekly Collections'
+      : data.period === 'month' ? 'Monthly Collections'
+      : data.period + '-Month Collections';
+    document.getElementById('risk-chart-period-label').textContent =
+      data.custom_range ? 'selected range' : data.period_label.toLowerCase();
 
     const activePeriod = document.getElementById('dashboard-period');
     activePeriod.value = String(data.period);

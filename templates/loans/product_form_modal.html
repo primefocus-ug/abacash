@@ -1,0 +1,15 @@
+<div class="product-modal">
+  <div class="product-modal-heading">
+    <div>
+      <h2>{{ title }}</h2>
+      <div class="text-sm text-muted">
+        {% if action == "edit" %}Update the terms and requirements for {{ product.name }}.{% else %}Define terms and requirements for a new loan product.{% endif %}
+      </div>
+    </div>
+  </div>
+  {% if form_error %}<div class="alert alert-danger">{{ form_error }}</div>{% endif %}
+  <form method="post" action="{{ request.get_full_path }}" {% if action == "edit" %}data-product-edit-form{% else %}hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-swap="innerHTML"{% endif %}>
+    {% csrf_token %}
+    {% include "loans/product_form_fields.html" %}
+  </form>
+</div>

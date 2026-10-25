@@ -16,6 +16,7 @@ class LoanProductAdmin(admin.ModelAdmin):
         "min_term_months",
         "max_term_months",
         "requires_guarantor",
+        "requires_collateral",
         "is_active",
         "created_at",
     )
@@ -23,6 +24,7 @@ class LoanProductAdmin(admin.ModelAdmin):
         "interest_method",
         "default_repayment_frequency",
         "requires_guarantor",
+        "requires_collateral",
         "is_active",
     )
     search_fields = ("name", "description")
@@ -73,4 +75,3 @@ class LoanScheduleExtensionAdmin(admin.ModelAdmin):
     )
     search_fields = ("schedule_entry__loan__loan_number", "extended_by__username")
     ordering = ("-extended_at",)
-

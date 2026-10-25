@@ -73,6 +73,16 @@
 
 {% block content %}
 
+<div class="section-label">Accountability &amp; Analysis</div>
+<div class="reports-grid">
+  <a href="{% url 'reports:company_ledger' %}" class="report-card" style="border-color:rgba(20,130,120,.3);">
+    <div class="r-icon"><i class="fas fa-list-check" style="color:#148278;"></i></div>
+    <div class="r-title">Company Ledger</div>
+    <div class="r-desc">Search payments, refunds, injections, expenses, disbursements, clients, products, bank activity, sales adjustments, staff performance, and branch activity by period.</div>
+    <div class="r-open" style="color:#148278;"><i class="fas fa-arrow-right"></i> Open ledger</div>
+  </a>
+</div>
+
 <div class="section-label">Portfolio</div>
 <div class="reports-grid">
 
@@ -142,6 +152,13 @@
     <div class="r-title">Cash In / Cash Out</div>
     <div class="r-desc">Combined ledger of disbursements and repayments for cash flow analysis.</div>
     <div class="r-open" style="color:var(--purple);"><i class="fas fa-arrow-right"></i> Open</div>
+  </a>
+
+  <a href="{% url 'reports:fund_movement' %}" class="report-card" style="border-color:rgba(20,130,120,.24);">
+    <div class="r-icon"><i class="fas fa-money-bill-transfer" style="color:#148278;"></i></div>
+    <div class="r-title">Capital &amp; Fund Movement</div>
+    <div class="r-desc">Reconcile injections, repayments, reversals, refunds, sales adjustments, fees, loan disbursements, and expenses with opening and closing balances. Export to Excel or PDF.</div>
+    <div class="r-open" style="color:#148278;"><i class="fas fa-arrow-right"></i> Open</div>
   </a>
 
 </div>

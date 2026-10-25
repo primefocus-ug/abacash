@@ -19,6 +19,7 @@ from datetime import timedelta
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
+from common.phone_numbers import normalize_phone_number
 
 from django_tenants.utils import get_tenant_model, tenant_context
 
@@ -32,6 +33,7 @@ def _send_sms(phone: str, message: str) -> tuple[bool, str]:
     Send an SMS via Africa's Talking.
     Returns (success: bool, provider_message_id or error: str).
     """
+    phone = normalize_phone_number(phone)
     try:
         import africastalking
         africastalking.initialize(
@@ -53,6 +55,7 @@ def _send_whatsapp(phone: str, message: str) -> tuple[bool, str]:
     Send a WhatsApp message via Twilio.
     Phone must be in format +256XXXXXXXXX.
     """
+    phone = normalize_phone_number(phone)
     try:
         from twilio.rest import Client as TwilioClient
         client = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)

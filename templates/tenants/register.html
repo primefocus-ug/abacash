@@ -707,15 +707,6 @@
       });
     }
 
-    // Phone number formatting helper (optional)
-    var phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-      phoneInput.addEventListener('input', function() {
-        // Simple: remove any non-digit except + and space
-        this.value = this.value.replace(/[^0-9+\s]/g, '');
-      });
-    }
-
   })();
 </script>
 {% endblock %}

@@ -55,6 +55,7 @@
       <a href="{% url 'reports:cash_flow' %}">View full cash flow <span aria-hidden="true">→</span></a>
     </div>
   </div>
+  {% include "accounts/includes/dashboard_performance.html" %}
 </div>
 
 {% include "accounts/includes/dashboard_live_refresh.html" %}

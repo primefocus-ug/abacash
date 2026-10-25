@@ -27,9 +27,24 @@ PLANS = {
 }
 
 DEFAULT_PRODUCTS = [
-    {"name": "Salary Loan",    "interest_rate_monthly": "5.00", "interest_method": "FLAT",     "min_amount": "100000",  "max_amount": "5000000",  "min_term": 1, "max_term": 12},
-    {"name": "Business Loan",  "interest_rate_monthly": "4.00", "interest_method": "REDUCING", "min_amount": "500000",  "max_amount": "50000000", "min_term": 3, "max_term": 24},
-    {"name": "Emergency Loan", "interest_rate_monthly": "6.00", "interest_method": "FLAT",     "min_amount": "50000",   "max_amount": "1000000",  "min_term": 1, "max_term": 3},
+    {"name": "Salary Loan",       "interest_rate_monthly": "5.00", "interest_method": "FLAT",     "min_amount": "100000",  "max_amount": "5000000",  "min_term": 1, "max_term": 12},
+    {"name": "Business Loan",     "interest_rate_monthly": "4.00", "interest_method": "REDUCING", "min_amount": "500000",  "max_amount": "50000000", "min_term": 3, "max_term": 24},
+    {"name": "Emergency Loan",    "interest_rate_monthly": "6.00", "interest_method": "FLAT",     "min_amount": "50000",   "max_amount": "1000000",  "min_term": 1, "max_term": 3},
+    {"name": "Logbook Loan",      "interest_rate_monthly": "4.00", "interest_method": "REDUCING", "min_amount": "500000",  "max_amount": "50000000", "min_term": 3, "max_term": 36},
+    {"name": "School Fees Loan",  "interest_rate_monthly": "4.00", "interest_method": "FLAT",     "min_amount": "100000",  "max_amount": "10000000", "min_term": 1, "max_term": 12},
+    {"name": "Group Loan",        "interest_rate_monthly": "5.00", "interest_method": "FLAT",     "min_amount": "50000",   "max_amount": "5000000",  "min_term": 1, "max_term": 12},
+    {"name": "Agricultural Loan", "interest_rate_monthly": "4.00", "interest_method": "REDUCING", "min_amount": "200000",  "max_amount": "20000000", "min_term": 3, "max_term": 18},
+    {"name": "Asset Finance Loan", "interest_rate_monthly": "3.50", "interest_method": "REDUCING", "min_amount": "1000000", "max_amount": "50000000", "min_term": 6, "max_term": 36},
+]
+
+DEFAULT_EXPENSE_CATEGORIES = [
+    {"name": "General Operations", "color": "blue", "types": ["Office Supplies", "Rent", "Utilities", "Internet and Telephone", "Repairs and Maintenance", "Security"]},
+    {"name": "Staff Costs", "color": "teal", "types": ["Salaries and Wages", "Staff Welfare", "Staff Training"]},
+    {"name": "Transport and Travel", "color": "green", "types": ["Fuel", "Vehicle Maintenance", "Travel and Accommodation"]},
+    {"name": "Marketing and Outreach", "color": "amber", "types": ["Advertising", "Client Outreach", "Community Events"]},
+    {"name": "Financial Charges", "color": "purple", "types": ["Bank Charges", "Mobile Money Fees"]},
+    {"name": "Taxes and Licenses", "color": "red", "types": ["Taxes", "Licenses and Permits"]},
+    {"name": "Other Expenses", "color": "amber", "types": ["Miscellaneous"]},
 ]
 
 
@@ -95,10 +110,11 @@ def provision_tenant(
             _seed_sequence("accounts.models", "ReceiptSequence", "receipt")
             _seed_sequence("loans.models", "LoanSequence", "loans")
             _seed_products()
+            _seed_expense_categories()
             created_user = _create_ceo(company.name, email, password)
-            if created_user is not None and branch is not None and created_user.branch_id is None:
-                created_user.branch = branch
-                created_user.save(update_fields=["branch"])
+            if branch is not None:
+                from accounts.models import User
+                User.objects.filter(branch__isnull=True).update(branch=branch)
         _log("Seeding complete.")
 
         if notify and company_email:
@@ -163,8 +179,9 @@ def _seed_sequence(module_path, model_name, seq_name):
 
 def _seed_products():
     from loans.models import LoanProduct
+    created_count = 0
     for p in DEFAULT_PRODUCTS:
-        LoanProduct.objects.get_or_create(name=p["name"], defaults={
+        _, created = LoanProduct.objects.get_or_create(name=p["name"], defaults={
             "interest_rate_monthly": Decimal(p["interest_rate_monthly"]),
             "interest_method": p["interest_method"],
             "min_amount": Decimal(p["min_amount"]),
@@ -173,6 +190,20 @@ def _seed_products():
             "max_term_months": p["max_term"],
             "is_active": True,
         })
+        created_count += int(created)
+    return created_count
+
+
+def _seed_expense_categories():
+    from accounts.models import ExpenseType, TransactionCategory
+
+    for defaults in DEFAULT_EXPENSE_CATEGORIES:
+        category, _created = TransactionCategory.objects.get_or_create(
+            name=defaults["name"],
+            defaults={"color": defaults["color"]},
+        )
+        for expense_type in defaults["types"]:
+            ExpenseType.objects.get_or_create(category=category, name=expense_type)
 
 
 def _create_ceo(company_name, email, password=None):

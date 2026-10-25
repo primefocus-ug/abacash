@@ -5,6 +5,7 @@ app_name = "reports"
 
 urlpatterns = [
     path("",                  views.report_index,          name="index"),
+    path("company-ledger/",   views.company_ledger,        name="company_ledger"),
 
     path("loan-book/",        views.loan_book,             name="loan_book"),
     path("loan-book/download/", views.loan_book_download,  name="loan_book_download"),
@@ -17,6 +18,10 @@ urlpatterns = [
 
     path("cash-flow/",        views.cash_flow_report,      name="cash_flow"),
     path("cash-flow/download/", views.cash_flow_download,  name="cash_flow_download"),
+
+    path("fund-movement/", views.fund_movement_report, name="fund_movement"),
+    path("fund-movement/download/pdf/", views.fund_movement_pdf, name="fund_movement_pdf"),
+    path("fund-movement/download/excel/", views.fund_movement_excel, name="fund_movement_excel"),
 
     path("overdue/",          views.overdue_report,        name="overdue"),
     path("overdue/download/", views.overdue_download,      name="overdue_download"),

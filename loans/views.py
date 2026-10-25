@@ -12,14 +12,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
-from django.http import JsonResponse
+from django.db.models import Q, Sum
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from accounts.models import Branch, CompanySettings
+from accounts.models import BankAccount, Branch, CompanySettings
 from accounts.branch_scope import (
     SESSION_KEY,
     scope_to_branch,
@@ -226,27 +226,38 @@ def loan_search(request):
 @_require_role("CASHIER", "MANAGER", "CEO")
 def loan_apply_step1(request):
     """Step 1: Select or search for the client."""
-    return render(request, "loans/apply_step1.html")
+    clients = _loan_application_client_queryset(request.user)[:3]
+    return render(request, "loans/apply_step1.html", {"recent_clients": clients})
+
+
+def _loan_application_client_queryset(user, search=""):
+    clients = scope_to_branch(
+        Client.objects.filter(is_active=True, is_blacklisted=False),
+        user,
+    )
+    if not search:
+        return clients.order_by("-created_at", "-pk")
+
+    name_query = Q()
+    for term in search.split():
+        name_query &= (
+            Q(first_name__icontains=term)
+            | Q(other_names__icontains=term)
+            | Q(last_name__icontains=term)
+        )
+    return clients.filter(
+        name_query
+        | Q(client_number__icontains=search)
+        | Q(nin__icontains=search)
+        | Q(phone_primary__icontains=search)
+    ).distinct().order_by("-created_at", "-pk")
 
 
 @_require_role("CASHIER", "MANAGER", "CEO")
 def client_search_htmx(request):
-    """HTMX endpoint: instant client search returning a table partial."""
+    """Return the client search results table partial."""
     q = request.GET.get("q", "").strip()
-    base_qs = scope_to_branch(Client.objects.filter(is_active=True), request.user)
-    if q:
-        qs = base_qs.filter(
-            first_name__icontains=q
-        ) | base_qs.filter(
-            last_name__icontains=q
-        ) | base_qs.filter(
-            client_number__icontains=q
-        ) | base_qs.filter(
-            nin__icontains=q
-        )
-        clients = qs.distinct()[:30]
-    else:
-        clients = base_qs.order_by("-created_at")[:30]
+    clients = _loan_application_client_queryset(request.user, q)[:30 if q else 3]
     return render(request, "partials/client_search_results.html", {"clients": clients, "q": q})
 
 
@@ -264,7 +275,8 @@ def loan_apply_step2(request, client_id):
     products = LoanProduct.objects.filter(is_active=True)
     active_branches = Branch.objects.filter(is_active=True).order_by("name")
     can_choose_branch = request.user.is_superuser or request.user.can("can_view_all_branches")
-    company_default_fee = CompanySettings.get().default_processing_fee_percent
+    company_settings = CompanySettings.get()
+    company_default_fee = company_settings.default_processing_fee_percent
 
     loan = _get_client_loan_draft(client)
     form_data = _build_loan_basic_data(loan)
@@ -273,6 +285,8 @@ def loan_apply_step2(request, client_id):
     processing_fee = None
     processing_fee_percent = None
     fee_source = None
+    nominal_apr = Decimal("0")
+    total_cost_of_credit = Decimal("0")
 
     if request.method == "POST":
         data = request.POST
@@ -323,6 +337,8 @@ def loan_apply_step2(request, client_id):
                 include_processing_fee=True,
             )
             processing_fee_percent = fee_percent
+            nominal_apr = product.interest_rate_monthly * Decimal("12")
+            total_cost_of_credit = totals["total_interest"] + processing_fee
 
             loan.processing_fee = processing_fee
             loan.processing_fee_percent = fee_percent if fee_percent else None
@@ -358,6 +374,8 @@ def loan_apply_step2(request, client_id):
                 include_processing_fee=True,
             )
             processing_fee_percent = fee_percent
+            nominal_apr = loan.interest_rate_monthly * Decimal("12")
+            total_cost_of_credit = totals["total_interest"] + processing_fee
             form_data = _build_loan_basic_data(loan)
         except Exception as e:
             import logging
@@ -393,7 +411,11 @@ def loan_apply_step2(request, client_id):
         "processing_fee": processing_fee,
         "processing_fee_percent": processing_fee_percent,
         "fee_source": fee_source,
+        "processing_fee_method": company_settings.processing_fee_method,
+        "processing_fee_ranges": company_settings.processing_fee_ranges,
         "company_default_processing_fee_percent": company_default_fee,
+        "nominal_apr": nominal_apr,
+        "total_cost_of_credit": total_cost_of_credit,
     })
 
 
@@ -595,12 +617,19 @@ def loan_apply_step3(request, client_id):
             for d, v in zip(collateral_descs, collateral_values)
             if d.strip() and v
         ]
+        include_collateral = loan.product.requires_collateral or data.get("include_collateral") == "on"
+        include_guarantors = loan.product.requires_guarantor or data.get("include_guarantors") == "on"
+        if not include_collateral:
+            collateral_items = []
+            security_data["collateral_items"] = []
+        if not include_guarantors:
+            security_data["guarantor_rows"] = []
 
         try:
             # Validate guarantor rows BEFORE touching any data, so a bad row
             # shows an error instead of being silently dropped.
-            guarantor_ids = data.getlist("guarantor_id")
-            guarantor_amounts = data.getlist("guarantor_amount")
+            guarantor_ids = data.getlist("guarantor_id") if include_guarantors else []
+            guarantor_amounts = data.getlist("guarantor_amount") if include_guarantors else []
             guarantor_rows = []
             guarantor_errors = []
             for index, (gid, amt) in enumerate(zip(guarantor_ids, guarantor_amounts), start=1):
@@ -622,6 +651,8 @@ def loan_apply_step3(request, client_id):
                 guarantor_rows.append({"guarantor_id": gid, "amount": str(parsed_amount)})
             if guarantor_errors:
                 raise ValueError(" ".join(guarantor_errors))
+            if loan.product.requires_collateral and not collateral_items:
+                raise ValueError("This product requires at least one complete collateral item.")
 
             CollateralItem.objects.filter(loan=loan).delete()
             CollateralItem.objects.bulk_create([
@@ -677,17 +708,32 @@ def loan_apply_step3(request, client_id):
         except (ValueError, TypeError) as e:
             messages.error(request, f"Invalid input: {e}")
 
+    include_collateral = loan.product.requires_collateral or (
+        request.POST.get("include_collateral") == "on"
+        if request.method == "POST"
+        else bool(security_data["collateral_items"])
+    )
+    include_guarantors = loan.product.requires_guarantor or (
+        request.POST.get("include_guarantors") == "on"
+        if request.method == "POST"
+        else bool(security_data["guarantor_rows"])
+    )
+
     return render(request, "loans/apply_step3.html", {
         "client": client,
         "loan": loan,
         "available_guarantors": available_guarantors,
         "security_data": security_data,
+        "include_collateral": include_collateral,
+        "include_guarantors": include_guarantors,
         "schedule_rows": schedule_rows,
         "totals": totals,
         "processing_fee": processing_fee,
         "processing_fee_percent": fee_percent,
         "processing_fee_rate_text": f"{fee_percent}%" if fee_percent else ("Fixed range" if processing_fee else ""),
         "fee_source": "Company settings (range)" if (processing_fee and not fee_percent) else (loan.product.name if fee_percent else "Company settings"),
+        "nominal_apr": loan.interest_rate_monthly * Decimal("12"),
+        "total_cost_of_credit": totals.get("total_interest", Decimal("0")) + processing_fee,
         "eligibility": eligibility,
         "effective_min": effective_min,
     })
@@ -743,6 +789,8 @@ def loan_apply_review(request, client_id):
             try:
                 if not loan.product:
                     raise ValueError("Loan product is required.")
+                if loan.product.requires_collateral and not loan.collateral_items.exists():
+                    raise ValueError("This product requires at least one collateral item.")
                 if loan.product.requires_guarantor and not guarantor_rows:
                     raise ValueError("This product requires at least one guarantor.")
                 company_settings = CompanySettings.get()
@@ -812,6 +860,8 @@ def loan_apply_review(request, client_id):
         "processing_fee_percent": fee_percent,
         "processing_fee_rate_text": f"{fee_percent}%" if fee_percent else ("Fixed range" if processing_fee else ""),
         "fee_source": "Company settings (range)" if (processing_fee and not fee_percent) else (loan.product.name if fee_percent else "Company settings"),
+        "nominal_apr": loan.interest_rate_monthly * Decimal("12"),
+        "total_cost_of_credit": totals.get("total_interest", Decimal("0")) + processing_fee,
         "collateral_items": collateral_items,
         "guarantor_rows": guarantor_rows,
         "eligibility": calculate_eligibility(client, loan.product) if loan and loan.product else None,
@@ -1687,6 +1737,9 @@ def loan_approve(request, pk):
     if loan.product.requires_guarantor and not loan.guarantees.filter(is_active=True).exists():
         messages.error(request, "This loan needs at least one active guarantor before this product can be approved.")
         return redirect("loans:detail", pk=pk)
+    if loan.product.requires_collateral and not loan.collateral_items.exists():
+        messages.error(request, "This loan needs at least one collateral item before this product can be approved.")
+        return redirect("loans:detail", pk=pk)
 
     # Ensure a schedule exists (we can regenerate below when CEO changes disbursement date)
     if not loan.schedule.exists():
@@ -1944,10 +1997,20 @@ def loan_schedule_print(request, pk):
         Loan.objects.select_related("client", "product", "applied_by", "reviewed_by"),
         pk=pk,
     )
-    schedule = loan.schedule.order_by("period_number")
+    schedule = loan.schedule.select_related("paid_by_payment").order_by("period_number")
     return render(request, "loans/schedule_print.html", {
         "loan": loan,
         "schedule": schedule,
+        "company_accounts": BankAccount.objects.filter(
+            is_active=True,
+            account_type__in=(
+                BankAccount.AccountType.CURRENT,
+                BankAccount.AccountType.SAVINGS,
+                BankAccount.AccountType.MOBILE,
+            ),
+        ).order_by("account_type", "bank_name"),
+        "nominal_apr": loan.interest_rate_monthly * Decimal("12"),
+        "total_cost_of_credit": loan.total_interest + loan.processing_fee,
     })
 
 
@@ -2069,6 +2132,8 @@ def schedule_preview(request):
             "processing_fee_percent": processing_fee_percent,
             "processing_fee_rate_text": processing_fee_rate_text,
             "fee_source": fee_source,
+            "nominal_apr": product.interest_rate_monthly * Decimal("12"),
+            "total_cost_of_credit": totals["total_interest"] + (processing_fee or Decimal("0")),
         })
     except Exception:
         return render(request, "partials/schedule_table.html", {
@@ -2172,8 +2237,30 @@ def loan_product_list(request):
 
 @_require_role("CEO")
 def loan_product_create(request):
+    form_error = ""
+    product_form_defaults = {
+        "requires_guarantor": False,
+        "requires_collateral": False,
+        "is_active": True,
+    }
     if request.method == "POST":
         d = request.POST
+        product_form_defaults.update({
+            "name": d.get("name", ""),
+            "description": d.get("description", ""),
+            "interest_rate_monthly": d.get("interest_rate_monthly", ""),
+            "interest_method": d.get("interest_method", ""),
+            "default_repayment_frequency": d.get("default_repayment_frequency", ""),
+            "min_amount": d.get("min_amount", ""),
+            "max_amount": d.get("max_amount", ""),
+            "min_term_months": d.get("min_term_months", ""),
+            "max_term_months": d.get("max_term_months", ""),
+            "penalty_rate_monthly": d.get("penalty_rate_monthly", ""),
+            "processing_fee_percent": d.get("processing_fee_percent", "0"),
+            "requires_guarantor": d.get("requires_guarantor") == "on",
+            "requires_collateral": d.get("requires_collateral") == "on",
+            "is_active": d.get("is_active") == "on",
+        })
         try:
             product = LoanProduct(
                 name=d["name"].strip(),
@@ -2188,6 +2275,7 @@ def loan_product_create(request):
                 penalty_rate_monthly=Decimal(d["penalty_rate_monthly"]),
                 processing_fee_percent=Decimal(d.get("processing_fee_percent") or "0"),
                 requires_guarantor=(d.get("requires_guarantor") == "on"),
+                requires_collateral=(d.get("requires_collateral") == "on"),
                 is_active=(d.get("is_active") == "on"),
                 created_by=request.user,
             )
@@ -2196,27 +2284,35 @@ def loan_product_create(request):
             product.save()
 
             messages.success(request, f"Loan product '{product.name}' created.")
+            if request.headers.get("HX-Request") == "true":
+                response = HttpResponse(status=204)
+                response["HX-Redirect"] = reverse("loans:products")
+                return response
             return redirect("loans:products")
         except Exception as e:
-            messages.error(request, f"Could not create product: {e}")
+            form_error = f"Could not create product: {e}"
 
-    return render(
-        request,
-        "loans/product_form.html",
-        {
-            "title": "Create Loan Product",
-            "action": "create",
-            "product": None,
-            "product_form_defaults": {},
-            "interest_method_choices": LoanProduct.InterestMethod.choices,
-            "frequency_choices": LoanProduct.RepaymentFrequency.choices,
-        },
+    context = {
+        "title": "Create Loan Product",
+        "action": "create",
+        "product": None,
+        "product_form_defaults": product_form_defaults,
+        "interest_method_choices": LoanProduct.InterestMethod.choices,
+        "frequency_choices": LoanProduct.RepaymentFrequency.choices,
+        "form_error": form_error,
+    }
+    template = (
+        "loans/product_form_modal.html"
+        if request.headers.get("HX-Request") == "true"
+        else "loans/product_form.html"
     )
+    return render(request, template, context)
 
 
 @_require_role("CEO")
 def loan_product_edit(request, pk: int):
     product = get_object_or_404(LoanProduct, pk=pk)
+    form_error = ""
 
     if request.method == "POST":
         d = request.POST
@@ -2233,41 +2329,54 @@ def loan_product_edit(request, pk: int):
             product.penalty_rate_monthly = Decimal(d["penalty_rate_monthly"])
             product.processing_fee_percent = Decimal(d.get("processing_fee_percent") or "0")
             product.requires_guarantor = (d.get("requires_guarantor") == "on")
+            product.requires_collateral = (d.get("requires_collateral") == "on")
             product.is_active = (d.get("is_active") == "on")
             product.full_clean()
             product.save()
 
             messages.success(request, f"Loan product '{product.name}' updated.")
+            if request.headers.get("HX-Request") == "true":
+                response = HttpResponse(status=204)
+                response["HX-Redirect"] = reverse("loans:products")
+                return response
             return redirect("loans:products")
         except Exception as e:
-            messages.error(request, f"Could not update product: {e}")
+            error_message = f"Could not update product: {e}"
+            if request.headers.get("HX-Request") == "true":
+                form_error = error_message
+            else:
+                messages.error(request, error_message)
 
-    return render(
-        request,
-        "loans/product_form.html",
-        {
-            "title": f"Edit Loan Product — {product.name}",
-            "action": "edit",
-            "product": product,
-            "product_form_defaults": {
-                "name": product.name,
-                "description": product.description,
-                "interest_rate_monthly": product.interest_rate_monthly,
-                "interest_method": product.interest_method,
-                "default_repayment_frequency": product.default_repayment_frequency,
-                "min_amount": product.min_amount,
-                "max_amount": product.max_amount,
-                "min_term_months": product.min_term_months,
-                "max_term_months": product.max_term_months,
-                "penalty_rate_monthly": product.penalty_rate_monthly,
-                "processing_fee_percent": product.processing_fee_percent,
-                "requires_guarantor": product.requires_guarantor,
-                "is_active": product.is_active,
-            },
-            "interest_method_choices": LoanProduct.InterestMethod.choices,
-            "frequency_choices": LoanProduct.RepaymentFrequency.choices,
+    context = {
+        "title": f"Edit Loan Product — {product.name}",
+        "action": "edit",
+        "product": product,
+        "product_form_defaults": {
+            "name": product.name,
+            "description": product.description,
+            "interest_rate_monthly": product.interest_rate_monthly,
+            "interest_method": product.interest_method,
+            "default_repayment_frequency": product.default_repayment_frequency,
+            "min_amount": product.min_amount,
+            "max_amount": product.max_amount,
+            "min_term_months": product.min_term_months,
+            "max_term_months": product.max_term_months,
+            "penalty_rate_monthly": product.penalty_rate_monthly,
+            "processing_fee_percent": product.processing_fee_percent,
+            "requires_guarantor": product.requires_guarantor,
+            "requires_collateral": product.requires_collateral,
+            "is_active": product.is_active,
         },
+        "interest_method_choices": LoanProduct.InterestMethod.choices,
+        "frequency_choices": LoanProduct.RepaymentFrequency.choices,
+        "form_error": form_error,
+    }
+    template = (
+        "loans/product_form_modal.html"
+        if request.headers.get("HX-Request") == "true"
+        else "loans/product_form.html"
     )
+    return render(request, template, context)
 
 
 @login_required

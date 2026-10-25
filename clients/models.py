@@ -27,6 +27,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from common.phone_numbers import PhoneNumberNormalizationMixin
 
 
 def client_document_path(instance, filename):
@@ -39,11 +40,12 @@ def client_photo_path(instance, filename):
     return f"photos/client_{instance.id}/{filename}"
 
 
-class Client(models.Model):
+class Client(PhoneNumberNormalizationMixin, models.Model):
     """
     A borrower registered at ABA Uganda.
     One client can have multiple loans over time.
     """
+    phone_fields = ("phone_primary", "phone_secondary")
 
     class Gender(models.TextChoices):
         MALE   = "M", _("Male")
@@ -280,12 +282,13 @@ class CreditTransaction(models.Model):
         indexes = [models.Index(fields=["client", "created_at"])]
 
 
-class NextOfKin(models.Model):
+class NextOfKin(PhoneNumberNormalizationMixin, models.Model):
     """
     Emergency contact / guarantor for a client.
     A client can have multiple next-of-kin records,
     but at least one is required before loan approval.
     """
+    phone_fields = ("phone_primary", "phone_secondary")
 
     client = models.ForeignKey(
         Client,

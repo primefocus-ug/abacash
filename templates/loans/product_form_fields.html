@@ -1,0 +1,92 @@
+{% load aba_filters %}
+
+<div class="product-form-content">
+  <section class="product-form-section">
+    <h3>Product profile</h3>
+    <div class="product-form-grid product-form-grid-two">
+      <div class="form-group">
+        <label for="product-name">Product Name</label>
+        <input id="product-name" type="text" name="name" required value="{{ product_form_defaults.name|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-description">Description (optional)</label>
+        <textarea id="product-description" name="description" rows="2">{{ product_form_defaults.description|default:'' }}</textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="product-form-section">
+    <h3>Pricing &amp; repayment</h3>
+    <div class="product-form-grid">
+      <div class="form-group">
+        <label for="product-interest">Interest Rate (Monthly %)</label>
+        <input id="product-interest" type="number" name="interest_rate_monthly" step="0.01" min="0.01" required value="{{ product_form_defaults.interest_rate_monthly|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-interest-method">Interest Method</label>
+        <select id="product-interest-method" name="interest_method" required>
+          {% for val, label in interest_method_choices %}
+            <option value="{{ val }}" {% if product_form_defaults.interest_method == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="product-frequency">Repayment Frequency</label>
+        <select id="product-frequency" name="default_repayment_frequency" required>
+          {% for val, label in frequency_choices %}
+            <option value="{{ val }}" {% if product_form_defaults.default_repayment_frequency == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="product-penalty">Penalty Rate (Monthly %)</label>
+        <input id="product-penalty" type="number" name="penalty_rate_monthly" step="0.01" min="0" required value="{{ product_form_defaults.penalty_rate_monthly|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-fee">Processing Fee (% fallback)</label>
+        <input id="product-fee" type="number" name="processing_fee_percent" step="0.01" min="0" max="10" value="{{ product_form_defaults.processing_fee_percent|default:'0' }}">
+        <div class="form-hint product-form-hint">Used only if the company percentage rate is 0.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="product-form-section">
+    <h3>Loan limits</h3>
+    <div class="product-form-grid">
+      <div class="form-group">
+        <label for="product-min-amount">Min Amount ({% currency_symbol %})</label>
+        <input id="product-min-amount" type="number" name="min_amount" step="1" min="0" required value="{{ product_form_defaults.min_amount|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-max-amount">Max Amount ({% currency_symbol %})</label>
+        <input id="product-max-amount" type="number" name="max_amount" step="1" min="0" required value="{{ product_form_defaults.max_amount|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-min-term">Min Term (Months)</label>
+        <input id="product-min-term" type="number" name="min_term_months" step="1" min="1" required value="{{ product_form_defaults.min_term_months|default:'' }}">
+      </div>
+      <div class="form-group">
+        <label for="product-max-term">Max Term (Months)</label>
+        <input id="product-max-term" type="number" name="max_term_months" step="1" min="1" required value="{{ product_form_defaults.max_term_months|default:'' }}">
+      </div>
+    </div>
+  </section>
+
+  <section class="product-form-section">
+    <h3>Eligibility &amp; availability</h3>
+    <div class="product-form-flags">
+      <label><input type="checkbox" name="requires_guarantor" {% if product_form_defaults.requires_guarantor %}checked{% endif %}> Requires guarantor</label>
+      <label><input type="checkbox" name="requires_collateral" {% if product_form_defaults.requires_collateral %}checked{% endif %}> Requires collateral</label>
+      <label><input type="checkbox" name="is_active" {% if product_form_defaults.is_active %}checked{% endif %}> Active</label>
+    </div>
+  </section>
+
+  <div class="product-form-actions">
+    {% if request.htmx %}
+      <button type="button" class="btn btn-secondary btn-sm" onclick="hideModal()">Cancel</button>
+    {% else %}
+      <a href="{% url 'loans:products' %}" class="btn btn-secondary btn-sm">Cancel</a>
+    {% endif %}
+    <button type="submit" class="btn btn-primary btn-sm">Save Product</button>
+  </div>
+</div>

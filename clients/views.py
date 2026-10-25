@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Client, NextOfKin
+from .models import Client, ClientDocument, NextOfKin
 from accounts.audit import log_action
 from accounts.models import AuditLog, Branch
 from accounts.branch_scope import (
@@ -17,6 +17,7 @@ from accounts.branch_scope import (
 )
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from common.phone_numbers import normalize_phone_number
 
 # Fields required to save a Client, used to validate POST data explicitly
 # instead of relying on KeyError from raw dict access.
@@ -24,6 +25,21 @@ REQUIRED_CLIENT_FIELDS = [
     "first_name", "last_name", "gender", "date_of_birth", "marital_status",
     "nin", "phone_primary", "physical_address", "employment_status",
 ]
+
+
+def _save_client_documents(client, files, document_type, uploaded_by):
+    valid_types = {value for value, _label in ClientDocument.DocumentType.choices}
+    if document_type not in valid_types:
+        document_type = ClientDocument.DocumentType.OTHER
+
+    for uploaded_file in files:
+        ClientDocument.objects.create(
+            client=client,
+            document_type=document_type,
+            file=uploaded_file,
+            description=uploaded_file.name[:255],
+            uploaded_by=uploaded_by,
+        )
 
 
 @login_required
@@ -171,8 +187,8 @@ def client_create(request):
             "date_of_birth":     d.get("date_of_birth", ""),
             "marital_status":    d.get("marital_status", ""),
             "nin":               d.get("nin", "").strip().upper(),
-            "phone_primary":     d.get("phone_primary", "").strip(),
-            "phone_secondary":   d.get("phone_secondary", "").strip(),
+            "phone_primary":     normalize_phone_number(d.get("phone_primary", "")),
+            "phone_secondary":   normalize_phone_number(d.get("phone_secondary", "")),
             "email":             d.get("email", "").strip(),
             "physical_address":  d.get("physical_address", "").strip(),
             "district":          d.get("district", "Kampala").strip(),
@@ -212,11 +228,13 @@ def client_create(request):
                       "marital_status", "nin", "phone_primary", "physical_address",
                       "employment_status")):
             messages.error(request, "Please fill in all required fields.")
-        elif not request.FILES.get("passport_photo"):
-            messages.error(request, "A passport photo is required to register a client.")
         else:
             try:
                 with transaction.atomic():
+                    passport_photo = (
+                        request.FILES.get("passport_photo")
+                        or request.FILES.get("passport_photo_camera")
+                    )
                     client = Client.objects.create(
                         first_name        = client_data["first_name"],
                         last_name         = client_data["last_name"],
@@ -238,13 +256,17 @@ def client_create(request):
                         notes             = client_data["notes"],
                         registered_by     = request.user,
                         branch            = client_branch,
+                        passport_photo    = passport_photo,
                     )
-                    if request.FILES.get("passport_photo"):
-                        client.passport_photo = request.FILES["passport_photo"]
-                        client.save()
+                    _save_client_documents(
+                        client,
+                        request.FILES.getlist("attachments"),
+                        d.get("attachment_type", ClientDocument.DocumentType.OTHER),
+                        request.user,
+                    )
                     # Optional next of kin
                     kin_name  = d.get("kin_name", "").strip()
-                    kin_phone = d.get("kin_phone", "").strip()
+                    kin_phone = normalize_phone_number(d.get("kin_phone", ""))
                     wants_guarantor = d.get("kin_is_guarantor") == "on"
                     if wants_guarantor and not (kin_name and kin_phone):
                         raise ValueError("A guarantor needs a name and phone number.")
@@ -254,7 +276,7 @@ def client_create(request):
                             full_name        = kin_name,
                             relationship     = d.get("kin_relationship", "").strip(),
                             phone_primary    = kin_phone,
-                            phone_secondary  = d.get("kin_phone2", "").strip(),
+                            phone_secondary  = normalize_phone_number(d.get("kin_phone2", "")),
                             physical_address = d.get("kin_address", "").strip(),
                             is_guarantor     = wants_guarantor,
                         )
@@ -286,6 +308,7 @@ def client_create(request):
         "gender_choices":     Client.Gender.choices,
         "marital_choices":    Client.MaritalStatus.choices,
         "employment_choices": Client.EmploymentStatus.choices,
+        "document_type_choices": ClientDocument.DocumentType.choices,
         "client":             client_data,
         "duplicates":        duplicates,
         "branches":          Branch.objects.filter(is_active=True).order_by("name"),
@@ -320,11 +343,12 @@ def client_edit(request, pk):
                 "gender_choices":     Client.Gender.choices,
                 "marital_choices":    Client.MaritalStatus.choices,
                 "employment_choices": Client.EmploymentStatus.choices,
+                "document_type_choices": ClientDocument.DocumentType.choices,
                 "branches":           Branch.objects.filter(is_active=True).order_by("name"),
             })
 
         new_nin   = d["nin"].strip().upper()
-        new_phone = d["phone_primary"].strip()
+        new_phone = normalize_phone_number(d["phone_primary"])
         duplicate_filter = Q(nin__iexact=new_nin)
         if new_phone:
             duplicate_filter |= Q(phone_primary=new_phone)
@@ -342,6 +366,7 @@ def client_edit(request, pk):
                 "gender_choices":     Client.Gender.choices,
                 "marital_choices":    Client.MaritalStatus.choices,
                 "employment_choices": Client.EmploymentStatus.choices,
+                "document_type_choices": ClientDocument.DocumentType.choices,
                 "branches":           Branch.objects.filter(is_active=True).order_by("name"),
             })
 
@@ -355,7 +380,7 @@ def client_edit(request, pk):
                 client.marital_status    = d["marital_status"]
                 client.nin               = new_nin
                 client.phone_primary     = new_phone
-                client.phone_secondary   = d.get("phone_secondary", "").strip()
+                client.phone_secondary   = normalize_phone_number(d.get("phone_secondary", ""))
                 client.email             = d.get("email", "").strip()
                 client.physical_address  = d["physical_address"].strip()
                 client.district          = d.get("district", "Kampala").strip()
@@ -365,8 +390,12 @@ def client_edit(request, pk):
                 client.job_title         = d.get("job_title", "").strip()
                 client.monthly_income    = d.get("monthly_income") or 0
                 client.notes             = d.get("notes", "").strip()
-                if request.FILES.get("passport_photo"):
-                    client.passport_photo = request.FILES["passport_photo"]
+                passport_photo = (
+                    request.FILES.get("passport_photo")
+                    or request.FILES.get("passport_photo_camera")
+                )
+                if passport_photo:
+                    client.passport_photo = passport_photo
                 # Users who can see across branches can also toggle blacklist and reassign branch
                 if request.user.can("can_view_all_branches"):
                     client.is_blacklisted    = d.get("is_blacklisted") == "on"
@@ -376,6 +405,12 @@ def client_edit(request, pk):
                     if new_branch_id:
                         client.branch = Branch.objects.filter(pk=new_branch_id, is_active=True).first() or client.branch
                 client.save()
+                _save_client_documents(
+                    client,
+                    request.FILES.getlist("attachments"),
+                    d.get("attachment_type", ClientDocument.DocumentType.OTHER),
+                    request.user,
+                )
                 log_action(request.user, AuditLog.Action.UPDATE, client, request=request,
                            changes={"name": client.full_name},
                            remarks=f"Client {client.full_name} updated")
@@ -397,5 +432,6 @@ def client_edit(request, pk):
         "gender_choices":     Client.Gender.choices,
         "marital_choices":    Client.MaritalStatus.choices,
         "employment_choices": Client.EmploymentStatus.choices,
+        "document_type_choices": ClientDocument.DocumentType.choices,
         "branches":           Branch.objects.filter(is_active=True).order_by("name"),
     })
