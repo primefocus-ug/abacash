@@ -13,13 +13,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, Sum
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import BankAccount, Branch, CompanySettings
+from accounts.signatures import selected_signatory
 from accounts.branch_scope import (
     SESSION_KEY,
     scope_to_branch,
@@ -1998,6 +1999,7 @@ def loan_schedule_print(request, pk):
         pk=pk,
     )
     schedule = loan.schedule.select_related("paid_by_payment").order_by("period_number")
+    signatories, chosen_signatory = selected_signatory(request, loan.branch_id)
     return render(request, "loans/schedule_print.html", {
         "loan": loan,
         "schedule": schedule,
@@ -2011,6 +2013,8 @@ def loan_schedule_print(request, pk):
         ).order_by("account_type", "bank_name"),
         "nominal_apr": loan.interest_rate_monthly * Decimal("12"),
         "total_cost_of_credit": loan.total_interest + loan.processing_fee,
+        "signatories": signatories,
+        "selected_signatory": chosen_signatory,
     })
 
 
@@ -2020,10 +2024,15 @@ def loan_schedule_download(request, pk):
     from django.http import HttpResponse
     from common.pdf_utils import generate_loan_schedule_pdf
 
-    loan = get_object_or_404(Loan, pk=pk)
-    pdf_bytes = generate_loan_schedule_pdf(loan)
+    loan = get_object_or_404(Loan.objects.select_related("branch"), pk=pk)
+    _, chosen_signatory = selected_signatory(request, loan.branch_id)
+    if chosen_signatory is None:
+        return HttpResponseBadRequest("Select a signatory before downloading the loan schedule.")
+    pdf_bytes = generate_loan_schedule_pdf(loan, signatory=chosen_signatory)
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="Schedule-{loan.loan_number}.pdf"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="Schedule-{loan.loan_number}-{chosen_signatory.pk}.pdf"'
+    )
     return response
 
 

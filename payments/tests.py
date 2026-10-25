@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.test import SimpleTestCase
 
 from accounts.templatetags.aba_filters import amount_in_words
+from payments.views import _receipt_document_basename
 
 
 class AmountInWordsTests(SimpleTestCase):
@@ -23,4 +24,22 @@ class AmountInWordsTests(SimpleTestCase):
         self.assertEqual(
             amount_in_words(Decimal("-5")),
             "minus five Uganda shillings only",
+        )
+
+
+class ReceiptDocumentNameTests(SimpleTestCase):
+    def test_filename_includes_company_client_and_tenant_slug(self):
+        self.assertEqual(
+            _receipt_document_basename(
+                "Acme Finance Ltd",
+                "Amina N. Kato",
+                "acme_finance",
+            ),
+            "acme-finance-ltd-amina-n-kato-acme-finance",
+        )
+
+    def test_filename_removes_path_characters(self):
+        self.assertEqual(
+            _receipt_document_basename("Acme/Finance", "Amina Kato", "acme"),
+            "acme-finance-amina-kato-acme",
         )

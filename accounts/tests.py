@@ -1,3 +1,4 @@
+from io import BytesIO
 import json
 from datetime import date
 from decimal import Decimal
@@ -5,8 +6,11 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import F
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
+from PIL import Image
 
 from .branch_scope import get_single_active_branch_id, resolve_branch_for_write
 from .cash import recent_cash_transactions
@@ -17,6 +21,7 @@ from .views import (
     _on_time_schedule_payment_filter,
     _unpaid_overdue_schedule_filter,
     _quick_form_saved,
+    _validated_signature_upload,
 )
 from tenants.provisioning import (
     DEFAULT_EXPENSE_CATEGORIES,
@@ -146,6 +151,39 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
         self.assertEqual(result["metrics"]["expenses"]["change_label"], "New")
         self.assertEqual(result["metrics"]["expenses"]["direction"], "negative")
         self.assertLess(result["score"], 50.0)
+
+
+class UserSignatureUploadTests(SimpleTestCase):
+    def test_accepts_a_valid_png_signature(self):
+        image_buffer = BytesIO()
+        Image.new("RGB", (1, 1), color="black").save(image_buffer, format="PNG")
+        upload = SimpleUploadedFile(
+            "signature.png",
+            image_buffer.getvalue(),
+            content_type="image/png",
+        )
+
+        self.assertEqual(_validated_signature_upload(upload).name, "signature.png")
+
+    def test_rejects_signature_larger_than_two_megabytes(self):
+        upload = SimpleUploadedFile(
+            "signature.png",
+            b"x" * (2 * 1024 * 1024 + 1),
+            content_type="image/png",
+        )
+
+        with self.assertRaisesMessage(ValueError, "2 MB or smaller"):
+            _validated_signature_upload(upload)
+
+    def test_rejects_non_image_signature_content(self):
+        upload = SimpleUploadedFile(
+            "signature.png",
+            b"not an image",
+            content_type="image/png",
+        )
+
+        with self.assertRaises(ValidationError):
+            _validated_signature_upload(upload)
 
 
 class QuickFormResponseTests(SimpleTestCase):

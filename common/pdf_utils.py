@@ -4,7 +4,7 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import Image, SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 
 
@@ -12,7 +12,19 @@ def _format_money(value):
     return f"UGX {value:,.0f}"
 
 
-def _make_receipt_story(receipt, guarantees, collateral_items):
+def _append_signatory(story, signatory, normal_style):
+    if not signatory or not signatory.signature:
+        return
+    with signatory.signature.open("rb") as uploaded_signature:
+        image_data = BytesIO(uploaded_signature.read())
+    story.extend([
+        Spacer(1, 10),
+        Paragraph(f"<b>Authorised signatory:</b> {signatory.full_name}", normal_style),
+        Image(image_data, width=45*mm, height=18*mm, kind="proportional"),
+    ])
+
+
+def _make_receipt_story(receipt, guarantees, collateral_items, signatory=None):
     styles = getSampleStyleSheet()
     normal = styles["Normal"]
     normal.spaceAfter = 6
@@ -83,6 +95,7 @@ def _make_receipt_story(receipt, guarantees, collateral_items):
     ]))
     story.append(Spacer(1, 10))
     story.append(summary_table)
+    _append_signatory(story, signatory, normal)
 
     if guarantees:
         story.append(Spacer(1, 12))
@@ -108,13 +121,14 @@ def render_pdf_response(request, template_name, context, filename="document.pdf"
     receipt = context.get("receipt")
     guarantees = context.get("guarantees", [])
     collateral_items = context.get("collateral_items", [])
+    signatory = context.get("selected_signatory")
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
     story = []
 
     if receipt is not None:
-        story = _make_receipt_story(receipt, guarantees, collateral_items)
+        story = _make_receipt_story(receipt, guarantees, collateral_items, signatory)
     else:
         story = [Paragraph("PDF generation is not configured for this document.", getSampleStyleSheet()["Normal"])]
 
@@ -127,7 +141,7 @@ def render_pdf_response(request, template_name, context, filename="document.pdf"
     return response
 
 
-def generate_loan_schedule_pdf(loan):
+def generate_loan_schedule_pdf(loan, signatory=None):
     """Generate PDF for a loan schedule."""
     from datetime import datetime
     from xml.sax.saxutils import escape
@@ -298,6 +312,7 @@ def generate_loan_schedule_pdf(loan):
         ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
     ]))
     story.append(table)
+    _append_signatory(story, signatory, normal)
 
     def draw_page_footer(canvas, document):
         canvas.saveState()

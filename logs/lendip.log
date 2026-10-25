@@ -17146,3 +17146,538 @@ django.template.exceptions.TemplateSyntaxError: Invalid filter: 'money'
 2026-10-25 05:12:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-10-25 05:12:16 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 263812
 2026-10-25 05:12:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:47:20 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 05:47:29 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-25 05:47:29 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195541
+2026-10-25 05:47:29 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-10-25 05:47:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:47:34 [INFO] django.server: "POST /accounts/branch-filter/ HTTP/1.1" 302 0
+2026-10-25 05:47:34 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 194546
+2026-10-25 05:47:36 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 192943
+2026-10-25 05:47:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:47:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:47:42 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 199451
+2026-10-25 05:47:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:48:53 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 195283
+2026-10-25 05:48:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:49:17 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 192943
+2026-10-25 05:49:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:49:21 [INFO] django.server: "GET /payments/receipt/551a56e9-f3c3-4a88-bc72-5327a8bbb95e/ HTTP/1.1" 200 208997
+2026-10-25 05:49:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:49:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 263812
+2026-10-25 05:49:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:01 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 199451
+2026-10-25 05:50:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:03 [INFO] django.server: "GET /clients/b76ba857-8284-4cd3-b77f-441029503795/ HTTP/1.1" 200 198127
+2026-10-25 05:50:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:10 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 205067
+2026-10-25 05:50:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:14 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 200537
+2026-10-25 05:50:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:26 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=iA1ja2Vnt8KeeTMNURQwx1IuIzoh6goQosePSXDgAyk7PJ3I7ahzrZrK271gDOsl&branch=1&product=1&principal=365000&term_months=6&frequency=MONTHLY&purpose= HTTP/1.1" 200 5065
+2026-10-25 05:50:31 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-10-25 05:50:31 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 200 263576
+2026-10-25 05:50:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:50:37 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 302 0
+2026-10-25 05:50:37 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/review/?draft_id=51be3d2d-ebf6-4d11-acf4-fd3f64e162d1 HTTP/1.1" 200 254182
+2026-10-25 05:50:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:52:39 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:52:39 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:52:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 263812
+2026-10-25 05:52:47 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:52:47 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:52:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:53:21 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:53:21 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:53:21 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:53:51 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:53:51 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:53:51 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:54:21 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:54:21 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:54:21 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:54:51 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:54:51 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:54:51 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:55:21 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:55:21 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:55:21 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:55:51 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:55:51 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:55:51 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:21 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 05:56:21 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:56:21 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:24 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 203502
+2026-10-25 05:56:24 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:56:24 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:56:27 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 192943
+2026-10-25 05:56:28 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:56:28 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:56:30 [INFO] django.server: "GET /payments/receipt/341a126e-5b40-4ee5-94f2-0b9cc3cff312/ HTTP/1.1" 200 208936
+2026-10-25 05:56:30 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:56:30 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 05:56:32 [INFO] django.server: "GET /payments/receipt/341a126e-5b40-4ee5-94f2-0b9cc3cff312/?style=classic HTTP/1.1" 200 203956
+2026-10-25 05:56:33 [WARNING] django.request: Not Found: /.well-known/appspecific/com.chrome.devtools.json
+2026-10-25 05:56:33 [WARNING] django.server: "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 3866
+2026-10-25 05:56:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:03:41 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:06:03 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 263812
+2026-10-25 06:06:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:06:34 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 06:06:50 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:06:53 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:06:56 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:06:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:07:05 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 06:07:24 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:07:25 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:07:34 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-10-25&date_to=2026-10-25&branch= HTTP/1.1" 200 6908
+2026-10-25 06:07:55 [INFO] django.server: "GET /accounts/dashboard/?period=week&date_from=&date_to=&branch= HTTP/1.1" 200 7751
+2026-10-25 06:07:57 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 9629
+2026-10-25 06:08:10 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 7323
+2026-10-25 06:08:15 [INFO] django.server: - Broken pipe from ('127.0.0.1', 59524)
+2026-10-25 06:08:16 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 7936
+2026-10-25 06:08:17 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 7323
+2026-10-25 06:08:20 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 7936
+2026-10-25 06:08:22 [INFO] django.server: "GET /accounts/dashboard/?period=12&date_from=&date_to=&branch= HTTP/1.1" 200 8510
+2026-10-25 06:09:15 [INFO] django.server: "GET /accounts/dashboard/?period=week&date_from=&date_to=&branch= HTTP/1.1" 200 7751
+2026-10-25 06:09:20 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 9629
+2026-10-25 06:09:22 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 7323
+2026-10-25 06:09:23 [INFO] django.server: "GET /accounts/dashboard/?period=week&date_from=&date_to=&branch= HTTP/1.1" 200 7751
+2026-10-25 06:09:25 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 9629
+2026-10-25 06:09:29 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 7323
+2026-10-25 06:09:42 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=2026-10-15&date_to=2026-10-21&branch= HTTP/1.1" 200 2619
+2026-10-25 06:10:15 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=2026-10-15&date_to=2026-10-21&branch= HTTP/1.1" 200 2619
+2026-10-25 06:10:24 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 211259
+2026-10-25 06:10:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:11:08 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 199451
+2026-10-25 06:11:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:11:13 [INFO] django.server: "GET /clients/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 196246
+2026-10-25 06:11:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:11:18 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 216594
+2026-10-25 06:11:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:12:17 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 203502
+2026-10-25 06:12:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:12:22 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 216594
+2026-10-25 06:12:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:12:25 [INFO] django.server: "GET /payments/record/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 200472
+2026-10-25 06:12:31 [INFO] django.server: "POST /payments/record/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 204 0
+2026-10-25 06:12:31 [INFO] django.server: "GET /payments/receipt/156723af-0d5a-4045-a902-f6cf446d8fa3/ HTTP/1.1" 200 204824
+2026-10-25 06:12:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:12:34 [INFO] django.server: "GET /payments/receipt/156723af-0d5a-4045-a902-f6cf446d8fa3/?style=modern HTTP/1.1" 200 209123
+2026-10-25 06:12:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:14:15 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 189467
+2026-10-25 06:14:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:14:17 [INFO] django.server: "GET /accounts/admin-panel/users/2/edit/ HTTP/1.1" 200 200482
+2026-10-25 06:14:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:17:34 [INFO] django.server: "GET /accounts/admin-panel/users/2/edit/ HTTP/1.1" 200 200482
+2026-10-25 06:17:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:19:23 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 194546
+2026-10-25 06:19:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:19:28 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 201879
+2026-10-25 06:19:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:19:32 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 189467
+2026-10-25 06:19:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:19:34 [INFO] django.server: "GET /accounts/admin-panel/users/2/edit/ HTTP/1.1" 200 200482
+2026-10-25 06:19:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:19:46 [INFO] django.server: "GET /accounts/admin-panel/users/2/edit/ HTTP/1.1" 200 200482
+2026-10-25 06:19:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:20:39 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 263808
+2026-10-25 06:20:40 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\models.py changed, reloading.
+2026-10-25 06:20:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:20:53 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\views.py changed, reloading.
+2026-10-25 06:20:55 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:21:27 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:21:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:21:46 [INFO] django.utils.autoreload: C:\Users\USER\abacash\common\pdf_utils.py changed, reloading.
+2026-10-25 06:21:50 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:22:05 [ERROR] django.request: Internal Server Error: /accounts/dashboard/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 216, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+2026-10-25 06:22:05 [ERROR] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 500 29580
+2026-10-25 06:22:05 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:22:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:22:16 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:22:18 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:24:02 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-10-25 06:24:04 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:24:59 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\views.py changed, reloading.
+2026-10-25 06:25:00 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:25:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\views.py changed, reloading.
+2026-10-25 06:25:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-10-25 06:35:34 [ERROR] django.request: Internal Server Error: /clients/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 216, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+2026-10-25 06:35:34 [ERROR] django.server: "GET /clients/ HTTP/1.1" 500 171809
+2026-10-25 06:35:36 [ERROR] django.request: Internal Server Error: /sw.js
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 216, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+2026-10-25 06:35:36 [ERROR] django.server: "GET /sw.js HTTP/1.1" 500 171114
+2026-10-25 06:36:18 [ERROR] django.request: Internal Server Error: /clients/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 216, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+2026-10-25 06:36:18 [ERROR] django.server: "GET /clients/ HTTP/1.1" 500 171946
+2026-10-25 06:36:19 [ERROR] django.request: Internal Server Error: /sw.js
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\auditlog\middleware.py", line 35, in __call__
+    if hasattr(request, "user") and request.user.is_authenticated:
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 33, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\middleware.py", line 13, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\__init__.py", line 216, in get_user
+    user = backend.get_user(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\backends.py", line 157, in get_user
+    user = UserModel._default_manager.get(pk=user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column accounts_user.signature does not exist
+LINE 1: ...counts_user"."is_staff", "accounts_user"."phone", "accounts_...
+                                                             ^
+
+2026-10-25 06:36:19 [ERROR] django.server: "GET /sw.js HTTP/1.1" 500 171114
+2026-10-25 06:36:58 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 199451
+2026-10-25 06:37:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:37:20 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 199451
+2026-10-25 06:37:21 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-10-25 06:37:22 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 189467
+2026-10-25 06:37:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:37:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:37:26 [INFO] django.server: "GET /accounts/admin-panel/users/2/edit/ HTTP/1.1" 200 201160
+2026-10-25 06:37:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-10-25 06:37:52 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 203502
+2026-10-25 06:37:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

@@ -7,25 +7,47 @@ Payment recording and receipt generation for ABA Uganda.
 from decimal import Decimal
 from datetime import date
 import logging
+import re
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.db import connection, transaction
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 from loans.models import Loan, LoanSchedule
-from accounts.models import AuditLog, Branch
+from accounts.models import AuditLog, Branch, CompanySettings
 from accounts.audit import log_action
 from accounts.branch_scope import scope_to_branch, can_access_branch_object, scope_to_branch_request
+from accounts.signatures import selected_signatory
 from common.pdf_utils import render_pdf_response
 from clients.models import CreditTransaction
 from .models import Payment, Receipt, TRANSFER_REF_PREFIX
 
 logger = logging.getLogger("payments")
+
+
+def _receipt_document_basename(company_name, client_name, tenant_slug):
+    parts = []
+    for value in (company_name, client_name, tenant_slug):
+        normalized = re.sub(r"[\W_]+", "-", value, flags=re.UNICODE) if value else ""
+        slug = slugify(normalized)
+        if slug:
+            parts.append(slug)
+    return "-".join(parts) or "receipt"
+
+
+def _receipt_document_title(request, client_name):
+    company_name = CompanySettings.get().company_name or "Company"
+    tenant = getattr(request, "tenant", None)
+    tenant_slug = getattr(tenant, "schema_name", "") or getattr(connection, "schema_name", "")
+    basename = _receipt_document_basename(company_name, client_name, tenant_slug)
+    title = " - ".join(part for part in (company_name, client_name, tenant_slug) if part)
+    return title, basename
 
 
 @login_required
@@ -392,9 +414,16 @@ def record_payment(request, loan_pk=None):
                             },
                         )
                     # Render combined receipts for printing/viewing
+                    signatories, _ = selected_signatory(request)
+                    document_title, _ = _receipt_document_title(
+                        request, receipt.payment.client.full_name,
+                    )
                     return render(request, "payments/combined_receipt.html", {
                         "receipts": [transfer_receipt, receipt],
-                        "auto_print": True,
+                        "auto_print": False,
+                        "receipt_document_title": document_title,
+                        "signatories": signatories,
+                        "selected_signatory": None,
                     })
             except Exception:
                 # If something goes wrong rendering combined receipts, fall back to single receipt redirect
@@ -479,6 +508,7 @@ def receipt_view(request, pk):
         return redirect("payments:list")
     guarantees = loan.guarantees.select_related('guarantor').all()
     collateral_items = loan.collateral_items.all()
+    signatories, chosen_signatory = selected_signatory(request, loan.branch_id)
 
     # Receipt design: classic (letterhead + line-item table) or modern
     # (G-Loan style card, now the default). Resolution order:
@@ -510,9 +540,17 @@ def receipt_view(request, pk):
         "collateral_items": collateral_items,
         "receipt_style": receipt_style,
         "receipt_style_options": VALID_RECEIPT_STYLES,
+        "signatories": signatories,
+        "selected_signatory": chosen_signatory,
     }
+    document_title, document_basename = _receipt_document_title(
+        request, receipt.payment.client.full_name,
+    )
+    context["receipt_document_title"] = document_title
     if request.GET.get("format") == "pdf":
-        filename = f"Receipt-{receipt.receipt_number}.pdf"
+        if chosen_signatory is None:
+            return HttpResponseBadRequest("Select a signatory before downloading the receipt.")
+        filename = f"{document_basename}.pdf"
         return render_pdf_response(request, "payments/receipt.html", context, filename=filename)
     return render(request, "payments/receipt.html", context)
 
@@ -539,9 +577,13 @@ def combined_receipt_view(request, transfer_pk, payment_pk):
     ):
         messages.error(request, "Those receipts cannot be viewed together.")
         return redirect("payments:list")
+    signatories, chosen_signatory = selected_signatory(request)
     return render(request, "payments/combined_receipt.html", {
         "receipts": [transfer_receipt, payment_receipt],
-        "auto_print": True,
+        "auto_print": chosen_signatory is not None,
+        "receipt_document_title": document_title,
+        "signatories": signatories,
+        "selected_signatory": chosen_signatory,
     })
 
 

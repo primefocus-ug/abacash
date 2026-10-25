@@ -162,6 +162,12 @@ class User(PhoneNumberNormalizationMixin, AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text=_("Staff contact number, e.g. +256700123456"),
     )
+    signature = models.ImageField(
+        upload_to="user_signatures/",
+        blank=True,
+        null=True,
+        help_text=_("Signature image used when this staff member is selected on printed documents."),
+    )
 
     branch = models.ForeignKey(
         "accounts.Branch",

@@ -299,8 +299,24 @@
 <div class="print-bar">
   <span class="print-bar-title">{{ company.name }} — Repayment Schedule — {{ loan.loan_number }}</span>
   <div class="print-bar-actions">
+    <form method="get" class="print-hide" style="display:flex;gap:6px;align-items:center;">
+      <label for="schedule-signatory" style="color:#fff;font-size:12px;">Signatory</label>
+      <select id="schedule-signatory" name="signatory" required onchange="this.form.requestSubmit()">
+        <option value="">Choose signatory</option>
+        {% for signer in signatories %}
+        <option value="{{ signer.pk }}" {% if selected_signatory.pk == signer.pk %}selected{% endif %}>{{ signer.full_name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% if not signatories %}
+    <span class="print-hide" style="color:#ffd7a8;font-size:11px;">No staff signatures uploaded</span>
+    {% endif %}
+    <a class="btn-print print-hide {% if not selected_signatory %}disabled{% endif %}"
+       {% if selected_signatory %}href="{% url 'loans:schedule_download' loan.pk %}?signatory={{ selected_signatory.pk }}"{% else %}aria-disabled="true" title="Choose a signatory first"{% endif %}>
+      Download PDF
+    </a>
     <button class="btn-close-tab" onclick="window.close()">✕ Close</button>
-    <button class="btn-print" onclick="window.print()">
+    <button class="btn-print" onclick="printSchedule()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Print / Save PDF
     </button>
@@ -512,7 +528,7 @@
   <div class="doc-footer">
     <div>
       <div style="font-size:11px;color:#516a7f;">Prepared by: {{ request.user.full_name }}</div>
-      <div style="font-size:10px;color:#8a9bac;margin-top:3px;">This document is computer-generated and valid without a signature.</div>
+      <div style="font-size:10px;color:#8a9bac;margin-top:3px;">The authorised officer's signature is shown alongside this schedule.</div>
     </div>
     <div style="display:flex;gap:48px;">
       <div class="signature-block">
@@ -520,8 +536,11 @@
         <div class="signature-label">Client Signature</div>
       </div>
       <div class="signature-block">
+        {% if selected_signatory %}
+        <img src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}" style="display:block;max-width:160px;max-height:48px;object-fit:contain;margin:0 auto 4px;">
+        {% endif %}
         <div class="signature-line"></div>
-        <div class="signature-label">Authorised Officer</div>
+        <div class="signature-label">{% if selected_signatory %}{{ selected_signatory.full_name }} · {% endif %}Authorised Officer</div>
       </div>
     </div>
   </div>
@@ -529,9 +548,17 @@
 </div><!-- /.doc-wrapper -->
 
 <script>
+  function printSchedule() {
+    {% if selected_signatory %}
+    window.print();
+    {% else %}
+    window.alert('Choose an authorised signatory before printing this schedule.');
+    {% endif %}
+  }
+
   // Auto-trigger print if ?print=1 is in URL
   if (new URLSearchParams(window.location.search).get('print') === '1') {
-    window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+    window.addEventListener('load', () => setTimeout(printSchedule, 400));
   }
 </script>
 </body>

@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<form method="post" style="max-width:80%;">
+<form method="post" enctype="multipart/form-data" style="max-width:80%;">
   {% csrf_token %}
 
   <div class="card mb-3">
@@ -42,6 +42,27 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header"><span class="card-title">Document Signature</span></div>
+    <div class="card-body">
+      <p class="text-sm text-muted">Upload this staff member's signature. Authorized signatories can then be selected on receipt and loan schedule printouts.</p>
+      {% if staff.signature %}
+      <div style="margin:0 0 12px;">
+        <img src="{{ staff.signature.url }}" alt="Current signature for {{ staff.full_name }}" style="display:block;max-width:240px;max-height:100px;object-fit:contain;border:1px solid var(--border);border-radius:6px;padding:8px;background:#fff;">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <input type="checkbox" name="remove_signature" style="width:auto;">
+        <span>Remove current signature</span>
+      </label>
+      {% endif %}
+      <div class="form-group">
+        <label for="signature">Signature image</label>
+        <input type="file" name="signature" id="signature" accept="image/png,image/jpeg,image/webp">
+        <div class="form-hint">PNG, JPEG, or WebP image, up to 2 MB. Leave blank to keep the current signature.</div>
+      </div>
     </div>
   </div>
 

@@ -1,23 +1,39 @@
 {% extends "base.html" %}
 {% load humanize aba_filters %}
 
-{% block title %}Receipt {{ receipt.receipt_number }}{% endblock %}
+{% block title %}{{ receipt_document_title|default:receipt.receipt_number }}{% endblock %}
 {% block page_title %}Receipt{% endblock %}
 
 {% block topbar_actions %}
   <div class="rcpt-style-toggle print-hide" style="display:inline-flex;align-items:center;gap:2px;background:var(--surface-3,#EEF2F7);border-radius:999px;padding:3px;margin-right:8px;">
-    <a href="?style=classic"
+    <a href="?style=classic{% if selected_signatory %}&amp;signatory={{ selected_signatory.pk }}{% endif %}"
        class="btn btn-sm"
        style="border-radius:999px;padding:5px 14px;font-size:12px;{% if receipt_style == 'modern' %}background:transparent;color:var(--text-secondary,#475569);{% else %}background:var(--surface,#fff);color:var(--text-primary,#0F172A);box-shadow:0 1px 2px rgba(0,0,0,.08);{% endif %}">
       Classic
     </a>
-    <a href="?style=modern"
+    <a href="?style=modern{% if selected_signatory %}&amp;signatory={{ selected_signatory.pk }}{% endif %}"
        class="btn btn-sm"
        style="border-radius:999px;padding:5px 14px;font-size:12px;{% if receipt_style == 'modern' %}background:var(--surface,#fff);color:var(--text-primary,#0F172A);box-shadow:0 1px 2px rgba(0,0,0,.08);{% else %}background:transparent;color:var(--text-secondary,#475569);{% endif %}">
       Modern
     </a>
   </div>
-  <button onclick="window.print()" class="btn btn-primary btn-sm">Print Receipt</button>
+  <form method="get" class="print-hide" style="display:inline-flex;align-items:center;gap:6px;margin-right:8px;">
+    <input type="hidden" name="style" value="{{ receipt_style }}">
+    <label for="receipt-signatory" class="sr-only">Receipt signatory</label>
+    <select id="receipt-signatory" name="signatory" required onchange="this.form.requestSubmit()"
+            style="max-width:190px;padding:6px 8px;">
+      <option value="">Choose signatory</option>
+      {% for signer in signatories %}
+      <option value="{{ signer.pk }}" {% if selected_signatory.pk == signer.pk %}selected{% endif %}>{{ signer.full_name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% if not signatories %}<span class="print-hide text-sm text-muted">No staff signatures uploaded</span>{% endif %}
+  <a class="btn btn-secondary btn-sm print-hide {% if not selected_signatory %}disabled{% endif %}"
+     {% if selected_signatory %}href="?format=pdf&amp;style={{ receipt_style }}&amp;signatory={{ selected_signatory.pk }}"{% else %}aria-disabled="true" title="Choose a signatory first"{% endif %}>
+    Download PDF
+  </a>
+  <button onclick="printReceipt()" class="btn btn-primary btn-sm">Print Receipt</button>
   <a href="{% url 'loans:detail' receipt.payment.loan.pk %}" class="btn btn-secondary btn-sm">Back to Loan</a>
 {% endblock %}
 
@@ -182,6 +198,7 @@
     padding-top: 6px;
     border-top: 1px solid #0F172A;
   }
+  .rcpt-signature-image { display:block;max-width:150px;max-height:42px;object-fit:contain;margin:0 auto 3px; }
 
   .rcpt-footer {
     margin-top: 26px;
@@ -383,6 +400,7 @@
     color: var(--rcpt2-muted) !important;
     padding-top: 6px; border-top: 1px solid var(--rcpt2-navy);
   }
+  .rcpt2-signature-image { display:block;max-width:150px;max-height:42px;object-fit:contain;margin:0 auto 3px; }
 
   .rcpt2-footerbar {
     background: #f8f9fb; border-top: 1px solid var(--rcpt2-line);
@@ -512,12 +530,6 @@
           <div class="rcpt2-chip-value">{{ receipt.payment.loan.principal_amount|money }}</div>
         </div>
         {% endif %}
-        {% if receipt.payment.loan.interest_rate %}
-        <div class="rcpt2-chip">
-          <div class="rcpt2-chip-label">Interest Rate</div>
-          <div class="rcpt2-chip-value">{{ receipt.payment.loan.interest_rate }}</div>
-        </div>
-        {% endif %}
         {% if receipt.payment.loan.disbursement_date %}
         <div class="rcpt2-chip">
           <div class="rcpt2-chip-label">Disbursement Date</div>
@@ -615,7 +627,13 @@
 
     <div class="rcpt2-sign">
       <div class="rcpt2-sign-box">Customer Signature</div>
-      <div class="rcpt2-sign-box">Authorized Signatory</div>
+      <div class="rcpt2-sign-box">
+        {% if selected_signatory %}
+        <img class="rcpt2-signature-image" src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}">
+        {{ selected_signatory.full_name }}<br>
+        {% else %}Select signatory to print{% endif %}
+        Authorized Signatory
+      </div>
     </div>
 
   </div>
@@ -756,7 +774,13 @@
 
   <div class="rcpt-sign">
     <div class="rcpt-sign-box">Customer Signature</div>
-    <div class="rcpt-sign-box">Authorized Signatory</div>
+    <div class="rcpt-sign-box">
+      {% if selected_signatory %}
+      <img class="rcpt-signature-image" src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}">
+      {{ selected_signatory.full_name }}<br>
+      {% else %}Select signatory to print{% endif %}
+      Authorized Signatory
+    </div>
   </div>
 
   <div class="rcpt-footer">
@@ -768,4 +792,26 @@
 
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  (function () {
+    const receiptTitle = "{{ receipt_document_title|default:receipt.receipt_number|escapejs }}";
+    const hasSignatory = {{ selected_signatory|yesno:"true,false" }};
+    document.title = receiptTitle;
+    window.printReceipt = function () {
+      if (!hasSignatory) {
+        window.alert('Choose an authorized signatory before printing this receipt.');
+        return;
+      }
+      document.title = receiptTitle;
+      window.print();
+    };
+    window.addEventListener('beforeprint', function () {
+      document.title = receiptTitle;
+    });
+  })();
+</script>
 {% endblock %}

@@ -1,12 +1,15 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from io import BytesIO
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 from unittest.mock import patch
 
 from accounts.models import CompanySettings
@@ -298,9 +301,15 @@ class SchedulePdfGenerationTests(SimpleTestCase):
             collateral_items=_RelatedList([collateral]),
             schedule=_RelatedList([schedule_row]),
         )
+        signature_buffer = BytesIO()
+        Image.new("RGB", (1, 1), color="black").save(signature_buffer, format="PNG")
+        signatory = SimpleNamespace(
+            full_name="Test Signatory",
+            signature=ContentFile(signature_buffer.getvalue(), name="signature.png"),
+        )
 
         with patch("accounts.models.BankAccount.objects.filter", return_value=_RelatedList()):
-            pdf = generate_loan_schedule_pdf(loan)
+            pdf = generate_loan_schedule_pdf(loan, signatory=signatory)
 
         self.assertTrue(pdf.startswith(b"%PDF"))
 

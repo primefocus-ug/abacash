@@ -13,6 +13,7 @@ from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
+from django.forms import ImageField
 from django.db.models import F, Q, Sum, Count
 from django.db.models.functions import TruncDay, TruncMonth
 from django.shortcuts import render, redirect, get_object_or_404
@@ -49,6 +50,14 @@ def _quick_form_saved(request):
             headers={"HX-Trigger": '{"quickFormSaved": null, "quickFormNotice": {"message": "Saved successfully."}}'},
         )
     return None
+
+
+def _validated_signature_upload(upload):
+    if not upload:
+        return None
+    if upload.size > 2 * 1024 * 1024:
+        raise ValueError("Signature images must be 2 MB or smaller.")
+    return ImageField().clean(upload)
 
 
 def _permission_required(codename):
@@ -1025,6 +1034,7 @@ def user_create(request):
                 raise ValueError("Email already registered.")
             if d["password1"] != d["password2"]:
                 raise ValueError("Passwords do not match.")
+            signature = _validated_signature_upload(request.FILES.get("signature"))
             user = User.objects.create(
                 username   = d["username"].strip(),
                 first_name = d["first_name"].strip(),
@@ -1035,6 +1045,7 @@ def user_create(request):
                 branch_id  = d.get("branch") or get_single_active_branch_id(),
                 commission_rate = d.get("commission_rate", "0.00"),
                 is_active  = True,
+                signature = signature,
                 password   = make_password(d["password1"]),
             )
             log_action(request.user, AuditLog.Action.CREATE, user, request=request,
@@ -1080,6 +1091,14 @@ def user_edit(request, pk):
             staff.branch_id  = d.get("branch") or None
             staff.commission_rate = d.get("commission_rate", "0.00")
             staff.is_active  = d.get("is_active") == "on"
+            signature = _validated_signature_upload(request.FILES.get("signature"))
+            old_signature_name = None
+            if signature:
+                old_signature_name = staff.signature.name if staff.signature else None
+                staff.signature = signature
+            elif d.get("remove_signature") == "on" and staff.signature:
+                old_signature_name = staff.signature.name
+                staff.signature = None
             # Only change password if provided
             if d.get("password1"):
                 if d["password1"] != d["password2"]:
@@ -1119,6 +1138,8 @@ def user_edit(request, pk):
             log_action(request.user, AuditLog.Action.UPDATE, staff, request=request,
                        changes={"role": staff.role, "is_active": staff.is_active},
                        remarks=f"User {staff.full_name} updated")
+            if old_signature_name:
+                staff._meta.get_field("signature").storage.delete(old_signature_name)
             messages.success(request, f"User {staff.full_name} updated.")
             return redirect("accounts:user_list")
         except Exception as e:

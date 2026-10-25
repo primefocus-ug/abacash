@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load humanize aba_filters %}
 
-{% block title %}Combined Receipts{% endblock %}
+{% block title %}{{ receipt_document_title|default:"Combined Receipts" }}{% endblock %}
 {% block page_title %}Receipts - Print{% endblock %}
 
 {% block content %}
@@ -9,7 +9,17 @@
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <h3 style="margin:0;">Receipts</h3>
     <div>
-      <button onclick="window.print()" class="btn btn-primary">Print</button>
+      <form method="get" class="print-hide" style="display:inline-flex;gap:8px;align-items:center;">
+        <label for="combined-signatory" class="sr-only">Receipt signatory</label>
+        <select id="combined-signatory" name="signatory" required onchange="this.form.requestSubmit()">
+          <option value="">Choose signatory</option>
+          {% for signer in signatories %}
+          <option value="{{ signer.pk }}" {% if selected_signatory.pk == signer.pk %}selected{% endif %}>{{ signer.full_name }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      {% if not signatories %}<span class="print-hide text-sm text-muted">No staff signatures uploaded</span>{% endif %}
+      <button onclick="printReceipt()" class="btn btn-primary">Print</button>
       <a href="{% url 'payments:list' %}" class="btn btn-secondary">Done</a>
     </div>
   </div>
@@ -33,6 +43,13 @@
       <div><strong>Balance before:</strong> {{ r.balance_before|money }}</div>
       <div><strong>Balance after:</strong> {{ r.balance_after|money }}</div>
       <div style="margin-top:8px;color:var(--text-muted);font-size:13px;"><strong>Issued at:</strong> {{ r.issued_at }}</div>
+      <div style="margin-top:24px;min-height:70px;width:260px;border-top:1px solid #334155;text-align:center;padding-top:5px;">
+        {% if selected_signatory %}
+        <img src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}" style="display:block;max-width:150px;max-height:42px;object-fit:contain;margin:-48px auto 3px;">
+        <strong>{{ selected_signatory.full_name }}</strong><br>
+        {% else %}Choose a signatory before printing<br>{% endif %}
+        Authorized Signatory
+      </div>
     </div>
   </div>
   {% endfor %}
@@ -45,9 +62,31 @@
 {% if auto_print %}
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    try { window.print(); } catch(e) {}
+    printReceipt();
   });
 </script>
 {% endif %}
 
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+  (function () {
+    const receiptTitle = "{{ receipt_document_title|default:'Combined Receipts'|escapejs }}";
+    const hasSignatory = {{ selected_signatory|yesno:"true,false" }};
+    document.title = receiptTitle;
+    window.printReceipt = function () {
+      if (!hasSignatory) {
+        window.alert('Choose an authorized signatory before printing these receipts.');
+        return;
+      }
+      document.title = receiptTitle;
+      window.print();
+    };
+    window.addEventListener('beforeprint', function () {
+      document.title = receiptTitle;
+    });
+  })();
+</script>
 {% endblock %}
