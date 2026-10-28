@@ -84,6 +84,7 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
             "overdue_recoveries": Decimal("100"),
             "overdue_balance": Decimal("100"),
             "on_time_rate": 80.0,
+            "paid_schedule_count": 10,
         }
         metrics.update(overrides)
         return metrics
@@ -108,8 +109,10 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
         self.assertEqual(result["metrics"]["disbursements"]["direction"], "negative")
         self.assertEqual(result["metrics"]["overdue_recoveries"]["change_label"], "+100.0%")
         self.assertEqual(result["metrics"]["overdue_balance"]["direction"], "negative")
-        self.assertEqual(result["score"], 58.3)
+        self.assertEqual(result["metrics"]["on_time_rate"]["change_label"], "+10.0 pp")
+        self.assertEqual(result["score"], 64.3)
         self.assertTrue(result["recommendations"])
+        self.assertFalse(result["metrics"]["disbursements"]["contributes_to_score"])
 
     def test_unchanged_empty_periods_have_neutral_score(self):
         empty_period = self._period(**{
@@ -119,14 +122,15 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
             )
         })
         empty_period["on_time_rate"] = 0.0
+        empty_period["paid_schedule_count"] = 0
 
         result = _build_dashboard_performance(empty_period, empty_period)
 
         self.assertEqual(result["score"], 50.0)
-        self.assertTrue(all(
-            metric["change_label"] == "0.0%"
-            for metric in result["metrics"].values()
-        ))
+        self.assertEqual(
+            result["metrics"]["on_time_rate"]["change_label"],
+            "No observations",
+        )
 
     def test_new_activity_is_labeled_and_expense_growth_is_unfavorable(self):
         current = self._period(
@@ -151,6 +155,42 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
         self.assertEqual(result["metrics"]["expenses"]["change_label"], "New")
         self.assertEqual(result["metrics"]["expenses"]["direction"], "negative")
         self.assertLess(result["score"], 50.0)
+
+    def test_growth_and_funding_metrics_do_not_raise_the_score(self):
+        baseline = self._period()
+        current = self._period(
+            loan_charges=Decimal("1000"),
+            disbursements=Decimal("1000"),
+            expenses=Decimal("0"),
+            injections=Decimal("1000"),
+            overdue_recoveries=Decimal("1000"),
+        )
+
+        result = _build_dashboard_performance(current, baseline)
+
+        self.assertEqual(result["score"], 63.5)
+        for key in ("loan_charges", "disbursements", "expenses", "injections", "overdue_recoveries"):
+            self.assertFalse(result["metrics"][key]["contributes_to_score"])
+
+    def test_new_interest_without_comparison_baseline_is_neutral(self):
+        current = self._period(interest_income=Decimal("100"))
+        previous = self._period(interest_income=Decimal("0"))
+
+        result = _build_dashboard_performance(current, previous)
+
+        self.assertEqual(result["metrics"]["interest_income"]["change_label"], "New")
+        self.assertEqual(result["score"], 63.5)
+
+    def test_unpaid_overdue_balance_increase_reduces_score(self):
+        current = self._period(overdue_balance=Decimal("200"))
+        previous = self._period(overdue_balance=Decimal("100"))
+
+        result = _build_dashboard_performance(current, previous)
+
+        self.assertEqual(result["score"], 46.0)
+        self.assertIn("Unpaid overdue balance moved against the prior period", [
+            item["title"] for item in result["recommendations"]
+        ])
 
 
 class UserSignatureUploadTests(SimpleTestCase):

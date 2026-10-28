@@ -1000,7 +1000,7 @@
     });
     const performance = data.performance;
     const score = document.querySelector('[data-performance-score]');
-    const scoreText = Number(performance.score || 0).toFixed(0) + '%';
+    const scoreText = Number(performance.score || 0).toFixed(0) + ' / 100';
     if (score) score.textContent = scoreText;
     const scoreCopy = document.querySelector('[data-performance-score-copy]');
     if (scoreCopy) scoreCopy.textContent = scoreText;
@@ -1017,11 +1017,17 @@
       }
       const values = document.querySelector('[data-performance-values="' + key + '"]');
       if (values) {
-        const formatValue = key === 'on_time_rate'
-          ? value => Number(value || 0).toFixed(1) + '%'
-          : formatMoney;
-        values.textContent = formatValue(metric.current) + ' current · ' +
-          formatValue(metric.previous) + ' previous';
+        if (key === 'on_time_rate') {
+          values.textContent = metric.observed
+            ? Number(metric.current || 0).toFixed(1) + '% current (' +
+              Number(metric.current_count || 0) + ' fully paid) · ' +
+              Number(metric.previous || 0).toFixed(1) + '% previous (' +
+              Number(metric.previous_count || 0) + ' fully paid)'
+            : 'No fully paid instalments in this period';
+        } else {
+          values.textContent = formatMoney(metric.current) + ' current · ' +
+            formatMoney(metric.previous) + ' previous';
+        }
       }
     });
     const recommendations = document.getElementById('performance-recommendations');

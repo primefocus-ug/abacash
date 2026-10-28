@@ -1,9 +1,11 @@
 """clients/views.py — Client registration, list, detail, and edit."""
 
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Client, ClientDocument, NextOfKin
@@ -18,6 +20,7 @@ from accounts.branch_scope import (
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from common.phone_numbers import normalize_phone_number
+from payments.models import Payment
 
 # Fields required to save a Client, used to validate POST data explicitly
 # instead of relying on KeyError from raw dict access.
@@ -135,11 +138,17 @@ def client_detail(request, pk):
     loans  = client.loans.select_related("product").order_by("-application_date")
     kin    = client.next_of_kin.all()
     docs   = client.documents.all()
+    interest_earned = (
+        Payment.objects.filter(client=client, status=Payment.Status.ALLOCATED)
+        .aggregate(total=Sum("interest_paid"))["total"]
+        or Decimal("0")
+    )
     return render(request, "clients/client_detail.html", {
         "client": client,
         "loans":  loans,
         "kin":    kin,
         "docs":   docs,
+        "interest_earned": interest_earned,
     })
 
 

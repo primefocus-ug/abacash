@@ -8,7 +8,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
   @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 14mm 12mm;
     @bottom-right {
       content: "Page " counter(page) " of " counter(pages);
@@ -101,7 +101,7 @@
   /* ── Summary metrics ── */
   .metrics {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0;
     border: 1px solid #c9d6e0;
     border-radius: 8px;
@@ -283,6 +283,18 @@
     .print-bar { display: none !important; }
     .doc-wrapper { padding-top: 0 !important; }
     body { padding: 0; max-width: none; }
+    table { table-layout: fixed; font-size: 8px; }
+    thead th, td { padding: 4px 3px; white-space: normal; overflow-wrap: anywhere; }
+    thead th { font-size: 7px; letter-spacing: 0; }
+    td:not(:first-child):not(:nth-child(2)) { font-size: 7px; }
+    td:nth-child(1) { width: 4%; }
+    td:nth-child(2) { width: 8%; }
+    td:nth-child(3), td:nth-child(4), td:nth-child(5), td:nth-child(7),
+    td:nth-child(8), td:nth-child(11) { width: 9%; }
+    td:nth-child(6) { width: 7%; }
+    td:nth-child(9) { width: 8%; }
+    td:nth-child(10) { width: 12%; }
+    td:nth-child(12) { width: 7%; }
     thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tfoot tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -299,20 +311,7 @@
 <div class="print-bar">
   <span class="print-bar-title">{{ company.name }} — Repayment Schedule — {{ loan.loan_number }}</span>
   <div class="print-bar-actions">
-    <form method="get" class="print-hide" style="display:flex;gap:6px;align-items:center;">
-      <label for="schedule-signatory" style="color:#fff;font-size:12px;">Signatory</label>
-      <select id="schedule-signatory" name="signatory" required onchange="this.form.requestSubmit()">
-        <option value="">Choose signatory</option>
-        {% for signer in signatories %}
-        <option value="{{ signer.pk }}" {% if selected_signatory.pk == signer.pk %}selected{% endif %}>{{ signer.full_name }}</option>
-        {% endfor %}
-      </select>
-    </form>
-    {% if not signatories %}
-    <span class="print-hide" style="color:#ffd7a8;font-size:11px;">No staff signatures uploaded</span>
-    {% endif %}
-    <a class="btn-print print-hide {% if not selected_signatory %}disabled{% endif %}"
-       {% if selected_signatory %}href="{% url 'loans:schedule_download' loan.pk %}?signatory={{ selected_signatory.pk }}"{% else %}aria-disabled="true" title="Choose a signatory first"{% endif %}>
+    <a class="btn-print print-hide" href="{% url 'loans:schedule_download' loan.pk %}">
       Download PDF
     </a>
     <button class="btn-close-tab" onclick="window.close()">✕ Close</button>
@@ -453,11 +452,6 @@
       <div class="metric-sub">{{ schedule.count }} instalment{{ schedule.count|pluralize }}</div>
     </div>
     <div class="metric">
-      <div class="metric-label">Nominal APR</div>
-      <div class="metric-value">{{ nominal_apr|floatformat:2 }}%</div>
-      <div class="metric-sub">Monthly rate × 12</div>
-    </div>
-    <div class="metric">
       <div class="metric-label">Total Cost of Credit</div>
       <div class="metric-value">{{ total_cost_of_credit|money }}</div>
       <div class="metric-sub">Interest + processing fee</div>
@@ -528,7 +522,7 @@
   <div class="doc-footer">
     <div>
       <div style="font-size:11px;color:#516a7f;">Prepared by: {{ request.user.full_name }}</div>
-      <div style="font-size:10px;color:#8a9bac;margin-top:3px;">The authorised officer's signature is shown alongside this schedule.</div>
+      <div style="font-size:10px;color:#8a9bac;margin-top:3px;">The authorised officer's signature is shown if available.</div>
     </div>
     <div style="display:flex;gap:48px;">
       <div class="signature-block">
@@ -549,11 +543,7 @@
 
 <script>
   function printSchedule() {
-    {% if selected_signatory %}
     window.print();
-    {% else %}
-    window.alert('Choose an authorised signatory before printing this schedule.');
-    {% endif %}
   }
 
   // Auto-trigger print if ?print=1 is in URL

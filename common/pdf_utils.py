@@ -1,6 +1,6 @@
 from io import BytesIO
 from django.http import HttpResponse
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4, portrait
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm
@@ -151,12 +151,12 @@ def generate_loan_schedule_pdf(loan, signatory=None):
     normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=9, spaceAfter=2)
     header_style = ParagraphStyle("Header", parent=styles["Heading1"], fontSize=14, alignment=TA_CENTER, spaceAfter=8)
     small = ParagraphStyle("Small", parent=normal, fontSize=8, textColor=colors.grey)
-    table_text = ParagraphStyle("ScheduleCell", parent=normal, fontSize=7, leading=8)
+    table_text = ParagraphStyle("ScheduleCell", parent=normal, fontSize=6, leading=7)
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
-        pagesize=landscape(A4),
+        pagesize=portrait(A4),
         rightMargin=12*mm,
         leftMargin=12*mm,
         topMargin=14*mm,
@@ -164,7 +164,6 @@ def generate_loan_schedule_pdf(loan, signatory=None):
     )
     story = []
     generated_at = datetime.now()
-    nominal_apr = loan.interest_rate_monthly * 12
     total_cost_of_credit = loan.total_interest + loan.processing_fee
 
     # Header
@@ -175,8 +174,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
     maturity_date = loan.maturity_date.strftime("%d %b %Y") if loan.maturity_date else "—"
     story.append(Paragraph(
         f"<b>Disbursement:</b> {disbursement_date} | <b>Maturity:</b> {maturity_date} | "
-        f"<b>Interest:</b> {loan.get_interest_method_display()} at {loan.interest_rate_monthly}%/month "
-        f"(<b>Nominal APR:</b> {nominal_apr:.2f}%)",
+        f"<b>Interest:</b> {loan.get_interest_method_display()} at {loan.interest_rate_monthly}%/month",
         normal,
     ))
     story.append(Paragraph(
@@ -296,7 +294,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
 
     table = Table(
         table_data,
-        colWidths=[8*mm, 20*mm, 20*mm, 19*mm, 19*mm, 16*mm, 20*mm, 18*mm, 20*mm, 28*mm, 20*mm, 18*mm],
+        colWidths=[7*mm, 15*mm, 16*mm, 16*mm, 15*mm, 11*mm, 16*mm, 15*mm, 16*mm, 23*mm, 17*mm, 14*mm],
         repeatRows=1,
     )
     table.setStyle(TableStyle([
@@ -307,7 +305,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
         ("ALIGN", (0, 0), (1, -1), "CENTER"),
         ("ALIGN", (9, 1), (9, -1), "LEFT"),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("FONTSIZE", (0, 0), (-1, -1), 6),
         ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#E5E7EB")),
         ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
     ]))
@@ -319,7 +317,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
         canvas.setFont("Helvetica", 8)
         canvas.setFillColor(colors.grey)
         canvas.drawString(document.leftMargin, 8*mm, f"Generated on {generated_at:%d %b %Y %H:%M}")
-        canvas.drawRightString(landscape(A4)[0] - document.rightMargin, 8*mm, f"Page {document.page}")
+        canvas.drawRightString(portrait(A4)[0] - document.rightMargin, 8*mm, f"Page {document.page}")
         canvas.restoreState()
 
     doc.build(story, onFirstPage=draw_page_footer, onLaterPages=draw_page_footer)

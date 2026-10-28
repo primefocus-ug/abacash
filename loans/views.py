@@ -20,7 +20,6 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from accounts.models import BankAccount, Branch, CompanySettings
-from accounts.signatures import selected_signatory
 from accounts.branch_scope import (
     SESSION_KEY,
     scope_to_branch,
@@ -1999,7 +1998,7 @@ def loan_schedule_print(request, pk):
         pk=pk,
     )
     schedule = loan.schedule.select_related("paid_by_payment").order_by("period_number")
-    signatories, chosen_signatory = selected_signatory(request, loan.branch_id)
+    chosen_signatory = request.user if request.user.signature else None
     return render(request, "loans/schedule_print.html", {
         "loan": loan,
         "schedule": schedule,
@@ -2011,9 +2010,7 @@ def loan_schedule_print(request, pk):
                 BankAccount.AccountType.MOBILE,
             ),
         ).order_by("account_type", "bank_name"),
-        "nominal_apr": loan.interest_rate_monthly * Decimal("12"),
         "total_cost_of_credit": loan.total_interest + loan.processing_fee,
-        "signatories": signatories,
         "selected_signatory": chosen_signatory,
     })
 
@@ -2025,13 +2022,11 @@ def loan_schedule_download(request, pk):
     from common.pdf_utils import generate_loan_schedule_pdf
 
     loan = get_object_or_404(Loan.objects.select_related("branch"), pk=pk)
-    _, chosen_signatory = selected_signatory(request, loan.branch_id)
-    if chosen_signatory is None:
-        return HttpResponseBadRequest("Select a signatory before downloading the loan schedule.")
+    chosen_signatory = request.user if request.user.signature else None
     pdf_bytes = generate_loan_schedule_pdf(loan, signatory=chosen_signatory)
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = (
-        f'attachment; filename="Schedule-{loan.loan_number}-{chosen_signatory.pk}.pdf"'
+        f'attachment; filename="Schedule-{loan.loan_number}.pdf"'
     )
     return response
 

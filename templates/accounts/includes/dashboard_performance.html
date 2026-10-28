@@ -3,7 +3,7 @@
   <summary class="performance-tile">
     <span class="metric-icon-wrap purple"><i class="fas fa-gauge-high" aria-hidden="true"></i></span>
     <span class="metric-body">
-      <strong class="metric-value performance-score" data-performance-score>{{ performance.score|floatformat:0 }}%</strong>
+      <strong class="metric-value performance-score" data-performance-score>{{ performance.score|floatformat:0 }} / 100</strong>
       <span id="dashboard-performance-title" class="metric-label">Performance</span>
       <span class="metric-sub"><span class="performance-eyebrow">{{ performance_period }}</span> · View analysis</span>
     </span>
@@ -16,9 +16,9 @@
         <span class="performance-eyebrow">{{ performance_period }}</span>
         <span class="performance-comparison-period">Compared with {{ performance_comparison_period }}</span>
       </div>
-      <span class="performance-popover-score"><span data-performance-score-copy>{{ performance.score|floatformat:0 }}%</span> overall</span>
+      <span class="performance-popover-score"><span data-performance-score-copy>{{ performance.score|floatformat:0 }} / 100</span> score</span>
     </div>
-    <p class="performance-score-note">Period-over-period score: 50% means unchanged; above 50% means favorable movement, below 50% means unfavorable movement. Higher loan charges, interest collected, disbursements, injections, overdue recoveries and on-time payment rates improve the score; higher expenses and unpaid overdue balances reduce it. Payments received before or on the due date count as on time. “New” means there was no previous-period baseline.</p>
+    <p class="performance-score-note">This is a management indicator, not an audited rating or a measure of profit. It weights on-time paid instalments at 45%, movement in unpaid overdue exposure at 35%, and movement in interest collected or settled at 20%. For trend components, 50 is neutral; movements are capped to prevent any one period change dominating the score. If a comparison baseline is missing, that component is neutral unless new overdue exposure has arisen. Payments received on or before the due date count as on time. Growth, charges, expenses, recoveries and capital injections are shown for context only; they do not directly raise the score.</p>
     <div class="performance-metrics">
       {% for key, metric in performance.metrics.items %}
       <div class="performance-metric">
@@ -26,15 +26,18 @@
         <strong data-performance-change="{{ key }}" class="performance-change-{{ metric.direction }}">{{ metric.change_label }}</strong>
         <small class="performance-value-comparison" data-performance-values="{{ key }}">
           {% if key == "on_time_rate" %}
-            {{ metric.current|floatformat:1 }}% current · {{ metric.previous|floatformat:1 }}% previous
+            {% if metric.observed %}{{ metric.current|floatformat:1 }}% current ({{ metric.current_count }} fully paid) · {{ metric.previous|floatformat:1 }}% previous ({{ metric.previous_count }} fully paid){% else %}No fully paid instalments in this period{% endif %}
           {% else %}
             {{ metric.current|money }} current · {{ metric.previous|money }} previous
           {% endif %}
         </small>
+        {% if not metric.contributes_to_score %}
+        <small class="performance-value-comparison">Context only · not included in score</small>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
-    <p class="performance-score-note">Unpaid overdue balance includes the remaining scheduled amount and penalties on pending, partial, or overdue installments past due by each range end. The system does not retain dated allocation history for every partial payment, so historical overdue balances can be approximate.</p>
+    <p class="performance-score-note">Unpaid overdue exposure is an absolute balance, not a portfolio-at-risk ratio, and can rise as the loan book grows. It includes the remaining scheduled amount and penalties on pending, partial, or overdue instalments past due by each period end. Historical exposure can be approximate because dated allocation history for every partial payment is not retained. Review underlying records, portfolio scale, and sample size before using this indicator for staff decisions, lending policy, or financial reporting.</p>
     <div class="performance-advice">
       <h3><i class="fas fa-lightbulb" aria-hidden="true"></i> Decision notes &amp; improvement actions</h3>
       <ul id="performance-recommendations">

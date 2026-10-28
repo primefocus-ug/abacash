@@ -5,7 +5,7 @@ Authentication, role-based dashboard routing, and comprehensive admin panel for 
 """
 
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -272,10 +272,10 @@ def _cashier_dashboard(request, today):
 
 
 def _build_dashboard_performance(current, previous):
-    """Compare period totals and derive a directional, neutral-at-50 score."""
+    """Build a weighted operating-quality indicator from collection outcomes."""
     definitions = (
-        ("loan_charges", "Loan charges (interest + fees)", 1),
-        ("interest_income", "Interest collected", 1),
+        ("loan_charges", "New loan charges (interest + fees)", 1),
+        ("interest_income", "Interest collected / settled", 1),
         ("disbursements", "Loan disbursements", 1),
         ("expenses", "Approved expenses", -1),
         ("injections", "Capital injections", 1),
@@ -283,32 +283,39 @@ def _build_dashboard_performance(current, previous):
         ("overdue_balance", "Unpaid overdue balance", -1),
         ("on_time_rate", "On-time payment rate", 1),
     )
+    score_weights = {
+        "on_time_rate": Decimal("0.45"),
+        "overdue_balance": Decimal("0.35"),
+        "interest_income": Decimal("0.20"),
+    }
     metrics = {}
-    score_components = []
     for key, label, direction in definitions:
-        current_value = float(current[key] or 0)
-        previous_value = float(previous[key] or 0)
-        if previous_value:
-            change_percent = round(
-                (current_value - previous_value) / abs(previous_value) * 100,
-                1,
-            )
-            change_label = f"{change_percent:+.1f}%"
-            component_score = max(
-                0.0,
-                min(100.0, 50 + direction * change_percent / 2),
+        current_decimal = Decimal(str(current[key] or 0))
+        previous_decimal = Decimal(str(previous[key] or 0))
+        current_value = float(current_decimal)
+        previous_value = float(previous_decimal)
+        observed = key != "on_time_rate" or current.get("paid_schedule_count", 0) > 0
+        if not observed:
+            change_percent = None
+            change_label = "No observations"
+        elif previous_decimal:
+            change_percent_decimal = (
+                (current_decimal - previous_decimal)
+                / abs(previous_decimal)
+                * Decimal("100")
+            ).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+            change_percent = float(change_percent_decimal)
+            change_label = (
+                f"{(current_decimal - previous_decimal).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP):+.1f} pp"
+                if key == "on_time_rate"
+                else f"{change_percent:+.1f}%"
             )
         elif current_value:
             change_percent = None
             change_label = "New"
-            component_score = (
-                current_value if key == "on_time_rate"
-                else 100.0 if direction > 0 else 0.0
-            )
         else:
             change_percent = 0.0
             change_label = "0.0%"
-            component_score = 50.0
 
         metrics[key] = {
             "label": label,
@@ -317,16 +324,54 @@ def _build_dashboard_performance(current, previous):
             "change_percent": change_percent,
             "change_label": change_label,
             "direction": (
-                "positive" if direction * (current_value - previous_value) > 0
-                else "negative" if direction * (current_value - previous_value) < 0
+                "neutral" if not observed
+                else "positive" if direction * (current_decimal - previous_decimal) > 0
+                else "negative" if direction * (current_decimal - previous_decimal) < 0
                 else "neutral"
             ),
+            "observed": observed,
+            "contributes_to_score": key in score_weights,
+            "score_weight": score_weights.get(key, Decimal("0")) * 100,
+            "current_count": current.get("paid_schedule_count", 0) if key == "on_time_rate" else None,
+            "previous_count": previous.get("paid_schedule_count", 0) if key == "on_time_rate" else None,
         }
-        score_components.append(component_score)
 
-    score = round(sum(score_components) / len(score_components), 1)
+    def trend_score(current_value, previous_value, direction):
+        if not previous_value:
+            return Decimal("0") if direction < 0 and current_value else Decimal("50")
+        change_percent = (
+            (current_value - previous_value)
+            / abs(previous_value)
+            * Decimal("100")
+        )
+        return max(
+            Decimal("0"),
+            min(Decimal("100"), Decimal("50") + direction * change_percent / Decimal("2")),
+        )
+
+    on_time_score = (
+        Decimal(str(current["on_time_rate"] or 0))
+        if current.get("paid_schedule_count", 0) > 0
+        else Decimal("50")
+    )
+    overdue_score = trend_score(
+        Decimal(str(current["overdue_balance"] or 0)),
+        Decimal(str(previous["overdue_balance"] or 0)),
+        -1,
+    )
+    interest_score = trend_score(
+        Decimal(str(current["interest_income"] or 0)),
+        Decimal(str(previous["interest_income"] or 0)),
+        1,
+    )
+    score = (
+        on_time_score * score_weights["on_time_rate"]
+        + overdue_score * score_weights["overdue_balance"]
+        + interest_score * score_weights["interest_income"]
+    ).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
     recommendations = []
-    for key, metric in metrics.items():
+    for key in score_weights:
+        metric = metrics[key]
         if metric["direction"] != "negative":
             continue
         recommendations.append({
@@ -344,7 +389,7 @@ def _build_dashboard_performance(current, previous):
             "detail": "The selected-period comparisons were stable or favorable against the preceding range.",
         })
     return {
-        "score": score,
+        "score": float(score),
         "metrics": metrics,
         "recommendations": recommendations,
     }
@@ -463,6 +508,7 @@ def _dashboard_performance_period(user, date_from, date_to, branch_id=None):
             "on_time_rate": (
                 schedule_totals["on_time"] / paid_count * 100 if paid_count else 0
             ),
+            "paid_schedule_count": paid_count,
         }
 
     current = collect_period(date_from, date_to)
