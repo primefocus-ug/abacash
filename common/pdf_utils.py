@@ -141,11 +141,11 @@ def render_pdf_response(request, template_name, context, filename="document.pdf"
     return response
 
 
-def generate_loan_schedule_pdf(loan, signatory=None):
+def generate_loan_schedule_pdf(loan, signatory=None, loan_terms=None):
     """Generate PDF for a loan schedule."""
     from datetime import datetime
     from xml.sax.saxutils import escape
-    from accounts.models import BankAccount
+    from accounts.models import BankAccount, DEFAULT_LOAN_TERMS
 
     styles = getSampleStyleSheet()
     normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=9, spaceAfter=2)
@@ -186,7 +186,51 @@ def generate_loan_schedule_pdf(loan, signatory=None):
     ))
     story.append(Spacer(1, 8))
 
-    story.append(Paragraph("<b>Payment instructions</b>", normal))
+    collateral_items = loan.collateral_items.all()
+    guarantees = getattr(loan, "guarantees", None)
+    guarantee_items = list(guarantees.select_related("guarantor").all()) if guarantees is not None else []
+    story.append(Paragraph("<b>01 · BORROWER AND LOAN DETAILS</b>", normal))
+    story.append(Spacer(1, 4))
+    if collateral_items.exists() or guarantee_items:
+        story.append(Paragraph("<b>02 · SECURITY AND GUARANTEES</b>", normal))
+        if collateral_items.exists():
+            story.append(Paragraph("<b>Collateral pledged</b>", small))
+            for item in collateral_items:
+                details = [escape(item.description), f"UGX {item.estimated_value:,.0f}"]
+                if item.document_number:
+                    details.append(f"Document: {escape(item.document_number)}")
+                if item.storage_location:
+                    details.append(f"Held at: {escape(item.storage_location)}")
+                story.append(Paragraph(" — ".join(details), small))
+        if guarantee_items:
+            story.append(Paragraph("<b>Guarantors</b>", small))
+            for guarantee in guarantee_items:
+                guarantor = guarantee.guarantor
+                name = guarantor.company_name if guarantor.guarantor_type == "CORPORATE" else guarantor.full_name
+                agreement = "Agreement signed" if guarantee.agreement_signed else "Agreement pending"
+                story.append(Paragraph(
+                    f"{escape(name)} — {escape(guarantee.get_guarantee_type_display())} — "
+                    f"UGX {guarantee.guaranteed_amount:,.0f} — {agreement}",
+                    small,
+                ))
+        story.append(Spacer(1, 8))
+
+    story.append(Paragraph("<b>03 · TERMS AND CONDITIONS</b>", normal))
+    terms = (loan_terms if loan_terms is not None else DEFAULT_LOAN_TERMS).strip()
+    if terms:
+        story.append(Paragraph("<b>Terms and conditions</b>", normal))
+        for paragraph in terms.splitlines():
+            paragraph = paragraph.strip()
+            if paragraph:
+                story.append(Paragraph(escape(paragraph), small))
+        story.append(Paragraph(
+            "This summary should be read with the signed loan agreement and applicable law. "
+            "It does not replace independent legal advice.",
+            small,
+        ))
+        story.append(Spacer(1, 8))
+
+    story.append(Paragraph("<b>04 · PAYMENT INSTRUCTIONS</b>", normal))
     story.append(Paragraph(
         f"Pay by mobile money or bank transfer using an active account below. "
         f"Enter loan number <b>{escape(loan.loan_number)}</b> as the payment reference.",
@@ -217,23 +261,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
         ))
     story.append(Spacer(1, 8))
 
-    collateral_items = loan.collateral_items.all()
-    if collateral_items.exists():
-        story.append(Paragraph("<b>Collateral pledged</b>", normal))
-        for item in collateral_items:
-            details = [escape(item.description), f"UGX {item.estimated_value:,.0f}"]
-            if item.document_number:
-                details.append(f"Document: {escape(item.document_number)}")
-            if item.storage_location:
-                details.append(f"Held at: {escape(item.storage_location)}")
-            if item.notes:
-                details.append(escape(item.notes))
-            if item.release_date:
-                released_to = f" to {escape(item.released_to)}" if item.released_to else ""
-                details.append(f"Released {item.release_date}{released_to}")
-            story.append(Paragraph(" — ".join(details), small))
-        story.append(Spacer(1, 8))
-
+    story.append(Paragraph("<b>05 · REPAYMENT SCHEDULE</b>", normal))
     # Schedule table
     schedule_items = getattr(loan, "schedule", None)
     if schedule_items is None:
@@ -310,6 +338,7 @@ def generate_loan_schedule_pdf(loan, signatory=None):
         ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
     ]))
     story.append(table)
+    story.append(Paragraph("<b>06 · AUTHORISATION AND ACKNOWLEDGEMENT</b>", normal))
     _append_signatory(story, signatory, normal)
 
     def draw_page_footer(canvas, document):

@@ -23,8 +23,15 @@
     <form method="post">
       {% csrf_token %}
       <div class="form-row-2 gap-3">
+        {% if is_reschedule %}
         <div>
-          <label>Renewal Term (months)</label>
+          <label>Principal Amount (UGX)</label>
+          <input type="number" name="principal_amount" value="{{ default_principal|floatformat:2 }}" step="0.01" min="0.01" required>
+          <div class="text-muted text-sm">Editable principal used to rebuild the repayment schedule.</div>
+        </div>
+        {% endif %}
+        <div>
+          <label>{% if is_reschedule %}New Term{% else %}Renewal Term{% endif %} (months)</label>
           <input type="number" name="term_months" value="{{ default_term }}" min="{{ min_term }}" max="{{ max_term }}" required>
         </div>
         <div>

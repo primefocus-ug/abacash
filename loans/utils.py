@@ -329,10 +329,11 @@ def build_loan_schedule_context(
             company_settings=company_settings,
         )
         fee_percent = resolve_processing_fee_rate(product, company_settings)
+        product_name = getattr(product, "name", "") or "Product"
         fee_source = (
             "Company settings (range)"
             if (processing_fee and not fee_percent)
-            else (product.name if fee_percent else "Company settings")
+            else (product_name if fee_percent else "Company settings")
         )
     else:
         processing_fee = Decimal("0")

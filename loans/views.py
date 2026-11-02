@@ -4,7 +4,7 @@ loans/views.py
 Loan application, approval workflow, and detail views for ABA Uganda.
 """
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import date
 
 from django.contrib import messages
@@ -80,12 +80,18 @@ def _permission_required(codename):
         @wraps(view_func)
         @login_required
         def wrapper(request, *args, **kwargs):
-            if not request.user.can(codename):
+            if not _user_has_permission(request.user, codename):
                 messages.error(request, "You do not have permission to access that page.")
                 return redirect("accounts:dashboard")
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
+
+def _user_has_permission(user, codename):
+    """Return True when the user object exposes the required permission check."""
+    can = getattr(user, "can", None)
+    return bool(can is not None and callable(can) and can(codename))
 
 
 def _get_client_loan_draft(client):
@@ -126,7 +132,7 @@ def _build_security_data(loan=None):
 
 def _resolve_loan_branch(request, client, posted_branch_id):
     """Resolve an active loan branch, defaulting privileged users to the client's branch."""
-    can_choose_branch = request.user.is_superuser or request.user.can("can_view_all_branches")
+    can_choose_branch = bool(getattr(request.user, "is_superuser", False)) or _user_has_permission(request.user, "can_view_all_branches")
 
     if can_choose_branch and posted_branch_id:
         branch = Branch.objects.filter(pk=posted_branch_id, is_active=True).first()
@@ -270,11 +276,11 @@ def loan_apply_step2(request, client_id):
     if client.active_loan_count > 0:
         # show existing active loan and allow rollover option when product and user permit
         active_loan = client.loans.filter(status=Loan.Status.ACTIVE).order_by("-disbursement_date").first()
-        can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and request.user.can("can_approve_loans"))
+        can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and _user_has_permission(request.user, "can_approve_loans"))
 
     products = LoanProduct.objects.filter(is_active=True)
     active_branches = Branch.objects.filter(is_active=True).order_by("name")
-    can_choose_branch = request.user.is_superuser or request.user.can("can_view_all_branches")
+    can_choose_branch = bool(getattr(request.user, "is_superuser", False)) or _user_has_permission(request.user, "can_view_all_branches")
     company_settings = CompanySettings.get()
     company_default_fee = company_settings.default_processing_fee_percent
 
@@ -1101,9 +1107,10 @@ def loan_detail(request, pk):
     # it's meant to catch loans automation hasn't (or can't) clean up, not to
     # be a general-purpose write-off button.
     from accounts.models import CompanySettings
-    write_off_threshold_days = getattr(CompanySettings.get(), "auto_write_off_days", 180)
+    company_settings = CompanySettings.get()
+    write_off_threshold_days = getattr(company_settings, "auto_write_off_days", 180)
     can_write_off = (
-        request.user.can("can_write_off_loans")
+        _user_has_permission(request.user, "can_write_off_loans")
         and loan.status in (Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED, Loan.Status.DEFAULTED)
         and loan.days_overdue >= write_off_threshold_days
     )
@@ -1119,6 +1126,7 @@ def loan_detail(request, pk):
         "can_write_off": can_write_off,
         "write_off_threshold_days": write_off_threshold_days,
         "can_undo_regenerate": _can_undo_regenerate(loan),
+        "company_settings": company_settings,
     })
 
 @_require_role("MANAGER", "CEO")
@@ -1144,9 +1152,18 @@ def loan_reschedule(request, pk):
             term_months = int(request.POST.get("term_months", loan.term_months) or loan.term_months)
             frequency = request.POST.get("frequency", loan.repayment_frequency)
             reason = request.POST.get("reason", "").strip()
+            try:
+                reschedule_principal = Decimal(
+                    request.POST.get("principal_amount", str(loan.outstanding_balance))
+                    or str(loan.outstanding_balance)
+                )
+            except (InvalidOperation, TypeError, ValueError):
+                raise ValueError("Principal amount must be a valid number.")
 
             if not reason:
                 raise ValueError("Rescheduling reason is required.")
+            if reschedule_principal <= Decimal("0"):
+                raise ValueError("Principal amount must be greater than zero.")
 
             if term_months < loan.product.min_term_months or term_months > loan.product.max_term_months:
                 raise ValueError(
@@ -1167,20 +1184,28 @@ def loan_reschedule(request, pk):
                     chosen_disbursement = date.fromisoformat(provided_disb)
                 except Exception:
                     raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
-                if chosen_disbursement < date.today() and not request.user.can("can_backdate_transactions"):
+                if chosen_disbursement < date.today() and not _user_has_permission(request.user, "can_backdate_transactions"):
                     raise ValueError("Only users with back-dating permission may set a past disbursement date.")
             else:
                 chosen_disbursement = date.today()
 
-            # Generate the schedule from the set date. We deliberately always
-            # regenerate here (even if term/frequency/date are unchanged from
-            # the loan's current values) — the point of clicking Reschedule
-            # is to activate/re-anchor the repayment clock to the date shown
-            # in the form, not just to record a change if one happened to
-            # occur. A CEO resuming a lapsed loan after an agreement expects
-            # submitting this form to always take effect.
+            if (
+                term_months == loan.term_months
+                and frequency == loan.repayment_frequency
+                and reschedule_principal == loan.outstanding_balance
+                and chosen_disbursement == loan.disbursement_date
+            ):
+                messages.success(request, f"Loan {loan.loan_number} already matches the selected schedule settings.")
+                if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
+                    from django.urls import reverse
+                    return render(request, 'loans/htmx_success.html', {
+                        'message': f'Loan {loan.loan_number} already matches the selected schedule settings.',
+                        'redirect': '"' + reverse('loans:detail', kwargs={'pk': loan.pk}) + '"',
+                    })
+                return redirect("loans:detail", pk=loan.pk)
+
             schedule_rows, totals, _, _, _ = build_loan_schedule_context(
-                principal=outstanding_amount,
+                principal=reschedule_principal,
                 product=loan.product,
                 term_months=term_months,
                 frequency=frequency,
@@ -1194,11 +1219,12 @@ def loan_reschedule(request, pk):
             old_date = loan.disbursement_date
             loan.term_months = term_months
             loan.repayment_frequency = frequency
+            loan.principal_amount = reschedule_principal
             loan.disbursement_date = chosen_disbursement
             loan.maturity_date = schedule_rows[-1]["due_date"]
             loan.total_repayable = totals["total_repayable_exclusive"]
             loan.total_interest = totals["total_interest"]
-            loan.outstanding_balance = outstanding_amount
+            loan.outstanding_balance = reschedule_principal
             loan.save()
 
             # Create an audit record of this reschedule action
@@ -1250,6 +1276,7 @@ def loan_reschedule(request, pk):
         "loan": loan,
         "frequency_choices": frequency_choices,
         "default_term": loan.term_months,
+        "default_principal": loan.outstanding_balance,
         "min_term": loan.product.min_term_months,
         "max_term": loan.product.max_term_months,
         "is_reschedule": True,
@@ -1998,7 +2025,11 @@ def loan_schedule_print(request, pk):
         pk=pk,
     )
     schedule = loan.schedule.select_related("paid_by_payment").order_by("period_number")
+    from accounts.models import CompanySettings
     chosen_signatory = request.user if request.user.signature else None
+    company_settings = CompanySettings.get()
+    collateral_items = loan.collateral_items.all()
+    guarantees = loan.guarantees.select_related("guarantor").all()
     return render(request, "loans/schedule_print.html", {
         "loan": loan,
         "schedule": schedule,
@@ -2011,6 +2042,9 @@ def loan_schedule_print(request, pk):
             ),
         ).order_by("account_type", "bank_name"),
         "total_cost_of_credit": loan.total_interest + loan.processing_fee,
+        "company_settings": company_settings,
+        "collateral_items": collateral_items,
+        "guarantees": guarantees,
         "selected_signatory": chosen_signatory,
     })
 
@@ -2023,7 +2057,12 @@ def loan_schedule_download(request, pk):
 
     loan = get_object_or_404(Loan.objects.select_related("branch"), pk=pk)
     chosen_signatory = request.user if request.user.signature else None
-    pdf_bytes = generate_loan_schedule_pdf(loan, signatory=chosen_signatory)
+    from accounts.models import CompanySettings
+    pdf_bytes = generate_loan_schedule_pdf(
+        loan,
+        signatory=chosen_signatory,
+        loan_terms=CompanySettings.get().loan_terms_and_conditions,
+    )
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = (
         f'attachment; filename="Schedule-{loan.loan_number}.pdf"'

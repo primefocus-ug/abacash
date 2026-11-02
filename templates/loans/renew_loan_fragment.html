@@ -36,6 +36,16 @@
     {% csrf_token %}
 
     <div class="form-row" style="margin-bottom:16px;">
+      {% if is_reschedule %}
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Principal Amount (UGX)</label>
+        <input type="number" name="principal_amount"
+               value="{{ default_principal|floatformat:2 }}"
+               step="0.01" min="0.01" required
+               style="font-family:var(--font-mono);">
+        <div class="form-hint">Editable principal used to rebuild the repayment schedule.</div>
+      </div>
+      {% endif %}
       <div class="form-group" style="margin-bottom:0;">
         <label>New Term (months)</label>
         <input type="number" name="term_months"

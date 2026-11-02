@@ -188,7 +188,7 @@ class DashboardPerformanceCalculationTests(SimpleTestCase):
         result = _build_dashboard_performance(current, previous)
 
         self.assertEqual(result["score"], 46.0)
-        self.assertIn("Unpaid overdue balance moved against the prior period", [
+        self.assertIn("Unpaid overdue amount got worse", [
             item["title"] for item in result["recommendations"]
         ])
 

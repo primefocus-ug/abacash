@@ -274,14 +274,14 @@ def _cashier_dashboard(request, today):
 def _build_dashboard_performance(current, previous):
     """Build a weighted operating-quality indicator from collection outcomes."""
     definitions = (
-        ("loan_charges", "New loan charges (interest + fees)", 1),
-        ("interest_income", "Interest collected / settled", 1),
-        ("disbursements", "Loan disbursements", 1),
-        ("expenses", "Approved expenses", -1),
-        ("injections", "Capital injections", 1),
-        ("overdue_recoveries", "Overdue recoveries", 1),
-        ("overdue_balance", "Unpaid overdue balance", -1),
-        ("on_time_rate", "On-time payment rate", 1),
+        ("loan_charges", "New loan fees and interest", 1),
+        ("interest_income", "Interest collected", 1),
+        ("disbursements", "Loans given out", 1),
+        ("expenses", "Expenses paid", -1),
+        ("injections", "Money added to the business", 1),
+        ("overdue_recoveries", "Overdue payments collected", 1),
+        ("overdue_balance", "Unpaid overdue amount", -1),
+        ("on_time_rate", "Payments made on time", 1),
     )
     score_weights = {
         "on_time_rate": Decimal("0.45"),
@@ -376,17 +376,17 @@ def _build_dashboard_performance(current, previous):
             continue
         recommendations.append({
             "level": "warning",
-            "title": f"{metric['label']} moved against the prior period",
+            "title": f"{metric['label']} got worse",
             "detail": (
-                f"{metric['change_label']} compared with the previous range. "
-                "Review the underlying activity before drawing a conclusion."
+                f"{metric['change_label']} compared with the previous period. "
+                "Check the related loans and payments to understand why."
             ),
         })
     if not recommendations:
         recommendations.append({
             "level": "positive",
-            "title": "No measured indicator declined",
-            "detail": "The selected-period comparisons were stable or favorable against the preceding range.",
+            "title": "Performance is steady or improving",
+            "detail": "None of the measures used in the score got worse than in the previous period.",
         })
     return {
         "score": float(score),
@@ -1588,6 +1588,9 @@ def company_settings(request):
             settings_obj.company_registration   = d.get("company_registration", "").strip()
             settings_obj.tax_identification     = d.get("tax_identification", "").strip()
             settings_obj.currency_symbol        = d.get("currency_symbol", "UGX").strip() or "UGX"
+            settings_obj.loan_terms_and_conditions = d.get(
+                "loan_terms_and_conditions", ""
+            ).strip()
 
             def _dec(key, default):
                 v = d.get(key, "").strip()

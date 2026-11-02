@@ -402,6 +402,36 @@ DEFAULT_PROCESSING_FEE_RANGES = (
     "1000001-:40000"
 )
 
+DEFAULT_LOAN_TERMS = """1. Loan agreement
+The borrower acknowledges receipt of the loan amount stated on this schedule and agrees to repay the principal, interest, approved fees, and any lawful charges shown in the schedule.
+
+2. Repayment obligation
+Each instalment is due on its stated due date. The borrower must ensure that payments are made through an approved payment channel and that the loan number is used as the payment reference.
+
+3. Allocation of payments
+Unless applicable law requires otherwise, payments are applied to approved charges and penalties, interest, and then principal, according to the lender's documented allocation procedure. A payment is only treated as received when it has been confirmed and allocated by the lender.
+
+4. Late payment and default
+An unpaid or partially paid instalment may be treated as overdue after the applicable grace period. Lawful default penalties, collection costs, and other charges disclosed in the loan agreement may apply. Persistent non-payment may result in recovery action, reporting to authorised credit-reference bodies, or enforcement of security.
+
+5. Early repayment
+The borrower may request early settlement. The lender will provide a settlement figure showing the amount required to close the loan. Any early-repayment charge must be disclosed, lawful, and included in the applicable loan agreement.
+
+6. Security and guarantees
+Where security or a guarantee has been provided, it remains subject to the separate security or guarantee instrument. The lender may enforce those rights only in accordance with the agreement and applicable law.
+
+7. Changes and restructuring
+Any variation, extension, waiver, or restructuring must be approved by the lender in writing. An informal promise or verbal discussion does not amend the repayment schedule.
+
+8. Statements and disputes
+The borrower should review this schedule and report any error promptly. The lender's records are prima facie evidence of transactions, subject to reconciliation and the borrower's statutory rights to request information or raise a dispute.
+
+9. Notices and contact details
+The borrower must keep contact information current and promptly notify the lender of changes affecting repayment. Notices may be sent using the contact details recorded in the lender's records, subject to applicable law.
+
+10. Governing law
+This schedule is intended to be read with the signed loan agreement, disclosures, and applicable security documents. Those documents and the laws applicable in the lender's jurisdiction govern the relationship. This summary does not replace independent legal advice."""
+
 
 class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
     """
@@ -421,6 +451,13 @@ class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
     company_website         = models.URLField(blank=True)
     company_registration    = models.CharField(max_length=100, blank=True, help_text=_("Registration number"))
     tax_identification      = models.CharField(max_length=100, blank=True, help_text=_("TIN number"))
+    loan_terms_and_conditions = models.TextField(
+        default=DEFAULT_LOAN_TERMS,
+        help_text=_(
+            "Terms printed on loan schedules. Review with qualified local counsel "
+            "before relying on them as a legal contract."
+        ),
+    )
 
     # Loan Business Rules
     manager_approval_limit  = models.DecimalField(

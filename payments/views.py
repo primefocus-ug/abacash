@@ -578,6 +578,9 @@ def combined_receipt_view(request, transfer_pk, payment_pk):
         messages.error(request, "Those receipts cannot be viewed together.")
         return redirect("payments:list")
     signatories, chosen_signatory = selected_signatory(request)
+    document_title, _ = _receipt_document_title(
+        request, payment_receipt.payment.client.full_name,
+    )
     return render(request, "payments/combined_receipt.html", {
         "receipts": [transfer_receipt, payment_receipt],
         "auto_print": chosen_signatory is not None,

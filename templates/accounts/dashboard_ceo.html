@@ -1000,7 +1000,7 @@
     });
     const performance = data.performance;
     const score = document.querySelector('[data-performance-score]');
-    const scoreText = Number(performance.score || 0).toFixed(0) + ' / 100';
+    const scoreText = Number(performance.score || 0).toFixed(0) + '%';
     if (score) score.textContent = scoreText;
     const scoreCopy = document.querySelector('[data-performance-score-copy]');
     if (scoreCopy) scoreCopy.textContent = scoreText;

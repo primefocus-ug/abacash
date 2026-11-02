@@ -610,6 +610,8 @@ class LoanRescheduleTests(SimpleTestCase):
             outstanding_balance = Decimal("1000000")
             disbursement_date = date(2024, 1, 1)
             product = SimpleNamespace(min_term_months=1, max_term_months=12)
+            interest_rate_monthly = Decimal("2.00")
+            interest_method = LoanProduct.InterestMethod.FLAT_RATE
             status = Loan.Status.ACTIVE
 
             def __init__(self):
@@ -637,6 +639,7 @@ class LoanRescheduleTests(SimpleTestCase):
         request = RequestFactory().post(
             reverse("loans:reschedule", kwargs={"pk": loan.pk}),
             {
+                "principal_amount": "750000",
                 "term_months": "4",
                 "frequency": Loan.RepaymentFrequency.MONTHLY,
                 "reason": "Need a shorter schedule",
@@ -659,7 +662,8 @@ class LoanRescheduleTests(SimpleTestCase):
 
         self.assertIn(response.status_code, (200, 302))
         self.assertTrue(loan.saved)
-        self.assertEqual(loan.outstanding_balance, Decimal("1000000"))
+        self.assertEqual(loan.principal_amount, Decimal("750000"))
+        self.assertEqual(loan.outstanding_balance, Decimal("750000"))
 
     def test_reschedule_keeps_existing_schedule_when_no_settings_change(self):
         class DummyUser:

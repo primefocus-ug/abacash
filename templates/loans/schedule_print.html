@@ -348,6 +348,8 @@
     </div>
   </div>
 
+  <div class="section-title">01 · Borrower and Loan Details</div>
+
   <!-- Loan + Client info -->
   <div class="info-grid">
     <div class="info-section">
@@ -398,10 +400,11 @@
     </div>
   </div>
 
-  {% with loan.collateral_items.all as collateral_items %}
-  {% if collateral_items %}
-  <div style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-bottom:24px;">
-    <div class="section-title">Collateral pledged</div>
+  {% if collateral_items or guarantees %}
+  <div class="section-title">02 · Security and Guarantees</div>
+  <div style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-bottom:24px;page-break-inside:avoid;">
+    {% if collateral_items %}
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#516a7f;margin-bottom:6px;">Collateral pledged</div>
     {% for item in collateral_items %}
     <div class="info-row" style="{% if not forloop.last %}border-bottom:1px solid #e8eef3;{% endif %}">
       <span class="info-label">
@@ -414,12 +417,26 @@
       <span class="info-value mono">UGX {{ item.estimated_value|floatformat:0|intcomma }}</span>
     </div>
     {% endfor %}
+    {% endif %}
+    {% if guarantees %}
+    <div style="border-top:1px solid #e8eef3;margin-top:10px;padding-top:10px;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#516a7f;margin-bottom:6px;">Guarantors</div>
+      {% for guarantee in guarantees %}
+      <div class="info-row" style="{% if not forloop.last %}border-bottom:1px solid #e8eef3;{% endif %}">
+        <span class="info-label">
+          {% if guarantee.guarantor.guarantor_type == "CORPORATE" %}{{ guarantee.guarantor.company_name }}{% else %}{{ guarantee.guarantor.full_name }}{% endif %}
+          <br><small>{{ guarantee.get_guarantee_type_display }}{% if guarantee.agreement_signed %} · Agreement signed{% else %} · Agreement pending{% endif %}</small>
+        </span>
+        <span class="info-value mono">UGX {{ guarantee.guaranteed_amount|floatformat:0|intcomma }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
   {% endif %}
-  {% endwith %}
 
+  <div class="section-title">03 · Payment Instructions</div>
   <div style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-bottom:24px;page-break-inside:avoid;">
-    <div class="section-title">Payment Instructions</div>
     <div style="font-size:12px;margin-bottom:8px;">Use the loan number <strong class="doc-ref">{{ loan.loan_number }}</strong> as the payment reference for mobile money or bank payments.</div>
     {% for account in company_accounts %}
     <div class="info-row" style="border-top:1px solid #e8eef3;">
@@ -431,6 +448,7 @@
     {% endfor %}
   </div>
 
+  <div class="section-title">04 · Financial Summary</div>
   <!-- Summary metrics -->
   <div class="metrics">
     <div class="metric">
@@ -458,8 +476,7 @@
     </div>
   </div>
 
-  <!-- Schedule table -->
-  <div class="section-title">Repayment Schedule</div>
+  <div class="section-title">05 · Repayment Schedule</div>
   <table>
     <thead>
       <tr>
@@ -518,6 +535,15 @@
     {% endif %}
   </table>
 
+  <div class="terms-block" style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-top:24px;page-break-inside:avoid;">
+    <div class="section-title">06 · Terms and Conditions</div>
+    <div style="font-size:10px;line-height:1.55;color:#334e5f;white-space:pre-line;">{{ company_settings.loan_terms_and_conditions }}</div>
+    <div style="font-size:9px;line-height:1.45;color:#6d7e8f;margin-top:10px;">
+      This summary should be read with the signed loan agreement and applicable law. It does not replace independent legal advice.
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:24px;">07 · Authorisation and Acknowledgement</div>
   <!-- Signature / footer -->
   <div class="doc-footer">
     <div>
