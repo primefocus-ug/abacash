@@ -11,7 +11,7 @@
     <div>
       <form method="get" class="print-hide" style="display:inline-flex;gap:8px;align-items:center;">
         <label for="combined-signatory" class="sr-only">Receipt signatory</label>
-        <select id="combined-signatory" name="signatory" required onchange="this.form.requestSubmit()">
+        <select id="combined-signatory" name="signatory" onchange="this.form.requestSubmit()">
           <option value="">Choose signatory</option>
           {% for signer in signatories %}
           <option value="{{ signer.pk }}" {% if selected_signatory.pk == signer.pk %}selected{% endif %}>{{ signer.full_name }}</option>
@@ -47,7 +47,7 @@
         {% if selected_signatory %}
         <img src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}" style="display:block;max-width:150px;max-height:42px;object-fit:contain;margin:-48px auto 3px;">
         <strong>{{ selected_signatory.full_name }}</strong><br>
-        {% else %}Choose a signatory before printing<br>{% endif %}
+        {% endif %}
         Authorized Signatory
       </div>
     </div>
@@ -74,13 +74,8 @@
 <script>
   (function () {
     const receiptTitle = "{{ receipt_document_title|default:'Combined Receipts'|escapejs }}";
-    const hasSignatory = {{ selected_signatory|yesno:"true,false" }};
     document.title = receiptTitle;
     window.printReceipt = function () {
-      if (!hasSignatory) {
-        window.alert('Choose an authorized signatory before printing these receipts.');
-        return;
-      }
       document.title = receiptTitle;
       window.print();
     };

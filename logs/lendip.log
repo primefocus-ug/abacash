@@ -18502,3 +18502,162 @@ NameError: name 'document_title' is not defined
 2026-11-02 08:32:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
 2026-11-02 08:34:21 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\views.py changed, reloading.
 2026-11-02 08:34:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 06:43:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 06:44:17 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-05 06:44:17 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 266696
+2026-11-05 06:44:18 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-05 06:44:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 06:44:49 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:45:19 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:45:49 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:45:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 06:46:19 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:46:49 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:47:05 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-11-05 06:47:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 06:47:15 [INFO] django.utils.autoreload: C:\Users\USER\abacash\payments\views.py changed, reloading.
+2026-11-05 06:47:16 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 06:47:19 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:47:49 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:48:19 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:48:49 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 3550
+2026-11-05 06:48:54 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-05&date_to=2026-11-05&branch= HTTP/1.1" 200 257801
+2026-11-05 06:48:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 06:49:12 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 199066
+2026-11-05 06:49:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 06:49:16 [INFO] django.server: "GET /payments/receipt/aa0d605e-5464-4de9-a23f-e2fa12ea4beb/ HTTP/1.1" 200 210583
+2026-11-05 06:49:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 06:49:26 [INFO] django.server: "GET /payments/receipt/aa0d605e-5464-4de9-a23f-e2fa12ea4beb/?style=classic HTTP/1.1" 200 205958
+2026-11-05 06:49:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:04:53 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\pdf_utils.py changed, reloading.
+2026-11-05 07:04:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:05:23 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\urls.py changed, reloading.
+2026-11-05 07:05:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:05:41 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\views.py changed, reloading.
+2026-11-05 07:05:41 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:06:29 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\pdf_utils.py changed, reloading.
+2026-11-05 07:06:30 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:07:03 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 266696
+2026-11-05 07:07:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:08 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195203
+2026-11-05 07:07:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:10 [INFO] django.server: "GET /reports/disbursements/ HTTP/1.1" 200 190054
+2026-11-05 07:07:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:14 [INFO] django.server: "GET /reports/disbursements/download/?&format=excel HTTP/1.1" 200 5725
+2026-11-05 07:07:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:36 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 204467
+2026-11-05 07:07:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:40 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195203
+2026-11-05 07:07:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:42 [INFO] django.server: "GET /reports/client-statement/ HTTP/1.1" 200 188093
+2026-11-05 07:07:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:07:46 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 192217
+2026-11-05 07:07:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:08:20 [INFO] django.server: "GET /reports/client-statement/?client=689c8cb2-f963-44d1-92ef-f2b1bbd9b58e HTTP/1.1" 200 195002
+2026-11-05 07:08:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:08:35 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 204467
+2026-11-05 07:08:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:08:48 [INFO] django.server: "GET /loans/98527598-baf6-4ae6-8086-2c1068397ca3/ HTTP/1.1" 200 216791
+2026-11-05 07:08:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:02 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 204467
+2026-11-05 07:09:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:05 [INFO] django.server: "GET /loans/98527598-baf6-4ae6-8086-2c1068397ca3/ HTTP/1.1" 200 216791
+2026-11-05 07:09:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:15 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 205727
+2026-11-05 07:09:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:40 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192559
+2026-11-05 07:09:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:42 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200105
+2026-11-05 07:09:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:45 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195203
+2026-11-05 07:09:47 [INFO] django.server: "GET /reports/closed-loans/ HTTP/1.1" 200 191144
+2026-11-05 07:09:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:51 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200105
+2026-11-05 07:09:52 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195203
+2026-11-05 07:09:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:55 [INFO] django.server: "GET /reports/company-ledger/ HTTP/1.1" 200 213977
+2026-11-05 07:09:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:09:59 [INFO] django.server: "GET /reports/company-ledger/download/?&format=excel HTTP/1.1" 200 6339
+2026-11-05 07:10:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:11:56 [INFO] django.server: "GET /reports/company-ledger/download/? HTTP/1.1" 200 3353
+2026-11-05 07:11:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:16 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 266696
+2026-11-05 07:12:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:20 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 187731
+2026-11-05 07:12:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:24 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 206102
+2026-11-05 07:12:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:39 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200105
+2026-11-05 07:12:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:44 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 206102
+2026-11-05 07:12:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:49 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200105
+2026-11-05 07:12:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:12:54 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 204467
+2026-11-05 07:12:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:13:13 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200105
+2026-11-05 07:13:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:13:25 [INFO] django.server: "GET /accounts/admin-panel/expense-types/ HTTP/1.1" 200 192341
+2026-11-05 07:13:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:13:32 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 187731
+2026-11-05 07:13:33 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195203
+2026-11-05 07:13:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:13:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:17:51 [INFO] django.server: "GET /reports/par/ HTTP/1.1" 200 192523
+2026-11-05 07:17:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:19:22 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\views.py changed, reloading.
+2026-11-05 07:19:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:19:37 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\views.py changed, reloading.
+2026-11-05 07:19:38 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:19:42 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\views.py changed, reloading.
+2026-11-05 07:19:42 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:19:44 [INFO] django.utils.autoreload: C:\Users\USER\abacash\reports\views.py changed, reloading.
+2026-11-05 07:19:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-05 07:20:26 [INFO] django.server: "GET /reports/par/ HTTP/1.1" 200 192523
+2026-11-05 07:20:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:20:28 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 266696
+2026-11-05 07:20:29 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 195710
+2026-11-05 07:20:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:20:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:20:34 [INFO] django.server: "GET /reports/collateral-ledger/ HTTP/1.1" 200 193257
+2026-11-05 07:20:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:30:51 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-11-05 07:30:51 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-05 07:30:51 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-05 07:30:52 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-05 07:30:52 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-05 07:30:52 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-11-05 07:31:10 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-11-05 07:31:11 [INFO] django.server: code 400, message Bad request version ('êê\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06o')
+2026-11-05 07:31:11 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:31:11 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x06ü\x01\x00\x06ø\x03\x03Ç{tÎ8\x0fÖ\x03¼pl.{[·!É³ÏþðéÃ/\x8bÚüþ')
+2026-11-05 07:31:11 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:31:11 [INFO] django.server: code 400, message Bad request version ('®&ðüéû^\x06Íµ\x96\x88\x93³â\x94¼/Ð\x1bp1\x9f')
+2026-11-05 07:31:11 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:31:11 [INFO] django.server: code 400, message Bad request version ('E~ÆL¸\x15\x90öÒ\x03')
+2026-11-05 07:31:11 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:40:55 [INFO] django.server: code 400, message Bad request version ('\x06\x04\x03\x08\x04\x04\x01\x05\x03\x08\x05\x05\x01\x08\x06\x06\x01\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00#\x00\x00DÍ\x00\x05\x00\x03\x02h2\x00')
+2026-11-05 07:40:55 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:40:55 [INFO] django.server: code 400, message Bad request version ('è')
+2026-11-05 07:40:55 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:40:55 [INFO] django.server: code 400, message Bad request version ('\x02h2\x08http/1.1\x00')
+2026-11-05 07:40:55 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:40:56 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x06ü\x01\x00\x06ø\x03\x03f5\x07ØeÝÍ]¬v\x16\x89Ä"ø\x9eÄ\x96·úèi')
+2026-11-05 07:40:56 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-05 07:41:18 [INFO] django.server: "GET /reports/collateral-ledger/ HTTP/1.1" 200 193272
+2026-11-05 07:41:18 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-05 07:41:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:41:30 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200120
+2026-11-05 07:41:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:41:33 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 212600
+2026-11-05 07:41:35 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200120
+2026-11-05 07:41:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:41:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:41:40 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 204482
+2026-11-05 07:41:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:41:50 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 217924
+2026-11-05 07:41:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-05 07:42:02 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/print/ HTTP/1.1" 200 29235
+2026-11-05 07:42:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035

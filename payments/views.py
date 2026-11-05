@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import connection, transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -548,8 +548,6 @@ def receipt_view(request, pk):
     )
     context["receipt_document_title"] = document_title
     if request.GET.get("format") == "pdf":
-        if chosen_signatory is None:
-            return HttpResponseBadRequest("Select a signatory before downloading the receipt.")
         filename = f"{document_basename}.pdf"
         return render_pdf_response(request, "payments/receipt.html", context, filename=filename)
     return render(request, "payments/receipt.html", context)

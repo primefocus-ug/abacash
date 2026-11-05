@@ -8,6 +8,8 @@
   <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
   <a href="{% url 'reports:staff_performance' %}?date_from={{ date_from|date:'Y-m-d' }}&amp;date_to={{ date_to|date:'Y-m-d' }}&amp;branch={{ branch_id }}" class="btn btn-secondary btn-sm">Staff performance</a>
   <a href="{% url 'reports:fund_movement' %}?date_from={{ date_from|date:'Y-m-d' }}&amp;date_to={{ date_to|date:'Y-m-d' }}&amp;branch={{ branch_id }}" class="btn btn-secondary btn-sm">Fund analysis</a>
+  <a href="{% url 'reports:company_ledger_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">Download PDF</a>
+  <a href="{% url 'reports:company_ledger_download' %}?{{ request.GET.urlencode }}&amp;format=excel" class="btn btn-secondary btn-sm">Excel</a>
 {% endblock %}
 
 {% block content %}

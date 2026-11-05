@@ -5,6 +5,7 @@
 
 {% block topbar_actions %}
   <a href="{% url 'reports:disbursements_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm print-hide">⬇ Download PDF</a>
+  <a href="{% url 'reports:disbursements_download' %}?{{ request.GET.urlencode }}&amp;format=excel" class="btn btn-secondary btn-sm print-hide">⬇ Excel</a>
   <a href="{% url 'reports:disbursements_download' %}?{{ request.GET.urlencode }}&mode=inline" target="_blank" class="btn btn-secondary btn-sm print-hide">🖨 Print</a>
 {% endblock %}
 

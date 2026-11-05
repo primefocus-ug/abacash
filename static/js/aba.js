@@ -276,7 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
     saveDockPosition();
     positionPanel();
   });
-  dockToggle.addEventListener('click', () => {
+  dockToggle.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
     if (suppressNextClick) {
       suppressNextClick = false;
       return;

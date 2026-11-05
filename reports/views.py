@@ -1226,6 +1226,138 @@ def company_ledger(request):
 
 
 @_require_manager
+def company_ledger_download(request):
+    date_from, date_to = _period(request)
+    category = request.GET.get("category", "")
+    search = request.GET.get("q", "").strip()[:100].lower()
+    rows = []
+
+    def add(event_date, kind, reference, description, branch="", user="", status="",
+            amount=ZERO, cash_in=ZERO, cash_out=ZERO):
+        values = (kind, reference, description, branch, user, status)
+        if search and search not in " ".join(str(value or "") for value in values).lower():
+            return
+        rows.append([
+            event_date.isoformat() if hasattr(event_date, "isoformat") else str(event_date),
+            LEDGER_CATEGORIES.get(kind, kind), reference or "—", description or "",
+            branch or "—", user or "—", status or "—", _ugx(amount),
+            _ugx(cash_in), _ugx(cash_out),
+        ])
+
+    if not category or category == "payment":
+        payments = _branch(Payment.objects.filter(
+            payment_date__gte=date_from, payment_date__lte=date_to,
+        ).exclude(status=Payment.Status.REVERSED).select_related(
+            "loan__branch", "loan", "client", "recorded_by",
+        ), request, "loan__branch_id")
+        for item in payments:
+            add(item.payment_date, "payment", item.reference_number or item.loan.loan_number,
+                f"{item.client.full_name} · Loan {item.loan.loan_number}",
+                item.loan.branch.name if item.loan.branch else "",
+                item.recorded_by.get_full_name(), item.get_status_display(),
+                item.amount_received, item.amount_received, ZERO)
+
+    if not category or category in {"refund", "credit"}:
+        credits = _branch(CreditTransaction.objects.filter(
+            created_at__date__gte=date_from, created_at__date__lte=date_to,
+        ).select_related("client__branch", "created_by"), request, "client__branch_id")
+        for item in credits:
+            kind = "refund" if item.tx_type == CreditTransaction.TxType.REFUNDED else "credit"
+            if category and category != kind:
+                continue
+            amount = abs(item.amount)
+            add(item.created_at.date(), kind, f"CR-{item.pk}",
+                f"{item.client.full_name} · {item.get_tx_type_display()}: {item.notes}".strip(),
+                item.client.branch.name if item.client.branch else "",
+                item.created_by.get_full_name(), item.get_tx_type_display(), amount,
+                ZERO, amount if kind == "refund" else ZERO)
+
+    if not category or category == "injection":
+        for item in _branch(CapitalInjection.objects.filter(
+            injected_date__gte=date_from, injected_date__lte=date_to,
+        ).select_related("branch", "created_by"), request):
+            add(item.injected_date, "injection", f"INJ-{item.pk}",
+                f"{item.investor or item.source}: {item.notes}".strip(": "),
+                item.branch.name if item.branch else "", item.created_by.get_full_name(),
+                item.get_payment_method_display(), item.amount, item.amount, ZERO)
+
+    if not category or category == "expense":
+        for item in _branch(Expense.objects.filter(
+            expense_date__gte=date_from, expense_date__lte=date_to,
+        ).select_related("branch", "created_by"), request):
+            add(item.expense_date, "expense", item.receipt_number or item.reference_number,
+                f"{item.vendor or 'Expense'} · {item.description}".strip(" ·"),
+                item.branch.name if item.branch else "", item.created_by.get_full_name(),
+                item.get_status_display(), item.amount, ZERO,
+                item.amount if item.status == Expense.Status.APPROVED else ZERO)
+
+    if not category or category == "loan":
+        for item in _branch(Loan.objects.filter(
+            disbursement_date__gte=date_from, disbursement_date__lte=date_to,
+            status__in=DISBURSED,
+        ).select_related("branch", "client", "product", "applied_by"), request):
+            add(item.disbursement_date, "loan", item.loan_number,
+                f"{item.client.full_name} · {item.product.name}",
+                item.branch.name if item.branch else "", item.applied_by.get_full_name(),
+                item.get_status_display(), item.principal_amount, ZERO, item.principal_amount)
+
+    if not category or category == "client":
+        for item in _branch(Client.objects.filter(
+            created_at__date__gte=date_from, created_at__date__lte=date_to,
+        ).select_related("branch", "registered_by"), request):
+            add(item.created_at.date(), "client", item.client_number, item.full_name,
+                item.branch.name if item.branch else "", item.registered_by.get_full_name(),
+                "Active" if item.is_active else "Inactive")
+
+    if not category or category == "product":
+        for item in LoanProduct.objects.filter(
+            created_at__date__gte=date_from, created_at__date__lte=date_to,
+        ).select_related("created_by"):
+            add(item.created_at.date(), "product", f"PRODUCT-{item.pk}", item.name, "",
+                item.created_by.get_full_name(), "Active" if item.is_active else "Inactive")
+
+    if not category or category == "bank":
+        if request.user.can("can_manage_bank_accounts") or request.user.can("can_view_financial_overview"):
+            for item in _branch(BankTransaction.objects.filter(
+                transaction_date__date__gte=date_from, transaction_date__date__lte=date_to,
+            ).select_related("branch", "bank_account", "created_by"), request):
+                cash_in = item.amount if item.transaction_type == BankTransaction.TransactionType.CREDIT else ZERO
+                cash_out = ZERO if cash_in else item.amount
+                add(item.transaction_date.date(), "bank",
+                    item.reference_number or f"BANK-{item.pk}",
+                    f"{item.bank_account.account_name} · {item.category or item.notes}",
+                    item.branch.name if item.branch else "", item.created_by.get_full_name(),
+                    item.get_transaction_type_display(), item.amount, cash_in, cash_out)
+
+    if not category or category == "adjustment":
+        for item in _branch(SalesAdjustment.objects.filter(
+            adjustment_date__gte=date_from, adjustment_date__lte=date_to,
+        ).select_related("branch", "created_by"), request):
+            cash_in = item.amount if item.direction == SalesAdjustment.Direction.CASH_IN else ZERO
+            cash_out = ZERO if cash_in else item.amount
+            add(item.adjustment_date, "adjustment", item.reference, item.notes,
+                item.branch.name if item.branch else "", item.created_by.get_full_name(),
+                item.get_direction_display(), item.amount, cash_in, cash_out)
+
+    rows.sort(reverse=True)
+    body_rows = [[p(value) for value in row] for row in rows]
+    return build_report_pdf(
+        request, filename=f"Company-Ledger-{date_from}-{date_to}.pdf",
+        title="Company Ledger",
+        subtitle=f"Period: {date_from} to {date_to} | {len(rows)} events | Generated: {_stamp()}",
+        landscape=True,
+        sections=[{
+            "heading": "Operational and Financial Activity",
+            "head_row": ["Date", "Category", "Reference", "Description", "Branch", "Staff",
+                         "Status", "Amount", "Cash In", "Cash Out"],
+            "col_widths": [20*mm, 27*mm, 27*mm, 55*mm, 28*mm, 30*mm, 25*mm,
+                           28*mm, 28*mm, 28*mm],
+            "body_rows": body_rows,
+        }],
+    )
+
+
+@_require_manager
 def report_index(request):
     return render(request, "reports/index.html")
 
@@ -1275,6 +1407,107 @@ def loan_book_download(request):
             "head_row": ["Loan #", "Client", "Product", "Principal", "Outstanding", "Paid", "Status"],
             "col_widths": [28*mm, 60*mm, 40*mm, 34*mm, 34*mm, 34*mm, 30*mm],
             "body_rows": body_rows, "totals_row": totals_row,
+        }],
+    )
+
+
+def _collateral_ledger_data(request):
+    loans = list(
+        _loan_book_qs(request)
+        .select_related("branch")
+        .prefetch_related("collateral_items")
+    )
+    rows = []
+    for loan in loans:
+        collateral_value = sum(
+            (item.estimated_value for item in loan.collateral_items.all()),
+            ZERO,
+        )
+        principal = loan.principal_amount or ZERO
+        outstanding = loan.outstanding_balance or ZERO
+        rows.append({
+            "loan": loan,
+            "collateral_items": list(loan.collateral_items.all()),
+            "collateral_value": collateral_value,
+            "principal": principal,
+            "outstanding": outstanding,
+            "principal_gap": collateral_value - principal,
+            "outstanding_gap": collateral_value - outstanding,
+            "principal_coverage": (
+                collateral_value / principal * 100 if principal else ZERO
+            ),
+            "outstanding_coverage": (
+                collateral_value / outstanding * 100 if outstanding else ZERO
+            ),
+        })
+    return {
+        "rows": rows,
+        "total_principal": sum((row["principal"] for row in rows), ZERO),
+        "total_outstanding": sum((row["outstanding"] for row in rows), ZERO),
+        "total_collateral": sum((row["collateral_value"] for row in rows), ZERO),
+        "total_gap": sum((row["principal_gap"] for row in rows), ZERO),
+        "total_items": sum((len(row["collateral_items"]) for row in rows), 0),
+        "date_from": request.GET.get("date_from", ""),
+        "date_to": request.GET.get("date_to", ""),
+        "product_id": request.GET.get("product", ""),
+    }
+
+
+@_require_manager
+def collateral_ledger(request):
+    data = _collateral_ledger_data(request)
+    data["products"] = LoanProduct.objects.filter(is_active=True)
+    return render(request, "reports/collateral_ledger.html", data)
+
+
+@_require_manager
+def collateral_ledger_download(request):
+    data = _collateral_ledger_data(request)
+    body_rows = [
+        [
+            p(row["loan"].loan_number),
+            p(row["loan"].client.full_name),
+            p(row["loan"].product.name),
+            p(row["loan"].get_status_display()),
+            p(len(row["collateral_items"])),
+            p(_ugx(row["principal"])),
+            p(_ugx(row["outstanding"])),
+            p(_ugx(row["collateral_value"])),
+            p(f'{row["principal_coverage"]:,.1f}%'),
+            p(f'{row["outstanding_coverage"]:,.1f}%'),
+            p(_ugx(row["principal_gap"])),
+        ]
+        for row in data["rows"]
+    ]
+    totals_row = [
+        p(""), p(""), p(""), p("<b>TOTAL</b>", CELL_BOLD),
+        p(f'<b>{data["total_items"]}</b>', CELL_BOLD),
+        p(f'<b>{_ugx(data["total_principal"])}</b>', CELL_BOLD),
+        p(f'<b>{_ugx(data["total_outstanding"])}</b>', CELL_BOLD),
+        p(f'<b>{_ugx(data["total_collateral"])}</b>', CELL_BOLD),
+        p(""), p(""),
+        p(f'<b>{_ugx(data["total_collateral"] - data["total_principal"])}</b>', CELL_BOLD),
+    ]
+    return build_report_pdf(
+        request,
+        filename=f"Collateral-Ledger-{_today()}.pdf",
+        title="Loan & Collateral Coverage Ledger",
+        subtitle=(
+            f"{len(data['rows'])} loans | {data['total_items']} collateral items | "
+            f"Generated: {_stamp()}"
+        ),
+        landscape=True,
+        sections=[{
+            "heading": "Loan value compared with pledged collateral value",
+            "head_row": [
+                "Loan #", "Client", "Product", "Status", "Items", "Principal",
+                "Outstanding", "Collateral Value", "Principal Coverage",
+                "Outstanding Coverage", "Collateral vs Principal",
+            ],
+            "col_widths": [23*mm, 42*mm, 28*mm, 27*mm, 14*mm, 29*mm,
+                           30*mm, 32*mm, 29*mm, 32*mm, 32*mm],
+            "body_rows": body_rows,
+            "totals_row": totals_row,
         }],
     )
 

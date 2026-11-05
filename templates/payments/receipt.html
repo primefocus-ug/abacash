@@ -20,7 +20,7 @@
   <form method="get" class="print-hide" style="display:inline-flex;align-items:center;gap:6px;margin-right:8px;">
     <input type="hidden" name="style" value="{{ receipt_style }}">
     <label for="receipt-signatory" class="sr-only">Receipt signatory</label>
-    <select id="receipt-signatory" name="signatory" required onchange="this.form.requestSubmit()"
+    <select id="receipt-signatory" name="signatory" onchange="this.form.requestSubmit()"
             style="max-width:190px;padding:6px 8px;">
       <option value="">Choose signatory</option>
       {% for signer in signatories %}
@@ -29,8 +29,8 @@
     </select>
   </form>
   {% if not signatories %}<span class="print-hide text-sm text-muted">No staff signatures uploaded</span>{% endif %}
-  <a class="btn btn-secondary btn-sm print-hide {% if not selected_signatory %}disabled{% endif %}"
-     {% if selected_signatory %}href="?format=pdf&amp;style={{ receipt_style }}&amp;signatory={{ selected_signatory.pk }}"{% else %}aria-disabled="true" title="Choose a signatory first"{% endif %}>
+  <a class="btn btn-secondary btn-sm print-hide"
+     href="?format=pdf&amp;style={{ receipt_style }}{% if selected_signatory %}&amp;signatory={{ selected_signatory.pk }}{% endif %}">
     Download PDF
   </a>
   <button onclick="printReceipt()" class="btn btn-primary btn-sm">Print Receipt</button>
@@ -631,7 +631,7 @@
         {% if selected_signatory %}
         <img class="rcpt2-signature-image" src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}">
         {{ selected_signatory.full_name }}<br>
-        {% else %}Select signatory to print{% endif %}
+        {% endif %}
         Authorized Signatory
       </div>
     </div>
@@ -778,7 +778,7 @@
       {% if selected_signatory %}
       <img class="rcpt-signature-image" src="{{ selected_signatory.signature.url }}" alt="Signature of {{ selected_signatory.full_name }}">
       {{ selected_signatory.full_name }}<br>
-      {% else %}Select signatory to print{% endif %}
+      {% endif %}
       Authorized Signatory
     </div>
   </div>
@@ -799,13 +799,8 @@
 <script>
   (function () {
     const receiptTitle = "{{ receipt_document_title|default:receipt.receipt_number|escapejs }}";
-    const hasSignatory = {{ selected_signatory|yesno:"true,false" }};
     document.title = receiptTitle;
     window.printReceipt = function () {
-      if (!hasSignatory) {
-        window.alert('Choose an authorized signatory before printing this receipt.');
-        return;
-      }
       document.title = receiptTitle;
       window.print();
     };

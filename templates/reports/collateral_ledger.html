@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load humanize aba_filters %}
+
+{% block title %}Loan &amp; Collateral Ledger{% endblock %}
+{% block page_title %}Loan &amp; Collateral Ledger{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'reports:index' %}" class="btn btn-secondary btn-sm">← Reports</a>
+  <a href="{% url 'reports:collateral_ledger_download' %}?{{ request.GET.urlencode }}" class="btn btn-secondary btn-sm">⬇ Download PDF</a>
+  <a href="{% url 'reports:collateral_ledger_download' %}?{{ request.GET.urlencode }}&amp;format=excel" class="btn btn-secondary btn-sm">⬇ Excel</a>
+  <a href="{% url 'reports:collateral_ledger_download' %}?{{ request.GET.urlencode }}&amp;mode=inline" target="_blank" class="btn btn-secondary btn-sm">🖨 Print</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3 print-hide">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="search-filter-bar" style="align-items:flex-end;">
+      <div>
+        <label style="display:block;margin-bottom:4px;">Disbursed from</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">Disbursed to</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;width:160px;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;">Product</label>
+        <select name="product" style="margin-bottom:0;width:200px;">
+          <option value="">All products</option>
+          {% for product in products %}
+          <option value="{{ product.pk }}" {% if product_id == product.pk|stringformat:"s" %}selected{% endif %}>{{ product.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      {% if date_from or date_to or product_id %}
+      <a href="{% url 'reports:collateral_ledger' %}" class="btn btn-secondary btn-sm">Clear</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<div class="metrics-grid mb-3">
+  <div class="metric-card teal">
+    <div class="metric-label">Loans</div>
+    <div class="metric-value">{{ rows|length }}</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Principal Value</div>
+    <div class="metric-value" style="font-size:18px;">{{ total_principal|ugx }}</div>
+  </div>
+  <div class="metric-card amber">
+    <div class="metric-label">Outstanding Value</div>
+    <div class="metric-value amber" style="font-size:18px;">{{ total_outstanding|ugx }}</div>
+  </div>
+  <div class="metric-card green">
+    <div class="metric-label">Collateral Value</div>
+    <div class="metric-value green" style="font-size:18px;">{{ total_collateral|ugx }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header card-header-content">
+    <span class="card-header-title card-title">Coverage by loan</span>
+    <span class="text-muted text-sm">{{ total_items }} collateral items</span>
+  </div>
+  <div class="table-wrap">
+    <table class="aba-table">
+      <thead>
+        <tr>
+          <th>Loan</th><th>Client</th><th>Product</th><th>Status</th><th>Items</th>
+          <th>Principal</th><th>Outstanding</th><th>Collateral value</th>
+          <th>Principal coverage</th><th>Outstanding coverage</th><th>Value gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="mono">{{ row.loan.loan_number }}</td>
+          <td>{{ row.loan.client.full_name }}</td>
+          <td>{{ row.loan.product.name }}</td>
+          <td>{{ row.loan.get_status_display }}</td>
+          <td>{{ row.collateral_items|length }}</td>
+          <td class="mono">{{ row.principal|ugx }}</td>
+          <td class="mono">{{ row.outstanding|ugx }}</td>
+          <td class="mono">{{ row.collateral_value|ugx }}</td>
+          <td class="mono">{{ row.principal_coverage|floatformat:1 }}%</td>
+          <td class="mono">{{ row.outstanding_coverage|floatformat:1 }}%</td>
+          <td class="mono {% if row.principal_gap < 0 %}text-danger{% else %}text-success{% endif %}">{{ row.principal_gap|ugx }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" class="text-center text-muted">No loans match the selected filters.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="4">Total</th><th>{{ total_items }}</th>
+          <th>{{ total_principal|ugx }}</th><th>{{ total_outstanding|ugx }}</th>
+          <th>{{ total_collateral|ugx }}</th><th colspan="2"></th>
+          <th>{{ total_gap|ugx }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endblock %}

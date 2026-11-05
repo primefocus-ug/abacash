@@ -6,6 +6,9 @@ app_name = "reports"
 urlpatterns = [
     path("",                  views.report_index,          name="index"),
     path("company-ledger/",   views.company_ledger,        name="company_ledger"),
+    path("company-ledger/download/", views.company_ledger_download, name="company_ledger_download"),
+    path("collateral-ledger/", views.collateral_ledger, name="collateral_ledger"),
+    path("collateral-ledger/download/", views.collateral_ledger_download, name="collateral_ledger_download"),
 
     path("loan-book/",        views.loan_book,             name="loan_book"),
     path("loan-book/download/", views.loan_book_download,  name="loan_book_download"),
