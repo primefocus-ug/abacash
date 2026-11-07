@@ -569,7 +569,7 @@ def _fund_movement_data(request):
             event_date=injection.injected_date,
             event_time=injection.created_at,
             kind="Capital injection",
-            counterparty=injection.investor or injection.source,
+            counterparty=injection.investor_name or injection.source,
             method=injection.get_payment_method_display(),
             reference=f"INJ-{injection.pk}",
             description=injection.notes or injection.source,
@@ -1096,7 +1096,7 @@ def company_ledger(request):
                 branch, user, amount = item.branch, item.created_by, item.amount
                 cash_in = amount
                 reference = f"INJ-{item.pk}"
-                description = f"{item.investor or item.source}: {item.notes}".strip(": ")
+                description = f"{item.investor_name or item.source}: {item.notes}".strip(": ")
                 status = item.get_payment_method_display()
             elif kind == "expense":
                 branch, user, amount = item.branch, item.created_by, item.amount
@@ -1277,7 +1277,7 @@ def company_ledger_download(request):
             injected_date__gte=date_from, injected_date__lte=date_to,
         ).select_related("branch", "created_by"), request):
             add(item.injected_date, "injection", f"INJ-{item.pk}",
-                f"{item.investor or item.source}: {item.notes}".strip(": "),
+                f"{item.investor_name or item.source}: {item.notes}".strip(": "),
                 item.branch.name if item.branch else "", item.created_by.get_full_name(),
                 item.get_payment_method_display(), item.amount, item.amount, ZERO)
 

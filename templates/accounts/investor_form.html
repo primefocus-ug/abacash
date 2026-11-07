@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load aba_filters %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block topbar_actions %}<a href="{% url 'accounts:investor_list' %}" class="btn btn-secondary btn-sm">← Back</a>{% endblock %}
+
+{% block content %}
+<div id="quick-form-content" class="investor-form-popover">
+  {% include "accounts/includes/quick_form_messages.html" %}
+  <div class="investor-form-heading">
+    <div>
+      <div class="investor-form-kicker">Investor profile</div>
+      <h2>{{ title }}</h2>
+      <p>{% if action == 'edit' %}Keep contact and account details up to date.{% else %}Add a reusable investor profile for future injections.{% endif %}</p>
+    </div>
+    <div class="investor-form-badge">{% if action == 'edit' %}Edit{% else %}New{% endif %}</div>
+  </div>
+  <div class="investor-form-panel">
+    <form method="post" id="investor-form" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
+      {% csrf_token %}
+      <div class="investor-form-grid">
+        <div class="investor-field investor-field-wide">
+          <label for="name">Investor name <span>*</span></label>
+          <input class="form-control" type="text" id="name" name="name" required autocomplete="name" placeholder="e.g. Derick Nsubuga" value="{{ investor.name|default:'' }}">
+        </div>
+        <div class="investor-field">
+          <label for="phone">Phone <small>Optional</small></label>
+          <input class="form-control" type="tel" id="phone" name="phone" autocomplete="tel" placeholder="+256 7XX XXX XXX" value="{{ investor.phone|default:'' }}">
+        </div>
+        <div class="investor-field">
+          <label for="email">Email <small>Optional</small></label>
+          <input class="form-control" type="email" id="email" name="email" autocomplete="email" placeholder="name@example.com" value="{{ investor.email|default:'' }}">
+        </div>
+        {% if action == 'edit' %}
+          <div class="investor-field">
+            <label for="investor_type">Investor type</label>
+            <select class="form-control" id="investor_type" name="investor_type">{% for value, label in investor_type_choices %}<option value="{{ value }}" {% if investor.investor_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          </div>
+          <div class="investor-field">
+            <label for="status">Account status</label>
+            <select class="form-control" id="status" name="status">{% for value, label in status_choices %}<option value="{{ value }}" {% if investor.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          </div>
+          <div class="investor-field investor-field-wide">
+            <label for="notes">Notes <small>Optional</small></label>
+            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Add a short internal note...">{{ investor.notes|default:'' }}</textarea>
+          </div>
+        {% endif %}
+      </div>
+      {% if action == 'create' %}
+        <input type="hidden" name="investor_type" value="INDIVIDUAL">
+        <input type="hidden" name="committed_amount" value="0">
+        <input type="hidden" name="status" value="ACTIVE">
+      {% endif %}
+      <div class="investor-form-actions">
+        <button type="button" class="btn btn-secondary" data-quick-form-cancel>Cancel</button>
+        <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Save Changes{% else %}Add Investor{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+<style>
+  .investor-form-popover { color: var(--text-primary); }
+  .investor-form-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:2px 2px 18px; }
+  .investor-form-kicker { color:var(--accent); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  .investor-form-heading h2 { margin:4px 0 3px; font-size:20px; }
+  .investor-form-heading p { margin:0; color:var(--text-muted); font-size:12px; }
+  .investor-form-badge { border:1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-radius:999px; color:var(--accent); font-size:11px; font-weight:700; padding:5px 10px; }
+  .investor-form-panel { border:1px solid var(--border); border-radius:12px; padding:18px; background:var(--surface-2); }
+  .investor-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+  .investor-field { min-width:0; }
+  .investor-field-wide { grid-column:1 / -1; }
+  .investor-field label { margin-bottom:6px; }
+  .investor-field label span { color:var(--accent); }
+  .investor-field label small { color:var(--text-muted); font-size:10px; font-weight:400; margin-left:4px; }
+  .investor-form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+  @media (max-width:560px) { .investor-form-grid { grid-template-columns:1fr; } .investor-field-wide { grid-column:auto; } }
+</style>
+{% endblock %}

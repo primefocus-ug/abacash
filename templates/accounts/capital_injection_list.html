@@ -56,7 +56,7 @@
         <tr>
           <td>{{ injection.injected_date }}</td>
           <td><strong>{{ injection.source }}</strong></td>
-          <td class="text-sm text-muted">{{ injection.investor|default:"-" }}</td>
+          <td class="text-sm text-muted">{{ injection.investor_name|default:"-" }}</td>
           <td class="mono" style="color:var(--green-400);">UGX {{ injection.amount|floatformat:0|intcomma }}</td>
           <td class="text-sm text-muted">{{ injection.notes|default:"-"|truncatewords:5 }}</td>
           <td style="text-align:center;">

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Delete Investor{% endblock %}
+{% block page_title %}Delete Investor{% endblock %}
+{% block content %}
+<div class="card"><div class="card-body">
+  <p>Delete investor <strong>{{ investor.name }}</strong>?</p>
+  <form method="post">{% csrf_token %}<button type="submit" class="btn btn-danger">Delete</button> <a href="{% url 'accounts:investor_list' %}" class="btn btn-secondary">Cancel</a></form>
+</div></div>
+{% endblock %}

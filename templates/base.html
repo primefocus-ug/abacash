@@ -4619,7 +4619,7 @@
             {% endif %}
 
             <!-- FINANCIAL -->
-            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
+            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_investors or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
             <div class="nav-group" data-group="financial">
                 <button type="button" class="nav-group-toggle" aria-expanded="false">
                     <span class="nav-group-label">Financial</span>
@@ -4649,6 +4649,10 @@
                             <polyline points="17 6 23 6 23 12"/>
                         </svg>
                         <span>Capital Injections</span>
+                        </a>
+                        <a href="{% url 'accounts:investor_list' %}"
+                           class="nav-link {% if ns == 'accounts' and name == 'investor_list' or ns == 'accounts' and name == 'investor_create' or ns == 'accounts' and name == 'investor_edit' %}active{% endif %}">
+                            <span>Investors</span>
                     </a>
 
                 </div>
@@ -5087,7 +5091,7 @@
             </div>
             {% endif %}
 
-            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
+            {% if perms.accounts.can_view_admin_panel or perms.accounts.can_manage_expenses or perms.accounts.can_manage_capital or perms.accounts.can_manage_investors or perms.accounts.can_manage_bank_accounts or perms.accounts.can_manage_users or perms.accounts.can_manage_branches or perms.accounts.can_manage_company_settings or perms.accounts.can_manage_system_settings or perms.accounts.can_view_audit_log or perms.accounts.can_manage_permissions %}
             <div class="more-sheet-section">
                 <div class="more-sheet-section-title">Financial</div>
 
@@ -5114,6 +5118,10 @@
                         <polyline points="17 6 23 6 23 12"/>
                     </svg>
                     <span>Capital Injections</span>
+                </a>
+                <a href="{% url 'accounts:investor_list' %}"
+                   class="more-sheet-link {% if ns == 'accounts' and name == 'investor_list' or ns == 'accounts' and name == 'investor_create' or ns == 'accounts' and name == 'investor_edit' %}active{% endif %}">
+                    <span>Investors</span>
                 </a>
             </div>
 

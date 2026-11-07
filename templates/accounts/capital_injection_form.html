@@ -23,7 +23,7 @@
       <div class="card">
         <div class="card-body">
           <h3 style="margin-bottom:20px;">{{ title }}</h3>
-          <form method="post" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
+          <form method="post" id="capital-injection-form" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
             {% csrf_token %}
       <div class="form-grid">
         <div>
@@ -50,6 +50,7 @@
           </select>
         </div>
 
+        {% if not injection %}
         <div>
           <label for="branch">Branch</label>
           <select id="branch" name="branch">
@@ -59,16 +60,63 @@
             {% endfor %}
           </select>
         </div>
+        {% else %}
+          <input type="hidden" name="branch" value="{{ injection.branch_id|default:'' }}">
+        {% endif %}
 
-        <div>
-          <label for="investor">Investor Name</label>
-          <input type="text" id="investor" name="investor" placeholder="Optional investor/source contact name" value="{{ injection.investor|default:'' }}">
+        <div style="grid-column:1 / -1;">
+          <label for="investor_record">Investor</label>
+          <select id="investor_record" name="investor_record">
+            <option value="">Select an investor (optional)</option>
+            {% for investor in investors %}
+              <option value="{{ investor.pk }}" {% if injection.investor_record_id == investor.pk %}selected{% endif %}>{{ investor.name }}{% if investor.phone %} — {{ investor.phone }}{% endif %}</option>
+            {% endfor %}
+            {% if previous_investors %}
+              <optgroup label="Previously recorded names">
+                {% for name in previous_investors %}
+                  <option value="legacy:{{ name|escape }}" {% if injection.investor == name and not injection.investor_record_id %}selected{% endif %}>{{ name }} (register if needed)</option>
+                {% endfor %}
+              </optgroup>
+            {% endif %}
+            {% if not injection %}
+              <option value="new">+ Add new investor</option>
+            {% endif %}
+          </select>
+          {% if not injection %}
+            <div id="new-investor-fields" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-subtle, rgba(0,0,0,.02));">
+              <label for="investor">New investor name</label>
+              <input type="text" id="investor" name="investor" placeholder="Enter investor name">
+              <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;">
+                <input type="checkbox" name="register_investor" value="1" id="register_investor" style="width:auto;" checked>
+                Save investor for future injections
+              </label>
+            </div>
+          {% endif %}
+        </div>
+        {% if injection %}
+          <input type="hidden" id="investor" name="investor" value="{{ injection.investor|default:'' }}">
+          <input type="hidden" name="register_investor" value="0">
+        {% endif %}
+
+        <div style="grid-column:1 / -1;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-subtle, rgba(0,0,0,.02));">
+          <label style="display:flex;align-items:center;gap:8px;margin:0;font-size:13px;">
+            <input type="checkbox" name="attracts_interest" value="1" style="width:auto;" {% if injection.attracts_interest %}checked{% endif %}>
+            This injection attracts interest
+            <span class="text-muted">({{ injection.interest_rate_annual|default:default_savings_interest_rate }}% per year)</span>
+          </label>
         </div>
 
+        {% if not injection %}
         <div style="grid-column: 1 / -1;">
           <label for="notes">Notes</label>
           <textarea id="notes" name="notes" rows="3" placeholder="Optional details about this capital injection...">{{ injection.notes|default:'' }}</textarea>
         </div>
+        {% else %}
+        <div style="grid-column: 1 / -1;">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="2" placeholder="Optional details about this capital injection...">{{ injection.notes|default:'' }}</textarea>
+        </div>
+        {% endif %}
       </div>
 
       <div class="form-actions">
@@ -91,6 +139,41 @@
     modal?.addEventListener('click', function (event) {
       if (event.target === modal) {
         window.location.href = '{% url "accounts:capital_injection_list" %}';
+      }
+    });
+
+    const form = document.getElementById('capital-injection-form');
+    const investorSelect = document.getElementById('investor_record');
+    const investorInput = document.getElementById('investor');
+    const newInvestorFields = document.getElementById('new-investor-fields');
+    const registerCheckbox = document.getElementById('register_investor');
+    function showNewInvestorFields(show) {
+      if (newInvestorFields) newInvestorFields.style.display = show ? 'block' : 'none';
+      if (!show && investorInput) investorInput.value = '';
+    }
+    investorSelect?.addEventListener('change', function () {
+      if (this.value.indexOf('legacy:') === 0) {
+        investorInput.value = this.value.slice(7);
+        showNewInvestorFields(true);
+        this.value = 'new';
+        investorInput.focus();
+        if (registerCheckbox && window.confirm('Register ' + investorInput.value + ' among the investors for future use?')) {
+          registerCheckbox.checked = true;
+        }
+      } else if (this.value === 'new') {
+        showNewInvestorFields(true);
+        investorInput.focus();
+      } else if (this.value) {
+        showNewInvestorFields(false);
+        if (registerCheckbox) registerCheckbox.checked = false;
+      } else {
+        showNewInvestorFields(false);
+      }
+    });
+    form?.addEventListener('submit', function (event) {
+      if (!investorInput || !investorInput.value.trim() || registerCheckbox.checked) return;
+      if (window.confirm('Register ' + investorInput.value.trim() + ' among the investors for future use?')) {
+        registerCheckbox.checked = true;
       }
     });
   });

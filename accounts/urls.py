@@ -118,6 +118,14 @@ urlpatterns = [
     path("admin-panel/capital-injections/<int:pk>/edit/", views.capital_injection_edit, name="capital_injection_edit"),
     path("admin-panel/capital-injections/<int:pk>/delete/", views.capital_injection_delete, name="capital_injection_delete"),
 
+    # Investor Management
+    path("admin-panel/investors/", views.investor_list, name="investor_list"),
+    path("admin-panel/investors/new/", views.investor_create, name="investor_create"),
+    path("admin-panel/investors/<int:pk>/", views.investor_detail, name="investor_detail"),
+    path("admin-panel/investors/<int:pk>/drawings/new/", views.investor_drawing_create, name="investor_drawing_create"),
+    path("admin-panel/investors/<int:pk>/edit/", views.investor_edit, name="investor_edit"),
+    path("admin-panel/investors/<int:pk>/delete/", views.investor_delete, name="investor_delete"),
+
     # Bank Account Management
     path("admin-panel/bank-accounts/",              views.bank_account_list,   name="bank_account_list"),
     path("admin-panel/bank-accounts/new/",           views.bank_account_create, name="bank_account_create"),

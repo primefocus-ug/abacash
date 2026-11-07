@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import BankTransaction, CapitalInjection, Expense, User
+from .models import BankTransaction, CapitalInjection, Expense, Investor, InvestorDrawing, User
 
 
 @admin.register(User)
@@ -36,6 +36,20 @@ class BankTransactionAdmin(admin.ModelAdmin):
 
 @admin.register(CapitalInjection)
 class CapitalInjectionAdmin(admin.ModelAdmin):
-    list_display = ("injected_date", "source", "amount", "payment_method", "branch", "investor")
+    list_display = ("injected_date", "source", "amount", "payment_method", "branch", "investor", "attracts_interest")
     list_filter = ("injected_date", "payment_method", "branch")
     search_fields = ("source", "investor", "notes")
+
+
+@admin.register(Investor)
+class InvestorAdmin(admin.ModelAdmin):
+    list_display = ("name", "investor_type", "committed_amount", "status", "branch", "phone")
+    list_filter = ("investor_type", "status", "payment_method", "branch")
+    search_fields = ("name", "phone", "email", "national_id")
+
+
+@admin.register(InvestorDrawing)
+class InvestorDrawingAdmin(admin.ModelAdmin):
+    list_display = ("drawing_date", "investor", "amount", "payment_method", "purpose")
+    list_filter = ("drawing_date", "payment_method")
+    search_fields = ("investor__name", "purpose", "notes")

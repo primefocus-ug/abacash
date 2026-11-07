@@ -48,7 +48,8 @@ PERMISSIONS = [
     ("can_manage_expenses",          "Record & manage expenses",                 [GROUP_CEO]),
     ("can_manage_expense_categories","Manage expense categories",                [GROUP_CEO]),
     ("can_manage_capital",           "Manage capital injections",                [GROUP_CEO]),
-    ("can_manage_bank_accounts",     "Manage bank accounts & transactions",      [GROUP_CEO]),
+    ("can_manage_investors",         "Manage investors",                         [GROUP_CEO]),
+    ("can_manage_bank_accounts",      "Manage bank accounts & transactions",      [GROUP_CEO]),
     ("can_view_financial_overview",  "View company-wide financial overview",     [GROUP_CEO]),
 
     # --- Loans --------------------------------------------------------------

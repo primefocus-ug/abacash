@@ -477,6 +477,38 @@ class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
         help_text=_("Percentage of collateral value used as loan floor (e.g. 50 = 50%)."),
     )
 
+    # Disbursement limits
+    class DisbursementLimitScope(models.TextChoices):
+        ALL = "ALL", _("All staff")
+        CASHIER = "CASHIER", _("Cashiers")
+        MANAGER = "MANAGER", _("Managers")
+        CEO = "CEO", _("CEOs")
+
+    daily_disbursement_limit = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text=_("Maximum total loan principal disbursed per day. Zero disables the limit."),
+    )
+    daily_disbursement_limit_scope = models.CharField(
+        max_length=10, choices=DisbursementLimitScope.choices, default=DisbursementLimitScope.ALL,
+    )
+    weekly_disbursement_limit = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text=_("Maximum total loan principal disbursed per week. Zero disables the limit."),
+    )
+    weekly_disbursement_limit_scope = models.CharField(
+        max_length=10, choices=DisbursementLimitScope.choices, default=DisbursementLimitScope.ALL,
+    )
+    monthly_disbursement_limit = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text=_("Maximum total loan principal disbursed per month. Zero disables the limit."),
+    )
+    monthly_disbursement_limit_scope = models.CharField(
+        max_length=10, choices=DisbursementLimitScope.choices, default=DisbursementLimitScope.ALL,
+    )
+
     # Fee Settings
     default_processing_fee_percent = models.DecimalField(
         max_digits=5, decimal_places=2, default=1,
@@ -752,6 +784,21 @@ class CapitalInjection(models.Model):
         related_name="capital_injections",
     )
     investor = models.CharField(max_length=200, blank=True)
+    investor_record = models.ForeignKey(
+        "accounts.Investor",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="capital_injections",
+    )
+    attracts_interest = models.BooleanField(
+        default=False,
+        help_text=_("Apply the configured annual savings interest rate to this injection."),
+    )
+    interest_rate_annual = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0,
+        help_text=_("Annual interest rate snapshotted when this injection was recorded."),
+    )
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(
         "accounts.User",
@@ -765,11 +812,104 @@ class CapitalInjection(models.Model):
     def __str__(self):
         return f"Capital injection UGX {self.amount:,.0f} from {self.source} on {self.injected_date}"
 
+    @property
+    def investor_name(self):
+        return self.investor_record.name if self.investor_record else self.investor
+
     class Meta:
         verbose_name = _("Capital Injection")
         verbose_name_plural = _("Capital Injections")
         ordering = ["-injected_date", "-created_at"]
         indexes = [models.Index(fields=["injected_date"])]
+
+
+class Investor(models.Model):
+    class InvestorType(models.TextChoices):
+        INDIVIDUAL = "INDIVIDUAL", _("Individual")
+        COMPANY = "COMPANY", _("Company")
+        PARTNERSHIP = "PARTNERSHIP", _("Partnership")
+
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", _("Active")
+        INACTIVE = "INACTIVE", _("Inactive")
+        PROSPECT = "PROSPECT", _("Prospect")
+
+    name = models.CharField(max_length=200)
+    investor_type = models.CharField(
+        max_length=20, choices=InvestorType.choices, default=InvestorType.INDIVIDUAL,
+    )
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    national_id = models.CharField(max_length=100, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    committed_amount = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
+    investment_date = models.DateField(null=True, blank=True)
+    maturity_date = models.DateField(null=True, blank=True)
+    payment_method = models.CharField(
+        max_length=20, choices=CapitalInjection.PaymentMethod.choices,
+        default=CapitalInjection.PaymentMethod.BANK,
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.ACTIVE,
+    )
+    branch = models.ForeignKey(
+        "accounts.Branch", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="investors",
+    )
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="created_investors",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Investor")
+        verbose_name_plural = _("Investors")
+        ordering = ["name"]
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["investment_date"]),
+        ]
+
+
+class InvestorDrawing(models.Model):
+    """A withdrawal/drawing made against an investor's capital account."""
+
+    investor = models.ForeignKey(
+        Investor, on_delete=models.PROTECT, related_name="drawings",
+    )
+    amount = models.DecimalField(
+        max_digits=15, decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    drawing_date = models.DateField(default=timezone.localdate)
+    payment_method = models.CharField(
+        max_length=20, choices=CapitalInjection.PaymentMethod.choices,
+        default=CapitalInjection.PaymentMethod.BANK,
+    )
+    purpose = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="created_investor_drawings",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Drawing UGX {self.amount:,.0f} from {self.investor.name}"
+
+    class Meta:
+        ordering = ["-drawing_date", "-created_at"]
+        indexes = [models.Index(fields=["investor", "drawing_date"])]
 
 
 class SalesAdjustment(models.Model):

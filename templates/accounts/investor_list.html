@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Investors{% endblock %}
+{% block page_title %}Investors{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'accounts:investor_create' %}" class="btn btn-primary btn-sm" hx-get="{% url 'accounts:investor_create' %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">+ Add Investor</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-body" style="padding:14px 20px;">
+    <form method="get" class="flex gap-2" style="align-items:flex-end;flex-wrap:wrap;">
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Search</label>
+        <input type="text" name="q" value="{{ q }}" placeholder="Name, phone, email or ID..." style="width:220px;margin-bottom:0;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Type</label>
+        <select name="investor_type" style="margin-bottom:0;">
+          <option value="">All types</option>
+          {% for value, label in investor_type_choices %}<option value="{{ value }}" {% if investor_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Status</label>
+        <select name="status" style="margin-bottom:0;">
+          <option value="">All statuses</option>
+          {% for value, label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Branch</label>
+        <select name="branch" style="margin-bottom:0;">
+          <option value="">All branches</option>
+          {% for item in branches %}<option value="{{ item.pk }}" {% if branch == item.pk|stringformat:"s" %}selected{% endif %}>{{ item.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Investment from</label>
+        <input type="date" name="date_from" value="{{ date_from }}" style="margin-bottom:0;">
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:12px;">Investment to</label>
+        <input type="date" name="date_to" value="{{ date_to }}" style="margin-bottom:0;">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+      <a href="?q={{ q|urlencode }}&investor_type={{ investor_type }}&status={{ status }}&branch={{ branch }}&date_from={{ date_from }}&date_to={{ date_to }}&export=csv" class="btn btn-secondary btn-sm">Export CSV</a>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;">
+  <div class="metric-card purple" style="cursor:default;">
+    <div class="metric-label">Investors</div>
+    <div class="metric-value">{{ total_count|intcomma }}</div>
+    <div class="metric-sub">Matching filters</div>
+  </div>
+  <div class="metric-card green" style="cursor:default;">
+    <div class="metric-label">Committed Capital</div>
+    <div class="metric-value">UGX {{ total_amount|floatformat:0|intcomma }}</div>
+    <div class="metric-sub">Matching filters</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Investor Register</span></div>
+  <div class="table-wrap">
+    {% if investors %}
+    <table class="aba-table">
+      <thead><tr><th>Investor</th><th>Contact</th><th>Type</th><th>Committed</th><th>Investment date</th><th>Status</th><th>Branch</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for investor in investors %}
+        <tr data-href="{% url 'accounts:investor_detail' investor.pk %}" class="clickable-row" tabindex="0" role="link" aria-label="View {{ investor.name }}">
+          <td><strong>{{ investor.name }}</strong><div class="text-sm text-muted">{{ investor.national_id|default:"" }}</div></td>
+          <td class="text-sm">{{ investor.phone|default:"-" }}<br>{{ investor.email|default:"-" }}</td>
+          <td>{{ investor.get_investor_type_display }}</td>
+          <td class="mono">UGX {{ investor.committed_amount|floatformat:0|intcomma }}</td>
+          <td>{{ investor.investment_date|default:"-" }}</td>
+          <td>{{ investor.get_status_display }}</td>
+          <td>{{ investor.branch.name|default:"Company-wide" }}</td>
+          <td><a href="{% url 'accounts:investor_edit' investor.pk %}" class="btn btn-xs btn-secondary" hx-get="{% url 'accounts:investor_edit' investor.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML" onclick="event.stopPropagation();">Edit</a> <a href="{% url 'accounts:investor_delete' investor.pk %}" class="btn btn-xs btn-danger" onclick="event.stopPropagation();">Delete</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state"><p>No investors match the selected filters.</p></div>{% endif %}
+  </div>
+  {% if investors.has_other_pages %}
+  <div class="card-footer" style="text-align:center;">
+    {% if investors.has_previous %}<a href="?page={{ investors.previous_page_number }}&q={{ q|urlencode }}&investor_type={{ investor_type }}&status={{ status }}&branch={{ branch }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-sm btn-secondary">Previous</a>{% endif %}
+    <span style="margin:0 8px;font-size:13px;">Page {{ investors.number }} of {{ investors.paginator.num_pages }}</span>
+    {% if investors.has_next %}<a href="?page={{ investors.next_page_number }}&q={{ q|urlencode }}&investor_type={{ investor_type }}&status={{ status }}&branch={{ branch }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-sm btn-secondary">Next</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+<script>
+document.querySelectorAll('.clickable-row[data-href]').forEach(function (row) {
+  function open() { window.location.href = row.getAttribute('data-href'); }
+  row.addEventListener('click', function (event) {
+    if (event.target.closest('a,button,form')) return;
+    open();
+  });
+  row.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+  });
+});
+</script>
+{% endblock %}

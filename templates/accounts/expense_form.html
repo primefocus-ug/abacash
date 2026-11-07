@@ -9,16 +9,24 @@
 {% endblock %}
 
 {% block content %}
-<div id="quick-form-content">
+<div id="quick-form-content" class="expense-form-popover">
   {% include "accounts/includes/quick_form_messages.html" %}
-<div class="card" style="max-width:640px;">
-  <div class="card-header"><span class="card-title">{{ title }}</span></div>
-  <div class="card-body">
-    <form method="post" style="display:grid;gap:16px;" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
+  <div class="expense-form-heading">
+    <div>
+      <div class="expense-form-kicker">Expense ledger</div>
+      <h2>{{ title }}</h2>
+      <p>{% if action == 'edit' %}Update the classification, amount, and supporting details.{% else %}Record a business expense in a few steps.{% endif %}</p>
+    </div>
+    <div class="expense-form-badge">{% if action == 'edit' %}Edit{% else %}New{% endif %}</div>
+  </div>
+  <div class="expense-form-panel">
+    <form method="post" hx-post="{{ request.get_full_path }}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
       {% csrf_token %}
-      <div class="form-row">
-        <div>
-          <label>Category</label>
+      <div class="expense-form-section">
+        <div class="expense-form-section-title">Classification <span>Select where this expense belongs</span></div>
+        <div class="expense-form-grid">
+        <div class="expense-field">
+          <label for="form-category">Category <small>Optional</small></label>
           <select id="form-category" name="category">
             <option value="">— Select Category —</option>
             {% for cat in categories %}
@@ -26,8 +34,8 @@
             {% endfor %}
           </select>
         </div>
-        <div>
-          <label>Expense Type</label>
+        <div class="expense-field">
+          <label for="form-type">Type <small>Optional</small></label>
           <select id="form-type" name="expense_type">
             <option value="">— Select Type —</option>
             {% for cat in categories %}{% for et in cat.expense_types.all %}{% if et.is_active %}
@@ -37,38 +45,55 @@
           </select>
         </div>
       </div>
-      <div class="form-row">
-        <div>
-          <label>Amount ({% currency_symbol %}) *</label>
-          <input type="number" name="amount" step="0.01" required value="{{ expense.amount|default:'' }}" placeholder="0.00">
-        </div>
-        <div>
-          <label>Date *</label>
-          <input type="date" name="expense_date" required value="{{ expense.expense_date|default:'' }}">
-        </div>
       </div>
-      <div class="form-row">
-        <div>
-          <label>Branch</label>
-          <select name="branch">
+      <div class="expense-form-grid">
+        <div class="expense-field">
+          <label for="expense-amount">Amount ({% currency_symbol %}) <span>*</span></label>
+          <input class="form-control" id="expense-amount" type="number" name="amount" step="0.01" min="0.01" inputmode="decimal" required value="{{ expense.amount|default:'' }}" placeholder="0.00" autofocus>
+        </div>
+        <div class="expense-field">
+          <label for="expense-date">Date <span>*</span></label>
+          <input class="form-control" id="expense-date" type="date" name="expense_date" required value="{{ expense.expense_date|default:'' }}">
+        </div>
+        <div class="expense-field">
+          <label for="expense-branch">Branch <small>Optional</small></label>
+          <select class="form-control" id="expense-branch" name="branch">
             <option value="">— Not branch-specific —</option>
             {% for b in branches %}
               <option value="{{ b.pk }}" {% if expense.branch_id == b.pk %}selected{% endif %}>{{ b.name }} ({{ b.code }})</option>
             {% endfor %}
           </select>
         </div>
+        <div class="expense-field expense-field-wide">
+          <label for="expense-description">Description <small>Optional</small></label>
+          <textarea class="form-control" id="expense-description" name="description" rows="3" placeholder="Add a short note about this expense...">{{ expense.description|default:'' }}</textarea>
+        </div>
       </div>
-      <div>
-        <label>Description</label>
-        <textarea name="description" rows="3" placeholder="Optional notes…">{{ expense.description|default:'' }}</textarea>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Update{% else %}Record{% endif %} Expense</button>
+      <div class="expense-form-actions">
         <a href="{% url 'accounts:expense_list' %}" class="btn btn-secondary" data-quick-form-cancel>Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if action == 'edit' %}Save Changes{% else %}Record Expense{% endif %}</button>
       </div>
     </form>
   </div>
-</div>
+  <style>
+    .expense-form-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:2px 2px 18px; }
+    .expense-form-kicker { color:var(--accent); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .expense-form-heading h2 { margin:4px 0 3px; font-size:20px; }
+    .expense-form-heading p { margin:0; color:var(--text-muted); font-size:12px; }
+    .expense-form-badge { border:1px solid color-mix(in srgb, var(--accent) 25%, var(--border)); border-radius:999px; color:var(--accent); font-size:11px; font-weight:700; padding:5px 10px; }
+    .expense-form-panel { border:1px solid var(--border); border-radius:12px; padding:18px; background:var(--surface-2); }
+    .expense-form-section { border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px; }
+    .expense-form-section-title { color:var(--text-primary); font-size:12px; font-weight:700; margin-bottom:10px; }
+    .expense-form-section-title span { color:var(--text-muted); font-size:11px; font-weight:400; margin-left:6px; }
+    .expense-form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+    .expense-field { min-width:0; }
+    .expense-field-wide { grid-column:1 / -1; }
+    .expense-field label { margin-bottom:6px; }
+    .expense-field label span { color:var(--accent); }
+    .expense-field label small { color:var(--text-muted); font-size:10px; font-weight:400; margin-left:4px; }
+    .expense-form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; padding-top:14px; border-top:1px solid var(--border); }
+    @media (max-width:560px) { .expense-form-grid { grid-template-columns:1fr; } .expense-field-wide { grid-column:auto; } }
+  </style>
 
 <script>
 (function () {
@@ -117,5 +142,4 @@
   }
 })();
 </script>
-</div>
 {% endblock %}

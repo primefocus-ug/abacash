@@ -5,7 +5,7 @@ Loan application, approval workflow, and detail views for ABA Uganda.
 """
 
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -92,6 +92,59 @@ def _user_has_permission(user, codename):
     """Return True when the user object exposes the required permission check."""
     can = getattr(user, "can", None)
     return bool(can is not None and callable(can) and can(codename))
+
+
+def _disbursement_limit_error(user, amount, disbursement_date):
+    """Return a user-facing error when a staff member would exceed a limit."""
+    settings_obj = CompanySettings.get()
+    periods = (
+        ("daily", "Daily", disbursement_date, disbursement_date + timedelta(days=1)),
+        (
+            "weekly",
+            "Weekly",
+            disbursement_date - timedelta(days=disbursement_date.weekday()),
+            disbursement_date - timedelta(days=disbursement_date.weekday()) + timedelta(days=7),
+        ),
+        (
+            "monthly",
+            "Monthly",
+            disbursement_date.replace(day=1),
+            (
+                disbursement_date.replace(day=28) + timedelta(days=4)
+            ).replace(day=1),
+        ),
+    )
+    disbursed_statuses = (
+        Loan.Status.ACTIVE,
+        Loan.Status.RESTRUCTURED,
+        Loan.Status.COMPLETED,
+        Loan.Status.DEFAULTED,
+        Loan.Status.WRITTEN_OFF,
+    )
+
+    for period, label, start, end in periods:
+        limit = getattr(settings_obj, f"{period}_disbursement_limit")
+        if limit <= 0:
+            continue
+        scope = getattr(settings_obj, f"{period}_disbursement_limit_scope")
+        if scope != CompanySettings.DisbursementLimitScope.ALL and user.role != scope:
+            continue
+        query = Loan.objects.filter(
+            disbursement_date__gte=start,
+            disbursement_date__lt=end,
+            status__in=disbursed_statuses,
+        )
+        if scope != CompanySettings.DisbursementLimitScope.ALL:
+            query = query.filter(disbursed_by__role=scope)
+        used = query.aggregate(total=Sum("principal_amount"))["total"] or Decimal("0")
+        if used + amount > limit:
+            remaining = max(limit - used, Decimal("0"))
+            scope_label = dict(CompanySettings.DisbursementLimitScope.choices).get(scope, "selected staff")
+            return (
+                f"{label} disbursement limit for {scope_label} would be exceeded. "
+                f"Limit: {limit:,.2f}; remaining: {remaining:,.2f}."
+            )
+    return None
 
 
 def _get_client_loan_draft(client):
@@ -1601,6 +1654,10 @@ def loan_renew(request, pk):
             else:
                 chosen_disbursement = date.today()
 
+            limit_error = _disbursement_limit_error(request.user, total_new_principal, chosen_disbursement)
+            if limit_error:
+                raise ValueError(limit_error)
+
             schedule_rows, totals, processing_fee, _, _ = build_loan_schedule_context(
                 principal=total_new_principal,
                 product=loan.product,
@@ -1756,6 +1813,11 @@ def loan_approve(request, pk):
         # CEOs are allowed to back-date disbursement; accept the provided date as-is
         disbursement_date = parsed
 
+    limit_error = _disbursement_limit_error(user, loan.principal_amount, disbursement_date)
+    if limit_error:
+        messages.error(request, limit_error)
+        return redirect("loans:detail", pk=pk)
+
     # Capture old disbursement date for auditing
     old_disb_date = loan.disbursement_date
     loan.disbursement_date = disbursement_date
@@ -1821,6 +1883,7 @@ def loan_approve(request, pk):
 
     # Immediately activate
     loan.status = Loan.Status.ACTIVE
+    loan.disbursed_by = user
     loan.save()
 
     # Audit disbursement date change on approval

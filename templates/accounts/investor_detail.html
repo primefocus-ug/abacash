@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ investor.name }}{% endblock %}
+{% block page_title %}{{ investor.name }}{% endblock %}
+{% block topbar_actions %}
+  <a href="{% url 'accounts:investor_list' %}" class="btn btn-secondary btn-sm">← Investors</a>
+  <a href="{% url 'accounts:investor_edit' investor.pk %}" class="btn btn-secondary btn-sm" hx-get="{% url 'accounts:investor_edit' investor.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Edit</a>
+  <a href="{% url 'accounts:investor_drawing_create' investor.pk %}" class="btn btn-primary btn-sm" hx-get="{% url 'accounts:investor_drawing_create' investor.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">+ Drawing</a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-3"><div class="card-body">
+  <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div><h2 style="margin:0 0 6px;">{{ investor.name }}</h2><div class="text-muted">{{ investor.get_investor_type_display }} · {{ investor.get_status_display }}{% if investor.phone %} · {{ investor.phone }}{% endif %}</div></div>
+    <div class="text-sm text-muted">{{ investor.email|default:"No email recorded" }}<br>{{ investor.branch.name|default:"Company-wide" }}</div>
+  </div>
+</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+  <div class="metric-card green"><div class="metric-label">Injections</div><div class="metric-value">UGX {{ total_injected|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card purple"><div class="metric-label">Drawings</div><div class="metric-value">UGX {{ total_drawn|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card blue"><div class="metric-label">Balance</div><div class="metric-value">UGX {{ balance|floatformat:0|intcomma }}</div></div>
+  <div class="metric-card orange"><div class="metric-label">Accrued interest</div><div class="metric-value">UGX {{ interest_total|floatformat:0|intcomma }}</div></div>
+</div>
+<div class="card"><div class="card-header"><span class="card-title">Statement</span></div><div class="table-wrap">
+<table class="aba-table"><thead><tr><th>Date</th><th>Transaction</th><th>Reference / purpose</th><th>Interest</th><th style="text-align:right;">Amount</th></tr></thead><tbody>
+{% for item in injections %}<tr><td>{{ item.injected_date }}</td><td>Capital injection</td><td>{{ item.source }}</td><td>{% if item.attracts_interest %}{{ item.interest_rate_annual }}% p.a.{% else %}—{% endif %}</td><td class="mono" style="text-align:right;color:var(--success);">+ UGX {{ item.amount|floatformat:0|intcomma }}</td></tr>{% endfor %}
+{% for item in drawings %}<tr><td>{{ item.drawing_date }}</td><td>Drawing</td><td>{{ item.purpose|default:"—" }}</td><td>—</td><td class="mono" style="text-align:right;color:var(--danger);">− UGX {{ item.amount|floatformat:0|intcomma }}</td></tr>{% endfor %}
+{% if not injections and not drawings %}<tr><td colspan="5"><div class="empty-state">No transactions recorded yet.</div></td></tr>{% endif %}
+</tbody></table></div></div>
+{% endblock %}

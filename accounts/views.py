@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
 from django.forms import ImageField
+from django.db import transaction
 from django.db.models import F, Q, Sum, Count
 from django.db.models.functions import TruncDay, TruncMonth
 from django.shortcuts import render, redirect, get_object_or_404
@@ -28,7 +29,7 @@ from dateutil.relativedelta import relativedelta
 from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
 from payments.models import Payment
 from clients.models import Client
-from .models import CompanySettings, Branch, Expense, CapitalInjection, FeeType, Holiday, AuditLog, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
+from .models import CompanySettings, Branch, Expense, CapitalInjection, Investor, InvestorDrawing, FeeType, Holiday, AuditLog, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
 from .branch_scope import (
     scope_to_branch,
     effective_branch_id,
@@ -1600,11 +1601,31 @@ def company_settings(request):
                 v = d.get(key, "").strip()
                 return int(v) if v else default
 
+            def _disbursement_limit(key):
+                value = Decimal(_dec(key, "0"))
+                if value < 0:
+                    raise ValueError(f"{key.replace('_', ' ').capitalize()} cannot be negative.")
+                return value
+
+            def _disbursement_scope(key):
+                value = d.get(key, "ALL")
+                if value not in dict(CompanySettings.DisbursementLimitScope.choices):
+                    raise ValueError(f"Invalid staff scope for {key.replace('_', ' ')}.")
+                return value
+
             # Loan Business Rules
             settings_obj.manager_approval_limit = _dec("manager_approval_limit", "5000000")
             settings_obj.default_penalty_rate   = _dec("default_penalty_rate", "2")
             settings_obj.income_multiplier      = _dec("income_multiplier", "3")
             settings_obj.collateral_haircut     = _dec("collateral_haircut", "50")
+
+            # Disbursement Limits
+            settings_obj.daily_disbursement_limit = _disbursement_limit("daily_disbursement_limit")
+            settings_obj.daily_disbursement_limit_scope = _disbursement_scope("daily_disbursement_limit_scope")
+            settings_obj.weekly_disbursement_limit = _disbursement_limit("weekly_disbursement_limit")
+            settings_obj.weekly_disbursement_limit_scope = _disbursement_scope("weekly_disbursement_limit_scope")
+            settings_obj.monthly_disbursement_limit = _disbursement_limit("monthly_disbursement_limit")
+            settings_obj.monthly_disbursement_limit_scope = _disbursement_scope("monthly_disbursement_limit_scope")
 
             # Fee Settings
             settings_obj.default_processing_fee_percent  = _dec("default_processing_fee_percent", "1")
@@ -1651,7 +1672,31 @@ def company_settings(request):
         except Exception as e:
             messages.error(request, f"Error saving settings: {e}")
 
-    return render(request, "accounts/company_settings.html", {"s": settings_obj})
+    disbursement_limit_periods = [
+        {
+            "key": "daily",
+            "label": "Daily",
+            "limit": settings_obj.daily_disbursement_limit,
+            "scope": settings_obj.daily_disbursement_limit_scope,
+        },
+        {
+            "key": "weekly",
+            "label": "Weekly",
+            "limit": settings_obj.weekly_disbursement_limit,
+            "scope": settings_obj.weekly_disbursement_limit_scope,
+        },
+        {
+            "key": "monthly",
+            "label": "Monthly",
+            "limit": settings_obj.monthly_disbursement_limit,
+            "scope": settings_obj.monthly_disbursement_limit_scope,
+        },
+    ]
+    return render(request, "accounts/company_settings.html", {
+        "s": settings_obj,
+        "disbursement_limit_periods": disbursement_limit_periods,
+        "disbursement_limit_scopes": CompanySettings.DisbursementLimitScope.choices,
+    })
 
 
 # ------------------------------------------------------------------ #
@@ -2250,13 +2295,68 @@ def expense_delete(request, pk):
 # Capital Injection Management                                        #
 # ------------------------------------------------------------------ #
 
+def _capital_injection_investor_choices():
+    registered = list(
+        Investor.objects.filter(
+            status__in=[Investor.Status.ACTIVE, Investor.Status.PROSPECT]
+        ).order_by("name")
+    )
+    registered_names = {investor.name.casefold() for investor in registered}
+    previous_names = []
+    for name in CapitalInjection.objects.filter(
+        investor_record__isnull=True
+    ).exclude(investor="").values_list("investor", flat=True).distinct().order_by("investor"):
+        if name.casefold() not in registered_names:
+            previous_names.append(name)
+    return registered, previous_names
+
+
+def _resolve_capital_injection_investor(request, data, amount, injected_date, payment_method, branch_id):
+    investor_record_id = data.get("investor_record") or ""
+    investor_name = data.get("investor", "").strip()
+    register_investor = data.get("register_investor") == "1"
+
+    if investor_record_id.startswith("legacy:"):
+        investor_name = investor_record_id[7:].strip()
+        investor_record_id = ""
+
+    if register_investor and investor_name and not investor_record_id:
+        investor = Investor.objects.filter(name__iexact=investor_name).first()
+        if investor is None:
+            investor = Investor.objects.create(
+                name=investor_name,
+                committed_amount=amount,
+                investment_date=injected_date,
+                payment_method=payment_method,
+                branch_id=branch_id,
+                created_by=request.user,
+            )
+        investor_record_id = investor.pk
+        investor_name = ""
+
+    return investor_record_id or None, investor_name
+
+
+def _capital_injection_interest(data, existing=None):
+    attracts_interest = data.get("attracts_interest") == "1"
+    if not attracts_interest:
+        return False, Decimal("0")
+    if existing and existing.attracts_interest and existing.interest_rate_annual:
+        return True, existing.interest_rate_annual
+    return True, CompanySettings.get().default_savings_interest_rate
+
+
 @_permission_required("can_manage_capital")
 def capital_injection_list(request):
-    qs = CapitalInjection.objects.select_related("created_by").order_by("-injected_date")
+    qs = CapitalInjection.objects.select_related("created_by", "investor_record").order_by("-injected_date")
 
     q = request.GET.get("q", "").strip()
     if q:
-        qs = qs.filter(Q(source__icontains=q) | Q(investor__icontains=q))
+        qs = qs.filter(
+            Q(source__icontains=q)
+            | Q(investor__icontains=q)
+            | Q(investor_record__name__icontains=q)
+        )
 
     date_from = request.GET.get("date_from", "")
     if date_from:
@@ -2288,16 +2388,26 @@ def capital_injection_create(request):
         d = request.POST
         try:
             amount_value = d.get("amount", "")
-            injection = CapitalInjection.objects.create(
-                source=d["source"].strip(),
-                amount=amount_value,
-                injected_date=d["injected_date"],
-                payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.CASH),
-                branch_id=resolve_branch_for_write(request, d.get("branch")),
-                investor=d.get("investor", "").strip(),
-                notes=d.get("notes", "").strip(),
-                created_by=request.user,
-            )
+            payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.CASH)
+            branch_id = resolve_branch_for_write(request, d.get("branch"))
+            with transaction.atomic():
+                investor_record_id, investor_name = _resolve_capital_injection_investor(
+                    request, d, amount_value, d["injected_date"], payment_method, branch_id
+                )
+                attracts_interest, interest_rate_annual = _capital_injection_interest(d)
+                injection = CapitalInjection.objects.create(
+                    source=d["source"].strip(),
+                    amount=amount_value,
+                    injected_date=d["injected_date"],
+                    payment_method=payment_method,
+                    branch_id=branch_id,
+                    investor_record_id=investor_record_id,
+                    investor=investor_name,
+                    attracts_interest=attracts_interest,
+                    interest_rate_annual=interest_rate_annual,
+                    notes=d.get("notes", "").strip(),
+                    created_by=request.user,
+                )
             amount_display = f"{injection.amount:,.2f}".rstrip("0").rstrip(".") if hasattr(injection.amount, "quantize") else str(injection.amount)
             messages.success(request, f"Capital injection recorded: UGX {amount_display} from {injection.source}")
             response = _quick_form_saved(request)
@@ -2307,10 +2417,14 @@ def capital_injection_create(request):
         except Exception as e:
             messages.error(request, f"Could not create capital injection: {e}")
 
+    investors, previous_investors = _capital_injection_investor_choices()
     return render(request, "accounts/capital_injection_form.html", {
         "title": "Record Capital Injection",
         "action": "create",
         "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "investors": investors,
+        "previous_investors": previous_investors,
+        "default_savings_interest_rate": CompanySettings.get().default_savings_interest_rate,
     })
 
 
@@ -2326,7 +2440,17 @@ def capital_injection_edit(request, pk):
             injection.injected_date = d["injected_date"]
             injection.payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.CASH)
             injection.branch_id = resolve_branch_for_write(request, d.get("branch"))
-            injection.investor = d.get("investor", "").strip()
+            investor_record_id, investor_name = _resolve_capital_injection_investor(
+                request,
+                d,
+                d["amount"],
+                d["injected_date"],
+                injection.payment_method,
+                injection.branch_id,
+            )
+            injection.investor_record_id = investor_record_id
+            injection.investor = investor_name
+            injection.attracts_interest, injection.interest_rate_annual = _capital_injection_interest(d, injection)
             injection.notes = d.get("notes", "").strip()
             injection.save()
             messages.success(request, f"Capital injection updated.")
@@ -2337,11 +2461,15 @@ def capital_injection_edit(request, pk):
         except Exception as e:
             messages.error(request, f"Could not update capital injection: {e}")
 
+    investors, previous_investors = _capital_injection_investor_choices()
     return render(request, "accounts/capital_injection_form.html", {
         "title": f"Edit Capital Injection — {injection.source}",
         "action": "edit",
         "injection": injection,
         "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "investors": investors,
+        "previous_investors": previous_investors,
+        "default_savings_interest_rate": CompanySettings.get().default_savings_interest_rate,
     })
 
 
@@ -2353,6 +2481,241 @@ def capital_injection_delete(request, pk):
         messages.success(request, "Capital injection deleted.")
         return redirect("accounts:capital_injection_list")
     return render(request, "accounts/capital_injection_confirm_delete.html", {"injection": injection})
+
+
+# ------------------------------------------------------------------ #
+# Investor Management                                                  #
+# ------------------------------------------------------------------ #
+
+@_permission_required("can_manage_investors")
+def investor_list(request):
+    qs = Investor.objects.select_related("branch", "created_by").order_by("name")
+
+    q = request.GET.get("q", "").strip()
+    if q:
+        qs = qs.filter(
+            Q(name__icontains=q)
+            | Q(phone__icontains=q)
+            | Q(email__icontains=q)
+            | Q(national_id__icontains=q)
+        )
+
+    investor_type = request.GET.get("investor_type", "")
+    if investor_type:
+        qs = qs.filter(investor_type=investor_type)
+    status = request.GET.get("status", "")
+    if status:
+        qs = qs.filter(status=status)
+    branch = request.GET.get("branch", "")
+    if branch:
+        qs = qs.filter(branch_id=branch)
+    date_from = request.GET.get("date_from", "")
+    if date_from:
+        qs = qs.filter(investment_date__gte=date_from)
+    date_to = request.GET.get("date_to", "")
+    if date_to:
+        qs = qs.filter(investment_date__lte=date_to)
+
+    if request.GET.get("export") == "csv":
+        import csv
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=investors.csv"
+        writer = csv.writer(response)
+        writer.writerow([
+            "name", "investor_type", "phone", "email", "national_id", "address",
+            "committed_amount", "investment_date", "maturity_date",
+            "payment_method", "status", "branch", "notes",
+        ])
+        for investor in qs:
+            writer.writerow([
+                investor.name,
+                investor.get_investor_type_display(),
+                investor.phone,
+                investor.email,
+                investor.national_id,
+                investor.address,
+                f"{investor.committed_amount:.2f}",
+                investor.investment_date.isoformat() if investor.investment_date else "",
+                investor.maturity_date.isoformat() if investor.maturity_date else "",
+                investor.get_payment_method_display(),
+                investor.get_status_display(),
+                investor.branch.name if investor.branch else "",
+                investor.notes,
+            ])
+        return response
+
+    investors = Paginator(qs, 25).get_page(request.GET.get("page", 1))
+    totals = qs.aggregate(total=Sum("committed_amount"), count=Count("id"))
+    return render(request, "accounts/investor_list.html", {
+        "investors": investors,
+        "total_amount": totals["total"] or 0,
+        "total_count": totals["count"],
+        "q": q,
+        "investor_type": investor_type,
+        "status": status,
+        "branch": branch,
+        "date_from": date_from,
+        "date_to": date_to,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "investor_type_choices": Investor.InvestorType.choices,
+        "status_choices": Investor.Status.choices,
+    })
+
+
+def _investor_statement(investor):
+    injections = list(investor.capital_injections.order_by("-injected_date", "-created_at"))
+    drawings = list(investor.drawings.order_by("-drawing_date", "-created_at"))
+    total_injected = sum((item.amount for item in injections), Decimal("0"))
+    total_drawn = sum((item.amount for item in drawings), Decimal("0"))
+    today = timezone.localdate()
+    interest_total = Decimal("0")
+    for injection in injections:
+        if injection.attracts_interest and injection.interest_rate_annual:
+            days = max((today - injection.injected_date).days, 0)
+            interest_total += (
+                injection.amount
+                * injection.interest_rate_annual
+                / Decimal("100")
+                * Decimal(days)
+                / Decimal("365")
+            )
+    return {
+        "injections": injections,
+        "drawings": drawings,
+        "total_injected": total_injected,
+        "total_drawn": total_drawn,
+        "interest_total": interest_total.quantize(Decimal("0.01")),
+        "balance": total_injected - total_drawn,
+    }
+
+
+@_permission_required("can_manage_investors")
+def investor_detail(request, pk):
+    investor = get_object_or_404(
+        Investor.objects.select_related("branch", "created_by"), pk=pk
+    )
+    return render(request, "accounts/investor_detail.html", {
+        "investor": investor,
+        **_investor_statement(investor),
+        "company_settings": CompanySettings.get(),
+    })
+
+
+@_permission_required("can_manage_investors")
+def investor_drawing_create(request, pk):
+    investor = get_object_or_404(Investor, pk=pk)
+    if request.method == "POST":
+        d = request.POST
+        try:
+            InvestorDrawing.objects.create(
+                investor=investor,
+                amount=d["amount"],
+                drawing_date=d["drawing_date"],
+                payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.BANK),
+                purpose=d.get("purpose", "").strip(),
+                notes=d.get("notes", "").strip(),
+                created_by=request.user,
+            )
+            messages.success(request, f"Drawing recorded for {investor.name}.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
+            return redirect("accounts:investor_detail", pk=pk)
+        except Exception as e:
+            messages.error(request, f"Could not record drawing: {e}")
+    return render(request, "accounts/investor_drawing_form.html", {
+        "investor": investor,
+        "payment_method_choices": CapitalInjection.PaymentMethod.choices,
+    })
+
+
+@_permission_required("can_manage_investors")
+def investor_create(request):
+    if request.method == "POST":
+        d = request.POST
+        try:
+            investor = Investor.objects.create(
+                name=d["name"].strip(),
+                investor_type=d.get("investor_type", Investor.InvestorType.INDIVIDUAL),
+                phone=d.get("phone", "").strip(),
+                email=d.get("email", "").strip(),
+                national_id=d.get("national_id", "").strip(),
+                address=d.get("address", "").strip(),
+                committed_amount=d.get("committed_amount", "0") or "0",
+                investment_date=d.get("investment_date") or None,
+                maturity_date=d.get("maturity_date") or None,
+                payment_method=d.get("payment_method", CapitalInjection.PaymentMethod.BANK),
+                status=d.get("status", Investor.Status.ACTIVE),
+                branch_id=resolve_branch_for_write(request, d.get("branch")),
+                notes=d.get("notes", "").strip(),
+                created_by=request.user,
+            )
+            messages.success(request, f"Investor '{investor.name}' added.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
+            return redirect("accounts:investor_list")
+        except Exception as e:
+            messages.error(request, f"Could not create investor: {e}")
+
+    return render(request, "accounts/investor_form.html", {
+        "title": "Add Investor",
+        "action": "create",
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "investor_type_choices": Investor.InvestorType.choices,
+        "status_choices": Investor.Status.choices,
+        "payment_method_choices": CapitalInjection.PaymentMethod.choices,
+    })
+
+
+@_permission_required("can_manage_investors")
+def investor_edit(request, pk):
+    investor = get_object_or_404(Investor, pk=pk)
+    if request.method == "POST":
+        d = request.POST
+        try:
+            investor.name = d["name"].strip()
+            investor.investor_type = d.get("investor_type", Investor.InvestorType.INDIVIDUAL)
+            investor.phone = d.get("phone", "").strip()
+            investor.email = d.get("email", "").strip()
+            investor.national_id = d.get("national_id", "").strip()
+            investor.address = d.get("address", "").strip()
+            investor.committed_amount = d.get("committed_amount", "0") or "0"
+            investor.investment_date = d.get("investment_date") or None
+            investor.maturity_date = d.get("maturity_date") or None
+            investor.payment_method = d.get("payment_method", CapitalInjection.PaymentMethod.BANK)
+            investor.status = d.get("status", Investor.Status.ACTIVE)
+            investor.branch_id = resolve_branch_for_write(request, d.get("branch"))
+            investor.notes = d.get("notes", "").strip()
+            investor.save()
+            messages.success(request, f"Investor '{investor.name}' updated.")
+            response = _quick_form_saved(request)
+            if response:
+                return response
+            return redirect("accounts:investor_list")
+        except Exception as e:
+            messages.error(request, f"Could not update investor: {e}")
+
+    return render(request, "accounts/investor_form.html", {
+        "title": f"Edit Investor — {investor.name}",
+        "action": "edit",
+        "investor": investor,
+        "branches": Branch.objects.filter(is_active=True).order_by("name"),
+        "investor_type_choices": Investor.InvestorType.choices,
+        "status_choices": Investor.Status.choices,
+        "payment_method_choices": CapitalInjection.PaymentMethod.choices,
+    })
+
+
+@_permission_required("can_manage_investors")
+def investor_delete(request, pk):
+    investor = get_object_or_404(Investor, pk=pk)
+    if request.method == "POST":
+        investor.delete()
+        messages.success(request, "Investor deleted.")
+        return redirect("accounts:investor_list")
+    return render(request, "accounts/investor_confirm_delete.html", {"investor": investor})
 
 
 # ------------------------------------------------------------------ #

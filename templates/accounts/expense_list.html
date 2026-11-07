@@ -74,7 +74,7 @@
       </thead>
       <tbody>
         {% for expense in expenses %}
-        <tr class="clickable-row" data-href="{% url 'accounts:expense_edit' expense.pk %}">
+        <tr class="clickable-row" data-href="{% url 'accounts:expense_edit' expense.pk %}" hx-get="{% url 'accounts:expense_edit' expense.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">
           <td class="mono">{{ expense.expense_date }}</td>
           <td>
             {% if expense.category %}
