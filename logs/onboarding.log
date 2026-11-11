@@ -19,3 +19,12 @@ Traceback (most recent call last):
 ValueError: Schema 'terrain_services_limited' already exists — pick a different company name or onboard manually.
 2026-11-10 20:29:54 [INFO] tenants.views: Onboarding task queued for registration 5: schema=21ervices_limited, domain=21ervices-limited.localhost:8000, company_id=8
 2026-11-10 21:02:26 [INFO] tenants.views: Onboarding task queued for registration 6: schema=joy, domain=joy.localhost:8000, company_id=9
+2026-11-11 15:07:42 [INFO] tenants.views: Onboarding task queued for registration 5: schema=test_company, domain=test-company.localhost:8000, company_id=7
+2026-11-11 15:27:12 [ERROR] tenants.views: Failed to start onboarding: Schema 'ent' already exists — pick a different company name or onboard manually.
+Traceback (most recent call last):
+  File "/home/nashvybzes/Music/no/abacash/tenants/views.py", line 756, in register
+    raise ValueError(f"Schema '{schema}' already exists — pick a different company name or onboard manually.")
+ValueError: Schema 'ent' already exists — pick a different company name or onboard manually.
+2026-11-11 15:39:08 [INFO] tenants.views: Onboarding task queued for registration 7: schema=setup, domain=setup.localhost:8000, company_id=8
+2026-11-11 15:48:22 [WARNING] tenants.views: PLATFORM_APPROVAL_EMAIL is not set; no admin email sent for registration 8
+2026-11-11 15:58:50 [WARNING] tenants.views: PLATFORM_APPROVAL_EMAIL is not set; no admin email sent for registration 9

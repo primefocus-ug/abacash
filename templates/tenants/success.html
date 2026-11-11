@@ -446,6 +446,30 @@
     .signup-progress-hero { margin-bottom: 22px; }
   }
 
+  .signup-progress-card[data-state="waiting"] .signup-progress-symbol {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .signup-progress-card[data-state="waiting"] .signup-status-pill {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .signup-progress-card[data-state="waiting"] .signup-activity {
+    display: none;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="waiting"] .signup-progress-symbol {
+    background: #78350f;
+    color: #fde68a;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="waiting"] .signup-status-pill {
+    background: #78350f;
+    color: #fde68a;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .signup-step.is-current .signup-step-marker { animation: none; }
     .signup-step-marker { transition: none; }
@@ -569,6 +593,26 @@
 
     function render(data) {
       var state = data.status;
+
+      // Free-trial signups wait for the platform owner's approval. Nothing is
+      // running yet, so show a review state and stop polling.
+      if (state === 'AWAITING_APPROVAL') {
+        card.dataset.status = state;
+        card.dataset.state = 'waiting';
+        card.dataset.step = 'QUEUED';
+        items.forEach(function(item) {
+          item.classList.remove('is-complete', 'is-current', 'is-failed');
+          item.setAttribute('aria-current', 'false');
+        });
+        statusPill.querySelector('i').className = 'fas fa-clock';
+        statusPill.querySelector('span').textContent = 'Awaiting review';
+        message.textContent = 'Your registration has been received and is waiting for review.';
+        nextMessage.textContent = 'No action is needed. Once your workspace is approved, setup starts automatically and we’ll email you the activation link.';
+        errorMessage.hidden = true;
+        window.clearInterval(timer);
+        return;
+      }
+
       var step = state === 'READY' ? 'COMPLETE' : (state === 'PENDING' ? 'QUEUED' : data.step);
       var failed = state === 'FAILED';
       var failedToStart = failed && data.failure_stage === 'START';

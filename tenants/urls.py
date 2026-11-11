@@ -8,6 +8,7 @@ urlpatterns = [
     path("features/", views.features, name="features"),
     path("pricing/",  views.pricing,  name="pricing"),
     path("pages/",    views.pages,    name="pages"),
+    path("registrations/approve/<str:token>/", views.approve_registration, name="approve_registration"),
     path("public-admin/", views.public_admin, name="public_admin"),
     path("public-admin/login/", views.public_admin_login, name="public_admin_login"),
     path("public-admin/logout/", views.public_admin_logout, name="public_admin_logout"),
