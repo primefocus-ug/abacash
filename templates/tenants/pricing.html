@@ -2,64 +2,922 @@
 
 {% block title %}Pricing | Abacash{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* ============================================
+     PRICING PAGE — SCOPED ENHANCEMENTS
+     ============================================ */
+
+  /* ---------- Hero ---------- */
+  .pricing-hero {
+    position: relative;
+    padding: clamp(3rem, 6vw, 5rem) 0 2.5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .pricing-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(900px, 90vw);
+    height: 600px;
+    background: radial-gradient(ellipse at center,
+      rgba(37, 99, 235, 0.10) 0%,
+      rgba(14, 165, 233, 0.06) 40%,
+      transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .pricing-hero > * { position: relative; z-index: 1; }
+  .pricing-hero .hero-title {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ---------- Billing toggle ---------- */
+  .billing-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 0.4rem;
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .billing-toggle button {
+    border: none;
+    background: transparent;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.25s var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .billing-toggle button:hover { color: var(--accent); }
+
+  .billing-toggle button.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  }
+
+  .billing-toggle .save-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    background: var(--success);
+    color: white;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    margin-left: 2px;
+  }
+
+  /* ---------- Pricing cards ---------- */
+  .pricing-grid-enhanced {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(1.25rem, 2vw, 2rem);
+    margin-top: 1.5rem;
+    align-items: stretch;
+  }
+
+  .pricing-card-v2 {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-xl);
+    padding: 2rem 1.75rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.35s var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .pricing-card-v2::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--transition-smooth);
+  }
+
+  .pricing-card-v2:hover {
+    transform: translateY(-6px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .pricing-card-v2:hover::before { transform: scaleX(1); }
+
+  .pricing-card-v2.featured {
+    border-color: var(--accent);
+    box-shadow: 0 20px 50px rgba(37, 99, 235, 0.18);
+    transform: translateY(-4px);
+    background:
+      radial-gradient(ellipse at top, rgba(37, 99, 235, 0.06), transparent 60%),
+      var(--surface);
+  }
+
+  .pricing-card-v2.featured::before { transform: scaleX(1); }
+
+  .pricing-card-v2.featured:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 28px 60px rgba(37, 99, 235, 0.22);
+  }
+
+  .pricing-badge {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+  }
+
+  .pricing-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .pricing-name {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .pricing-price-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .pricing-price {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    line-height: 1;
+    transition: all 0.3s ease;
+  }
+
+  .pricing-card-v2.featured .pricing-price {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pricing-period {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .pricing-annual-note {
+    font-size: 0.82rem;
+    color: var(--success);
+    font-weight: 600;
+    min-height: 1.2em;
+  }
+
+  .pricing-note {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .pricing-features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+    flex: 1 1 auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .pricing-features li::before {
+    content: '✓';
+    color: var(--success);
+    font-weight: 800;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    background: rgba(22, 163, 74, 0.1);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    margin-top: 1px;
+  }
+
+  .pricing-card-v2 .btn {
+    width: 100%;
+    padding: 0.95rem 1.25rem;
+    font-size: 0.95rem;
+    margin-top: auto;
+  }
+
+  /* ---------- Comparison table ---------- */
+  .compare-table-wrap {
+    margin-top: 2rem;
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-md);
+    background: var(--surface);
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+    font-size: 0.92rem;
+  }
+
+  .compare-table thead th {
+    background: var(--surface-2);
+    padding: 1.1rem 1.25rem;
+    text-align: left;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .compare-table thead th.featured-col {
+    color: var(--accent);
+    background: rgba(37, 99, 235, 0.06);
+  }
+
+  .compare-table tbody td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-secondary);
+  }
+
+  .compare-table tbody tr:last-child td { border-bottom: none; }
+
+  .compare-table tbody tr:hover td {
+    background: var(--surface-2);
+  }
+
+  .compare-table tbody tr:hover td.featured-col {
+    background: rgba(37, 99, 235, 0.08);
+  }
+
+  .compare-table tbody td:first-child {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .compare-table tbody td.featured-col {
+    background: rgba(37, 99, 235, 0.04);
+    font-weight: 600;
+  }
+
+  .compare-table .check {
+    color: var(--success);
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .compare-table .cross {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  /* ---------- Trust strip ---------- */
+  .trust-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .trust-item {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(14, 165, 233, 0.02));
+    border: 1px solid rgba(37, 99, 235, 0.10);
+    transition: all 0.3s var(--transition-smooth);
+  }
+
+  .trust-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+  }
+
+  .trust-item .trust-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .trust-item strong {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .trust-item span {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- Pricing FAQ ---------- */
+  .faq-list {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+  }
+
+  .faq-item {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.3s var(--transition-smooth);
+  }
+
+  .faq-item:hover { border-color: rgba(37, 99, 235, 0.25); }
+  .faq-item[open] {
+    border-color: rgba(37, 99, 235, 0.35);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+  }
+
+  .faq-item summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 1.15rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    transition: color 0.2s ease, background 0.2s ease;
+    user-select: none;
+  }
+
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::marker { content: ''; }
+
+  .faq-item summary:hover {
+    background: rgba(37, 99, 235, 0.04);
+    color: var(--accent);
+  }
+
+  .faq-item summary .faq-toggle {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--accent);
+    flex: 0 0 auto;
+    transition: transform 0.3s var(--transition-smooth), background 0.2s ease;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .faq-item[open] summary .faq-toggle {
+    transform: rotate(45deg);
+    background: var(--accent);
+    color: white;
+  }
+
+  .faq-body {
+    padding: 0 1.4rem 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    animation: faq-fade 0.3s var(--transition-smooth);
+  }
+
+  @keyframes faq-fade {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Navigation cards ---------- */
+  .nav-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .nav-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s var(--transition-smooth);
+    overflow: hidden;
+  }
+
+  .nav-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--transition-smooth);
+  }
+
+  .nav-card:hover::before { transform: scaleX(1); }
+  .nav-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nav-card .nav-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
+    color: var(--accent);
+    font-size: 1.25rem;
+    transition: transform 0.3s var(--transition-smooth);
+  }
+
+  .nav-card:hover .nav-icon { transform: scale(1.08) rotate(-4deg); }
+
+  .nav-card strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .nav-card small {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    flex: 1 1 auto;
+  }
+
+  .nav-card .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+
+  .nav-card .nav-cta::after {
+    content: '→';
+    transition: transform 0.25s ease;
+  }
+
+  .nav-card:hover .nav-cta::after { transform: translateX(3px); }
+
+  /* ---------- Dark theme ---------- */
+  html[data-theme='dark'] .pricing-card-v2.featured {
+    background:
+      radial-gradient(ellipse at top, rgba(37, 99, 235, 0.15), transparent 60%),
+      var(--surface);
+  }
+
+  html[data-theme='dark'] .compare-table thead th {
+    background: var(--surface-3);
+  }
+
+  html[data-theme='dark'] .trust-item,
+  html[data-theme='dark'] .nav-card {
+    background: rgba(30, 41, 59, 0.6);
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .faq-body { animation: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="hero">
+  <!-- ============================================
+       HERO
+       ============================================ -->
+  <section class="pricing-hero">
     <div class="eyebrow">Pricing plans</div>
     <h1 class="hero-title">Flexible pricing for every stage of your business.</h1>
-    <p class="hero-copy">Choose a package that matches your loan portfolio, team size, and operational needs. Get started quickly with transparent pricing.</p>
+    <p class="hero-copy">
+      Choose a package that matches your loan portfolio, team size, and operational needs.
+      Get started quickly with transparent pricing.
+    </p>
+
+    <!-- Billing toggle -->
+    <div class="billing-toggle" role="tablist" aria-label="Billing period">
+      <button type="button" class="active" data-billing="monthly" role="tab" aria-selected="true">
+        Monthly
+      </button>
+      <button type="button" data-billing="annual" role="tab" aria-selected="false">
+        Annual
+        <span class="save-badge">SAVE 20%</span>
+      </button>
+    </div>
   </section>
 
-  <section class="section-heading" style="margin-top: 2rem;">
-    <div class="section-label">Plans</div>
-    <h2>Simple packages for scaling lenders of every size</h2>
-  </section>
-
-  <div class="grid pricing-grid">
-    {% for plan in pricing_plans %}
-      <section class="pricing-card card{% if plan.featured %} featured{% endif %}">
-        {% if plan.featured %}
-          <div class="badge-featured">Most Popular</div>
-        {% endif %}
-        <p class="pricing-name">{{ plan.name }}</p>
-        <div class="pricing-price">{{ plan.price }}</div>
-        <p class="pricing-note">{{ plan.description }}</p>
-        <ul class="pricing-features">
-          {% for item in plan.features %}
-            <li>{{ item }}</li>
-          {% endfor %}
-        </ul>
-        <a href="{% if plan.name == 'STARTER' %}{% url 'tenants:public_register' %}{% else %}{% url 'tenants:support' %}{% endif %}" class="btn {% if plan.featured %}btn-primary{% else %}btn-secondary{% endif %}">{{ plan.button_text }}</a>
-      </section>
-    {% endfor %}
-  </div>
-
-  <section class="section-card" style="margin-top: 2.5rem; padding: 2rem;">
+  <!-- ============================================
+       PRICING CARDS
+       ============================================ -->
+  <section style="margin-top: 2rem;">
     <div class="section-heading">
-      <div class="section-label">Quick links</div>
+      <div class="section-label">Plans</div>
+      <h2>Simple packages for scaling lenders of every size</h2>
+    </div>
+
+    <div class="pricing-grid-enhanced">
+      {% for plan in pricing_plans %}
+        <article class="pricing-card-v2{% if plan.featured %} featured{% endif %}">
+          {% if plan.featured %}
+            <div class="pricing-badge">Most Popular</div>
+          {% endif %}
+
+          <div class="pricing-header">
+            <p class="pricing-name">{{ plan.name }}</p>
+            <div class="pricing-price-wrap">
+              <span class="pricing-price" data-monthly="{{ plan.price }}" data-annual="{{ plan.annual_price|default:plan.price }}">
+                {{ plan.price }}
+              </span>
+              <span class="pricing-period">/ month</span>
+            </div>
+            <p class="pricing-annual-note" data-annual-note></p>
+            <p class="pricing-note">{{ plan.description }}</p>
+          </div>
+
+          <ul class="pricing-features">
+            {% for item in plan.features %}
+              <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+
+          <a href="{% if plan.name == 'STARTER' %}{% url 'tenants:public_register' %}{% else %}{% url 'tenants:support' %}{% endif %}"
+             class="btn {% if plan.featured %}btn-primary{% else %}btn-secondary{% endif %}">
+            {{ plan.button_text }}
+          </a>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ============================================
+       TRUST STRIP
+       ============================================ -->
+  <section style="margin-top: 3rem;">
+    <div class="trust-strip">
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">🔒</span>
+        <strong>Bank-grade security</strong>
+        <span>256-bit encryption at rest and in transit.</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">⚡</span>
+        <strong>Fast onboarding</strong>
+        <span>Get started in days, not months.</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">🔄</span>
+        <strong>Cancel anytime</strong>
+        <span>No lock-in, no long-term contracts.</span>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon" aria-hidden="true">🎧</span>
+        <strong>Dedicated support</strong>
+        <span>Human onboarding specialist included.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       FEATURE COMPARISON TABLE
+       ============================================ -->
+  <section class="section-card" style="margin-top: 3rem; padding: clamp(1.5rem, 3vw, 2.5rem);">
+    <div class="section-heading">
+      <div class="section-label">Compare</div>
+      <h2>What's included in each plan</h2>
+      <p class="hero-copy" style="margin-top: 0.75rem; font-size: 1rem;">
+        A side-by-side view of what you get at each tier.
+      </p>
+    </div>
+
+    <div class="compare-table-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Starter</th>
+            <th class="featured-col">Professional</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Loan applications / month</td>
+            <td>Up to 500</td>
+            <td class="featured-col">Up to 5,000</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr>
+            <td>Team members</td>
+            <td>Up to 5</td>
+            <td class="featured-col">Up to 25</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr>
+            <td>Automated reminders</td>
+            <td><span class="check">✓</span></td>
+            <td class="featured-col"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Portfolio analytics</td>
+            <td><span class="check">✓</span></td>
+            <td class="featured-col"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Custom loan products</td>
+            <td><span class="cross">—</span></td>
+            <td class="featured-col"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>API access</td>
+            <td><span class="cross">—</span></td>
+            <td class="featured-col"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Audit-ready exports</td>
+            <td><span class="check">✓</span></td>
+            <td class="featured-col"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>SSO & advanced security</td>
+            <td><span class="cross">—</span></td>
+            <td class="featured-col"><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Dedicated account manager</td>
+            <td><span class="cross">—</span></td>
+            <td class="featured-col"><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Custom SLA</td>
+            <td><span class="cross">—</span></td>
+            <td class="featured-col"><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================
+       PRICING FAQ
+       ============================================ -->
+  <section class="section-card" style="margin-top: 2.5rem; padding: clamp(1.5rem, 3vw, 2.5rem);">
+    <div class="section-heading">
+      <div class="section-label">Pricing FAQ</div>
+      <h2>Common questions about our plans</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>
+          Can I change plans later?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          Yes. You can upgrade or downgrade your plan at any time. Upgrades take effect immediately and
+          we'll prorate the difference; downgrades take effect at the start of your next billing cycle.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          What happens if I exceed my monthly limit?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          We won't block your operation. Overages are billed at the end of the month at the published
+          per-application rate for your tier. You'll receive a notification when you reach 80% of your limit.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          Is there a free trial?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          Yes — the Starter plan includes a 14-day free trial with no credit card required.
+          For Professional and Enterprise, contact our team to schedule a guided demo and trial setup.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          How does annual billing work?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          Annual billing is charged once per year and saves 20% compared to monthly billing.
+          You can switch between monthly and annual at any time.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          Do you offer discounts for NGOs or startups?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          We offer discounted pricing for qualifying NGOs, SACCOs, and early-stage lending startups.
+          Reach out to our sales team through the support page to discuss your situation.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          What payment methods do you accept?
+          <span class="faq-toggle" aria-hidden="true">+</span>
+        </summary>
+        <div class="faq-body">
+          We accept bank transfers, mobile money, and all major credit cards. Enterprise customers can
+          request invoicing with net-30 terms.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============================================
+       QUICK NAVIGATION
+       ============================================ -->
+  <section class="section-card" style="margin-top: 2.5rem; padding: clamp(1.5rem, 3vw, 2.5rem);">
+    <div class="section-heading">
+      <div class="section-label">Continue exploring</div>
       <h2>Where else to go</h2>
     </div>
-    <div class="page-link-list">
-      <div class="page-link-item">
-        <div>
-          <strong>Home</strong>
-          <small>Return to the main landing page.</small>
-        </div>
-        <a href="{% url 'tenants:landing' %}" class="btn btn-secondary">Home</a>
-      </div>
-      <div class="page-link-item">
-        <div>
-          <strong>Features</strong>
-          <small>Review what the platform can do.</small>
-        </div>
-        <a href="{% url 'tenants:features' %}" class="btn btn-secondary">Features</a>
-      </div>
-      <div class="page-link-item">
-        <div>
-          <strong>Register</strong>
-          <small>Start your free trial or account setup.</small>
-        </div>
-        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
-      </div>
+
+    <div class="nav-card-grid">
+      <a href="{% url 'tenants:landing' %}" class="nav-card">
+        <div class="nav-icon">🏠</div>
+        <strong>Home</strong>
+        <small>Return to the main landing page.</small>
+        <span class="nav-cta">Go home</span>
+      </a>
+      <a href="{% url 'tenants:features' %}" class="nav-card">
+        <div class="nav-icon">✨</div>
+        <strong>Features</strong>
+        <small>Review what the platform can do.</small>
+        <span class="nav-cta">Explore features</span>
+      </a>
+      <a href="{% url 'tenants:public_register' %}" class="nav-card">
+        <div class="nav-icon">🚀</div>
+        <strong>Register</strong>
+        <small>Start your free trial or account setup.</small>
+        <span class="nav-cta">Get started</span>
+      </a>
     </div>
   </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ============================================
+  // Billing toggle: Monthly <-> Annual
+  // ============================================
+  (function () {
+    const toggleButtons = document.querySelectorAll('.billing-toggle button');
+    const priceEls = document.querySelectorAll('.pricing-price');
+    const periodEls = document.querySelectorAll('.pricing-period');
+    const annualNoteEls = document.querySelectorAll('[data-annual-note]');
+
+    // Helper: extract a numeric value from a formatted price string
+    function parsePrice(str) {
+      const match = String(str).replace(/,/g, '').match(/[\d.]+/);
+      return match ? parseFloat(match[0]) : 0;
+    }
+
+    // Helper: format a number back into a price string preserving the original prefix
+    function formatPrice(original, value) {
+      const prefix = (String(original).match(/^[^\d]*/) || [''])[0];
+      const num = value % 1 === 0 ? value.toFixed(0) : value.toFixed(2);
+      // Add thousand separators if the original had them
+      if (String(original).includes(',')) {
+        return prefix + Number(num).toLocaleString();
+      }
+      return prefix + num;
+    }
+
+    function applyBilling(mode) {
+      toggleButtons.forEach(b => {
+        const isActive = b.dataset.billing === mode;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      priceEls.forEach(el => {
+        const monthly = parsePrice(el.dataset.monthly || el.textContent);
+        const annual = parsePrice(el.dataset.annual || monthly);
+        if (mode === 'annual') {
+          el.textContent = formatPrice(el.dataset.monthly || el.textContent, annual);
+        } else {
+          el.textContent = formatPrice(el.dataset.monthly || el.textContent, monthly);
+        }
+      });
+
+      periodEls.forEach(el => {
+        el.textContent = mode === 'annual' ? '/ month, billed annually' : '/ month';
+      });
+
+      annualNoteEls.forEach(el => {
+        if (mode === 'annual') {
+          el.textContent = '20% savings applied';
+        } else {
+          el.textContent = '';
+        }
+      });
+    }
+
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', () => applyBilling(btn.dataset.billing));
+    });
+  })();
+</script>
 {% endblock %}

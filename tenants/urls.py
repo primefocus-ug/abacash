@@ -12,6 +12,7 @@ urlpatterns = [
     path("public-admin/login/", views.public_admin_login, name="public_admin_login"),
     path("public-admin/logout/", views.public_admin_logout, name="public_admin_logout"),
     path("register/", views.register, name="public_register"),
+    path("register/status/", views.registration_status, name="registration_status"),
     path("login/",    views.public_login, name="public_login"),
     path("support/",  views.support,      name="support"),
     path("success/",  views.success,      name="success"),

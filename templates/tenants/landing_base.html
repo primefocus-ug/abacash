@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}abacash — Loan Management{% endblock %}</title>
   <meta name="description" content="Abacash loan management platform marketing pages. Explore features, pricing, support, and register your account.">
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('abacash-theme') || localStorage.getItem('admin-theme');
+        if (theme !== 'dark' && theme !== 'light') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -15,24 +26,53 @@
     :root {
       --accent: #2563eb;
       --accent-2: #0ea5e9;
+      --accent-glow: rgba(37, 99, 235, 0.35);
       --success: #16a34a;
       --danger: #ef4444;
+      --warning: #f59e0b;
       --main-bg: #f8fafc;
       --surface: #ffffff;
       --surface-2: #f1f5f9;
       --surface-3: #e2e8f0;
       --border: #031682;
+      --border-soft: rgba(148, 163, 184, 0.25);
       --text-primary: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
+      --radius-sm: 10px;
       --radius-md: 14px;
       --radius-lg: 20px;
+      --radius-xl: 28px;
       --container-padding: clamp(1rem, 4vw, 3rem);
       --nav-height: 120px;
+      --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 12px 35px rgba(15, 23, 42, 0.06);
+      --shadow-lg: 0 22px 45px rgba(15, 23, 42, 0.08);
+      --shadow-xl: 0 30px 70px rgba(15, 23, 42, 0.16);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --main-bg: #0b1220;
+      --surface: #111827;
+      --surface-2: #172033;
+      --surface-3: #263248;
+      --border: #334155;
+      --border-soft: rgba(148, 163, 184, 0.18);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .24);
+      --shadow-md: 0 12px 35px rgba(0, 0, 0, .3);
+      --shadow-lg: 0 22px 45px rgba(0, 0, 0, .36);
+      --shadow-xl: 0 30px 70px rgba(0, 0, 0, .45);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     html { scroll-behavior: smooth; }
+
     body {
       display: flex;
       flex-direction: column;
@@ -47,24 +87,34 @@
       padding-top: var(--nav-height);
     }
 
+    /* ============================================
+       NAVIGATION
+       ============================================ */
     nav {
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
-      justify-content: center; /* center the navigation */
+      justify-content: center;
       gap: 0.75rem;
       padding: 1rem var(--container-padding);
-      background: rgba(232, 233, 234, 0.62); /* more transparent */
-      backdrop-filter: blur(18px);
+      background: rgba(248, 250, 252, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid rgba(148, 163, 184, 0.12);
       position: fixed;
       left: 0; right: 0; top: 0;
       z-index: 100;
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
       height: var(--nav-height);
+      transition: all 0.3s var(--transition-smooth);
     }
 
-    /* Isolate logo on the left and center the nav links */
+    html[data-theme="dark"] nav {
+      background: rgba(15, 23, 42, .88);
+      border-bottom-color: var(--border);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
+    }
+
     .logo {
       position: absolute;
       left: var(--container-padding);
@@ -80,15 +130,16 @@
       text-transform: uppercase;
       white-space: nowrap;
       z-index: 110;
-      background: rgba(255,255,255,0.0);
-      padding: 0.1rem 0.3rem;
-      border-radius: 8px;
+      transition: transform 0.3s var(--transition-smooth);
     }
+
+    .logo:hover { transform: translateY(-50%) scale(1.02); }
 
     .logo img {
       display: block;
-      height: 128px; /* larger isolated logo */
+      height: 128px;
       width: auto;
+      filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.15));
     }
 
     .nav-list {
@@ -102,6 +153,82 @@
       list-style: none;
       z-index: 105;
     }
+
+    .nav-list a {
+      color: var(--text-primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.25s ease;
+      font-size: clamp(0.9rem, 0.95vw, 1rem);
+      position: relative;
+      padding: 0.35rem 0;
+    }
+
+    .nav-list a::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -2px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.3s var(--transition-smooth);
+    }
+
+    .nav-list a:hover::after,
+    .nav-list a.active::after { transform: scaleX(1); }
+
+    .nav-list a:hover,
+    .nav-list a.active { color: var(--accent); }
+
+    .landing-theme-toggle {
+      display: inline-grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .landing-theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .landing-theme-toggle .icon-sun { display: none; }
+    html[data-theme="dark"] .landing-theme-toggle .icon-sun { display: block; }
+    html[data-theme="dark"] .landing-theme-toggle .icon-moon { display: none; }
+
+    html[data-theme="dark"] .section-card,
+    html[data-theme="dark"] .registration-container,
+    html[data-theme="dark"] .popup-panel,
+    html[data-theme="dark"] .popup-modal {
+      background-color: var(--surface);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+
+    html[data-theme="dark"] .form-group input,
+    html[data-theme="dark"] .form-group select,
+    html[data-theme="dark"] .form-group textarea {
+      background-color: var(--surface-2);
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+
+    html[data-theme="dark"] .form-group input:focus,
+    html[data-theme="dark"] .form-group select:focus,
+    html[data-theme="dark"] .form-group textarea:focus {
+      background-color: var(--surface-3);
+    }
+
 
     .nav-actions {
       position: absolute;
@@ -121,10 +248,83 @@
         justify-content: space-between;
       }
       .logo { position: static; transform: none; }
-      .nav-list { position: static; transform: none; justify-content:center; }
+      .logo:hover { transform: scale(1.02); }
+      .nav-list { position: static; transform: none; justify-content: center; }
       .nav-actions { position: static; transform: none; }
     }
 
+    /* ============================================
+       BUTTONS
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.6rem;
+      border: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: all 0.3s var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn:hover::before { opacity: 1; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.22);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 35px rgba(37, 99, 235, 0.32);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid rgba(37, 99, 235, 0.18);
+      color: var(--accent);
+      padding: 0.8rem 1.2rem;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(37, 99, 235, 0.06);
+      border-color: rgba(37, 99, 235, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.75rem 1rem;
+    }
+
+    .btn-ghost:hover { color: var(--accent); background: rgba(37, 99, 235, 0.05); }
+
+    .btn:active { transform: translateY(0) scale(0.98); }
+
+    .btn[disabled] { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ============================================
+       HERO
+       ============================================ */
     .hero {
       padding: 4rem 0 2.5rem;
       text-align: center;
@@ -144,24 +344,6 @@
       margin-top: 1.5rem;
     }
 
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.85rem;
-      font-size: clamp(1.2rem, 1.75vw, 1.85rem);
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      color: var(--accent);
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .logo img {
-      display: block;
-      height: 96px; /* increased logo size */
-      width: auto;
-    }
-
     .brand-text {
       display: inline-block;
       font-size: 1rem;
@@ -169,81 +351,12 @@
       color: var(--text-primary);
     }
 
-    .nav-list {
-      display: flex;
-      align-items: center;
-      gap: clamp(0.8rem, 1.5vw, 1.75rem);
-      flex-wrap: wrap;
-      list-style: none;
-    }
-
-    .nav-list a {
-      color: var(--text-primary);
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.25s ease;
-      font-size: clamp(0.9rem, 0.95vw, 1rem);
-    }
-
-    .nav-list a:hover,
-    .nav-list a.active {
-      color: var(--accent);
-    }
-
-    .nav-list a:hover,
-    .nav-list a.active {
-      color: var(--accent);
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn,
-    .link-card a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-md);
-      text-decoration: none;
-      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-    }
-
-    .btn {
-      padding: 0.85rem 1.6rem;
-      border: none;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      border-radius: var(--radius-md);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid rgba(37, 99, 235, 0.18);
-      color: var(--accent);
-      padding: 0.8rem 1.2rem;
-    }
-
-    .btn:hover,
-    .link-card:hover {
-      transform: translateY(-2px);
-    }
-
     main {
       flex: 1 1 auto;
       max-width: 1200px;
       margin: 0 auto;
       padding: 1rem var(--container-padding) 6rem 4rem;
+      width: 100%;
     }
 
     .section-heading {
@@ -269,7 +382,7 @@
       line-height: 1.05;
       letter-spacing: -0.05em;
       margin-bottom: 1rem;
-      background: linear-gradient(135deg, #F8FAFC, var(--accent));
+      background: linear-gradient(135deg, #0f172a, var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -294,12 +407,15 @@
     }
 
     .brand-logos img {
-      max-height: 96px; /* larger brand logo display */
+      max-height: 96px;
       width: auto;
       display: block;
       filter: brightness(1.05);
     }
 
+    /* ============================================
+       GRID & CARDS
+       ============================================ */
     .grid {
       display: grid;
       gap: clamp(1.25rem, 2vw, 2rem);
@@ -318,19 +434,21 @@
     .link-card,
     .section-card {
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-soft);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
-      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
-      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+      box-shadow: var(--shadow-md);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
     }
 
     .link-card:hover,
     .card:hover,
     .section-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
       border-color: rgba(37, 99, 235, 0.25);
-      box-shadow: 0 22px 45px rgba(15, 23, 42, 0.08);
+      box-shadow: var(--shadow-lg);
     }
 
     .link-card {
@@ -339,6 +457,7 @@
       color: var(--text-primary);
       min-height: 190px;
       justify-content: space-between;
+      text-decoration: none;
     }
 
     .link-card h3 {
@@ -365,7 +484,7 @@
       padding: 1rem 1.1rem;
       background: var(--surface-2);
       border-radius: var(--radius-md);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-soft);
     }
 
     .page-link-item strong,
@@ -393,7 +512,7 @@
       display: grid;
       place-items: center;
       border-radius: 16px;
-      background: rgba(96, 165, 250, 0.1);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
       color: var(--accent);
       margin-bottom: 1rem;
       font-size: 1.5rem;
@@ -421,8 +540,22 @@
 
     .pricing-card.featured {
       border-color: var(--accent);
-      box-shadow: 0 20px 50px rgba(96, 165, 250, 0.18);
+      box-shadow: 0 20px 50px rgba(37, 99, 235, 0.18);
       transform: translateY(-2px);
+    }
+
+    .pricing-card.featured::before {
+      content: 'POPULAR';
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
     }
 
     .pricing-name {
@@ -458,7 +591,7 @@
       color: var(--text-secondary);
     }
 
-    .pricing-features li:before {
+    .pricing-features li::before {
       content: '✓';
       color: var(--success);
       font-weight: 700;
@@ -470,77 +603,19 @@
       margin-top: 1.3rem;
     }
 
-    .registration-container {
-      max-width: 680px;
-      margin: 0 auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: clamp(1.8rem, 3vw, 3rem);
-      color: var(--text-primary);
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 1rem;
-    }
-
-    .form-group {
-      display: grid;
-      gap: 0.45rem;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      color: var(--text-primary);
-      font-size: 0.95rem;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: var(--radius-md);
-      padding: 0.95rem 1rem;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: var(--text-primary);
-      font-size: 1rem;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
-    }
-
-    .form-group textarea { min-height: 120px; }
-
-    .field-note {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .error-text {
-      color: var(--danger);
-      font-size: 0.9rem;
-    }
-
-    .required { color: var(--danger); }
-
+    /* ============================================
+       POPUP / MODAL — REFINED
+       ============================================ */
     .popup-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.72);
+      background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.85));
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.3s var(--transition-smooth);
       z-index: 130;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
 
     .popup-backdrop.active {
@@ -552,15 +627,15 @@
       position: fixed;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%) scale(0.96);
+      transform: translate(-50%, -50%) scale(0.94);
       opacity: 0;
       pointer-events: none;
-      width: min(92vw, 760px);
+      width: min(94vw, 780px);
       max-height: calc(100vh - 3rem);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      transition: opacity 0.32s var(--transition-smooth), transform 0.32s var(--transition-smooth);
       z-index: 140;
     }
 
@@ -575,66 +650,229 @@
       min-height: 100px;
       max-height: calc(100vh - 3.5rem);
       overflow-y: auto;
-      padding: 2rem;
-      border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.74);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.16);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(37, 99, 235, 0.05);
       color: var(--text-primary);
       position: relative;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+    }
+
+    .popup-panel::-webkit-scrollbar { width: 6px; }
+    .popup-panel::-webkit-scrollbar-thumb {
+      background: rgba(37, 99, 235, 0.3);
+      border-radius: 3px;
     }
 
     .popup-panel h2 {
       margin-top: 0;
       margin-bottom: 0.75rem;
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      line-height: 1.1;
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .popup-panel .hero-copy {
+      margin: 0 0 1.5rem;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
     }
 
     .popup-close {
       position: absolute;
-      right: 1rem;
-      top: 1rem;
-      width: 42px;
-      height: 42px;
+      right: 1.25rem;
+      top: 1.25rem;
+      width: 44px;
+      height: 44px;
       border: none;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.72);
+      background: rgba(241, 245, 249, 0.8);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: var(--text-primary);
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       display: grid;
       place-items: center;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: all 0.25s var(--transition-smooth);
+      z-index: 10;
     }
 
     .popup-close:hover {
-      background: rgba(15, 23, 42, 0.12);
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      transform: rotate(90deg);
     }
 
+    /* ============================================
+       FORM — ADVANCED STYLING
+       ============================================ */
     .popup-form {
       display: grid;
-      gap: 1rem;
+      gap: 1.15rem;
     }
 
-    .popup-form .form-group input,
-    .popup-form .form-group select,
-    .popup-form .form-group textarea {
-      background: var(--surface-2);
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.1rem;
+    }
+
+    .form-grid .full-width { grid-column: 1 / -1; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: grid;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .form-group label .required {
+      color: var(--danger);
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1.5px solid rgba(148, 163, 184, 0.35);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      background: rgba(248, 250, 252, 0.9);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.25s var(--transition-smooth);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group textarea:hover {
+      border-color: rgba(37, 99, 235, 0.35);
+      background: rgba(248, 250, 252, 1);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), 0 1px 2px rgba(15, 23, 42, 0.05);
+    }
+
+    .form-group textarea { min-height: 110px; resize: vertical; }
+
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.75rem;
+      cursor: pointer;
+    }
+
+    .field-note {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .error-text {
+      color: var(--danger);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .required { color: var(--danger); }
+
+    /* Form section divider */
+    .form-section-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      padding-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      border-bottom: 1px solid rgba(37, 99, 235, 0.12);
+      grid-column: 1 / -1;
+    }
+
+    /* Input with icon wrapper */
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon input {
+      padding-left: 2.75rem;
+    }
+
+    .input-with-icon .input-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: color 0.25s ease;
+    }
+
+    .input-with-icon input:focus ~ .input-icon {
+      color: var(--accent);
     }
 
     .popup-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.75rem;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       justify-content: flex-end;
+      align-items: center;
     }
 
+    .popup-actions .btn { min-width: 130px; }
+
+    /* ============================================
+       CONTACT FAB
+       ============================================ */
     .contact-fab {
       position: fixed;
       right: 1.25rem;
@@ -649,55 +887,51 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.95rem 1.35rem;
+      gap: 0.5rem;
+      padding: 0.95rem 1.45rem;
       border: none;
       border-radius: 999px;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: white;
       font-weight: 700;
-      box-shadow: 0 18px 35px rgba(37, 99, 235, 0.22);
+      font-size: 0.95rem;
+      font-family: inherit;
+      box-shadow: 0 18px 35px rgba(37, 99, 235, 0.28);
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.3s var(--transition-smooth);
+      animation: fab-pulse 3s ease-in-out infinite;
     }
 
     .contact-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 22px 42px rgba(37, 99, 235, 0.24);
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 22px 42px rgba(37, 99, 235, 0.4);
+      animation-play-state: paused;
     }
 
-    body.modal-open {
-      overflow: hidden;
+    .contact-button::before {
+      content: '💬';
+      font-size: 1.1rem;
     }
 
-    html[data-theme='dark'] .popup-panel {
-      background: rgba(15, 23, 42, 0.64);
-      border-color: rgba(148, 163, 184, 0.18);
-      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.32);
+    @keyframes fab-pulse {
+      0%, 100% { box-shadow: 0 18px 35px rgba(37, 99, 235, 0.28), 0 0 0 0 rgba(37, 99, 235, 0.4); }
+      50% { box-shadow: 0 18px 35px rgba(37, 99, 235, 0.28), 0 0 0 12px rgba(37, 99, 235, 0); }
     }
 
-    html[data-theme='dark'] .popup-close,
-    html[data-theme='dark'] .form-group input,
-    html[data-theme='dark'] .form-group select,
-    html[data-theme='dark'] .form-group textarea {
-      background: rgba(15, 23, 42, 0.55);
-      color: var(--text-primary);
-      border-color: rgba(148, 163, 184, 0.18);
-    }
+    body.modal-open { overflow: hidden; }
 
-    html[data-theme='dark'] .contact-button {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-    }
-
+    /* ============================================
+       FOOTER
+       ============================================ */
     .footer {
       margin-top: 3rem;
       padding: 2rem var(--container-padding) 2rem;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-soft);
       color: var(--text-secondary);
       background: var(--surface-2);
       border-radius: 24px;
       box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
-      margin-top: auto; /* push footer to bottom when page content is short */
+      margin-top: auto;
     }
 
     .footer-grid {
@@ -709,15 +943,32 @@
       margin-bottom: 1.5rem;
     }
 
+    .footer-grid h4 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.02em;
+    }
+
     .footer-grid a {
       display: block;
       color: var(--text-secondary);
       margin-bottom: 0.5rem;
       font-size: 0.95rem;
+      text-decoration: none;
+      transition: color 0.2s ease, transform 0.2s ease;
     }
 
     .footer-grid a:hover {
       color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    .footer-grid p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
     }
 
     .footer-bottom {
@@ -726,7 +977,9 @@
       color: var(--text-muted);
     }
 
-    /* Toast notifications (replaces message-list) */
+    /* ============================================
+       TOASTS
+       ============================================ */
     .toast-container {
       position: fixed;
       right: 1rem;
@@ -745,16 +998,16 @@
       max-width: 420px;
       background: var(--surface);
       color: var(--text-primary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.8rem 1rem;
-      box-shadow: 0 12px 30px rgba(2,6,23,0.12);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      box-shadow: var(--shadow-lg);
       display: flex;
       gap: 0.75rem;
       align-items: flex-start;
-      transform: translateY(10px);
+      transform: translateY(20px);
       opacity: 0;
-      transition: transform 0.28s cubic-bezier(.2,.9,.2,1), opacity 0.28s ease;
+      transition: transform 0.35s var(--transition-smooth), opacity 0.35s ease;
     }
 
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -763,7 +1016,15 @@
     .toast .toast-content { flex: 1 1 auto; }
     .toast .toast-title { font-weight: 700; font-size: 0.95rem; }
     .toast .toast-body { font-size: 0.9rem; color: var(--text-secondary); }
-    .toast .toast-close { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: var(--text-muted); }
+    .toast .toast-close {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+    .toast .toast-close:hover { color: var(--danger); }
 
     .toast-success { border-left: 4px solid var(--success); }
     .toast-error   { border-left: 4px solid var(--danger); }
@@ -784,41 +1045,61 @@
       to { transform: scaleX(0); }
     }
 
-    /* Legacy message-list styles removed — toasts preferred */
+    /* ============================================
+       DARK THEME
+       ============================================ */
+    html[data-theme='dark'] .popup-panel {
+      background: rgba(15, 23, 42, 0.92);
+      border-color: rgba(148, 163, 184, 0.18);
+      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.5);
+    }
 
+    html[data-theme='dark'] .popup-close,
+    html[data-theme='dark'] .form-group input,
+    html[data-theme='dark'] .form-group select,
+    html[data-theme='dark'] .form-group textarea {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-primary);
+      border-color: rgba(148, 163, 184, 0.25);
+    }
+
+    html[data-theme='dark'] .form-group input:focus,
+    html[data-theme='dark'] .form-group select:focus,
+    html[data-theme='dark'] .form-group textarea:focus {
+      background: rgba(30, 41, 59, 1);
+      border-color: var(--accent);
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
     @media (max-width: 900px) {
-      nav {
-        padding: 0.9rem 1rem;
-      }
-      .nav-actions {
-        width: 100%;
-        justify-content: center;
-      }
+      nav { padding: 0.9rem 1rem; }
+      .nav-actions { width: 100%; justify-content: center; }
     }
 
     @media (max-width: 780px) {
-      .hero-title {
-        font-size: clamp(2rem, 7vw, 2.8rem);
-      }
-
-      .grid {
-        gap: 1rem;
-      }
+      .hero-title { font-size: clamp(2rem, 7vw, 2.8rem); }
+      .grid { gap: 1rem; }
     }
 
     @media (max-width: 620px) {
-      .nav-list {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .nav-actions {
-        justify-content: center;
-      }
-
+      .nav-list { width: 100%; justify-content: center; }
+      .nav-actions { justify-content: center; }
       body { padding-top: 80px; }
+      .popup-actions { flex-direction: column-reverse; }
+      .popup-actions .btn { width: 100%; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
   <nav>
@@ -833,6 +1114,15 @@
       <li><a href="{% url 'tenants:support' %}">Support</a></li>
     </ul>
     <div class="nav-actions">
+      <button type="button" class="landing-theme-toggle" id="themeToggle" aria-label="Switch to dark theme" title="Switch to dark theme" aria-pressed="false">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
       <a href="#" data-modal-target="login-modal-template" class="btn btn-secondary">Login</a>
       <a href="#" data-modal-target="register-modal-template" class="btn btn-primary">Register</a>
     </div>
@@ -842,12 +1132,36 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Toast container for success/info/error messages -->
   <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <script>
-    // Toast system: create visually pleasing notifications for Django messages
     (function(){
+      const themeToggle = document.getElementById('themeToggle');
+      if (themeToggle) {
+        function updateTheme(theme) {
+          const isDark = theme === 'dark';
+          themeToggle.setAttribute('aria-pressed', String(isDark));
+          themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+          themeToggle.setAttribute('title', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+        }
+
+        updateTheme(document.documentElement.getAttribute('data-theme') || 'light');
+        themeToggle.addEventListener('click', function() {
+          const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          updateTheme(theme);
+          try {
+            localStorage.setItem('abacash-theme', theme);
+            localStorage.removeItem('admin-theme');
+          } catch (e) {}
+        });
+        window.addEventListener('storage', function(event) {
+          if (event.key !== 'abacash-theme' || (event.newValue !== 'dark' && event.newValue !== 'light')) return;
+          document.documentElement.setAttribute('data-theme', event.newValue);
+          updateTheme(event.newValue);
+        });
+      }
+
       const container = document.getElementById('toast-container');
       function makeToast(type, title, body, timeout=5000){
         const el = document.createElement('div');
@@ -885,14 +1199,12 @@
         }
 
         container.appendChild(el);
-        // small timeout to allow transition
         requestAnimationFrame(()=> setTimeout(()=> el.classList.add('show'), 10));
         hideTimeout = setTimeout(finish, timeout);
 
         return {el, finish};
       }
 
-      // Render server messages passed by Django
       document.addEventListener('DOMContentLoaded', function(){
         try{
           const serverMessages = [];
@@ -908,10 +1220,9 @@
             const lvl = (m.level && m.level.indexOf('error')!==-1) ? 'error' : ((m.level && m.level.indexOf('success')!==-1)? 'success':'info');
             makeToast(lvl, lvl.charAt(0).toUpperCase()+lvl.slice(1), m.text, 6000);
           });
-        }catch(e){ /* be silent on template parse issues */ }
+        }catch(e){ /* silent */ }
       });
 
-      // Expose simple API
       window.AbacashToasts = { show: makeToast };
     })();
   </script>
@@ -935,8 +1246,8 @@
       </div>
       <div>
         <h4>Contact</h4>
-        <p>support@abacash.loan</p>
-        <p>+256 700 000 000</p>
+        <p>abauganda21@gmail.com</p>
+        <p>+256 785230670</p>
       </div>
     </div>
     <div class="footer-bottom">&copy; 2026 Abacash. All rights reserved.</div>
@@ -950,6 +1261,9 @@
     <button type="button" class="popup-close" onclick="closePopup()" aria-label="Close popup">&times;</button>
   </div>
 
+  <!-- ============================================
+       CONTACT MODAL
+       ============================================ -->
   <template id="contact-modal-template">
     <div class="popup-panel">
       <span class="eyebrow">Contact Abacash</span>
@@ -958,50 +1272,64 @@
       <form id="contact-popup-form" class="popup-form" onsubmit="submitContactForm(event)">
         <div class="form-grid">
           <div class="form-group">
-            <label for="contact_name">Full name</label>
-            <input id="contact_name" name="name" type="text" placeholder="Your full name" required>
+            <label for="contact_name">Full name <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <input id="contact_name" name="name" type="text" placeholder="Jane Doe" required autocomplete="name">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
           </div>
           <div class="form-group">
-            <label for="contact_email">Email address</label>
-            <input id="contact_email" name="email" type="email" placeholder="you@example.com" required>
+            <label for="contact_email">Email address <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <input id="contact_email" name="email" type="email" placeholder="jane@example.com" required autocomplete="email">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="contact_message">Message</label>
+          <div class="form-group full-width">
+            <label for="contact_message">Message <span class="required">*</span></label>
             <textarea id="contact_message" name="message" placeholder="How can we help you today?" required></textarea>
           </div>
         </div>
         <div class="popup-actions">
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Cancel</button>
           <button type="submit" class="btn btn-primary">Send request</button>
-          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
         </div>
       </form>
     </div>
   </template>
 
+  <!-- ============================================
+       REGISTRATION MODAL — ENHANCED
+       ============================================ -->
   <template id="register-modal-template">
     <div class="popup-panel">
-      <span class="eyebrow">Register</span>
+      <span class="eyebrow">Get started</span>
       <h2 id="popup-title">Start your Abacash onboarding</h2>
-      <p class="hero-copy">Complete the secure registration popup and get an onboarding specialist to reach out within 24 hours.</p>
-      <form method="POST" action="{% url 'tenants:public_register' %}" class="popup-form">
+      <p class="hero-copy">Complete the secure registration form and get an onboarding specialist to reach out within 24 hours.</p>
+      <form method="POST" action="{% url 'tenants:public_register' %}" class="popup-form" id="register-form" autocomplete="on">
         {% csrf_token %}
         <div class="form-grid">
+          <div class="form-section-title">Company details</div>
+          <div class="form-group full-width">
+            <label for="register_company_name">Company name <span class="required">*</span></label>
+            <input id="register_company_name" name="company_name" type="text" placeholder="e.g. Acme Lending Ltd" required value="{{ request.POST.company_name|default:'' }}" autocomplete="organization">
+          </div>
+
+          <div class="form-section-title">Contact person</div>
           <div class="form-group">
-            <label for="register_company_name">Company name</label>
-            <input id="register_company_name" name="company_name" type="text" placeholder="Your organization name" required value="{{ request.POST.company_name|default:'' }}">
+            <label for="register_contact_name">Full name <span class="required">*</span></label>
+            <input id="register_contact_name" name="contact_name" type="text" placeholder="Jane Doe" required value="{{ request.POST.contact_name|default:'' }}" autocomplete="name">
           </div>
           <div class="form-group">
-            <label for="register_contact_name">Contact person</label>
-            <input id="register_contact_name" name="contact_name" type="text" placeholder="Your full name" required value="{{ request.POST.contact_name|default:'' }}">
+            <label for="register_email">Email address <span class="required">*</span></label>
+            <input id="register_email" name="email" type="email" placeholder="jane@example.com" required value="{{ request.POST.email|default:'' }}" autocomplete="email">
           </div>
           <div class="form-group">
-            <label for="register_email">Email address</label>
-            <input id="register_email" name="email" type="email" placeholder="you@example.com" required value="{{ request.POST.email|default:'' }}">
+            <label for="register_phone">Phone number <span class="required">*</span></label>
+            <input id="register_phone" name="phone" type="tel" placeholder="+256 700 000 000" required value="{{ request.POST.phone|default:'' }}" autocomplete="tel">
           </div>
-          <div class="form-group">
-            <label for="register_phone">Phone number</label>
-            <input id="register_phone" name="phone" type="tel" placeholder="+256..." required value="{{ request.POST.phone|default:'' }}">
-          </div>
+
+          <div class="form-section-title">Location & plan</div>
           <div class="form-group">
             <label for="register_country">Country</label>
             <select id="register_country" name="country">
@@ -1014,45 +1342,54 @@
           </div>
           <div class="form-group">
             <label for="register_city">City</label>
-            <input id="register_city" name="city" type="text" placeholder="Your city" value="{{ request.POST.city|default:'' }}">
+            <input id="register_city" name="city" type="text" placeholder="Kampala" value="{{ request.POST.city|default:'' }}" autocomplete="address-level2">
           </div>
-          <div class="form-group">
+          <div class="form-group full-width">
             <label for="register_plan">Pricing plan</label>
             <select id="register_plan" name="plan">
-              <option value="STARTER" {% if request.POST.plan == 'STARTER' %}selected{% endif %}>Starter</option>
-              <option value="PROFESSIONAL" {% if request.POST.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional</option>
-              <option value="ENTERPRISE" {% if request.POST.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise</option>
+              <option value="STARTER" {% if request.POST.plan == 'STARTER' %}selected{% endif %}>Starter — for small teams</option>
+              <option value="PROFESSIONAL" {% if request.POST.plan == 'PROFESSIONAL' %}selected{% endif %}>Professional — for growing lenders</option>
+              <option value="ENTERPRISE" {% if request.POST.plan == 'ENTERPRISE' %}selected{% endif %}>Enterprise — for large operations</option>
             </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label for="register_message">Message</label>
-          <textarea id="register_message" name="message" placeholder="Tell us about your lending operation...">{{ request.POST.message|default:'' }}</textarea>
+
+          <div class="form-section-title">Additional info</div>
+          <div class="form-group full-width">
+            <label for="register_message">Message <span class="field-note">(optional)</span></label>
+            <textarea id="register_message" name="message" placeholder="Tell us about your lending operation...">{{ request.POST.message|default:'' }}</textarea>
+          </div>
         </div>
         <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Start registration</button>
-          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Start registration →</button>
         </div>
       </form>
     </div>
   </template>
 
+  <!-- ============================================
+       LOGIN MODAL
+       ============================================ -->
   <template id="login-modal-template">
     <div class="popup-panel">
       <span class="eyebrow">Tenant login</span>
       <h2 id="popup-title">Open your Abacash tenant</h2>
-      <p class="hero-copy">Use your company slug to go directly to your secure tenant login page.</p>
+      <p class="hero-copy">Enter your company slug to go directly to your secure tenant login page.</p>
       <form method="POST" action="{% url 'tenants:public_login' %}" class="popup-form">
         {% csrf_token %}
         <div class="form-grid">
-          <div class="form-group">
-            <label for="login_tenant_slug">Company slug</label>
-            <input id="login_tenant_slug" name="tenant_slug" type="text" placeholder="your-company" required value="{{ request.POST.tenant_slug|default:'' }}">
+          <div class="form-group full-width">
+            <label for="login_tenant_slug">Company slug <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <input id="login_tenant_slug" name="tenant_slug" type="text" placeholder="your-company" required value="{{ request.POST.tenant_slug|default:'' }}" autocomplete="organization" pattern="[a-z0-9\-]+" title="Lowercase letters, numbers, and hyphens only">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+            </div>
+            <span class="field-note">Example: <code>acme-lending</code></span>
           </div>
         </div>
         <div class="popup-actions">
-          <button type="submit" class="btn btn-primary">Go to login</button>
-          <button type="button" class="btn btn-secondary" onclick="closePopup()">Close</button>
+          <button type="button" class="btn btn-secondary" onclick="closePopup()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Go to login →</button>
         </div>
       </form>
     </div>
@@ -1067,12 +1404,19 @@
     const popupModal = document.getElementById('popup-modal');
     const popupContent = document.getElementById('popup-content');
     const contactTemplate = document.getElementById('contact-modal-template');
+    let lastFocusedElement = null;
 
     function openPopup() {
+      lastFocusedElement = document.activeElement;
       document.body.classList.add('modal-open');
       popupBackdrop.classList.add('active');
       popupModal.classList.add('active');
       popupModal.setAttribute('aria-hidden', 'false');
+      // Focus first input after transition
+      setTimeout(() => {
+        const firstInput = popupContent.querySelector('input, textarea, select, button');
+        if (firstInput) firstInput.focus();
+      }, 100);
     }
 
     function closePopup() {
@@ -1080,12 +1424,14 @@
       popupBackdrop.classList.remove('active');
       popupModal.classList.remove('active');
       popupModal.setAttribute('aria-hidden', 'true');
+      if (lastFocusedElement && lastFocusedElement.focus) {
+        lastFocusedElement.focus();
+      }
     }
 
     function openContactPopup() {
       if (!contactTemplate) return;
       popupContent.innerHTML = contactTemplate.innerHTML;
-      popupContent.querySelector('input, textarea')?.focus();
       openPopup();
     }
 
@@ -1095,18 +1441,41 @@
       const name = form.name.value.trim();
       const email = form.email.value.trim();
       const message = form.message.value.trim();
-      if (!name || !email || !message) {
-        return;
-      }
+      if (!name || !email || !message) return;
+
       const body = `Name: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0A${encodeURIComponent(message)}`;
-      window.location.href = `mailto:support@abacash.loan?subject=${encodeURIComponent('Abacash support request')}&body=${body}`;
+      window.location.href = `mailto:abauganda21@gmail.com?subject=${encodeURIComponent('Abacash support request')}&body=${body}`;
+
+      if (window.AbacashToasts) {
+        window.AbacashToasts.show('success', 'Opening email client', 'Your default email app should open shortly.', 4000);
+      }
       closePopup();
+    }
+
+    // Focus trap inside modal
+    function trapFocus(e) {
+      if (!popupModal.classList.contains('active')) return;
+      if (e.key !== 'Tab') return;
+      const focusable = popupModal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && popupModal.classList.contains('active')) {
         closePopup();
       }
+      trapFocus(event);
     });
 
     document.querySelectorAll('[data-modal-target]').forEach(button => {
@@ -1134,6 +1503,6 @@
       });
     });
   </script>
-{% block extra_js %}{% endblock %}
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

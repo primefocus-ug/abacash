@@ -1,183 +1,644 @@
 {% extends "tenants/landing_base.html" %}
 
-{% block title %}Registration Successful | Abacash{% endblock %}
+{% block title %}Registration received | Abacash{% endblock %}
+
+{% block extra_head %}
+<style>
+  .signup-progress-page {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: clamp(24px, 5vw, 64px) 20px 72px;
+    color: var(--text-primary);
+    transition: color .25s ease;
+  }
+
+  html[data-theme="dark"] .signup-progress-hero .eyebrow {
+    border-color: rgba(96, 165, 250, .28);
+    background: rgba(37, 99, 235, .16);
+    color: #bfdbfe;
+  }
+
+  html[data-theme="dark"] .signup-progress-card {
+    border-color: #334155;
+    background:
+      radial-gradient(ellipse at 100% 0, rgba(37, 99, 235, .18), transparent 42%),
+      var(--surface);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .32);
+  }
+
+  html[data-theme="dark"] .signup-progress-symbol {
+    background: linear-gradient(145deg, #1e3a8a, #1e40af);
+    color: #dbeafe;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="ready"] .signup-progress-symbol {
+    background: #14532d;
+    color: #bbf7d0;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="failed"] .signup-progress-symbol {
+    background: #7f1d1d;
+    color: #fecaca;
+  }
+
+  html[data-theme="dark"] .signup-status-pill {
+    background: #1e3a8a;
+    color: #dbeafe;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="ready"] .signup-status-pill {
+    background: #14532d;
+    color: #bbf7d0;
+  }
+
+  html[data-theme="dark"] .signup-progress-card[data-state="failed"] .signup-status-pill {
+    background: #7f1d1d;
+    color: #fecaca;
+  }
+
+  html[data-theme="dark"] .signup-activity {
+    border-color: #1e3a8a;
+    background: rgba(30, 58, 138, .24);
+  }
+
+  html[data-theme="dark"] .signup-activity-copy strong { color: #dbeafe; }
+  html[data-theme="dark"] .signup-activity-copy span { color: #cbd5e1; }
+  html[data-theme="dark"] .signup-activity-track { background: #1e3a8a; }
+
+  html[data-theme="dark"] .signup-step:not(:last-child)::after { background: #334155; }
+  html[data-theme="dark"] .signup-step.is-complete:not(:last-child)::after { background: #22c55e; }
+  html[data-theme="dark"] .signup-step.is-current:not(:last-child)::after { background: linear-gradient(90deg, #60a5fa, #334155); }
+
+  html[data-theme="dark"] .signup-step-marker {
+    border-color: #475569;
+    background: var(--surface);
+    color: #94a3b8;
+  }
+
+  html[data-theme="dark"] .signup-step.is-current .signup-step-marker {
+    border-color: #3b82f6;
+    background: #2563eb;
+    color: #fff;
+  }
+
+  html[data-theme="dark"] .signup-next-panel {
+    border-color: #334155;
+    background: rgba(30, 41, 59, .82);
+    color: #cbd5e1;
+  }
+
+  html[data-theme="dark"] .signup-next-panel strong { color: #f8fafc; }
+  html[data-theme="dark"] .signup-error { color: #fecaca; }
+
+  html[data-theme="dark"] .signup-next-step {
+    border-color: #334155;
+    background: var(--surface);
+  }
+
+  html[data-theme="dark"] .signup-next-step > span {
+    background: #1e3a8a;
+    color: #dbeafe;
+  }
+
+  .signup-progress-hero {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 30px;
+  }
+
+  .signup-progress-hero .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid rgba(37, 99, 235, .18);
+    border-radius: 999px;
+    background: rgba(37, 99, 235, .07);
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+
+  .signup-progress-hero h1 {
+    margin: 18px 0 10px;
+    color: var(--text-primary, #0f172a);
+    font-size: clamp(30px, 5vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -.04em;
+  }
+
+  .signup-progress-hero p {
+    margin: 0;
+    color: var(--text-secondary, #475569);
+    font-size: clamp(15px, 2vw, 18px);
+    line-height: 1.65;
+  }
+
+  .signup-progress-card {
+    overflow: hidden;
+    border: 1px solid rgba(37, 99, 235, .16);
+    border-radius: 22px;
+    background:
+      radial-gradient(ellipse at 100% 0, rgba(96, 165, 250, .15), transparent 40%),
+      var(--surface, #fff);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .09);
+  }
+
+  .signup-progress-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: clamp(20px, 4vw, 30px);
+  }
+
+  .signup-progress-symbol {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #eff6ff, #dbeafe);
+    color: #2563eb;
+    font-size: 21px;
+  }
+
+  .signup-progress-card[data-state="ready"] .signup-progress-symbol {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .signup-progress-card[data-state="failed"] .signup-progress-symbol {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  .signup-progress-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .signup-progress-copy h2 {
+    margin: 1px 0 5px;
+    color: var(--text-primary, #0f172a);
+    font-size: clamp(18px, 3vw, 23px);
+    letter-spacing: -.02em;
+  }
+
+  .signup-progress-copy p {
+    margin: 0;
+    color: var(--text-secondary, #475569);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .signup-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    margin-top: 4px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .signup-status-pill i { font-size: 9px; }
+  .signup-progress-card[data-state="ready"] .signup-status-pill { background: #dcfce7; color: #166534; }
+  .signup-progress-card[data-state="failed"] .signup-status-pill { background: #fee2e2; color: #991b1b; }
+
+  .signup-activity {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    margin: 0 clamp(20px, 4vw, 30px) 25px;
+    padding: 14px 16px;
+    border: 1px solid rgba(59, 130, 246, .16);
+    border-radius: 14px;
+    background: rgba(239, 246, 255, .72);
+  }
+
+  .signup-progress-card[data-step="MIGRATING"] .signup-activity {
+    display: flex;
+  }
+
+  .signup-activity-copy {
+    flex: 0 0 auto;
+  }
+
+  .signup-activity-copy strong {
+    display: block;
+    color: #1e3a8a;
+    font-size: 12px;
+  }
+
+  .signup-activity-copy span {
+    display: block;
+    margin-top: 2px;
+    color: #475569;
+    font-size: 11px;
+  }
+
+  .signup-activity-track {
+    position: relative;
+    height: 7px;
+    flex: 1;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #dbeafe;
+  }
+
+  .signup-activity-track::after {
+    position: absolute;
+    inset: 0 auto 0 -45%;
+    width: 42%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #60a5fa, #2563eb, #60a5fa);
+    content: "";
+    animation: signup-migration-sweep 1.5s ease-in-out infinite;
+  }
+
+  .signup-progress-card[data-state="failed"] .signup-activity-track::after,
+  .signup-progress-card[data-state="ready"] .signup-activity-track::after {
+    animation-play-state: paused;
+  }
+
+  .signup-progress-card[data-step="MIGRATING"] .signup-progress-symbol i {
+    animation: signup-database-turn 2.8s linear infinite;
+  }
+
+  .signup-step-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    padding: 4px clamp(20px, 4vw, 30px) 28px;
+  }
+
+  .signup-step {
+    position: relative;
+    min-width: 0;
+    padding-right: 14px;
+  }
+
+  .signup-step:not(:last-child)::after {
+    position: absolute;
+    top: 16px;
+    left: 39px;
+    right: 12px;
+    height: 2px;
+    background: #e2e8f0;
+    content: "";
+  }
+
+  .signup-step.is-complete:not(:last-child)::after { background: #22c55e; }
+  .signup-step.is-current:not(:last-child)::after { background: linear-gradient(90deg, #3b82f6, #e2e8f0); }
+
+  .signup-step-marker {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 33px;
+    height: 33px;
+    margin-bottom: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    background: var(--surface, #fff);
+    color: #94a3b8;
+    font-size: 12px;
+    transition: all .25s ease;
+  }
+
+  .signup-step.is-complete .signup-step-marker {
+    border-color: #22c55e;
+    background: #22c55e;
+    color: #fff;
+  }
+
+  .signup-step.is-current .signup-step-marker {
+    border-color: #3b82f6;
+    background: #3b82f6;
+    color: #fff;
+    box-shadow: 0 0 0 5px rgba(59, 130, 246, .12);
+    animation: signup-pulse 1.8s ease-in-out infinite;
+  }
+
+  .signup-step.is-failed .signup-step-marker {
+    border-color: #ef4444;
+    background: #ef4444;
+    color: #fff;
+  }
+
+  .signup-step strong {
+    display: block;
+    color: var(--text-primary, #0f172a);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .signup-step small {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-muted, #64748b);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .signup-next-panel {
+    margin: 0 clamp(16px, 4vw, 30px) 26px;
+    padding: 16px 18px;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: rgba(239, 246, 255, .75);
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .signup-next-panel strong { color: #0f172a; }
+  .signup-error { margin-top: 8px; color: #b91c1c; }
+  .signup-error[hidden] { display: none; }
+
+  .signup-next-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+  }
+
+  .signup-next-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 16px;
+    background: var(--surface, #fff);
+  }
+
+  .signup-next-step > span {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .signup-next-step strong {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--text-primary, #0f172a);
+    font-size: 13px;
+  }
+
+  .signup-next-step p {
+    margin: 0;
+    color: var(--text-secondary, #475569);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .signup-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  @keyframes signup-pulse {
+    50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, .04); }
+  }
+
+  @keyframes signup-migration-sweep {
+    from { transform: translateX(0); }
+    to { transform: translateX(360%); }
+  }
+
+  @keyframes signup-database-turn {
+    0%, 15% { transform: rotateY(0); }
+    50%, 65% { transform: rotateY(180deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  @media (max-width: 720px) {
+    .signup-step-list { grid-template-columns: 1fr; gap: 0; padding-bottom: 12px; }
+    .signup-step { display: grid; grid-template-columns: 38px 1fr; column-gap: 10px; padding: 0 0 18px; }
+    .signup-step:not(:last-child)::after { top: 34px; bottom: -1px; left: 15px; right: auto; width: 2px; height: auto; }
+    .signup-step-marker { grid-row: span 2; margin: 0; }
+    .signup-step strong { align-self: end; }
+    .signup-step small { margin-top: 1px; }
+    .signup-next-steps { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 520px) {
+    .signup-progress-top { flex-wrap: wrap; }
+    .signup-status-pill { margin-left: 68px; margin-top: -8px; }
+    .signup-progress-hero { margin-bottom: 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .signup-step.is-current .signup-step-marker { animation: none; }
+    .signup-step-marker { transition: none; }
+    .signup-activity-track::after,
+    .signup-progress-card[data-step="MIGRATING"] .signup-progress-symbol i { animation: none; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <div class="eyebrow">Application received</div>
-    <h1 class="hero-title">Thank you for registering with Abacash.</h1>
-    <p class="hero-copy">Your registration has been submitted and we're provisioning your tenant environment.</p>
+<main class="signup-progress-page">
+  <header class="signup-progress-hero">
+    <span class="eyebrow"><i class="fas fa-check-circle" aria-hidden="true"></i> Application received</span>
+    <h1>We’re getting your workspace ready.</h1>
+    <p>Your signup is safely received. We’ll prepare your secure workspace and email the administrator when it’s ready to activate.</p>
+  </header>
+
+  <section class="signup-progress-card" id="signup-progress"
+    data-status-url="{{ status_url }}"
+    data-status="{% if status_url %}PENDING{% else %}UNKNOWN{% endif %}"
+    data-step="QUEUED"
+    aria-labelledby="signup-progress-title">
+    <div class="signup-progress-top">
+      <div class="signup-progress-symbol" aria-hidden="true"><i class="fas fa-layer-group"></i></div>
+      <div class="signup-progress-copy">
+        <h2 id="signup-progress-title">Preparing your account</h2>
+        <p id="signup-progress-message" aria-live="polite">
+          {% if status_url %}Your workspace setup is queued. This page will show each step as it completes.{% else %}Your registration has been received. Check your email for updates from our onboarding team.{% endif %}
+        </p>
+      </div>
+      <span class="signup-status-pill" id="signup-status-pill">
+        <i class="fas fa-circle" aria-hidden="true"></i><span>Waiting to start</span>
+      </span>
+    </div>
+
+    <div class="signup-activity" role="status" aria-label="Database migrations are running">
+      <div class="signup-activity-copy">
+        <strong>Database migrations running</strong>
+        <span>Applying the updates your workspace needs</span>
+      </div>
+      <div class="signup-activity-track" aria-hidden="true"></div>
+    </div>
+
+    <div class="signup-step-list" id="signup-step-list" aria-label="Workspace setup progress">
+      <div class="signup-step" data-step="CREATING_SCHEMA">
+        <span class="signup-step-marker"><i class="fas fa-building" aria-hidden="true"></i></span>
+        <strong>Secure workspace</strong><small>Creating your isolated tenant</small>
+      </div>
+      <div class="signup-step" data-step="MIGRATING">
+        <span class="signup-step-marker"><i class="fas fa-database" aria-hidden="true"></i></span>
+        <strong>Database setup</strong><small>Applying database migrations</small>
+      </div>
+      <div class="signup-step" data-step="SEEDING">
+        <span class="signup-step-marker"><i class="fas fa-seedling" aria-hidden="true"></i></span>
+        <strong>Starter data</strong><small>Adding your initial configuration</small>
+      </div>
+      <div class="signup-step" data-step="FINALIZING">
+        <span class="signup-step-marker"><i class="fas fa-envelope" aria-hidden="true"></i></span>
+        <strong>Account access</strong><small>Preparing your activation email</small>
+      </div>
+      <div class="signup-step" data-step="COMPLETE">
+        <span class="signup-step-marker"><i class="fas fa-check" aria-hidden="true"></i></span>
+        <strong>Ready to go</strong><small>Activate your administrator account</small>
+      </div>
+    </div>
+
+    <div class="signup-next-panel">
+      <strong id="signup-next-title">What should I do now?</strong>
+      <div id="signup-next-message">
+        No action is needed while setup runs. Database migrations can take a few minutes depending on system load. You can leave this page and check your email; setup will continue in the background.
+      </div>
+      <div class="signup-error" id="signup-error" role="status" hidden>
+        <strong id="signup-error-title"></strong>
+        <span id="signup-error-detail"></span>
+      </div>
+    </div>
   </section>
 
-  <!-- Fallback info section -->
-  <section class="section-card" style="margin-top: 2rem; padding: 2rem;">
-    <div class="section-heading">
-      <div class="section-label">What's happening</div>
-      <h2>Provisioning steps</h2>
-    </div>
-    <ol class="page-link-list" style="list-style: disc; padding-left: 1.5rem;">
-      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We create your isolated tenant schema in our database.</li>
-      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We run Django migrations to set up all required tables.</li>
-      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We seed default loan products and configuration.</li>
-      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">We send you a password reset link via email.</li>
-      <li style="margin-bottom: 0.85rem; color: var(--text-secondary);">You reset your password and start using Abacash.</li>
-    </ol>
+  <section class="signup-next-steps" aria-label="Next steps">
+    <article class="signup-next-step">
+      <span>1</span><div><strong>Setup continues automatically</strong><p>You don’t need to keep this page open for migrations to finish.</p></div>
+    </article>
+    <article class="signup-next-step">
+      <span>2</span><div><strong>Watch your inbox</strong><p>We’ll send an activation link to the email address used for signup.</p></div>
+    </article>
+    <article class="signup-next-step">
+      <span>3</span><div><strong>Activate your account</strong><p>Use the secure link to create your password and sign in.</p></div>
+    </article>
   </section>
+
+  <div class="signup-actions">
+    <a class="btn btn-primary" href="{% url 'tenants:landing' %}">Back to Abacash</a>
+    <a class="btn btn-secondary" href="{% url 'tenants:support' %}">Contact support</a>
+  </div>
+</main>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // Show provisioning modal on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    showProvisioningModal();
-  });
+  (function() {
+    'use strict';
+    var card = document.getElementById('signup-progress');
+    if (!card || !card.dataset.statusUrl) return;
 
-  function showProvisioningModal() {
-    // Create modal overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'provisioning-overlay';
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    `;
+    var items = Array.prototype.slice.call(card.querySelectorAll('.signup-step'));
+    var message = document.getElementById('signup-progress-message');
+    var nextMessage = document.getElementById('signup-next-message');
+    var statusPill = document.getElementById('signup-status-pill');
+    var errorMessage = document.getElementById('signup-error');
+    var errorTitle = document.getElementById('signup-error-title');
+    var errorDetail = document.getElementById('signup-error-detail');
+    var rank = { CREATING_SCHEMA: 0, MIGRATING: 1, SEEDING: 2, FINALIZING: 3, COMPLETE: 4 };
+    var copy = {
+      QUEUED: ['Waiting to start', 'Your workspace setup is queued. This page will show each step as it completes.', 'No action is needed while setup runs. Database migrations can take a few minutes depending on system load. You can leave this page and check your email; setup will continue in the background.'],
+      CREATING_SCHEMA: ['Creating workspace', 'We’re preparing a secure, separate workspace for your organization.', 'Your signup is safe. Workspace setup is running in the background; you may leave this page and return later.'],
+      MIGRATING: ['Setting up database', 'We’re applying the database migrations needed to run your workspace.', 'This step can take a few minutes depending on system load. Please don’t submit another signup; setup continues even if you leave this page.'],
+      SEEDING: ['Adding starter data', 'We’re adding the initial branch, lending products, and account settings.', 'Your workspace is being configured. We’ll email you as soon as account activation is ready.'],
+      FINALIZING: ['Preparing account access', 'The workspace is set up. We’re finishing the account activation steps.', 'Check your email shortly for your secure activation link.'],
+      COMPLETE: ['Workspace ready', 'Your workspace is ready. Check your inbox for the administrator activation email.', 'Open the secure activation link in your email to create your password and sign in.']
+    };
 
-    // Create modal content
-    const modal = document.createElement('div');
-    modal.id = 'provisioning-modal';
-    modal.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 3rem;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      animation: slideUp 0.4s ease-out;
-    `;
+    function render(data) {
+      var state = data.status;
+      var step = state === 'READY' ? 'COMPLETE' : (state === 'PENDING' ? 'QUEUED' : data.step);
+      var failed = state === 'FAILED';
+      var failedToStart = failed && data.failure_stage === 'START';
+      var waitingTooLong = state === 'PENDING' && data.waiting_seconds >= 120;
+      var currentRank = rank[step] === undefined ? -1 : rank[step];
+      var stateCopy = copy[step] || copy.QUEUED;
+      card.dataset.status = state;
+      card.dataset.step = step;
+      card.dataset.state = failed ? 'failed' : (state === 'READY' ? 'ready' : 'running');
 
-    modal.innerHTML = `
-      <div style="margin-bottom: 2rem;">
-        <!-- Abacash Logo Spinner -->
-        <div style="display: inline-block; position: relative; width: 120px; height: 120px;">
-          <svg style="width: 100%; height: 100%; animation: spin 2s linear infinite; transform-origin: center;"
-               viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <!-- Simple circle logo that rotates -->
-            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--accent, #2563eb)" stroke-width="2"/>
-            <circle cx="50" cy="50" r="35" fill="none" stroke="var(--accent, #2563eb)" stroke-width="1" opacity="0.5"/>
-            <path d="M 50 15 A 35 35 0 0 1 85 50" fill="none" stroke="var(--primary, #2563eb)" stroke-width="3" stroke-linecap="round"/>
-            <text x="50" y="55" font-size="20" font-weight="bold" text-anchor="middle" fill="var(--primary, #2563eb)">A</text>
-          </svg>
-        </div>
-      </div>
+      items.forEach(function(item) {
+        var itemRank = rank[item.dataset.step];
+        var current = !failed && state !== 'READY' && item.dataset.step === step;
+        item.classList.toggle('is-complete', state === 'READY' || (!failed && itemRank < currentRank));
+        item.classList.toggle('is-current', current);
+        item.classList.toggle('is-failed', failed && item.dataset.step === step);
+        item.setAttribute('aria-current', current ? 'step' : 'false');
+      });
 
-      <h2 style="margin: 1.5rem 0; color: var(--text-primary, #1f2937); font-size: 1.5rem; font-weight: 600;">
-        Setting up your Abacash tenant...
-      </h2>
-      <p style="color: var(--text-secondary, #6b7280); margin-bottom: 2rem; font-size: 1rem;">
-        Please hold on while we provision your environment. This typically takes 1-2 minutes.
-      </p>
-      
-      <div style="margin: 2rem 0; max-width: 100%;">
-        <div style="background: var(--border, #e5e7eb); border-radius: 8px; overflow: hidden; height: 8px;">
-          <div class="progress-bar" 
-               style="height: 100%; background: linear-gradient(90deg, var(--accent, #2563eb), var(--primary, #2563eb)); width: 0%; animation: progress 3s ease-in-out infinite; border-radius: 8px;">
-          </div>
-        </div>
-      </div>
-
-      <ul style="text-align: left; display: inline-block; margin: 2rem 0; list-style: none; padding: 0;">
-        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
-          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: var(--accent, #2563eb); color: white; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 0.9rem;">✓</span>
-          <span>Creating tenant schema</span>
-        </li>
-        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
-          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: var(--accent, #2563eb); color: white; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 0.9rem;">⏳</span>
-          <span>Running database migrations</span>
-        </li>
-        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
-          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: #d1d5db; color: #6b7280; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">•</span>
-          <span>Seeding default data</span>
-        </li>
-        <li style="padding: 0.75rem 0; color: var(--text-secondary, #6b7280); display: flex; align-items: center;">
-          <span style="display: inline-flex; width: 28px; height: 28px; margin-right: 0.75rem; background: #d1d5db; color: #6b7280; border-radius: 50%; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">•</span>
-          <span>Sending access instructions</span>
-        </li>
-      </ul>
-
-      <p style="color: #999; margin-top: 2rem; font-size: 0.9rem;">
-        A password reset link will be sent to your email address shortly.
-      </p>
-    `;
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // Add CSS animations
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-
-      @keyframes progress {
-        0% { width: 0%; }
-        50% { width: 100%; }
-        100% { width: 0%; }
-      }
-
-      @keyframes slideUp {
-        from {
-          transform: translateY(30px);
-          opacity: 0;
+      var icon = statusPill.querySelector('i');
+      if (failed) {
+        statusPill.querySelector('span').textContent = failedToStart ? 'Setup not started' : 'Setup stopped';
+        icon.className = 'fas fa-exclamation-triangle';
+        if (failedToStart) {
+          message.textContent = 'Your signup was saved, but workspace setup could not be started automatically.';
+          nextMessage.textContent = 'You do not need to register again. Contact support so the onboarding team can start setup for you.';
+          errorTitle.textContent = 'Setup did not start. ';
+          errorDetail.textContent = 'The signup is recorded, but the background setup job could not be queued.';
+        } else {
+          message.textContent = 'Workspace setup stopped before it finished.';
+          nextMessage.textContent = 'You do not need to register again. Contact support so the onboarding team can investigate and restart setup.';
+          errorTitle.textContent = 'Setup stopped. ';
+          errorDetail.textContent = 'An error occurred while preparing your workspace. The technical details are recorded for the support team.';
         }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
+        errorMessage.hidden = false;
+        window.clearInterval(timer);
+        return;
       }
 
-      @media (max-width: 640px) {
-        #provisioning-modal {
-          padding: 2rem;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Auto-close modal after provisioning completes
-    setTimeout(() => {
-      closeProvisioningModal();
-    }, 120000); // Close after 2 minutes (provisioning usually done by then)
-  }
-
-  function closeProvisioningModal() {
-    const overlay = document.getElementById('provisioning-overlay');
-    if (overlay) {
-      overlay.style.animation = 'fadeOut 0.3s ease-out';
-      setTimeout(() => {
-        overlay.remove();
-      }, 300);
+      statusPill.querySelector('span').textContent = waitingTooLong ? 'Taking longer' : stateCopy[0];
+      icon.className = state === 'READY' ? 'fas fa-check' : 'fas fa-circle';
+      var currentMessage = waitingTooLong
+        ? 'Your signup is saved, but workspace setup has not started yet.'
+        : stateCopy[1];
+      var currentNextMessage = waitingTooLong
+        ? 'You don’t need to submit again. Setup will continue when a worker is available. If this message remains for several minutes, contact support.'
+        : stateCopy[2];
+      if (message.textContent !== currentMessage) message.textContent = currentMessage;
+      if (nextMessage.textContent !== currentNextMessage) nextMessage.textContent = currentNextMessage;
+      if (state === 'READY') window.clearInterval(timer);
     }
-  }
+
+    function refresh() {
+      fetch(card.dataset.statusUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+        cache: 'no-store'
+      })
+        .then(function(response) {
+          if (!response.ok) throw new Error('Signup status unavailable');
+          return response.json();
+        })
+        .then(render)
+        .catch(function() {
+          statusPill.querySelector('span').textContent = 'Reconnecting';
+        });
+    }
+
+    var timer = window.setInterval(refresh, 3000);
+    refresh();
+  })();
 </script>
-
-<style>
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-</style>
 {% endblock %}

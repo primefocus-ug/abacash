@@ -83,19 +83,16 @@
             {% endif %}
           </select>
           {% if not injection %}
-            <div id="new-investor-fields" style="display:none;margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-subtle, rgba(0,0,0,.02));">
-              <label for="investor">New investor name</label>
-              <input type="text" id="investor" name="investor" placeholder="Enter investor name">
-              <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;">
-                <input type="checkbox" name="register_investor" value="1" id="register_investor" style="width:auto;" checked>
-                Save investor for future injections
-              </label>
-            </div>
           {% endif %}
         </div>
         {% if injection %}
           <input type="hidden" id="investor" name="investor" value="{{ injection.investor|default:'' }}">
           <input type="hidden" name="register_investor" value="0">
+        {% else %}
+          <input type="hidden" id="investor-value" name="investor" value="">
+          <input type="hidden" id="new-investor-phone-value" name="new_investor_phone" value="">
+          <input type="hidden" id="new-investor-email-value" name="new_investor_email" value="">
+          <input type="hidden" id="register_investor" name="register_investor" value="0">
         {% endif %}
 
         <div style="grid-column:1 / -1;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-subtle, rgba(0,0,0,.02));">
@@ -129,6 +126,61 @@
   </div>
 </div>
 </div>
+{% if not injection %}
+<div id="new-investor-popover" class="new-investor-popover" hidden>
+  <div class="new-investor-card" role="dialog" aria-modal="true" aria-labelledby="new-investor-title">
+    <div class="new-investor-header">
+      <div>
+        <div class="text-sm" style="color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Investor profile</div>
+        <h3 id="new-investor-title">Add new investor</h3>
+        <p>Save the investor now so they can be selected on future injections.</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" id="new-investor-close" aria-label="Close">✕</button>
+    </div>
+    <div class="new-investor-grid">
+      <div class="new-investor-field new-investor-field-wide">
+        <label for="investor">Full name <span>*</span></label>
+        <input type="text" id="new-investor-name" placeholder="e.g. Derick Nsubuga" autocomplete="name">
+      </div>
+      <div class="new-investor-field">
+        <label for="new-investor-phone">Phone <small>Optional</small></label>
+        <input type="tel" id="new-investor-phone" placeholder="+256 7XX XXX XXX" autocomplete="tel">
+      </div>
+      <div class="new-investor-field">
+        <label for="new-investor-email">Email <small>Optional</small></label>
+        <input type="email" id="new-investor-email" placeholder="name@example.com" autocomplete="email">
+      </div>
+    </div>
+    <label class="new-investor-check">
+      <input type="checkbox" value="1" id="register_investor_toggle" checked>
+      Register this investor for future capital injections
+    </label>
+    <div class="new-investor-actions">
+      <button type="button" class="btn btn-secondary" id="new-investor-cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="new-investor-confirm">Use this investor</button>
+    </div>
+  </div>
+</div>
+<style>
+  .new-investor-popover { position:fixed; inset:0; z-index:320; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(15,23,42,.48); }
+  .new-investor-popover[hidden] { display:none; }
+  .new-investor-card { width:min(520px, 100%); background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; box-shadow:0 24px 70px rgba(0,0,0,.25); }
+  .new-investor-header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+  .new-investor-header h3 { margin:4px 0; font-size:19px; }
+  .new-investor-header p { margin:0; color:var(--text-muted); font-size:12px; }
+  .new-investor-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; padding:18px 0 14px; }
+  .new-investor-field { min-width:0; }
+  .new-investor-field-wide { grid-column:1 / -1; }
+  .new-investor-field label { margin-bottom:6px; }
+  .new-investor-field label span { color:var(--accent); }
+  .new-investor-field label small { color:var(--text-muted); font-size:10px; font-weight:400; margin-left:4px; }
+  .new-investor-field input { width:100%; }
+  .new-investor-check { display:flex; align-items:center; gap:8px; margin:0; font-size:12px; color:var(--text-secondary); }
+  .new-investor-check input { width:auto; }
+  .new-investor-actions { display:flex; justify-content:flex-end; gap:8px; padding-top:16px; margin-top:16px; border-top:1px solid var(--border); }
+  @media (max-width:560px) { .new-investor-grid { grid-template-columns:1fr; } .new-investor-field-wide { grid-column:auto; } }
+</style>
+{% endif %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const closeBtn = document.getElementById('capital-injection-modal-close');
@@ -144,36 +196,75 @@
 
     const form = document.getElementById('capital-injection-form');
     const investorSelect = document.getElementById('investor_record');
-    const investorInput = document.getElementById('investor');
-    const newInvestorFields = document.getElementById('new-investor-fields');
+    const investorInput = document.getElementById('investor-value');
+    const newInvestorName = document.getElementById('new-investor-name');
+    const newInvestorPhone = document.getElementById('new-investor-phone');
+    const newInvestorEmail = document.getElementById('new-investor-email');
+    const investorPhoneValue = document.getElementById('new-investor-phone-value');
+    const investorEmailValue = document.getElementById('new-investor-email-value');
+    const newInvestorPopover = document.getElementById('new-investor-popover');
+    const newInvestorClose = document.getElementById('new-investor-close');
+    const newInvestorCancel = document.getElementById('new-investor-cancel');
+    const newInvestorConfirm = document.getElementById('new-investor-confirm');
     const registerCheckbox = document.getElementById('register_investor');
-    function showNewInvestorFields(show) {
-      if (newInvestorFields) newInvestorFields.style.display = show ? 'block' : 'none';
-      if (!show && investorInput) investorInput.value = '';
+    const registerToggle = document.getElementById('register_investor_toggle');
+    function showNewInvestorPopover(show) {
+      if (!newInvestorPopover) return;
+      newInvestorPopover.hidden = !show;
+      if (show) setTimeout(function () { newInvestorName?.focus(); }, 0);
+    }
+    function cancelNewInvestor() {
+      showNewInvestorPopover(false);
+      if (investorSelect) investorSelect.value = '';
+      if (investorInput) investorInput.value = '';
+      if (newInvestorName) newInvestorName.value = '';
+      if (newInvestorPhone) newInvestorPhone.value = '';
+      if (newInvestorEmail) newInvestorEmail.value = '';
+      if (investorPhoneValue) investorPhoneValue.value = '';
+      if (investorEmailValue) investorEmailValue.value = '';
+      if (registerCheckbox) registerCheckbox.value = '0';
+      if (registerToggle) registerToggle.checked = true;
     }
     investorSelect?.addEventListener('change', function () {
       if (this.value.indexOf('legacy:') === 0) {
-        investorInput.value = this.value.slice(7);
-        showNewInvestorFields(true);
+        if (newInvestorName) newInvestorName.value = this.value.slice(7);
         this.value = 'new';
-        investorInput.focus();
-        if (registerCheckbox && window.confirm('Register ' + investorInput.value + ' among the investors for future use?')) {
-          registerCheckbox.checked = true;
-        }
+        showNewInvestorPopover(true);
       } else if (this.value === 'new') {
-        showNewInvestorFields(true);
-        investorInput.focus();
+        showNewInvestorPopover(true);
       } else if (this.value) {
-        showNewInvestorFields(false);
-        if (registerCheckbox) registerCheckbox.checked = false;
+        if (registerCheckbox) registerCheckbox.value = '0';
+        if (registerToggle) registerToggle.checked = false;
       } else {
-        showNewInvestorFields(false);
+        if (investorInput) investorInput.value = '';
       }
     });
+    newInvestorClose?.addEventListener('click', cancelNewInvestor);
+    newInvestorCancel?.addEventListener('click', cancelNewInvestor);
+    newInvestorPopover?.addEventListener('click', function (event) {
+      if (event.target === newInvestorPopover) cancelNewInvestor();
+    });
+    newInvestorConfirm?.addEventListener('click', function () {
+      if (!newInvestorName?.value.trim()) {
+        newInvestorName?.focus();
+        return;
+      }
+      investorInput.value = newInvestorName.value.trim();
+      investorPhoneValue.value = newInvestorPhone.value.trim();
+      investorEmailValue.value = newInvestorEmail.value.trim();
+      if (registerCheckbox) registerCheckbox.value = '1';
+      if (registerToggle) registerToggle.checked = true;
+      showNewInvestorPopover(false);
+    });
     form?.addEventListener('submit', function (event) {
-      if (!investorInput || !investorInput.value.trim() || registerCheckbox.checked) return;
+      if (investorSelect?.value === 'new' && (!investorInput || !investorInput.value.trim())) {
+        event.preventDefault();
+        showNewInvestorPopover(true);
+        return;
+      }
+      if (!investorInput || !investorInput.value.trim() || registerCheckbox?.value === '1') return;
       if (window.confirm('Register ' + investorInput.value.trim() + ' among the investors for future use?')) {
-        registerCheckbox.checked = true;
+        registerCheckbox.value = '1';
       }
     });
   });

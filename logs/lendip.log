@@ -19636,3 +19636,1423 @@ LINE 1: ... "accounts_companysettings"."collateral_haircut", "accounts_...
 2026-11-07 16:42:34 [INFO] django.server: "GET /accounts/admin-panel/fee-types/new/ HTTP/1.1" 200 189690
 2026-11-07 16:42:48 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 206850
 2026-11-07 16:42:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-07 17:04:32 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-07 17:04:39 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:04:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-07 17:04:41 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 194674
+2026-11-07 17:05:24 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 195455
+2026-11-07 17:05:34 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 194674
+2026-11-07 17:05:56 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 195455
+2026-11-07 17:07:18 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 195455
+2026-11-07 17:09:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\accounts\views.py changed, reloading.
+2026-11-07 17:09:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-07 17:09:07 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:09:07 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-07 17:09:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-07 17:09:09 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 195329
+2026-11-07 17:09:18 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 196116
+2026-11-07 17:09:49 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 196116
+2026-11-07 17:11:24 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:25 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:25 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:26 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:26 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:26 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:26 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:28 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 195329
+2026-11-07 17:11:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-07 17:11:55 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 191630
+2026-11-07 17:11:55 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-07 17:11:55 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-07 17:11:55 [INFO] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 200 61690
+2026-11-07 17:11:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-07 17:11:56 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-07 17:11:56 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-07 17:11:56 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-07 17:11:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-07 17:12:00 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 199648
+2026-11-07 17:12:10 [INFO] django.server: "POST /accounts/admin-panel/capital-injections/create/ HTTP/1.1" 200 200772
+2026-11-09 13:46:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:46:28 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-09 13:46:28 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-09 13:46:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:46:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:47:26 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-09&date_to=2026-11-09&branch= HTTP/1.1" 200 3521
+2026-11-09 13:47:56 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-09&date_to=2026-11-09&branch= HTTP/1.1" 200 3521
+2026-11-09 13:49:32 [INFO] django.server: "GET /accounts/dashboard/?period=12&date_from=&date_to=&branch= HTTP/1.1" 200 10308
+2026-11-09 13:49:34 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9734
+2026-11-09 13:49:35 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 8814
+2026-11-09 13:49:36 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 8147
+2026-11-09 13:52:17 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 202571
+2026-11-09 13:52:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:52:21 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-09 13:52:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:52:30 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200484
+2026-11-09 13:52:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:52:33 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 198856
+2026-11-09 13:52:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 13:52:40 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200484
+2026-11-09 13:52:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 14:01:54 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 198856
+2026-11-09 14:01:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 14:02:07 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-09 14:02:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 16:17:20 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-09 16:17:22 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-09 16:17:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 16:17:51 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-09&date_to=2026-11-09&branch= HTTP/1.1" 200 3521
+2026-11-09 16:18:21 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-09&date_to=2026-11-09&branch= HTTP/1.1" 200 3521
+2026-11-09 16:18:41 [INFO] django.server: "GET /accounts/dashboard/?period=week&date_from=&date_to=&branch= HTTP/1.1" 200 3492
+2026-11-09 16:18:42 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 8147
+2026-11-09 16:18:43 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 8814
+2026-11-09 16:19:11 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9734
+2026-11-09 16:19:19 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 8814
+2026-11-09 16:19:27 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-09 16:19:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 16:19:32 [INFO] django.server: "GET /reports/disbursements/ HTTP/1.1" 200 191006
+2026-11-09 16:19:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 16:20:20 [INFO] django.server: "GET /loans/9941ca84-6d9d-48e8-9c82-1aeeac45d072/ HTTP/1.1" 200 205550
+2026-11-09 16:20:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-09 22:08:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-09 22:09:24 [WARNING] django.request: Not Found: /public-admin
+2026-11-09 22:09:24 [WARNING] django.server: "GET /public-admin HTTP/1.1" 404 3758
+2026-11-09 22:09:24 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-09 22:09:24 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-11-09 22:09:52 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-11-09 22:09:52 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-11-09 22:09:52 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 28091
+2026-11-09 22:09:54 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-09 22:09:54 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-11-09 22:10:29 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-09 22:10:29 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 38167
+2026-11-09 22:10:51 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 37245
+2026-11-09 22:10:57 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 41560
+2026-11-09 22:11:02 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 38167
+2026-11-09 22:11:08 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-11-09 22:11:08 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-09 22:11:08 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-09 22:11:09 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-09 22:11:17 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 37245
+2026-11-09 22:11:28 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 38167
+2026-11-10 18:38:11 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 18:50:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 18:51:08 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-11-10 18:51:08 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-10 18:51:08 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-10 18:51:10 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-10 18:51:11 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-10 18:51:11 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4319
+2026-11-10 18:51:32 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-11-10 18:51:32 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-11-10 18:51:32 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 28091
+2026-11-10 18:51:46 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-10 18:51:46 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 38167
+2026-11-10 18:52:11 [INFO] django.server: "GET / HTTP/1.1" 200 14161
+2026-11-10 18:52:11 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-10 18:52:12 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-10 18:52:12 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3756
+2026-11-10 18:52:21 [INFO] django.server: "POST / HTTP/1.1" 200 14340
+2026-11-10 18:55:24 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-11-10 18:55:24 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 257695
+2026-11-10 18:55:24 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-10 18:55:26 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-10 18:55:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 18:55:27 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-10 18:55:27 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188002
+2026-11-10 18:55:27 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 1208
+2026-11-10 18:55:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 257695
+2026-11-10 18:55:56 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:56:26 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:56:56 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:57:26 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:57:56 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:58:26 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:58:56 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 18:59:26 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 19:02:31 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 19:03:01 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 19:03:31 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 19:04:01 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 19:47:14 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-11-10 19:47:15 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 45502
+2026-11-10 19:47:19 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34076
+2026-11-10 19:57:58 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 19:57:58 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39958
+2026-11-10 19:58:42 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 19:58:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:00:05 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:00:11 [INFO] django.server: "GET / HTTP/1.1" 200 36646
+2026-11-10 20:00:13 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:01:24 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 20:01:27 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:06:28 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\models.py changed, reloading.
+2026-11-10 20:06:32 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:07:29 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:07:29 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:07:46 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:07:46 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:07:47 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:07:47 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:07:48 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:07:48 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:08:46 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:08:46 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:08:47 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:08:47 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:08:48 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:08:48 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:08:59 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:08:59 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:09:00 [ERROR] django.request: Internal Server Error: /support/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 44, in process_request
+    tenant = self.get_tenant(domain_model, hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django_tenants\middleware\main.py", line 28, in get_tenant
+    domain = domain_model.objects.select_related('tenant').get(domain=hostname)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column tenants_company.provisioning_step does not exist
+LINE 1: ...active", "tenants_company"."provisioning_status", "tenants_c...
+                                                             ^
+
+2026-11-10 20:09:00 [ERROR] django.server: "GET /support/ HTTP/1.1" 500 147627
+2026-11-10 20:09:34 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:10:01 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:10:02 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:10:02 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:10:15 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34901
+2026-11-10 20:10:45 [INFO] django.server: "GET /register/ HTTP/1.1" 200 34210
+2026-11-10 20:11:11 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 20:11:11 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39958
+2026-11-10 20:12:27 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:12:28 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:12:31 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:12:57 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:12:58 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:13:54 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:28 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:31 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:31 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:41 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:42 [INFO] django.server: "GET /success/ HTTP/1.1" 200 39714
+2026-11-10 20:16:55 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:16:55 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\urls.py changed, reloading.
+2026-11-10 20:16:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:16:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:16:59 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:16:59 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:17:02 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:17:02 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:17:37 [ERROR] django.request: Internal Server Error: /success/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 624, in success
+    return render(request, "tenants/success.html", {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: tenants/success.html
+2026-11-10 20:17:37 [ERROR] django.server: "GET /success/ HTTP/1.1" 500 98232
+2026-11-10 20:17:58 [INFO] django.server: "GET /success/ HTTP/1.1" 200 40721
+2026-11-10 20:17:59 [INFO] django.server: "GET /success/ HTTP/1.1" 200 40721
+2026-11-10 20:18:10 [INFO] django.server: "GET /success/ HTTP/1.1" 200 40721
+2026-11-10 20:18:11 [INFO] django.server: "GET /success/ HTTP/1.1" 200 40721
+2026-11-10 20:18:31 [INFO] django.server: "GET /success/ HTTP/1.1" 200 47555
+2026-11-10 20:18:32 [INFO] django.server: "GET /success/ HTTP/1.1" 200 47555
+2026-11-10 20:18:41 [INFO] django.server: "GET / HTTP/1.1" 200 36649
+2026-11-10 20:19:03 [INFO] django.server: "GET / HTTP/1.1" 200 36649
+2026-11-10 20:19:04 [INFO] django.server: "GET / HTTP/1.1" 200 36649
+2026-11-10 20:19:34 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:19:34 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:19:36 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:19:36 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:19:53 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 20:19:53 [INFO] django.server: "GET /success/ HTTP/1.1" 200 48198
+2026-11-10 20:19:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-10 20:19:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-10 20:19:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-10 20:20:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-10 20:20:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:15 [INFO] django.server: "GET /success/ HTTP/1.1" 200 47954
+2026-11-10 20:20:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:40 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:43 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:46 [INFO] django.server: "GET /success/ HTTP/1.1" 200 47954
+2026-11-10 20:20:46 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:47 [INFO] django.server: "GET /success/ HTTP/1.1" 200 47954
+2026-11-10 20:20:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:20:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:03 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:21:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:21:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:21:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:21:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:23 [INFO] django.server: "GET /success/ HTTP/1.1" 200 48436
+2026-11-10 20:21:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:24 [INFO] django.server: "GET /success/ HTTP/1.1" 200 48436
+2026-11-10 20:21:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-10 20:21:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:21:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-10 20:22:00 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 20:22:00 [INFO] django.server: "GET /success/ HTTP/1.1" 200 48680
+2026-11-10 20:22:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 69
+2026-11-10 20:28:26 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:28:26 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:28:27 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:28:27 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:28:37 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 63346
+2026-11-10 20:28:41 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 63590
+2026-11-10 20:29:14 [INFO] django.server: "GET /register/ HTTP/1.1" 200 34210
+2026-11-10 20:29:54 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 20:29:54 [INFO] django.server: "GET /success/ HTTP/1.1" 200 51422
+2026-11-10 20:29:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 20:29:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 20:30:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 20:30:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 20:30:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:19 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:22 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:25 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:41 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:30:41 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 20:30:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:30:43 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 20:30:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 20:30:53 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 70197
+2026-11-10 20:31:00 [INFO] django.server: "GET /features/ HTTP/1.1" 200 35338
+2026-11-10 20:31:05 [INFO] django.server: "GET /features/ HTTP/1.1" 200 35338
+2026-11-10 20:31:08 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 35726
+2026-11-10 20:31:14 [INFO] django.server: "GET /register/ HTTP/1.1" 200 34210
+2026-11-10 20:31:17 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 35726
+2026-11-10 20:31:21 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34904
+2026-11-10 20:31:25 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:31:31 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-11-10 20:31:31 [INFO] django.server: code 400, message Bad request version ('xýLùÒz/F6\x9f+*')
+2026-11-10 20:31:31 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:31 [INFO] django.server: code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07¼\x01\x00\x07¸\x03\x03CÁÿ\x0fÈL±\x9c+\x8e\x9b\x9f0gÖm´@#!B\x93`UR\x9að·êÕ;(')
+2026-11-10 20:31:31 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:33 [INFO] django.server: code 400, message Bad request version ('À²WÄC\x94\x00')
+2026-11-10 20:31:33 [INFO] django.server: code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07Ü\x01\x00\x07Ø\x03\x03\x02ce2éÖka\x94Úx\x1b÷')
+2026-11-10 20:31:33 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:33 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:33 [INFO] django.server: code 400, message Bad request version ('\x00\x9cãïd\x17')
+2026-11-10 20:31:33 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:33 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x07Ü\x01\x00\x07Ø\x03\x03\x87_\x95Ü6ÿRé,\x7f§«2l\x1b;å\x99z\x96)æ')
+2026-11-10 20:31:33 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 20:31:58 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:31:59 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:33:54 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:33:55 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:38:11 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:38:12 [INFO] django.server: "GET /login/ HTTP/1.1" 200 34079
+2026-11-10 20:38:19 [INFO] django.server: "GET / HTTP/1.1" 200 36649
+2026-11-10 20:38:23 [INFO] django.server: "GET /support/ HTTP/1.1" 200 34904
+2026-11-10 20:43:50 [INFO] django.server: "GET /support/ HTTP/1.1" 200 45355
+2026-11-10 20:46:13 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 20:46:14 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 20:46:20 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 20:46:21 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 46177
+2026-11-10 20:46:23 [INFO] django.server: "GET /features/ HTTP/1.1" 200 45789
+2026-11-10 20:48:10 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 20:50:28 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 20:50:29 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 20:50:34 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 46177
+2026-11-10 20:50:44 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 46177
+2026-11-10 20:50:46 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 20:50:49 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 46177
+2026-11-10 20:50:53 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 20:50:55 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 46177
+2026-11-10 20:55:20 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 20:56:14 [INFO] django.server: "GET / HTTP/1.1" 200 47100
+2026-11-10 20:58:05 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40220
+2026-11-10 20:59:49 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 20:59:50 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:00:00 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 78297
+2026-11-10 21:00:06 [INFO] django.server: "GET /public-admin/logout/ HTTP/1.1" 302 0
+2026-11-10 21:00:06 [INFO] django.server: "GET / HTTP/1.1" 200 47100
+2026-11-10 21:00:10 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-11-10 21:00:10 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:00:10 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 35214
+2026-11-10 21:00:31 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 200 35602
+2026-11-10 21:00:42 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-10 21:00:42 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 45597
+2026-11-10 21:00:49 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40220
+2026-11-10 21:02:26 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-10 21:02:26 [INFO] django.server: "GET /success/ HTTP/1.1" 200 61873
+2026-11-10 21:02:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 21:02:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 21:02:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 21:02:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-10 21:02:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:02:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-10 21:03:46 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85008
+2026-11-10 21:04:07 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:04:15 [INFO] django.server: "GET /public-admin HTTP/1.1" 301 0
+2026-11-10 21:04:15 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85008
+2026-11-10 21:05:17 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 85197
+2026-11-10 21:06:09 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 21:06:15 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40220
+2026-11-10 21:11:02 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:11:03 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:11:15 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:41 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:49 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:50 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:50 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:51 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:51 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:51 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:58 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:14:58 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:15:07 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:15:10 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:15:11 [INFO] django.server: "GET /login/ HTTP/1.1" 200 44530
+2026-11-10 21:15:25 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:15:35 [INFO] django.server: "GET / HTTP/1.1" 200 47100
+2026-11-10 21:15:36 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 21:15:39 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:16:30 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:16:45 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:16:47 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:16:49 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 21:16:51 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:16:54 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 21:16:56 [INFO] django.server: "GET / HTTP/1.1" 200 47100
+2026-11-10 21:16:59 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:17:21 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:17:32 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:17:33 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:17:34 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:17:37 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:17:40 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 71018
+2026-11-10 21:17:45 [INFO] django.server: "GET /register/ HTTP/1.1" 200 40551
+2026-11-10 21:17:51 [INFO] django.server: "GET /features/ HTTP/1.1" 200 62819
+2026-11-10 21:17:53 [INFO] django.server: "GET /support/ HTTP/1.1" 200 64114
+2026-11-10 21:18:06 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 85339
+2026-11-10 21:18:25 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 86868
+2026-11-10 21:18:38 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 86987
+2026-11-10 21:18:54 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 86973
+2026-11-10 21:20:27 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88088
+2026-11-10 21:20:36 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88103
+2026-11-10 21:20:58 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88103
+2026-11-10 21:21:02 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88103
+2026-11-10 21:21:13 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:21:14 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-10 21:21:14 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4510
+2026-11-10 21:21:48 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:21:48 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-10 21:21:48 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-10 21:21:49 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-10 21:21:56 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:22:46 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:22:48 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:22:50 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:22:51 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:23:02 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:23:02 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 37994
+2026-11-10 21:23:25 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-10 21:23:25 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 48745
+2026-11-10 21:23:50 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 44809
+2026-11-10 21:23:54 [INFO] django.server: "GET /success/ HTTP/1.1" 200 69143
+2026-11-10 21:24:12 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88103
+2026-11-10 21:24:24 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:24:39 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:24:49 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88088
+2026-11-10 21:24:51 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:26:29 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 75826
+2026-11-10 21:26:40 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 75826
+2026-11-10 21:28:08 [INFO] django.server: "GET /features/ HTTP/1.1" 200 67627
+2026-11-10 21:28:11 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:28:19 [INFO] django.server: "GET /features/ HTTP/1.1" 200 67627
+2026-11-10 21:28:26 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:28:31 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88088
+2026-11-10 21:29:13 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:31:35 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:31:37 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:31:43 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:31:43 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:32:36 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:32:51 [INFO] django.server: "GET /support/ HTTP/1.1" 200 68922
+2026-11-10 21:32:58 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:33:02 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:33:10 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:33:11 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:33:12 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:33:13 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:33:58 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88233
+2026-11-10 21:34:13 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 21:34:15 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:34:52 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88233
+2026-11-10 21:34:59 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:35:12 [INFO] django.server: "GET /login/ HTTP/1.1" 200 49338
+2026-11-10 21:35:51 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 21:35:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:36:26 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36137
+2026-11-10 21:36:39 [INFO] django.server: "GET /login/ HTTP/1.1" 200 49338
+2026-11-10 21:36:43 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:36:55 [INFO] django.server: "GET /platform/users/?status=active HTTP/1.1" 200 36239
+2026-11-10 21:36:56 [INFO] django.server: "GET /platform/users/?status=inactive HTTP/1.1" 200 28420
+2026-11-10 21:37:41 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:37:46 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 21:37:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:37:49 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88102
+2026-11-10 21:38:17 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 21:38:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:38:29 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-10 21:38:29 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36241
+2026-11-10 21:38:33 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88102
+2026-11-10 21:38:36 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:38:42 [INFO] django.server: "GET /features/ HTTP/1.1" 200 67627
+2026-11-10 21:39:00 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 75826
+2026-11-10 21:39:06 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:39:33 [INFO] django.server: "GET /support/ HTTP/1.1" 200 68922
+2026-11-10 21:40:29 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36137
+2026-11-10 21:41:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\platform_admin\views.py changed, reloading.
+2026-11-10 21:41:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:41:16 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36187
+2026-11-10 21:41:30 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-10 21:41:30 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36290
+2026-11-10 21:43:27 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 87865
+2026-11-10 21:43:40 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:43:40 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 88059
+2026-11-10 21:43:45 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:43:46 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 88039
+2026-11-10 21:44:02 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:45:02 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:45:27 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:45:44 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:46:01 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:46:25 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:46:36 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:46:36 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 88043
+2026-11-10 21:46:38 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:46:38 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:46:39 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:46:39 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:46:50 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 286, in public_admin
+    if tenant_plan in Company.Plan.values:
+                      ^^^^^^^^^^^^
+AttributeError: type object 'Company' has no attribute 'Plan'. Did you mean: 'plan'?
+2026-11-10 21:46:50 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 88161
+2026-11-10 21:47:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:04 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:47:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:47:43 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:43 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:44 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:47:44 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:47:45 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 312, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:47:45 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 89439
+2026-11-10 21:47:56 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:56 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:47:58 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:47:58 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:48:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:01 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 257323
+2026-11-10 21:48:01 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-10 21:48:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:31 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-10&date_to=2026-11-10&branch= HTTP/1.1" 200 3457
+2026-11-10 21:48:32 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 203844
+2026-11-10 21:48:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:35 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 194170
+2026-11-10 21:48:37 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 212169
+2026-11-10 21:48:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:55 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 194170
+2026-11-10 21:48:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-10 21:48:59 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:48:59 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:49:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:49:01 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:49:08 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 312, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:49:08 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 84412
+2026-11-10 21:49:34 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 312, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:49:34 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 84412
+2026-11-10 21:49:48 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:49:48 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:49:49 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:49:49 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:49:55 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 313, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:49:55 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 89439
+2026-11-10 21:50:10 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 313, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:50:10 [ERROR] django.server: "GET /public-admin/ HTTP/1.1" 500 82295
+2026-11-10 21:50:13 [ERROR] django.request: Internal Server Error: /public-admin/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\tenants\views.py", line 313, in public_admin
+    domains = list(company.domain_set.values_list("domain", flat=True))
+                   ^^^^^^^^^^^^^^^^^^
+AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'domain_url'?
+2026-11-10 21:50:13 [ERROR] django.server: "POST /public-admin/ HTTP/1.1" 500 89439
+2026-11-10 21:50:30 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:50:30 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:50:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:50:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:50:36 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:50:36 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96818
+2026-11-10 21:50:54 [INFO] django.server: "GET /platform/companies/terrain_services_limited/ HTTP/1.1" 200 60382
+2026-11-10 21:50:54 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:50:57 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:00 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:03 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:06 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:09 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:12 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:15 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:18 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:21 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:24 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:27 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:30 [INFO] django.server: "GET /platform/companies/terrain_services_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-10 21:51:33 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 36187
+2026-11-10 21:51:36 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:51:40 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:51:45 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 21:51:50 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:51:55 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:52:07 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:52:12 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 21:52:22 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:52:28 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:52:32 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:52:40 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:52:44 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:52:58 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:53:05 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 21:53:25 [INFO] django.server: "GET /platform/users/?tenant=aba HTTP/1.1" 200 32291
+2026-11-10 21:54:13 [INFO] django.server: "POST /platform/users/?tenant=aba HTTP/1.1" 302 0
+2026-11-10 21:54:13 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38347
+2026-11-10 21:55:20 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 21:55:33 [INFO] django.server: "GET /public-admin/?tenant_status=suspended HTTP/1.1" 200 73361
+2026-11-10 21:55:33 [INFO] django.server: "GET /public-admin/?tenant_status=active&tenant_plan=STARTER HTTP/1.1" 200 93518
+2026-11-10 21:55:33 [INFO] django.server: "GET /public-admin/?registration_status=ONBOARDED HTTP/1.1" 200 75972
+2026-11-10 21:55:33 [INFO] django.server: "GET /public-admin/?tenant_page=999&registration_page=999 HTTP/1.1" 200 96646
+2026-11-10 21:55:40 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-10 21:55:41 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96942
+2026-11-10 21:55:48 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 21:55:49 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 21:55:55 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 21:56:06 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 21:56:13 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:56:16 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:56:18 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:56:19 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:56:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:56:20 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:56:24 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:56:25 [INFO] django.utils.autoreload: C:\Users\USER\abacash\tenants\views.py changed, reloading.
+2026-11-10 21:56:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:56:26 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-10 21:56:42 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 21:57:42 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:57:42 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-10 21:57:42 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-10 21:57:42 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-10 21:57:43 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-10 21:57:43 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4510
+2026-11-10 21:57:51 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-11-10 21:57:51 [INFO] django.server: code 400, message Bad request version ('\x00\x02\x01\x00\x00')
+2026-11-10 21:57:51 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 21:57:51 [INFO] django.server: code 400, message Bad request version ('\x08\x83\x9ad\x8c\x9b-\x01')
+2026-11-10 21:57:51 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 21:57:58 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-11-10 21:57:58 [INFO] django.server: code 400, message Bad request syntax ('\x16\x03\x01\x07\x80\x01\x00\x07|\x03\x03q')
+2026-11-10 21:57:58 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 21:57:58 [INFO] django.server: code 400, message Bad request version ('bK¿n|øÈÒòqá\x10«\x15\x95\x16\x00')
+2026-11-10 21:57:58 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-10 21:58:22 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:58:39 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 21:58:44 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 21:58:50 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 21:58:53 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 21:58:59 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-10 21:58:59 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38330
+2026-11-10 21:59:17 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 21:59:21 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-10 21:59:56 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 22:01:11 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 22:01:34 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 22:01:35 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 22:02:00 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-10 22:02:41 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 22:04:07 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 22:04:09 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 22:04:23 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 22:04:27 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-10 22:04:29 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-10 22:04:31 [INFO] django.server: "GET /platform/companies/aba/ HTTP/1.1" 200 57177
+2026-11-10 22:04:53 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-10 22:04:58 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 22:05:19 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 22:05:21 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 22:05:22 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 22:05:23 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-10 22:05:30 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 96890
+2026-11-10 22:05:42 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 96869
+2026-11-11 09:07:09 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
+2026-11-11 09:07:09 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
+2026-11-11 09:07:13 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 09:07:13 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 09:11:51 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 96869
+2026-11-11 09:12:09 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 09:12:17 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-11 09:12:24 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-11 09:12:59 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-11 09:12:59 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38339
+2026-11-11 09:16:47 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-11 09:17:01 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-11 09:17:04 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-11 09:17:07 [INFO] django.server: "GET /platform/companies/joy/ HTTP/1.1" 200 60004
+2026-11-11 09:17:08 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:11 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:14 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:16 [INFO] django.server: "POST /platform/companies/joy/update-plan/ HTTP/1.1" 302 0
+2026-11-11 09:17:16 [INFO] django.server: "GET /platform/companies/joy/ HTTP/1.1" 200 60189
+2026-11-11 09:17:16 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:19 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:22 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:25 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:28 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:31 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:34 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:37 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:40 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:43 [INFO] django.server: "GET /platform/companies/joy/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:44 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-11 09:17:46 [INFO] django.server: "GET /platform/companies/21ervices_limited/ HTTP/1.1" 200 60266
+2026-11-11 09:17:46 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:49 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:52 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:55 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:17:58 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:01 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:04 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:07 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:10 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:13 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:16 [INFO] django.server: "GET /platform/companies/21ervices_limited/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:16 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 49005
+2026-11-11 09:18:29 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/ HTTP/1.1" 200 60274
+2026-11-11 09:18:29 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:32 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:35 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:38 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:41 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:45 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:48 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:51 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:54 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:18:56 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:00 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:03 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:06 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:09 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:12 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:15 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:18 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:21 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:24 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:27 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:30 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:33 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:36 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:39 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:42 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:45 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:48 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:51 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:19:54 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:20:31 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:31 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:32 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:36 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:39 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:42 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:45 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:48 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:51 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:54 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:21:57 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:00 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:03 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:06 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:09 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:12 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:15 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:18 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:21 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:24 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:27 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:22:30 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:23:15 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:23:17 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:23:17 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/ HTTP/1.1" 200 60274
+2026-11-11 09:23:17 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:23:20 [INFO] django.server: "GET /platform/companies/prime_focus_uganda/provisioning-status/ HTTP/1.1" 200 52
+2026-11-11 09:23:23 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-11 09:23:26 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 96646
+2026-11-11 09:23:48 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-11 09:23:49 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 95646
+2026-11-11 09:24:02 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 200 95702
+2026-11-11 09:24:45 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-11 09:24:56 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 09:25:05 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 95479
+2026-11-11 09:25:13 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 48165
+2026-11-11 09:25:20 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-11 09:25:41 [INFO] django.server: "GET /pricing/ HTTP/1.1" 200 75826
+2026-11-11 12:04:33 [WARNING] django.request: Not Found: /pricing/platforms
+2026-11-11 12:04:33 [WARNING] django.server: "GET /pricing/platforms HTTP/1.1" 404 4528
+2026-11-11 12:04:38 [WARNING] django.request: Not Found: /pricing/platform
+2026-11-11 12:04:38 [WARNING] django.server: "GET /pricing/platform HTTP/1.1" 404 4525
+2026-11-11 12:04:43 [INFO] django.server: "GET /platform HTTP/1.1" 301 0
+2026-11-11 12:04:43 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 48165
+2026-11-11 12:04:58 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-11 12:05:03 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 48165
+2026-11-11 12:05:05 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 45069
+2026-11-11 12:05:08 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-11 12:05:15 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38199
+2026-11-11 12:05:25 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-11 12:05:25 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38333
+2026-11-11 12:05:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 12:06:07 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-11 12:06:07 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38330

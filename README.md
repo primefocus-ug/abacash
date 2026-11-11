@@ -64,14 +64,46 @@ gunicorn aba_uganda.wsgi:application --bind unix:/tmp/aba_uganda.sock --workers 
 ## Celery (SMS reminders)
 
 ```bash
-# Windows (requires eventlet): pip install eventlet
-celery -A aba_uganda worker --loglevel=info --pool=eventlet
-celery -A aba_uganda beat   --loglevel=info
+# Windows (eventlet is installed from requirements.txt)
+celery -A config worker --loglevel=info --pool=eventlet
+celery -A config beat   --loglevel=info
 
 # Linux VPS
-celery -A aba_uganda worker --loglevel=info
-celery -A aba_uganda beat   --loglevel=info
+celery -A config worker --loglevel=info
+celery -A config beat   --loglevel=info
 ```
+
+### Automatic Gmail activation emails
+
+Tenant activation email is sent after the Celery provisioning task has
+completed migrations and seeded the tenant. Gmail OAuth authorization is
+performed once for a single platform sender; access tokens are then refreshed
+automatically by the Gmail API backend.
+
+1. Enable the Gmail API in Google Cloud. On the OAuth consent screen, add the
+   sender mailbox as a test user while the app is in Testing.
+2. Add `http://localhost:8766/` as an Authorized redirect URI for the Web OAuth
+   client. If a client secret was exposed, rotate it and download a new client
+   JSON before continuing.
+3. Run this from the project environment, replacing the path and sender:
+
+   ```powershell
+   python manage.py configure_gmail_oauth --client-secrets "C:\path\to\client_secret.json" --sender-email "sender@example.com"
+   ```
+
+   Sign in to the sender mailbox in the browser and approve Gmail send access.
+   The command saves the refresh token to the ignored
+   `google_oauth_token.json` file and enables Gmail delivery in `.env`; it
+   does not print the token or store it on tenant records.
+4. Restart Django and run a Celery worker so signup provisioning and its
+   activation email are processed. On Windows, use the worker command above
+   with the `eventlet` pool. Keep the token file in a secret-protected location
+   in production and mount it at `GOOGLE_OAUTH_TOKEN_FILE`.
+
+The sender must match the Google account used during authorization (or an
+authorized Gmail alias). While an external OAuth app remains in Testing,
+Google refresh tokens may expire after seven days; production use requires
+publishing/verifying the consent configuration as required by Google.
 
 After first migration, go to Django Admin > Periodic Tasks
 and create a task pointing to `reminders.check_due_payments`

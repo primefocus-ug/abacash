@@ -1,0 +1,217 @@
+{% extends "platform_admin/base_admin.html" %}
+
+{% block title %}Tenant Users — Platform Admin{% endblock %}
+{% block page_title %}Tenant User Management{% endblock %}
+
+{% block extra_head %}
+<style>
+  .users-page { min-height: 100vh; padding: 24px; background: var(--admin-surface-2); }
+  .users-container { max-width: 1440px; margin: 0 auto; }
+  .users-header { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 22px; }
+  .users-header h1 { margin: 0; color: var(--admin-text-primary); font-size: 26px; }
+  .users-header p { margin: 5px 0 0; color: var(--admin-text-secondary); }
+  .users-card { margin-bottom: 20px; overflow: hidden; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); box-shadow: var(--admin-shadow); }
+  .users-card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--admin-border); }
+  .users-card-header h2 { margin: 0; color: var(--admin-text-primary); font-size: 16px; }
+  .users-card-body { padding: 18px; }
+  .users-form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: end; }
+  .users-field label { display: block; margin-bottom: 5px; color: var(--admin-text-secondary); font-size: 12px; font-weight: 600; }
+  .users-field input, .users-field select, .users-filters input, .users-filters select, .users-inline select {
+    width: 100%; min-width: 0; padding: 9px 11px; border: 1px solid var(--admin-border); border-radius: 8px;
+    background: var(--admin-surface-2); color: var(--admin-text-primary); font: inherit; font-size: 13px;
+  }
+  .users-field input:focus, .users-field select:focus, .users-filters input:focus, .users-filters select:focus, .users-inline select:focus {
+    outline: 2px solid rgba(59, 130, 246, .45); outline-offset: 1px;
+  }
+  .users-note { grid-column: 1 / -1; margin: 0; color: var(--admin-text-muted); font-size: 12px; }
+  .users-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 13px; border: 0; border-radius: 8px; background: var(--admin-accent); color: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .users-btn:hover { filter: brightness(1.08); color: #fff; }
+  .users-btn-outline { border: 1px solid var(--admin-border); background: transparent; color: var(--admin-text-secondary); }
+  .users-btn-outline:hover { background: var(--admin-surface-2); color: var(--admin-text-primary); }
+  .users-warning { margin-bottom: 16px; padding: 12px 14px; border: 1px solid rgba(245,158,11,.28); border-radius: 8px; background: rgba(245,158,11,.09); color: var(--admin-text-primary); font-size: 13px; }
+  .users-error { margin-bottom: 16px; padding: 12px 14px; border: 1px solid rgba(239,68,68,.28); border-radius: 8px; background: rgba(239,68,68,.09); color: var(--admin-text-primary); font-size: 13px; }
+  .users-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .users-filters input { flex: 1 1 220px; }
+  .users-filters select { flex: 0 1 190px; }
+  .users-table-wrap { overflow-x: auto; }
+  .users-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  .users-table th { padding: 11px 14px; border-bottom: 1px solid var(--admin-border); color: var(--admin-text-muted); text-align: left; text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
+  .users-table td { padding: 12px 14px; border-bottom: 1px solid var(--admin-border); color: var(--admin-text-secondary); font-size: 13px; vertical-align: middle; }
+  .users-table tr:last-child td { border-bottom: 0; }
+  .users-name { color: var(--admin-text-primary); font-weight: 700; }
+  .users-meta { display: block; margin-top: 3px; color: var(--admin-text-muted); font-family: monospace; font-size: 11px; }
+  .users-tenant a { color: var(--admin-accent); font-weight: 600; }
+  .users-state { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+  .users-state.active { background: rgba(16,185,129,.12); color: #10b981; }
+  .users-state.inactive { background: rgba(239,68,68,.12); color: #ef4444; }
+  .users-inline { display: flex; align-items: center; gap: 8px; }
+  .users-inline select { width: auto; min-width: 125px; }
+  .users-active { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .users-active input { width: 16px; height: 16px; accent-color: var(--admin-accent); }
+  .users-empty { padding: 38px 16px; color: var(--admin-text-muted); text-align: center; }
+  .users-pagination { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-top: 1px solid var(--admin-border); color: var(--admin-text-muted); font-size: 12px; }
+  .users-pagination a { color: var(--admin-accent); text-decoration: none; font-weight: 600; }
+  @media (max-width: 900px) { .users-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) {
+    .users-page { padding: 14px; }
+    .users-header { align-items: start; flex-direction: column; }
+    .users-form-grid { grid-template-columns: 1fr; }
+    .users-note { grid-column: auto; }
+    .users-pagination { flex-direction: column; }
+    .users-card-body { padding: 14px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="users-page" aria-label="Tenant user management">
+  <div class="users-container">
+    <header class="users-header">
+      <div>
+        <h1><i class="fas fa-users" aria-hidden="true"></i> Tenant users</h1>
+        <p>Find and manage staff accounts across all provisioned tenant workspaces.</p>
+      </div>
+      <a class="users-btn users-btn-outline" href="{% url 'platform_admin:company_list' %}">
+        <i class="fas fa-building" aria-hidden="true"></i> Manage tenants
+      </a>
+    </header>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="{% if message.tags == 'error' %}users-error{% else %}users-warning{% endif %}" role="status">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% if unavailable_tenant_count %}
+    <div class="users-warning">
+      {{ unavailable_tenant_count }} tenant{{ unavailable_tenant_count|pluralize }} {{ unavailable_tenant_count|pluralize:"is,are" }} not fully provisioned yet, so their users are not available here.
+    </div>
+    {% endif %}
+    {% if load_errors %}
+    <div class="users-error" role="alert">
+      Could not load user accounts for: {{ load_errors|join:", " }}. These tenant schemas may need administrator attention.
+    </div>
+    {% endif %}
+
+    <section class="users-card" aria-labelledby="create-user-title">
+      <div class="users-card-header"><h2 id="create-user-title"><i class="fas fa-user-plus" aria-hidden="true"></i> Create a tenant user</h2></div>
+      <div class="users-card-body">
+        {% if company_choices %}
+        <form method="post" class="users-form-grid">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create">
+          <div class="users-field">
+            <label for="create-tenant">Tenant</label>
+            <select id="create-tenant" name="tenant_schema" required>
+              <option value="">Select a tenant</option>
+              {% for company in company_choices %}
+              <option value="{{ company.schema_name }}" {% if tenant_filter == company.schema_name %}selected{% endif %}>{{ company.name }} ({{ company.schema_name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="users-field">
+            <label for="create-email">Email address</label>
+            <input id="create-email" name="email" type="email" autocomplete="email" required placeholder="staff@company.com">
+          </div>
+          <div class="users-field">
+            <label for="create-role">Role</label>
+            <select id="create-role" name="role" required>
+              {% for role_code, role_label in role_choices %}<option value="{{ role_code }}">{{ role_label }}</option>{% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="users-btn"><i class="fas fa-paper-plane" aria-hidden="true"></i> Create &amp; send activation</button>
+          <p class="users-note">A random temporary credential is generated on the server. No password is shown to administrators; the user receives a secure link to set their own password.</p>
+        </form>
+        {% else %}
+        <p class="users-note">There are no fully provisioned tenants yet. User accounts can be created after tenant setup is complete.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="users-card" aria-labelledby="user-directory-title">
+      <div class="users-card-header">
+        <h2 id="user-directory-title"><i class="fas fa-address-book" aria-hidden="true"></i> User directory</h2>
+        <span>{{ page_obj.paginator.count }} account{{ page_obj.paginator.count|pluralize }}</span>
+      </div>
+      <div class="users-card-body">
+        <form method="get" class="users-filters" role="search">
+          <input type="search" name="q" value="{{ q }}" placeholder="Search name, username or email" aria-label="Search users">
+          <select name="tenant" aria-label="Filter by tenant">
+            <option value="">All tenants</option>
+            {% for company in company_choices %}
+            <option value="{{ company.schema_name }}" {% if tenant_filter == company.schema_name %}selected{% endif %}>{{ company.name }}</option>
+            {% endfor %}
+          </select>
+          <select name="role" aria-label="Filter by role">
+            <option value="">All roles</option>
+            {% for role_code, role_label in role_choices %}<option value="{{ role_code }}" {% if role_filter == role_code %}selected{% endif %}>{{ role_label }}</option>{% endfor %}
+          </select>
+          <select name="status" aria-label="Filter by status">
+            <option value="">All account statuses</option>
+            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Deactivated</option>
+          </select>
+          <button type="submit" class="users-btn"><i class="fas fa-filter" aria-hidden="true"></i> Filter</button>
+          {% if q or tenant_filter or role_filter or status_filter %}
+          <a class="users-btn users-btn-outline" href="{% url 'platform_admin:user_list' %}">Clear</a>
+          {% endif %}
+        </form>
+      </div>
+      <div class="users-table-wrap">
+        <table class="users-table">
+          <thead><tr><th>User</th><th>Tenant</th><th>Status</th><th>Role and access</th><th>Reset</th></tr></thead>
+          <tbody>
+            {% for company, user in page_obj %}
+            <tr>
+              <td>
+                <span class="users-name">{{ user.get_full_name|default:user.email }}</span>
+                <span class="users-meta">{{ user.email }}{% if user.username %} · {{ user.username }}{% endif %}</span>
+              </td>
+              <td class="users-tenant">
+                <a href="{% url 'platform_admin:company_detail' company.schema_name %}">{{ company.name }}</a>
+                <span class="users-meta">{{ company.schema_name }}</span>
+              </td>
+              <td><span class="users-state {% if user.is_active %}active{% else %}inactive{% endif %}">{% if user.is_active %}Active{% else %}Deactivated{% endif %}</span></td>
+              <td>
+                <form method="post" class="users-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="update">
+                  <input type="hidden" name="tenant_schema" value="{{ company.schema_name }}">
+                  <input type="hidden" name="user_id" value="{{ user.pk }}">
+                  <select name="role" aria-label="Role for {{ user.email }}">
+                    {% for role_code, role_label in role_choices %}<option value="{{ role_code }}" {% if user.role == role_code %}selected{% endif %}>{{ role_label }}</option>{% endfor %}
+                  </select>
+                  <label class="users-active"><input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}> Active</label>
+                  <button type="submit" class="users-btn users-btn-outline">Save</button>
+                </form>
+              </td>
+              <td>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reset">
+                  <input type="hidden" name="tenant_schema" value="{{ company.schema_name }}">
+                  <input type="hidden" name="user_id" value="{{ user.pk }}">
+                  <button type="submit" class="users-btn users-btn-outline"><i class="fas fa-envelope" aria-hidden="true"></i> Send password reset</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5"><div class="users-empty"><i class="fas fa-user-slash" aria-hidden="true"></i><br>No tenant users match these filters.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="users-pagination" aria-label="User directory pages">
+        <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+        <span>
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q|urlencode }}&tenant={{ tenant_filter|urlencode }}&role={{ role_filter|urlencode }}&status={{ status_filter|urlencode }}">Previous</a>{% endif %}
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q|urlencode }}&tenant={{ tenant_filter|urlencode }}&role={{ role_filter|urlencode }}&status={{ status_filter|urlencode }}">Next</a>{% endif %}
+        </span>
+      </nav>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}

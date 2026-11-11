@@ -10,17 +10,32 @@ actions; this app focuses on dashboard + per-company detail).
 """
 from datetime import date, timedelta
 from decimal import Decimal
+import ipaddress
+import logging
+import secrets
+import smtplib
 
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.core.validators import validate_email
+from django.db import DatabaseError, transaction
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django_tenants.utils import schema_context
 
 from tenants.models import Company, CompanyRegistration, Domain, Plan
 
 from .decorators import require_public_admin
+
+logger = logging.getLogger(__name__)
 
 
 @require_public_admin
@@ -174,6 +189,252 @@ def company_detail(request, schema_name):
     })
 
 
+def _send_tenant_user_activation(user, company):
+    domain = Domain.objects.filter(tenant=company).order_by("-is_primary").values_list(
+        "domain", flat=True
+    ).first()
+    if not domain:
+        domain = f"{company.schema_name}.{getattr(settings, 'TENANT_PUBLIC_DOMAIN', 'abacash.loan')}"
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = f"https://{domain}/accounts/reset/{uid}/{token}/"
+    return send_mail(
+        subject=f"Set up your Abacash account for {company.name}",
+        message=(
+            f"Hello {user.get_full_name()},\n\n"
+            f"An administrator created or requested access for your account in {company.name}.\n"
+            f"Use this secure link to set or reset your password: {reset_url}\n\n"
+            "If you did not expect this message, contact your organization administrator."
+        ),
+        from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+def _record_platform_user_action(request, user, action, changes, remarks):
+    from accounts.models import AuditLog
+
+    ip_address = request.META.get("REMOTE_ADDR")
+    try:
+        ipaddress.ip_address(ip_address)
+    except ValueError:
+        ip_address = None
+    AuditLog.objects.create(
+        user=None,
+        action=action,
+        entity_type="User",
+        entity_id=str(user.pk),
+        entity_repr=str(user)[:500],
+        changes=changes,
+        ip_address=ip_address,
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        remarks=f"Platform admin {request.platform_admin.username}: {remarks}",
+    )
+
+
+@require_public_admin
+@require_http_methods(["GET", "POST"])
+def user_list(request):
+    """Show users across ready tenant schemas and process scoped admin actions."""
+    from accounts.models import AuditLog, User
+
+    companies = list(
+        Company.objects.exclude(schema_name="public").order_by("name")
+    )
+    ready_companies = [
+        company for company in companies
+        if company.provisioning_status == Company.ProvisioningStatus.READY
+    ]
+
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+        schema_name = request.POST.get("tenant_schema", "").strip()
+        company = get_object_or_404(
+            Company.objects.exclude(schema_name="public"),
+            schema_name=schema_name,
+            provisioning_status=Company.ProvisioningStatus.READY,
+        )
+        try:
+            with schema_context(company.schema_name):
+                if action == "create":
+                    email = request.POST.get("email", "").strip()
+                    role = request.POST.get("role", "").strip().upper()
+                    try:
+                        validate_email(email)
+                    except ValidationError:
+                        messages.error(request, "Enter a valid user email address.")
+                        return redirect("platform_admin:user_list")
+                    if role not in User.Role.values:
+                        messages.error(request, "Select a valid tenant user role.")
+                        return redirect("platform_admin:user_list")
+                    if User.objects.filter(email__iexact=email).exists():
+                        messages.error(request, f"A user with {email} already exists in {company.name}.")
+                        return redirect("platform_admin:user_list")
+
+                    with transaction.atomic():
+                        user = User.objects.create_user(
+                            email=email,
+                            password=secrets.token_urlsafe(32),
+                            role=role,
+                            is_active=True,
+                        )
+                        _record_platform_user_action(
+                            request,
+                            user,
+                            AuditLog.Action.CREATE,
+                            {"email": email, "role": role, "is_active": True},
+                            "Tenant user created and activation link requested",
+                        )
+                    try:
+                        sent = _send_tenant_user_activation(user, company)
+                    except (OSError, smtplib.SMTPException):
+                        logger.exception("Could not send activation email for tenant user %s", user.pk)
+                        messages.warning(
+                            request,
+                            f"User {email} was created, but the activation email could not be sent. "
+                            "Use Send password reset on the user row to retry.",
+                        )
+                    else:
+                        if sent:
+                            messages.success(request, f"Created {email} in {company.name} and sent a secure activation link.")
+                        else:
+                            messages.warning(
+                                request,
+                                f"User {email} was created, but the email service did not accept the activation message. "
+                                "Use Send password reset on the user row to retry.",
+                            )
+
+                elif action in {"update", "reset"}:
+                    if action == "update":
+                        with transaction.atomic():
+                            active_ceo_ids = list(
+                                User.objects.select_for_update().filter(
+                                    role=User.Role.CEO, is_active=True
+                                ).values_list("pk", flat=True)
+                            )
+                            user = get_object_or_404(
+                                User.objects.select_for_update(),
+                                pk=request.POST.get("user_id"),
+                            )
+                            role = request.POST.get("role", "").strip().upper()
+                            is_active = request.POST.get("is_active") == "on"
+                            if role not in User.Role.values:
+                                messages.error(
+                                    request,
+                                    "Select a valid tenant user role.",
+                                )
+                                return redirect("platform_admin:user_list")
+                            if user.pk in active_ceo_ids and (role != User.Role.CEO or not is_active):
+                                another_active_ceo = any(pk != user.pk for pk in active_ceo_ids)
+                                if not another_active_ceo:
+                                    messages.error(
+                                        request,
+                                        f"{user.email} is the only active CEO in {company.name}. "
+                                        "Promote another active user before changing this account.",
+                                    )
+                                    return redirect("platform_admin:user_list")
+                            old_role = user.role
+                            old_is_active = user.is_active
+                            user.role = role
+                            user.is_active = is_active
+                            if role != User.Role.CEO:
+                                user.is_superuser = False
+                            user.save(update_fields=["role", "is_active", "is_superuser"])
+                            _record_platform_user_action(
+                                request,
+                                user,
+                                AuditLog.Action.UPDATE,
+                                {
+                                    "role": [old_role, role],
+                                    "is_active": [old_is_active, is_active],
+                                },
+                                "Tenant user access updated",
+                            )
+                        messages.success(request, f"Updated access for {user.email} in {company.name}.")
+                    else:
+                        user = get_object_or_404(User, pk=request.POST.get("user_id"))
+                        if _send_tenant_user_activation(user, company):
+                            _record_platform_user_action(
+                                request,
+                                user,
+                                AuditLog.Action.OTHER,
+                                {},
+                                "Password setup email sent",
+                            )
+                            messages.success(request, f"Sent password setup instructions to {user.email}.")
+                        else:
+                            messages.error(request, f"The email service did not accept a message for {user.email}.")
+                else:
+                    messages.error(request, "Unknown user management action.")
+        except (OSError, smtplib.SMTPException):
+            logger.exception("Could not send tenant user reset email")
+            messages.error(request, "The email could not be sent. The account was not changed.")
+        return redirect("platform_admin:user_list")
+
+    q = request.GET.get("q", "").strip()
+    role_filter = request.GET.get("role", "").strip().upper()
+    status_filter = request.GET.get("status", "").strip()
+    tenant_filter = request.GET.get("tenant", "").strip()
+
+    filtered_companies = ready_companies
+    if tenant_filter:
+        filtered_companies = [
+            company for company in ready_companies
+            if company.schema_name == tenant_filter
+        ]
+
+    rows = []
+    load_errors = []
+    for company in filtered_companies:
+        try:
+            with schema_context(company.schema_name):
+                tenant_users = User.objects.select_related("branch").all()
+                if q:
+                    tenant_users = tenant_users.filter(
+                        Q(email__icontains=q)
+                        | Q(username__icontains=q)
+                        | Q(first_name__icontains=q)
+                        | Q(last_name__icontains=q)
+                    )
+                if role_filter in User.Role.values:
+                    tenant_users = tenant_users.filter(role=role_filter)
+                if status_filter == "active":
+                    tenant_users = tenant_users.filter(is_active=True)
+                elif status_filter == "inactive":
+                    tenant_users = tenant_users.filter(is_active=False)
+                rows.extend((company, user) for user in tenant_users.order_by("email"))
+        except DatabaseError:
+            logger.exception("Could not load tenant users for schema %s", company.schema_name)
+            load_errors.append(company.name)
+
+    paginator = Paginator(rows, 25)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+    return render(request, "platform_admin/user_list.html", {
+        "page_obj": page_obj,
+        "q": q,
+        "role_filter": role_filter,
+        "status_filter": status_filter,
+        "tenant_filter": tenant_filter,
+        "company_choices": ready_companies,
+        "role_choices": User.Role.choices,
+        "load_errors": load_errors,
+        "unavailable_tenant_count": len(companies) - len(ready_companies),
+    })
+
+
+@require_public_admin
+@require_GET
+def company_provisioning_status(request, schema_name):
+    company = get_object_or_404(Company, schema_name=schema_name)
+    return JsonResponse({
+        "status": company.provisioning_status,
+        "step": company.provisioning_step,
+        "error": company.provisioning_error if company.provisioning_status == Company.ProvisioningStatus.FAILED else "",
+    })
+
+
 @require_public_admin
 @require_POST
 def company_toggle_active(request, schema_name):
@@ -238,7 +499,7 @@ def company_retry_provisioning(request, schema_name):
         phone=request.POST.get("phone", ""),
         address=request.POST.get("address", ""),
         company_email=request.POST.get("company_email", "") or admin_email,
-        notify=(request.POST.get("notify") == "on"),
+        notify=True,
     )
     messages.success(request, f"Retrying provisioning for '{company.name}'.")
     return redirect("platform_admin:company_detail", schema_name=schema_name)

@@ -1,9 +1,17 @@
 from django.contrib import messages
 from django.core.mail import mail_admins, send_mail
 from django.conf import settings as django_settings
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.core.validators import validate_email
+from django.db import DatabaseError, ProgrammingError, connection
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.cache import cache_control
+from django.views.decorators.http import require_GET
+from django.utils import timezone
 from django.utils.text import slugify
 
 from django_tenants.utils import schema_context
@@ -14,7 +22,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from .models import Company, CompanyRegistration, Domain
+from .models import Company, CompanyRegistration, Domain, Plan
 
 PAGE_LINKS = [
     {"label": "Home", "url_name": "landing"},
@@ -207,6 +215,47 @@ def support(request):
     })
 
 
+def _tenant_user_table_available(company):
+    """Avoid querying the tenant user model before its schema has been migrated."""
+    from accounts.models import User
+
+    try:
+        with schema_context(company.schema_name):
+            return User._meta.db_table in connection.introspection.table_names()
+    except DatabaseError:
+        logger.exception("Could not inspect user table for tenant %s", company.schema_name)
+        return None
+
+
+def _send_tenant_user_access_email(user, company):
+    from django.contrib.auth.tokens import default_token_generator
+    from django.utils.encoding import force_bytes
+    from django.utils.http import urlsafe_base64_encode
+
+    primary_domain = Domain.objects.filter(tenant=company).order_by(
+        "-is_primary"
+    ).values_list("domain", flat=True).first()
+    domain = primary_domain or (
+        f"{company.schema_name}.{getattr(django_settings, 'TENANT_PUBLIC_DOMAIN', 'abacash.loan')}"
+    )
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    scheme = "http" if django_settings.DEBUG else "https"
+    return send_mail(
+        subject=f"Set up your Abacash account for {company.name}",
+        message=(
+            f"Hello {user.get_full_name()},\n\n"
+            f"An administrator created or requested access for your account in {company.name}.\n"
+            f"Use this secure link to set or reset your password: "
+            f"{scheme}://{domain}/accounts/reset/{uid}/{token}/\n\n"
+            "If you did not expect this message, contact your organization administrator."
+        ),
+        from_email=getattr(django_settings, "DEFAULT_FROM_EMAIL", None),
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
 def public_admin(request):
     # Require a logged-in PlatformAdmin (see tenants.auth). Attaches
     # request.platform_admin for use in the view/template below.
@@ -218,28 +267,82 @@ def public_admin(request):
     request.platform_admin = admin
 
 
-    recent_registrations = CompanyRegistration.objects.order_by("-submitted_at")[:6]
+    tenant_queryset = Company.objects.exclude(schema_name="public").order_by("name")
+    registration_queryset = CompanyRegistration.objects.order_by("-submitted_at")
+
+    tenant_search = request.GET.get("tenant_q", "").strip()
+    tenant_status = request.GET.get("tenant_status", "").strip()
+    tenant_plan = request.GET.get("tenant_plan", "").strip()
+    registration_search = request.GET.get("registration_q", "").strip()
+    registration_status = request.GET.get("registration_status", "").strip()
+    registration_plan = request.GET.get("registration_plan", "").strip()
+
+    if tenant_search:
+        tenant_queryset = tenant_queryset.filter(
+            Q(name__icontains=tenant_search) | Q(schema_name__icontains=tenant_search)
+        )
+    if tenant_status == "active":
+        tenant_queryset = tenant_queryset.filter(is_active=True)
+    elif tenant_status == "suspended":
+        tenant_queryset = tenant_queryset.filter(is_active=False)
+    if tenant_plan in Plan.values:
+        tenant_queryset = tenant_queryset.filter(plan=tenant_plan)
+
+    if registration_search:
+        registration_queryset = registration_queryset.filter(
+            Q(company_name__icontains=registration_search)
+            | Q(contact_name__icontains=registration_search)
+            | Q(email__icontains=registration_search)
+        )
+    if registration_status in CompanyRegistration.Status.values:
+        registration_queryset = registration_queryset.filter(status=registration_status)
+    if registration_plan in Plan.values:
+        registration_queryset = registration_queryset.filter(plan=registration_plan)
+
+    tenant_count = Company.objects.exclude(schema_name="public").count()
+    active_tenant_count = Company.objects.exclude(schema_name="public").filter(
+        is_active=True
+    ).count()
+    inactive_tenant_count = tenant_count - active_tenant_count
+    tenant_page = Paginator(tenant_queryset, 10).get_page(request.GET.get("tenant_page", 1))
+    registration_page = Paginator(registration_queryset, 10).get_page(
+        request.GET.get("registration_page", 1)
+    )
     tenants = []
-    active_tenant_count = 0
-    for company in Company.objects.order_by("name"):
-        domains = [domain.domain for domain in getattr(company, "domain_set", []).all()] if hasattr(company, "domain_set") else []
-        if company.is_active:
-            active_tenant_count += 1
+    for company in tenant_page.object_list:
+        domains = list(
+            Domain.objects.filter(tenant=company).values_list("domain", flat=True)
+        )
+        user_table_available = _tenant_user_table_available(company)
         tenants.append({
             "company": company,
             "domains": domains,
+            "user_table_available": user_table_available,
+            "user_table_check_failed": user_table_available is None,
         })
+    recent_registrations = registration_page.object_list
 
     admin_context = {
         "page_links": PAGE_LINKS,
         "platform_admin": admin,
         "plan_choices": CompanyRegistration.Plan.choices,
+        "registration_status_choices": CompanyRegistration.Status.choices,
         "recent_registrations": recent_registrations,
+        "registration_page": registration_page,
+        "registration_count": registration_page.paginator.count,
+        "registration_search": registration_search,
+        "registration_status": registration_status,
+        "registration_plan": registration_plan,
         "tenants": tenants,
-        "tenant_count": len(tenants),
+        "tenant_page": tenant_page,
+        "tenant_result_count": tenant_page.paginator.count,
+        "tenant_search": tenant_search,
+        "tenant_status": tenant_status,
+        "tenant_plan": tenant_plan,
+        "tenant_count": tenant_count,
         "active_tenant_count": active_tenant_count,
-        "inactive_tenant_count": len(tenants) - active_tenant_count,
-        "lead_count": recent_registrations.count(),
+        "inactive_tenant_count": inactive_tenant_count,
+        "lead_count": CompanyRegistration.objects.count(),
         "tenant_domain_root": getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan"),
     }
 
@@ -276,17 +379,13 @@ def public_admin(request):
                     phone=request.POST.get("phone", "").strip(),
                     address=request.POST.get("address", "").strip(),
                     company_email=request.POST.get("company_email", "").strip() or admin_email,
-                    notify=(request.POST.get('notify') == 'on'),
+                    notify=True,
                 )
 
-                if admin_password_input:
-                    messages.success(request, f"Provisioning '{name}' has started — check its status below.")
-                else:
-                    messages.success(
-                        request,
-                        f"Provisioning '{name}' has started — check its status below. "
-                        f"Generated admin password: {admin_password} — save this now, it won't be shown again."
-                    )
+                messages.success(
+                    request,
+                    f"Provisioning '{name}' has started. The administrator will receive an account activation email when setup is complete."
+                )
                 try:
                     return redirect("platform_admin:company_detail", schema_name=schema)
                 except Exception:
@@ -305,6 +404,9 @@ def public_admin(request):
             except CompanyRegistration.DoesNotExist:
                 messages.error(request, "Selected registration could not be found.")
                 return render(request, "tenants/public_admin.html", admin_context)
+            if registration.status != CompanyRegistration.Status.PENDING:
+                messages.warning(request, "Only pending registrations can be onboarded.")
+                return redirect("tenants:public_admin")
 
             schema = slugify(registration.company_name).replace("-", "_")
             plan = registration.plan
@@ -328,19 +430,16 @@ def public_admin(request):
                     phone=registration.phone,
                     address=f"{registration.city}, {registration.country}" if registration.city or registration.country else "",
                     company_email=registration.email,
-                    notify=(request.POST.get('notify') == 'on'),
+                    notify=True,
                 )
 
                 registration.status = CompanyRegistration.Status.ONBOARDED
                 registration.save()
-                if password_input:
-                    messages.success(request, f"Provisioning for '{registration.company_name}' has started as '{schema}' — check its status below.")
-                else:
-                    messages.success(
-                        request,
-                        f"Provisioning for '{registration.company_name}' has started as '{schema}' — check its status below. "
-                        f"Generated admin password: {password} — save this now, it won't be shown again."
-                    )
+                messages.success(
+                    request,
+                    f"Provisioning for '{registration.company_name}' has started as '{schema}'. "
+                    "The administrator will receive an account activation email when setup is complete."
+                )
                 try:
                     return redirect("platform_admin:company_detail", schema_name=schema)
                 except Exception:
@@ -349,28 +448,77 @@ def public_admin(request):
                 messages.error(request, f"Could not start onboarding: {exc}")
                 return render(request, "tenants/public_admin.html", admin_context)
 
+        if action == "update_registration_status":
+            registration = CompanyRegistration.objects.filter(
+                pk=request.POST.get("registration_id")
+            ).first()
+            status = request.POST.get("registration_status", "").strip().upper()
+            editable_statuses = {
+                CompanyRegistration.Status.PENDING,
+                CompanyRegistration.Status.CONTACTED,
+                CompanyRegistration.Status.REJECTED,
+            }
+            if registration is None:
+                messages.error(request, "Selected registration could not be found.")
+            elif status not in editable_statuses:
+                messages.error(request, "Select a valid lead status. Onboarded status is set by tenant provisioning.")
+            elif registration.status == CompanyRegistration.Status.ONBOARDED:
+                messages.error(request, "An onboarded registration cannot be changed from the lead controls.")
+            else:
+                registration.status = status
+                registration.save(update_fields=["status"])
+                messages.success(request, f"Updated the lead status for {registration.company_name}.")
+            return redirect("tenants:public_admin")
+
         if action == "assign_role":
             tenant_schema = request.POST.get("tenant_schema", "").strip().lower().replace("-", "_")
             user_email = request.POST.get("role_email", "").strip()
             role = request.POST.get("role", "CASHIER").strip().upper()
-            password_input = request.POST.get("role_password", "").strip()
-            password = password_input or secrets.token_urlsafe(10)
-
             if not tenant_schema or not user_email:
                 messages.error(request, "Tenant schema and user email are required to assign a role.")
                 return render(request, "tenants/public_admin.html", admin_context)
 
-            if not Company.objects.filter(schema_name=tenant_schema).exists():
+            company = Company.objects.filter(
+                schema_name=tenant_schema
+            ).exclude(schema_name="public").first()
+            if company is None:
                 messages.error(request, f"Tenant schema '{tenant_schema}' does not exist.")
-                return render(request, "tenants/public_admin.html", admin_context)
+                return redirect("tenants:public_admin")
+
+            user_table_available = _tenant_user_table_available(company)
+            if user_table_available is None:
+                messages.error(
+                    request,
+                    f"Could not verify the account tables for tenant '{company.name}'. "
+                    "Check database connectivity and try again.",
+                )
+                return redirect("tenants:public_admin")
+            if not user_table_available:
+                messages.error(
+                    request,
+                    f"Tenant '{company.name}' is not ready for user access management. "
+                    "Its account tables are not migrated yet. Wait for provisioning to finish or retry it from tenant details.",
+                )
+                return redirect("tenants:public_admin")
 
             from accounts.models import User
 
             try:
+                try:
+                    validate_email(user_email)
+                except ValidationError:
+                    messages.error(request, "Enter a valid user email address.")
+                    return redirect("tenants:public_admin")
+                if role not in User.Role.values:
+                    messages.error(request, "Select a valid tenant user role.")
+                    return redirect("tenants:public_admin")
+                password = secrets.token_urlsafe(32)
                 with schema_context(tenant_schema):
                     user = User.objects.filter(email=user_email).first()
                     if user:
                         user.role = role
+                        if role != User.Role.CEO:
+                            user.is_superuser = False
                         user.save()
                         messages.success(request, f"Updated role for {user_email} to {role}.")
                     else:
@@ -389,17 +537,26 @@ def public_admin(request):
                             is_staff=True,
                             is_superuser=(role == "CEO"),
                         )
-                        if password_input:
+                        if _send_tenant_user_access_email(user, company):
                             messages.success(request, f"Created user {user_email} with role {role} in tenant '{tenant_schema}'.")
                         else:
-                            messages.success(
+                            messages.warning(
                                 request,
-                                f"Created user {user_email} with role {role} in tenant '{tenant_schema}'. "
-                                f"Generated password: {password} — save this now, it won't be shown again."
+                                f"Created user {user_email} in tenant '{tenant_schema}', but the email service "
+                                "did not accept the setup message. Use Send password reset to retry.",
                             )
-            except Exception as exc:
-                messages.error(request, f"Role assignment failed: {exc}")
-                return render(request, "tenants/public_admin.html", admin_context)
+            except ProgrammingError:
+                logger.exception("Tenant user table is missing for schema %s", tenant_schema)
+                messages.error(
+                    request,
+                    f"Tenant '{company.name}' has not completed its account migrations. "
+                    "Retry provisioning before managing its users.",
+                )
+                return redirect("tenants:public_admin")
+            except Exception:
+                logger.exception("Role assignment failed for tenant %s", tenant_schema)
+                messages.error(request, "Role assignment failed. Check tenant readiness and try again.")
+                return redirect("tenants:public_admin")
 
             return redirect("tenants:public_admin")
 
@@ -409,53 +566,60 @@ def public_admin(request):
             if not tenant_schema or not user_email:
                 messages.error(request, "Tenant schema and user email are required to reset access.")
                 return render(request, "tenants/public_admin.html", admin_context)
+            try:
+                validate_email(user_email)
+            except ValidationError:
+                messages.error(request, "Enter a valid user email address.")
+                return redirect("tenants:public_admin")
 
-            if not Company.objects.filter(schema_name=tenant_schema).exists():
+            company = Company.objects.filter(
+                schema_name=tenant_schema
+            ).exclude(schema_name="public").first()
+            if company is None:
                 messages.error(request, f"Tenant schema '{tenant_schema}' does not exist.")
-                return render(request, "tenants/public_admin.html", admin_context)
+                return redirect("tenants:public_admin")
+
+            user_table_available = _tenant_user_table_available(company)
+            if user_table_available is None:
+                messages.error(
+                    request,
+                    f"Could not verify the account tables for tenant '{company.name}'. "
+                    "Check database connectivity and try again.",
+                )
+                return redirect("tenants:public_admin")
+            if not user_table_available:
+                messages.error(
+                    request,
+                    f"Tenant '{company.name}' is not ready for access resets because its account tables are not migrated. "
+                    "Wait for provisioning to finish or retry it from tenant details.",
+                )
+                return redirect("tenants:public_admin")
 
             from accounts.models import User
-            from django.contrib.auth.tokens import default_token_generator
-            from django.utils.encoding import force_bytes
-            from django.utils.http import urlsafe_base64_encode
 
             try:
                 with schema_context(tenant_schema):
                     user = User.objects.filter(email=user_email).first()
                     if not user:
                         messages.error(request, f"No user with email '{user_email}' was found in tenant '{tenant_schema}'.")
-                        return render(request, "tenants/public_admin.html", admin_context)
+                        return redirect("tenants:public_admin")
 
-                    tenant_domain_root = getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan")
-                    tenant_domain = None
-                    company = Company.objects.get(schema_name=tenant_schema)
-                    domain_queryset = getattr(company, "domain_set", None)
-                    if domain_queryset is not None:
-                        primary_domain = domain_queryset.filter(is_primary=True).first() or domain_queryset.first()
-                        if primary_domain:
-                            tenant_domain = primary_domain.domain
-                    if not tenant_domain:
-                        tenant_domain = f"{tenant_schema}.{tenant_domain_root}"
-
-                    uid = urlsafe_base64_encode(force_bytes(user.pk))
-                    token = default_token_generator.make_token(user)
-                    reset_url = f"https://{tenant_domain}/accounts/reset/{uid}/{token}/"
-                    send_mail(
-                        subject=f"Abacash access reset for {tenant_schema}",
-                        message=(
-                            f"Hello {user.get_full_name() or user.username},\n\n"
-                            f"A platform operator requested a password reset for your Abacash account in tenant '{tenant_schema}'.\n"
-                            f"Use the following secure link to complete setup: {reset_url}\n\n"
-                            "If you did not request this, contact support immediately."
-                        ),
-                        from_email=getattr(django_settings, "DEFAULT_FROM_EMAIL", "support@abacash.loan"),
-                        recipient_list=[user.email],
-                        fail_silently=False,
-                    )
-                    messages.success(request, f"Password reset instructions were sent to {user.email} for tenant '{tenant_schema}'.")
-            except Exception as exc:
-                messages.error(request, f"Access reset failed: {exc}")
-                return render(request, "tenants/public_admin.html", admin_context)
+                    if _send_tenant_user_access_email(user, company):
+                        messages.success(request, f"Password reset instructions were sent to {user.email} for tenant '{tenant_schema}'.")
+                    else:
+                        messages.error(request, f"The email service did not accept password reset instructions for {user.email}.")
+            except ProgrammingError:
+                logger.exception("Tenant user table is missing during access reset for %s", tenant_schema)
+                messages.error(
+                    request,
+                    f"Tenant '{company.name}' has not completed its account migrations. "
+                    "Retry provisioning before resetting user access.",
+                )
+                return redirect("tenants:public_admin")
+            except Exception:
+                logger.exception("Access reset failed for tenant %s", tenant_schema)
+                messages.error(request, "Access reset failed. Check tenant readiness and email delivery settings.")
+                return redirect("tenants:public_admin")
 
             return redirect("tenants:public_admin")
 
@@ -467,6 +631,12 @@ def public_admin(request):
 
             try:
                 company = Company.objects.get(schema_name=tenant_schema)
+                if company.schema_name == "public":
+                    messages.error(request, "The public schema cannot be suspended.")
+                    return redirect("tenants:public_admin")
+                if company.provisioning_status == Company.ProvisioningStatus.RUNNING:
+                    messages.warning(request, "Wait for provisioning to finish before changing tenant access.")
+                    return redirect("tenants:public_admin")
                 company.is_active = not company.is_active
                 company.save()
                 status_label = "suspended" if not company.is_active else "activated"
@@ -486,7 +656,10 @@ def public_admin(request):
                 return render(request, "tenants/public_admin.html", admin_context)
 
             try:
-                company = Company.objects.get(schema_name=tenant_schema)
+                company = Company.objects.exclude(schema_name="public").get(schema_name=tenant_schema)
+                if plan not in Plan.values:
+                    messages.error(request, "Select a valid subscription plan.")
+                    return redirect("tenants:public_admin")
                 company.plan = plan
                 company.save()
                 messages.success(request, f"Updated subscription for '{tenant_schema}' to {plan}.")
@@ -542,6 +715,8 @@ def register(request):
             })
 
         reg = CompanyRegistration.objects.create(**form_data)
+        request.session["onboarding_registration_id"] = reg.pk
+        request.session.pop("onboarding_company_id", None)
 
         # Send admin notification to platform operators (best-effort)
         try:
@@ -581,6 +756,7 @@ def register(request):
                 raise ValueError(f"Schema '{schema}' already exists — pick a different company name or onboard manually.")
 
             company = Company.objects.create(schema_name=schema, name=reg.company_name, is_active=True, plan=reg.plan)
+            request.session["onboarding_company_id"] = company.pk
             Domain.objects.create(domain=domain, tenant=company, is_primary=True)
 
             provision_tenant_task.delay(
@@ -606,7 +782,11 @@ def register(request):
             logger.error(error_msg, exc_info=True)
 
         if is_ajax:
-            return JsonResponse({"ok": True, "message": "Thank you! Provisioning has started and you'll receive confirmation shortly."})
+            return JsonResponse({
+                "ok": True,
+                "message": "Your registration is received. We’ll show setup progress here and email you when access is ready.",
+                "status_url": reverse("tenants:registration_status"),
+            })
 
         messages.success(request, "Thank you! Your registration is being provisioned — you'll receive an email when ready.")
         return redirect("tenants:success")
@@ -621,6 +801,77 @@ def register(request):
 def success(request):
     return render(request, "tenants/success.html", {
         "page_links": PAGE_LINKS,
+        "status_url": (
+            reverse("tenants:registration_status")
+            if request.session.get("onboarding_registration_id")
+            else ""
+        ),
+    })
+
+
+@require_GET
+@cache_control(no_store=True)
+def registration_status(request):
+    registration_id = request.session.get("onboarding_registration_id")
+    if not registration_id:
+        return JsonResponse({"error": "No signup progress is available."}, status=404)
+
+    try:
+        registration = CompanyRegistration.objects.get(pk=registration_id)
+    except CompanyRegistration.DoesNotExist:
+        return JsonResponse({"error": "Signup progress is no longer available."}, status=404)
+
+    company_id = request.session.get("onboarding_company_id")
+    if not company_id:
+        if "[onboard-error]" in registration.notes:
+            return JsonResponse({
+                "status": "FAILED",
+                "step": "QUEUED",
+                "failure_stage": "START",
+                "waiting_seconds": 0,
+            })
+        return JsonResponse({
+            "status": "PENDING",
+            "step": "QUEUED",
+            "waiting_seconds": max(0, int((timezone.now() - registration.submitted_at).total_seconds())),
+        })
+
+    try:
+        company = Company.objects.get(pk=company_id)
+    except Company.DoesNotExist:
+        return JsonResponse({
+            "status": "FAILED",
+            "step": "QUEUED",
+            "failure_stage": "START",
+            "waiting_seconds": 0,
+        })
+
+    if (
+        "[onboard-error]" in registration.notes
+        and company.provisioning_status == Company.ProvisioningStatus.PENDING
+        and company.provisioning_started_at is None
+    ):
+        return JsonResponse({
+            "status": "FAILED",
+            "step": "QUEUED",
+            "failure_stage": "START",
+            "waiting_seconds": 0,
+        })
+
+    return JsonResponse({
+        "status": company.provisioning_status,
+        "step": company.provisioning_step,
+        "failure_stage": (
+            "PROVISIONING"
+            if company.provisioning_status == Company.ProvisioningStatus.FAILED
+            else ""
+        ),
+        "waiting_seconds": (
+            max(0, int((timezone.now() - registration.submitted_at).total_seconds()))
+            if company.provisioning_status == Company.ProvisioningStatus.PENDING
+            and company.provisioning_started_at is None
+            else 0
+        ),
     })
 
 

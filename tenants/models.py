@@ -17,6 +17,14 @@ class Company(TenantMixin):
         READY   = "READY",   "Ready"
         FAILED  = "FAILED",  "Failed"
 
+    class ProvisioningStep(models.TextChoices):
+        QUEUED = "QUEUED", "Waiting to start"
+        CREATING_SCHEMA = "CREATING_SCHEMA", "Preparing workspace"
+        MIGRATING = "MIGRATING", "Setting up database"
+        SEEDING = "SEEDING", "Adding starter data"
+        FINALIZING = "FINALIZING", "Finishing setup"
+        COMPLETE = "COMPLETE", "Ready to use"
+
     name = models.CharField(max_length=200)
     plan = models.CharField(max_length=20, choices=Plan.choices, default=Plan.STARTER)
     created_on = models.DateField(auto_now_add=True)
@@ -26,6 +34,11 @@ class Company(TenantMixin):
         max_length=10, choices=ProvisioningStatus.choices, default=ProvisioningStatus.PENDING,
         help_text="Tracks background schema creation + seeding via Celery. "
                    "A company is not safe to log into until this reaches READY.",
+    )
+    provisioning_step = models.CharField(
+        max_length=20,
+        choices=ProvisioningStep.choices,
+        default=ProvisioningStep.QUEUED,
     )
     provisioning_error = models.TextField(blank=True)
     provisioning_started_at = models.DateTimeField(null=True, blank=True)

@@ -4,3 +4,18 @@
 2026-07-17 18:30:34 [INFO] tenants.management.commands.onboard_tenant: Sent password reset email for tenant suzie_financial_business to taxmanissues.go@gmail.com
 2026-07-19 09:21:13 [INFO] tenants.views: Onboarding job started for registration 1: schema=suzie_financial_business, domain=suzie_financial_business.abacash.loan, log_file=C:\Users\aggyd\Desktop\tenant\logs\onboard_suzie_financial_business.log
 2026-07-19 09:21:27 [INFO] tenants.management.commands.onboard_tenant: Sent password reset email for tenant suzie_financial_business to taxmanissues.go@gmail.com
+2026-11-10 19:57:58 [INFO] tenants.views: Onboarding task queued for registration 1: schema=prime_focus_uganda, domain=prime-focus-uganda.localhost:8000, company_id=6
+2026-11-10 20:01:01 [INFO] tenants.provisioning: Sent account setup email for tenant example_lending to admin@example.com
+2026-11-10 20:11:11 [ERROR] tenants.views: Failed to start onboarding: Schema 'prime_focus_uganda' already exists — pick a different company name or onboard manually.
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\tenants\views.py", line 574, in register
+    raise ValueError(f"Schema '{schema}' already exists — pick a different company name or onboard manually.")
+ValueError: Schema 'prime_focus_uganda' already exists — pick a different company name or onboard manually.
+2026-11-10 20:19:53 [INFO] tenants.views: Onboarding task queued for registration 3: schema=terrain_services_limited, domain=terrain-services-limited.localhost:8000, company_id=7
+2026-11-10 20:22:00 [ERROR] tenants.views: Failed to start onboarding: Schema 'terrain_services_limited' already exists — pick a different company name or onboard manually.
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\tenants\views.py", line 579, in register
+    raise ValueError(f"Schema '{schema}' already exists — pick a different company name or onboard manually.")
+ValueError: Schema 'terrain_services_limited' already exists — pick a different company name or onboard manually.
+2026-11-10 20:29:54 [INFO] tenants.views: Onboarding task queued for registration 5: schema=21ervices_limited, domain=21ervices-limited.localhost:8000, company_id=8
+2026-11-10 21:02:26 [INFO] tenants.views: Onboarding task queued for registration 6: schema=joy, domain=joy.localhost:8000, company_id=9

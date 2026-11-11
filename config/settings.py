@@ -334,17 +334,34 @@ TWILIO_WHATSAPP_FROM = config("TWILIO_WHATSAPP_FROM", default="whatsapp:+2567852
 # Email (error alerts / contact form)                                  #
 # ------------------------------------------------------------------ #
 
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@abauganda.com")
+GOOGLE_OAUTH_TOKEN_FILE = config(
+    "GOOGLE_OAUTH_TOKEN_FILE",
+    default=str(BASE_DIR / "google_oauth_token.json"),
+)
+GOOGLE_SENDER_EMAIL = config("GOOGLE_SENDER_EMAIL", default=EMAIL_HOST_USER)
+_default_email_provider = (
+    "gmail_api"
+    if Path(GOOGLE_OAUTH_TOKEN_FILE).is_file()
+    else ("console" if DEBUG else "smtp")
+)
+EMAIL_PROVIDER = config("EMAIL_PROVIDER", default=_default_email_provider).strip().lower()
+EMAIL_BACKENDS = {
+    "console": "django.core.mail.backends.console.EmailBackend",
+    "smtp": "django.core.mail.backends.smtp.EmailBackend",
+    "gmail_api": "tenants.email_backends.GmailApiEmailBackend",
+}
+if EMAIL_PROVIDER not in EMAIL_BACKENDS:
+    raise ValueError(f"Unsupported EMAIL_PROVIDER: {EMAIL_PROVIDER}")
+EMAIL_BACKEND = EMAIL_BACKENDS[EMAIL_PROVIDER]
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default=GOOGLE_SENDER_EMAIL or EMAIL_HOST_USER or "noreply@abauganda.com",
+)
 
 # ------------------------------------------------------------------ #
 # Business rules                                                       #

@@ -419,6 +419,239 @@
     gap: 4px;
   }
 
+  .onboarding-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    background:
+      radial-gradient(ellipse at 100% 0%, rgba(59, 130, 246, 0.12), transparent 42%),
+      var(--detail-surface);
+  }
+
+  .onboarding-card[data-state="ready"] {
+    border-color: rgba(16, 185, 129, 0.28);
+  }
+
+  .onboarding-card[data-state="failed"] {
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+
+  .onboarding-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 22px 24px 18px;
+  }
+
+  .onboarding-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: #2563EB;
+    background: rgba(59, 130, 246, 0.12);
+    font-size: 19px;
+  }
+
+  [data-state="ready"] .onboarding-icon {
+    color: #059669;
+    background: rgba(16, 185, 129, 0.13);
+  }
+
+  [data-state="failed"] .onboarding-icon {
+    color: #DC2626;
+    background: rgba(239, 68, 68, 0.12);
+  }
+
+  .onboarding-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .onboarding-eyebrow {
+    color: var(--detail-accent);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .onboarding-copy h2 {
+    margin: 0;
+    color: var(--detail-text-primary);
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .onboarding-copy p {
+    margin: 5px 0 0;
+    color: var(--detail-text-secondary);
+    font-size: 13px;
+  }
+
+  .onboarding-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    margin: 3px 0 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #1D4ED8;
+    background: rgba(59, 130, 246, 0.1);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .onboarding-live i {
+    font-size: 8px;
+  }
+
+  [data-state="ready"] .onboarding-live {
+    color: #047857;
+    background: rgba(16, 185, 129, 0.12);
+  }
+
+  [data-state="failed"] .onboarding-live {
+    color: #B91C1C;
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .onboarding-steps {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 4px 24px 18px;
+  }
+
+  .onboarding-step {
+    position: relative;
+    min-width: 0;
+    padding-right: 12px;
+  }
+
+  .onboarding-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 34px;
+    right: 12px;
+    height: 2px;
+    background: var(--detail-border);
+  }
+
+  .onboarding-step.is-complete:not(:last-child)::after {
+    background: #10B981;
+  }
+
+  .onboarding-step.is-current:not(:last-child)::after {
+    background: linear-gradient(90deg, var(--detail-accent) 0%, var(--detail-border) 70%);
+  }
+
+  .onboarding-step-marker {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 29px;
+    height: 29px;
+    margin-bottom: 8px;
+    border: 2px solid var(--detail-border);
+    border-radius: 50%;
+    background: var(--detail-surface);
+    color: var(--detail-text-muted);
+    font-size: 11px;
+  }
+
+  .onboarding-step.is-complete .onboarding-step-marker {
+    border-color: #10B981;
+    color: #fff;
+    background: #10B981;
+  }
+
+  .onboarding-step.is-current .onboarding-step-marker {
+    border-color: var(--detail-accent);
+    color: #fff;
+    background: var(--detail-accent);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    animation: onboarding-pulse 1.8s ease-in-out infinite;
+  }
+
+  .onboarding-step.is-failed .onboarding-step-marker {
+    border-color: var(--detail-danger);
+    color: #fff;
+    background: var(--detail-danger);
+  }
+
+  .onboarding-step-title {
+    display: block;
+    color: var(--detail-text-primary);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .onboarding-step-description {
+    display: block;
+    margin-top: 2px;
+    color: var(--detail-text-muted);
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .onboarding-next,
+  .onboarding-error {
+    margin: 0 24px 20px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--detail-text-secondary);
+    background: rgba(59, 130, 246, 0.07);
+    font-size: 12px;
+  }
+
+  .onboarding-next strong {
+    color: var(--detail-text-primary);
+  }
+
+  .onboarding-error {
+    color: var(--detail-danger);
+    background: rgba(239, 68, 68, 0.08);
+    overflow-wrap: anywhere;
+  }
+
+  .onboarding-ready-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 24px 20px;
+  }
+
+  .onboarding-ready-actions[hidden],
+  .onboarding-error[hidden] {
+    display: none;
+  }
+
+  @keyframes onboarding-pulse {
+    50% { box-shadow: 0 0 0 7px rgba(59, 130, 246, 0.04); }
+  }
+
+  @media (max-width: 700px) {
+    .onboarding-hero { padding: 18px 16px 14px; gap: 12px; }
+    .onboarding-steps { grid-template-columns: 1fr; gap: 0; padding: 0 20px 14px; }
+    .onboarding-step { display: grid; grid-template-columns: 32px 1fr; column-gap: 10px; padding: 0 0 13px; }
+    .onboarding-step:not(:last-child)::after { top: 30px; bottom: -1px; left: 14px; right: auto; width: 2px; height: auto; }
+    .onboarding-step-marker { grid-row: span 2; margin: 0; }
+    .onboarding-step-title { align-self: end; }
+    .onboarding-step-description { margin-top: 0; }
+    .onboarding-live { margin-left: 0; }
+    .onboarding-next, .onboarding-error, .onboarding-ready-actions { margin-left: 16px; margin-right: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .onboarding-step.is-current .onboarding-step-marker { animation: none; }
+  }
+
   .detail-form-group {
     margin-bottom: 14px;
   }
@@ -694,6 +927,9 @@
         <div class="subtitle"><i class="fas fa-database"></i> {{ company.schema_name }}</div>
       </div>
       <div class="detail-header-actions">
+        <a href="{% url 'platform_admin:user_list' %}?tenant={{ company.schema_name|urlencode }}" class="detail-btn detail-btn-primary">
+          <i class="fas fa-users"></i> Manage Users
+        </a>
         <a href="{% url 'platform_admin:company_list' %}" class="detail-btn detail-btn-outline">
           <i class="fas fa-arrow-left"></i> Back
         </a>
@@ -709,6 +945,81 @@
       </div>
       {% endfor %}
     {% endif %}
+
+    <section
+      class="detail-card onboarding-card"
+      id="onboarding-progress"
+      data-state="{{ company.provisioning_status|lower }}"
+      data-provisioning-status="{{ company.provisioning_status }}"
+      data-provisioning-step="{{ company.provisioning_step }}"
+      data-provisioning-error="{{ company.provisioning_error }}"
+      data-status-url="{% url 'platform_admin:company_provisioning_status' company.schema_name %}"
+      aria-labelledby="onboarding-title"
+    >
+      <div class="onboarding-hero">
+        <div class="onboarding-icon" aria-hidden="true"><i class="fas fa-magic"></i></div>
+        <div class="onboarding-copy">
+          <div class="onboarding-eyebrow">Workspace setup</div>
+          <h2 id="onboarding-title">Getting {{ company.name }} ready</h2>
+          <p id="onboarding-message" aria-live="polite">
+            {% if company.provisioning_status == 'READY' %}Your workspace is ready. Follow the next step below to sign in.
+            {% elif company.provisioning_status == 'FAILED' %}Setup needs attention. Review the error and retry provisioning below.
+            {% elif company.provisioning_status == 'PENDING' %}Your setup is queued. This page will update automatically when work begins.
+            {% else %}We are preparing your workspace. You can stay on this page while setup runs.{% endif %}
+          </p>
+        </div>
+        <span class="onboarding-live" id="onboarding-live">
+          <i class="fas {% if company.provisioning_status == 'READY' %}fa-check{% elif company.provisioning_status == 'FAILED' %}fa-triangle-exclamation{% else %}fa-circle{% endif %}" aria-hidden="true"></i>
+          <span>{% if company.provisioning_status == 'READY' %}Ready{% elif company.provisioning_status == 'FAILED' %}Action needed{% elif company.provisioning_status == 'PENDING' %}Queued{% else %}In progress{% endif %}</span>
+        </span>
+      </div>
+
+      <div class="onboarding-steps" id="onboarding-steps" aria-label="Workspace setup progress">
+        <div class="onboarding-step" data-step="CREATING_SCHEMA">
+          <span class="onboarding-step-marker"><i class="fas fa-box" aria-hidden="true"></i></span>
+          <span class="onboarding-step-title">Workspace</span>
+          <span class="onboarding-step-description">Preparing your secure space</span>
+        </div>
+        <div class="onboarding-step" data-step="MIGRATING">
+          <span class="onboarding-step-marker"><i class="fas fa-database" aria-hidden="true"></i></span>
+          <span class="onboarding-step-title">Database</span>
+          <span class="onboarding-step-description">Creating tables and structure</span>
+        </div>
+        <div class="onboarding-step" data-step="SEEDING">
+          <span class="onboarding-step-marker"><i class="fas fa-seedling" aria-hidden="true"></i></span>
+          <span class="onboarding-step-title">Starter data</span>
+          <span class="onboarding-step-description">Adding your initial setup</span>
+        </div>
+        <div class="onboarding-step" data-step="FINALIZING">
+          <span class="onboarding-step-marker"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
+          <span class="onboarding-step-title">Finishing up</span>
+          <span class="onboarding-step-description">Preparing your activation email</span>
+        </div>
+        <div class="onboarding-step" data-step="COMPLETE">
+          <span class="onboarding-step-marker"><i class="fas fa-check" aria-hidden="true"></i></span>
+          <span class="onboarding-step-title">Ready</span>
+          <span class="onboarding-step-description">Sign in to your workspace</span>
+        </div>
+      </div>
+
+      <div class="onboarding-next" id="onboarding-next">
+        <strong>What happens next?</strong>
+        <span id="onboarding-next-text">
+          {% if company.provisioning_status == 'READY' %}Open your tenant sign-in page and use the activation link sent to the administrator email.
+          {% elif company.provisioning_status == 'FAILED' %}Use “Retry Provisioning” below after reviewing the setup error.
+          {% elif company.provisioning_status == 'PENDING' %}No action is needed. Keep this page open or return later to check progress.
+          {% else %}No action is needed. We’ll update this page as each setup step completes.{% endif %}
+        </span>
+      </div>
+      <div class="onboarding-error" id="onboarding-error" role="alert" {% if company.provisioning_status != 'FAILED' %}hidden{% endif %}>{{ company.provisioning_error }}</div>
+      <div class="onboarding-ready-actions" id="onboarding-ready-actions" {% if company.provisioning_status != 'READY' %}hidden{% endif %}>
+        {% for domain in domains %}{% if domain.is_primary %}
+        <a class="detail-btn detail-btn-primary" href="https://{{ domain.domain }}/accounts/login/" target="_blank" rel="noopener">
+          <i class="fas fa-external-link-alt"></i> Open tenant sign-in
+        </a>
+        {% endif %}{% endfor %}
+      </div>
+    </section>
 
     <!-- Company Info -->
     <div class="detail-grid-2">
@@ -918,7 +1229,7 @@
               </div>
               <div class="detail-form-group">
                 <label for="retry-password"><i class="fas fa-lock"></i> Admin Password (optional)</label>
-                <input type="text" name="password" id="retry-password" placeholder="Leave blank to auto-generate">
+                <input type="password" name="password" id="retry-password" autocomplete="new-password" placeholder="Leave blank to auto-generate">
               </div>
               <div class="detail-form-group">
                 <label for="retry-phone"><i class="fas fa-phone"></i> Phone</label>
@@ -929,9 +1240,7 @@
                 <input type="text" name="address" id="retry-address" placeholder="Street, City">
               </div>
               <div class="detail-form-group" style="grid-column:span 2;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;">
-                  <input type="checkbox" name="notify" checked> <i class="fas fa-bell"></i> Notify user via email
-                </label>
+                <span style="font-size:12px;color:var(--detail-text-muted);">The administrator will receive an account activation email after provisioning.</span>
                 <button type="submit" class="detail-btn detail-btn-warning">
                   <i class="fas fa-sync-alt"></i> Retry Provisioning
                 </button>
@@ -959,6 +1268,101 @@
   (function() {
     'use strict';
 
+    var progress = document.getElementById('onboarding-progress');
+    if (progress) {
+      var steps = Array.prototype.slice.call(progress.querySelectorAll('.onboarding-step'));
+      var messages = {
+        QUEUED: ['Queued', 'Your setup is queued. This page will update automatically when work begins.', 'No action is needed. Keep this page open or return later to check progress.'],
+        CREATING_SCHEMA: ['Preparing workspace', 'We are preparing a secure workspace for your organization.', 'No action is needed. We’ll update this page as each setup step completes.'],
+        MIGRATING: ['Setting up database', 'We are creating and updating the database tables your workspace needs.', 'Database setup can take a few minutes. Please keep this page open; your progress is saved.'],
+        SEEDING: ['Adding starter data', 'We are adding the initial branch, account, and lending setup.', 'Your workspace is being personalized. There is nothing you need to do right now.'],
+        FINALIZING: ['Finishing setup', 'We are completing the final setup steps and preparing account access.', 'We’ll let you know here as soon as the workspace is ready.'],
+        COMPLETE: ['Ready', 'Your workspace is ready. Follow the next step below to sign in.', 'Open your tenant sign-in page and use the activation link sent to the administrator email.']
+      };
+      var rank = { QUEUED: -1, CREATING_SCHEMA: 0, MIGRATING: 1, SEEDING: 2, FINALIZING: 3, COMPLETE: 4 };
+      var pollTimer;
+
+      function renderProgress(data) {
+        var state = data.status;
+        var step = state === 'READY' ? 'COMPLETE' : (state === 'PENDING' ? 'QUEUED' : data.step);
+        var failed = state === 'FAILED';
+        var currentRank = rank[step] === undefined ? -1 : rank[step];
+        var cardState = state.toLowerCase();
+        var copy = messages[step] || messages.QUEUED;
+        progress.dataset.state = cardState;
+        progress.dataset.provisioningStatus = state;
+        progress.dataset.provisioningStep = step;
+        steps.forEach(function(item) {
+          var itemRank = rank[item.dataset.step];
+          var isCurrent = !failed && state !== 'READY' && item.dataset.step === step;
+          item.classList.toggle('is-complete', state === 'READY' || (!failed && itemRank < currentRank));
+          item.classList.toggle('is-current', isCurrent);
+          item.classList.toggle('is-failed', failed && item.dataset.step === step);
+          item.setAttribute('aria-current', isCurrent || (failed && item.dataset.step === step) ? 'step' : 'false');
+        });
+
+        var title = progress.querySelector('#onboarding-title');
+        var message = progress.querySelector('#onboarding-message');
+        var live = progress.querySelector('#onboarding-live');
+        var next = progress.querySelector('#onboarding-next-text');
+        var error = progress.querySelector('#onboarding-error');
+        var readyActions = progress.querySelector('#onboarding-ready-actions');
+        var icon = live.querySelector('i');
+        var liveText = live.querySelector('span');
+
+        if (failed) {
+          title.textContent = 'Setup needs attention';
+          message.textContent = 'We could not finish this setup step. Your company data is retained; an administrator can review the error and retry.';
+          next.textContent = 'Use “Retry Provisioning” below after reviewing the setup error.';
+          liveText.textContent = 'Action needed';
+          icon.className = 'fas fa-exclamation-triangle';
+          error.textContent = data.error || 'The setup failed without returning an error message. Review the server logs before retrying.';
+          error.hidden = false;
+        } else {
+          title.textContent = state === 'READY' ? 'Your workspace is ready' : 'Getting {{ company.name|escapejs }} ready';
+          message.textContent = copy[1];
+          next.textContent = copy[2];
+          liveText.textContent = state === 'READY' ? 'Ready' : copy[0];
+          icon.className = state === 'READY' ? 'fas fa-check' : 'fas fa-circle';
+          error.hidden = true;
+        }
+        readyActions.hidden = state !== 'READY';
+
+        if (state === 'READY' || state === 'FAILED') {
+          window.clearInterval(pollTimer);
+        }
+      }
+
+      function pollProgress() {
+        fetch(progress.dataset.statusUrl, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin'
+        })
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('Could not refresh setup status (' + response.status + ').');
+            }
+            return response.json();
+          })
+          .then(renderProgress)
+          .catch(function(error) {
+            var liveText = progress.querySelector('#onboarding-live span');
+            liveText.textContent = 'Reconnecting';
+            progress.querySelector('#onboarding-message').textContent = error.message + ' We’ll try again automatically.';
+          });
+      }
+
+      renderProgress({
+        status: progress.dataset.provisioningStatus,
+        step: progress.dataset.provisioningStep,
+        error: progress.dataset.provisioningError
+      });
+      if (progress.dataset.state !== 'ready' && progress.dataset.state !== 'failed') {
+        pollProgress();
+        pollTimer = window.setInterval(pollProgress, 3000);
+      }
+    }
+
     // Confirm dangerous actions
     document.querySelectorAll('[data-confirm]').forEach(function(el) {
       el.addEventListener('click', function(e) {
@@ -967,23 +1371,6 @@
         }
       });
     });
-
-    // Auto-refresh stats every 60 seconds (optional)
-    // Uncomment to enable:
-    /*
-    setInterval(function() {
-      if (document.querySelector('.detail-stats-grid')) {
-        fetch(window.location.href, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.text())
-        .then(html => {
-          // Update stats selectively
-        })
-        .catch(console.warn);
-      }
-    }, 60000);
-    */
 
     console.log('Company detail loaded for {{ company.schema_name }}');
 

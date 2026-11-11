@@ -2,55 +2,663 @@
 
 {% block title %}Features | Abacash{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* ============================================
+     FEATURES PAGE — SCOPED ENHANCEMENTS
+     ============================================ */
+
+  /* ---------- Hero ---------- */
+  .features-hero {
+    position: relative;
+    padding: clamp(3rem, 6vw, 5rem) 0 2.5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .features-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(900px, 90vw);
+    height: 600px;
+    background: radial-gradient(ellipse at center,
+      rgba(37, 99, 235, 0.10) 0%,
+      rgba(14, 165, 233, 0.06) 40%,
+      transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .features-hero > * { position: relative; z-index: 1; }
+
+  .features-hero .hero-title {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .features-hero .hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  /* ---------- Category Tabs ---------- */
+  .feature-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 2.5rem auto 2rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+    max-width: fit-content;
+    box-shadow: var(--shadow-md);
+  }
+
+  .feature-tab {
+    border: none;
+    background: transparent;
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.25s var(--transition-smooth);
+    white-space: nowrap;
+  }
+
+  .feature-tab:hover {
+    color: var(--accent);
+    background: rgba(37, 99, 235, 0.06);
+  }
+
+  .feature-tab.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+  }
+
+  @media (max-width: 640px) {
+    .feature-tabs {
+      border-radius: var(--radius-lg);
+      max-width: 100%;
+    }
+    .feature-tab { font-size: 0.82rem; padding: 0.5rem 0.85rem; }
+  }
+
+  /* ---------- Feature Cards ---------- */
+  .feature-grid-enhanced {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(1.25rem, 2vw, 2rem);
+    margin-top: 1rem;
+  }
+
+  .feature-card-v2 {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s var(--transition-smooth);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    isolation: isolate;
+  }
+
+  /* Animated gradient border on hover */
+  .feature-card-v2::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent));
+    background-size: 200% 200%;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s var(--transition-smooth);
+    z-index: -1;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  .feature-card-v2:hover::before { opacity: 1; }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .feature-card-v2::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -30%;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.10), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .feature-card-v2:hover::after { opacity: 1; }
+
+  .feature-card-v2:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .feature-card-v2 .feature-icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
+    color: var(--accent);
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+    transition: transform 0.4s var(--transition-smooth), background 0.3s ease;
+  }
+
+  .feature-card-v2:hover .feature-icon {
+    transform: scale(1.08) rotate(-4deg);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(14, 165, 233, 0.15));
+  }
+
+  .feature-card-v2 h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .feature-card-v2 p {
+    color: var(--text-secondary);
+    line-height: 1.65;
+    font-size: 0.95rem;
+    margin: 0;
+    flex: 1 1 auto;
+  }
+
+  .feature-card-v2 .feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+
+  /* Filter animation */
+  .feature-card-v2.hidden {
+    display: none;
+  }
+
+  .feature-card-v2.filtering {
+    animation: card-in 0.4s var(--transition-smooth) both;
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ---------- "Why Abacash" Comparison Strip ---------- */
+  .compare-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem);
+    margin-top: 1.5rem;
+  }
+
+  .compare-item {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.04), rgba(14, 165, 233, 0.02));
+    border: 1px solid rgba(37, 99, 235, 0.10);
+    transition: all 0.3s var(--transition-smooth);
+  }
+
+  .compare-item:hover {
+    transform: translateY(-4px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.08);
+  }
+
+  .compare-item strong {
+    display: block;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 0.35rem;
+  }
+
+  .compare-item span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- Workflow Timeline ---------- */
+  .workflow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+    position: relative;
+  }
+
+  .workflow-step {
+    position: relative;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    transition: all 0.3s var(--transition-smooth);
+  }
+
+  .workflow-step:hover {
+    transform: translateY(-4px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: var(--shadow-md);
+  }
+
+  .workflow-step .step-number {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 0.85rem;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  }
+
+  .workflow-step h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .workflow-step p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Connector line between steps (desktop only) */
+  @media (min-width: 900px) {
+    .workflow::before {
+      content: '';
+      position: absolute;
+      top: calc(1.5rem + 20px);
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(37, 99, 235, 0.25) 15%,
+        rgba(37, 99, 235, 0.25) 85%,
+        transparent);
+      z-index: 0;
+    }
+    .workflow-step { z-index: 1; background: var(--surface); }
+  }
+
+  /* ---------- Enhanced Navigation Cards ---------- */
+  .nav-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .nav-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s var(--transition-smooth);
+    overflow: hidden;
+  }
+
+  .nav-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--transition-smooth);
+  }
+
+  .nav-card:hover::before { transform: scaleX(1); }
+
+  .nav-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .nav-card .nav-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08));
+    color: var(--accent);
+    font-size: 1.25rem;
+    transition: transform 0.3s var(--transition-smooth);
+  }
+
+  .nav-card:hover .nav-icon { transform: scale(1.08) rotate(-4deg); }
+
+  .nav-card strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .nav-card small {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    flex: 1 1 auto;
+  }
+
+  .nav-card .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--accent);
+    margin-top: 0.25rem;
+  }
+
+  .nav-card .nav-cta::after {
+    content: '→';
+    transition: transform 0.25s ease;
+  }
+
+  .nav-card:hover .nav-cta::after { transform: translateX(3px); }
+
+  /* ---------- Empty state ---------- */
+  .feature-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  /* Dark theme */
+  html[data-theme='dark'] .feature-tabs,
+  html[data-theme='dark'] .compare-item,
+  html[data-theme='dark'] .workflow-step,
+  html[data-theme='dark'] .nav-card {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feature-card-v2::before { animation: none; }
+    .feature-card-v2.filtering { animation: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-  <section class="hero">
+  <!-- ============================================
+       HERO
+       ============================================ -->
+  <section class="features-hero">
     <div class="eyebrow">Platform capabilities</div>
     <h1 class="hero-title">Everything you need to manage loans confidently.</h1>
-    <p class="hero-copy">Explore the full feature set designed to support every step of the lending lifecycle: application, approval, repayment, reporting, and reminders.</p>
+    <p class="hero-copy">
+      Explore the full feature set designed to support every step of the lending lifecycle:
+      application, approval, repayment, reporting, and reminders.
+    </p>
+
+    <div class="hero-actions">
+      <a href="{% url 'tenants:public_register' %}" class="btn btn-primary">Start free onboarding →</a>
+      <a href="{% url 'tenants:pricing' %}" class="btn btn-secondary">Compare plans</a>
+    </div>
   </section>
 
-  <section class="section-heading" style="margin-top: 2rem;">
-    <div class="section-label">Features</div>
-    <h2>Built for modern lending workflows</h2>
+  <!-- ============================================
+       WHY ABACASH — COMPARISON STRIP
+       ============================================ -->
+  <section style="margin-top: 1rem;">
+    <div class="compare-strip">
+      <div class="compare-item">
+        <strong>99.9%</strong>
+        <span>Platform uptime with redundant infrastructure</span>
+      </div>
+      <div class="compare-item">
+        <strong>&lt; 2 min</strong>
+        <span>Average time to process a loan application</span>
+      </div>
+      <div class="compare-item">
+        <strong>24/7</strong>
+        <span>Automated reminders and reconciliation</span>
+      </div>
+      <div class="compare-item">
+        <strong>100%</strong>
+        <span>Audit-ready records for every transaction</span>
+      </div>
+    </div>
   </section>
 
-  <div class="grid feature-grid">
-    {% for feature in feature_list %}
-      <article class="feature-card card">
-        <div class="feature-icon">{{ feature.icon }}</div>
-        <h3>{{ feature.title }}</h3>
-        <p>{{ feature.description }}</p>
-      </article>
-    {% endfor %}
-  </div>
-
-  <section class="section-card" style="margin-top: 2.5rem; padding: 2rem;">
+  <!-- ============================================
+       FEATURE GRID WITH FILTER TABS
+       ============================================ -->
+  <section style="margin-top: 3rem;">
     <div class="section-heading">
-      <div class="section-label">Navigation</div>
+      <div class="section-label">Features</div>
+      <h2>Built for modern lending workflows</h2>
+      <p class="hero-copy" style="margin-top: 0.75rem; font-size: 1rem;">
+        Filter by category to explore the capabilities most relevant to your team.
+      </p>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="feature-tabs" role="tablist" aria-label="Feature categories">
+      <button type="button" class="feature-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+      <button type="button" class="feature-tab" data-filter="origination" role="tab" aria-selected="false">Origination</button>
+      <button type="button" class="feature-tab" data-filter="servicing" role="tab" aria-selected="false">Servicing</button>
+      <button type="button" class="feature-tab" data-filter="analytics" role="tab" aria-selected="false">Analytics</button>
+      <button type="button" class="feature-tab" data-filter="compliance" role="tab" aria-selected="false">Compliance</button>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="feature-grid-enhanced" id="feature-grid">
+      {% for feature in feature_list %}
+        <article class="feature-card-v2" data-category="{{ feature.category|default:'origination' }}">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+          {% if feature.category %}
+            <span class="feature-tag">{{ feature.category|capfirst }}</span>
+          {% endif %}
+        </article>
+      {% empty %}
+        <div class="feature-empty">No features to display yet.</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ============================================
+       LENDING WORKFLOW TIMELINE
+       ============================================ -->
+  <section class="section-card" style="margin-top: 3rem; padding: clamp(1.5rem, 3vw, 2.5rem);">
+    <div class="section-heading">
+      <div class="section-label">Workflow</div>
+      <h2>One platform, end to end</h2>
+      <p class="hero-copy" style="margin-top: 0.75rem; font-size: 1rem;">
+        Follow the lending lifecycle from first application to final repayment.
+      </p>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow-step">
+        <div class="step-number">1</div>
+        <h4>Apply</h4>
+        <p>Borrowers submit applications through your branded portal.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">2</div>
+        <h4>Approve</h4>
+        <p>Review, score, and approve loans with automated rules.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">3</div>
+        <h4>Disburse</h4>
+        <p>Release funds with full audit trail and reconciliation.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">4</div>
+        <h4>Repay</h4>
+        <p>Track repayments and automate reminder schedules.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">5</div>
+        <h4>Report</h4>
+        <p>Generate portfolio reports and export audit-ready data.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       ENHANCED NAVIGATION CARDS
+       ============================================ -->
+  <section class="section-card" style="margin-top: 2.5rem; padding: clamp(1.5rem, 3vw, 2.5rem);">
+    <div class="section-heading">
+      <div class="section-label">Continue exploring</div>
       <h2>Jump to another page</h2>
     </div>
-    <div class="page-link-list">
-      <div class="page-link-item">
-        <div>
-          <strong>Pricing</strong>
-          <small>Compare plans and pricing tiers.</small>
-        </div>
-        <a href="{% url 'tenants:pricing' %}" class="btn btn-secondary">Pricing</a>
-      </div>
-      <div class="page-link-item">
-        <div>
-          <strong>Register</strong>
-          <small>Apply for your account and begin setup.</small>
-        </div>
-        <a href="{% url 'tenants:public_register' %}" class="btn btn-secondary">Register</a>
-      </div>
-      <div class="page-link-item">
-        <div>
-          <strong>Help</strong>
-          <small>Contact support or onboarding to get assistance.</small>
-        </div>
-        <a href="{% url 'tenants:support' %}" class="btn btn-secondary">Get Help</a>
-      </div>
+
+    <div class="nav-card-grid">
+      <a href="{% url 'tenants:pricing' %}" class="nav-card">
+        <div class="nav-icon">💳</div>
+        <strong>Pricing</strong>
+        <small>Compare plans and pricing tiers.</small>
+        <span class="nav-cta">View pricing</span>
+      </a>
+      <a href="{% url 'tenants:public_register' %}" class="nav-card">
+        <div class="nav-icon">🚀</div>
+        <strong>Register</strong>
+        <small>Apply for your account and begin setup.</small>
+        <span class="nav-cta">Get started</span>
+      </a>
+      <a href="{% url 'tenants:support' %}" class="nav-card">
+        <div class="nav-icon">💬</div>
+        <strong>Support</strong>
+        <small>Contact support or onboarding to get assistance.</small>
+        <span class="nav-cta">Get help</span>
+      </a>
     </div>
   </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ============================================
+  // Feature category filtering
+  // ============================================
+  (function () {
+    const tabs = document.querySelectorAll('.feature-tab');
+    const cards = document.querySelectorAll('.feature-card-v2');
+
+    function applyFilter(filter) {
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const cat = (card.dataset.category || '').toLowerCase();
+        const match = filter === 'all' || cat === filter;
+        if (match) {
+          card.classList.remove('hidden');
+          card.classList.add('filtering');
+          // re-trigger animation
+          void card.offsetWidth;
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+          card.classList.remove('filtering');
+        }
+      });
+
+      // Empty state
+      const grid = document.getElementById('feature-grid');
+      let empty = grid.querySelector('.feature-empty');
+      if (visibleCount === 0 && !empty) {
+        empty = document.createElement('div');
+        empty.className = 'feature-empty';
+        empty.textContent = 'No features in this category yet.';
+        grid.appendChild(empty);
+      } else if (visibleCount > 0 && empty) {
+        empty.remove();
+      }
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        applyFilter(tab.dataset.filter);
+      });
+    });
+  })();
+</script>
 {% endblock %}

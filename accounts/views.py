@@ -2316,6 +2316,11 @@ def _resolve_capital_injection_investor(request, data, amount, injected_date, pa
     investor_name = data.get("investor", "").strip()
     register_investor = data.get("register_investor") == "1"
 
+    if investor_record_id == "new":
+        investor_record_id = ""
+        if not investor_name:
+            raise ValueError("Enter the new investor's name before recording the injection.")
+
     if investor_record_id.startswith("legacy:"):
         investor_name = investor_record_id[7:].strip()
         investor_record_id = ""
@@ -2328,6 +2333,8 @@ def _resolve_capital_injection_investor(request, data, amount, injected_date, pa
                 committed_amount=amount,
                 investment_date=injected_date,
                 payment_method=payment_method,
+                phone=data.get("new_investor_phone", "").strip(),
+                email=data.get("new_investor_email", "").strip(),
                 branch_id=branch_id,
                 created_by=request.user,
             )

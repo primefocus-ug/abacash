@@ -168,6 +168,8 @@ logs/
 
 # Secret files
 secrets.json
+client_secret*.json
+google_oauth_token.json
 config.local.py
 settings_local.py
 

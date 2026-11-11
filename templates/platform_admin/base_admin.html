@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="theme-color" content="#0F172A">
     <meta name="description" content="Abacash Platform Admin — Manage multi-tenant loan management system.">
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('abacash-theme') || localStorage.getItem('admin-theme');
+          if (theme !== 'dark' && theme !== 'light') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
     <title>{% block title %}Platform Admin — Abacash{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,6 +48,7 @@
       }
 
       [data-theme="dark"] {
+        color-scheme: dark;
         --admin-surface: #111827;
         --admin-surface-2: #1E293B;
         --admin-surface-3: #273449;
@@ -448,8 +460,14 @@
         <a href="{% url 'platform_admin:company_list' %}" class="{% if request.resolver_match.url_name == 'company_list' %}active{% endif %}">
           <span class="icon"><i class="fas fa-building"></i></span> Companies
         </a>
+        <a href="{% url 'platform_admin:user_list' %}" class="{% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+          <span class="icon"><i class="fas fa-users"></i></span> Tenant users
+        </a>
 
         <div class="nav-label" style="margin-top:8px;">Public</div>
+        <a href="{% url 'tenants:public_admin' %}">
+          <span class="icon"><i class="fas fa-rocket"></i></span> Onboarding
+        </a>
         <a href="{% url 'tenants:public_register' %}">
           <span class="icon"><i class="fas fa-user-plus"></i></span> Register
         </a>
@@ -486,7 +504,7 @@
       <header class="admin-topbar">
         <div class="page-title">{% block page_title %}Platform Admin{% endblock %}</div>
         <div class="admin-topbar-actions">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to dark theme" aria-pressed="false">
             <span id="themeIcon"><i class="fas fa-moon"></i></span>
           </button>
           <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle sidebar" onclick="toggleAdminSidebar()">
@@ -534,20 +552,28 @@
         var html = document.documentElement;
 
         function getPreferredTheme() {
-          if (localStorage.getItem('admin-theme')) {
-            return localStorage.getItem('admin-theme');
-          }
-          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-          }
-          return 'light';
+          var current = html.getAttribute('data-theme');
+          if (current === 'dark' || current === 'light') return current;
+          try {
+            var stored = localStorage.getItem('abacash-theme') || localStorage.getItem('admin-theme');
+            if (stored === 'dark' || stored === 'light') return stored;
+          } catch (e) {}
+          return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
 
         function setTheme(theme) {
           html.setAttribute('data-theme', theme);
-          localStorage.setItem('admin-theme', theme);
+          try {
+            localStorage.setItem('abacash-theme', theme);
+            localStorage.removeItem('admin-theme');
+          } catch (e) {}
           if (themeIcon) {
             themeIcon.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+          }
+          if (themeToggle) {
+            themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+            themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+            themeToggle.setAttribute('title', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
           }
         }
 
@@ -561,6 +587,12 @@
         // Initialize theme
         var initialTheme = getPreferredTheme();
         setTheme(initialTheme);
+
+        window.addEventListener('storage', function(event) {
+          if (event.key === 'abacash-theme' && (event.newValue === 'dark' || event.newValue === 'light')) {
+            setTheme(event.newValue);
+          }
+        });
 
         // Close sidebar on window resize to desktop
         var resizeTimer;

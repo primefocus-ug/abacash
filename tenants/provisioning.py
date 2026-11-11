@@ -83,9 +83,13 @@ def provision_tenant(
     _log = log or (lambda msg: None)
     company = Company.objects.get(pk=company_id)
     company.provisioning_status = Company.ProvisioningStatus.RUNNING
+    company.provisioning_step = Company.ProvisioningStep.CREATING_SCHEMA
     company.provisioning_started_at = timezone.now()
     company.provisioning_error = ""
-    company.save(update_fields=["provisioning_status", "provisioning_started_at", "provisioning_error"])
+    company.save(update_fields=[
+        "provisioning_status", "provisioning_step",
+        "provisioning_started_at", "provisioning_error",
+    ])
 
     plan_cfg = PLANS.get(plan, PLANS["STARTER"])
     company_email = company_email or email
@@ -97,11 +101,15 @@ def provision_tenant(
         company.create_schema(check_if_exists=True, verbosity=1)
         _log("Schema created.")
 
+        company.provisioning_step = Company.ProvisioningStep.MIGRATING
+        company.save(update_fields=["provisioning_step"])
         _log("Applying tenant migrations…")
         from django.core import management as django_management
         django_management.call_command("migrate_schemas", schema_name=company.schema_name, verbosity=1)
         _log("Migrations applied.")
 
+        company.provisioning_step = Company.ProvisioningStep.SEEDING
+        company.save(update_fields=["provisioning_step"])
         _log("Seeding schema data…")
         from django_tenants.utils import schema_context
         with schema_context(company.schema_name):
@@ -117,8 +125,10 @@ def provision_tenant(
                 User.objects.filter(branch__isnull=True).update(branch=branch)
         _log("Seeding complete.")
 
+        company.provisioning_step = Company.ProvisioningStep.FINALIZING
+        company.save(update_fields=["provisioning_step"])
         if notify and company_email:
-            notify_sent = _send_notify_email(company.name, company.schema_name, domain, email, company_email, created_user)
+            notify_sent = _send_notify_email(company.name, company.schema_name, domain, email, created_user)
             _log("Notification email sent." if notify_sent else "Notification email failed — see logs.")
 
     except Exception as exc:
@@ -129,8 +139,11 @@ def provision_tenant(
         raise ProvisioningError(str(exc)) from exc
 
     company.provisioning_status = Company.ProvisioningStatus.READY
+    company.provisioning_step = Company.ProvisioningStep.COMPLETE
     company.provisioning_completed_at = timezone.now()
-    company.save(update_fields=["provisioning_status", "provisioning_completed_at"])
+    company.save(update_fields=[
+        "provisioning_status", "provisioning_step", "provisioning_completed_at",
+    ])
 
     return {
         "company_id": company.id,
@@ -226,7 +239,7 @@ def _create_ceo(company_name, email, password=None):
     return user
 
 
-def _send_notify_email(name, schema, domain, email, company_email, created_user):
+def _send_notify_email(name, schema, domain, email, created_user):
     try:
         from django.core.mail import send_mail
         from django.conf import settings
@@ -249,27 +262,34 @@ def _send_notify_email(name, schema, domain, email, company_email, created_user)
             except Exception:
                 reset_url = f"https://{domain}/accounts/login/"
 
-        subject = f"Your Abacash tenant '{name}' is ready"
+        username = created_user.username if created_user is not None else email
+        subject = "Congratulations — your Abacash account is ready"
         if reset_url and "accounts/reset" in reset_url:
             body = (
                 f"Hello,\n\n"
-                f"Your Abacash tenant has been provisioned. To complete setup, use the administrator account and set your password by following the secure link below:\n\n"
-                f"Tenant: {name}\nDomain: {domain}\nAdministrator email: {email}\n\n"
-                f"Open this link to complete your password creation: {reset_url}\n\n"
-                "The password entry screen will open with your username prefilled. For security, the link can only be used once. If you did not request this, contact support@abacash.loan immediately.\n\n"
+                f"Congratulations! {name} has been onboarded to Abacash.\n\n"
+                f"Your administrator account is ready:\n"
+                f"Tenant: {name}\nDomain: https://{domain}\n"
+                f"Username: {username}\n\n"
+                f"To activate your access and create your password, use this secure link:\n{reset_url}\n\n"
+                "For your security, the link can only be used once. We will never send your password by email. "
+                "If you did not request this account, contact support@abacash.loan immediately.\n\n"
                 "Best regards,\nAbacash Onboarding Team"
             )
         else:
             body = (
                 f"Hello,\n\n"
-                f"Your Abacash tenant has been provisioned. Sign in at https://{domain}/accounts/login/ and use the password reset flow to set your administrator password.\n\n"
-                "If you did not request this, contact support@abacash.loan immediately.\n\n"
+                f"Congratulations! {name} has been onboarded to Abacash.\n\n"
+                f"Your administrator username is: {username}\n"
+                f"Sign in at https://{domain}/accounts/login/ and use the password reset flow to activate your access and create your password. "
+                "We will never send your password by email.\n\n"
+                "If you did not request this account, contact support@abacash.loan immediately.\n\n"
                 "Best regards,\nAbacash Onboarding Team"
             )
 
         from_email = getattr(settings, "DEFAULT_FROM_EMAIL", getattr(settings, "EMAIL_HOST_USER", "support@abacash.loan"))
-        send_mail(subject, body, from_email, [company_email], fail_silently=False)
-        logger.info("Sent password reset email for tenant %s to %s", schema, company_email)
+        send_mail(subject, body, from_email, [email], fail_silently=False)
+        logger.info("Sent account setup email for tenant %s to %s", schema, email)
         return True
     except Exception:
         logger.warning("Failed to send credentials email for tenant %s", schema, exc_info=True)
