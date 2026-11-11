@@ -21056,3 +21056,9 @@ AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'd
 2026-11-11 12:05:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-11-11 12:06:07 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
 2026-11-11 12:06:07 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38330
+2026-11-11 16:40:45 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
+2026-11-11 16:40:45 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
+2026-11-11 16:40:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 16:40:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 17:01:17 [WARNING] django.request: Not Found: /platform/users/
+2026-11-11 17:01:17 [WARNING] django.server: "GET /platform/users/ HTTP/1.1" 404 0

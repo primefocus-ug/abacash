@@ -24,12 +24,17 @@ class TenantPasswordResetView(auth_views.PasswordResetView):
         opts = {
             "use_https": self.request.is_secure(),
             "token_generator": self.token_generator,
-            "from_email": self.from_email,
+            "from_email": self._tenant_from_email(),
             "email_template_name": self.email_template_name,
             "subject_template_name": self.subject_template_name,
             "request": self.request,
             "html_email_template_name": self.html_email_template_name,
-            "extra_email_context": self.extra_email_context,
+            # The emailed link already uses the real tenant host (domain_override,
+            # below) — this adds the tenant's own name/logo/support contact to the
+            # email itself, so a user juggling several tenants (or support staff
+            # looking at a forwarded email) can tell at a glance which company
+            # account it's for, instead of every reset email just saying "Abacash".
+            "extra_email_context": {**(self.extra_email_context or {}), **self._tenant_branding_context()},
             # The key fix: use the tenant's real host instead of Sites.
             "domain_override": self.request.get_host(),
         }
@@ -37,6 +42,58 @@ class TenantPasswordResetView(auth_views.PasswordResetView):
         # Skip PasswordResetView.form_valid (it recomputes opts using Sites)
         # and go straight to FormView.form_valid, which just redirects.
         return super(auth_views.PasswordResetView, self).form_valid(form)
+
+    def _tenant_branding_context(self):
+        """Tenant name/logo/support-contact for the reset email templates.
+
+        Falls back to generic Abacash branding if, for whatever reason,
+        CompanySettings can't be loaded (e.g. mid-provisioning) — the email
+        still goes out, it just won't be tenant-branded in that edge case.
+        """
+        tenant_name = "Abacash"
+        logo_url = None
+        support_email = "abauganda21@gmail.com"
+        try:
+            from accounts.models import CompanySettings
+            settings_obj = CompanySettings.get()
+            tenant_name = settings_obj.company_name or tenant_name
+            support_email = settings_obj.company_email or support_email
+            if settings_obj.company_logo:
+                logo_url = self.request.build_absolute_uri(settings_obj.company_logo.url)
+        except Exception:
+            pass
+        return {
+            "tenant_name": tenant_name,
+            "tenant_logo_url": logo_url,
+            "tenant_support_email": support_email,
+        }
+
+    def _tenant_from_email(self):
+        """Keep the technical From address as configured (so SPF/DKIM and
+        deliverability aren't affected) but put the tenant's name in the
+        display name, e.g. 'Acme Finance via Abacash <noreply@abacash.loan>',
+        so the email's sender line also identifies the tenant."""
+        from email.utils import formataddr
+
+        base_from = self.from_email or None
+        try:
+            from accounts.models import CompanySettings
+            tenant_name = CompanySettings.get().company_name
+        except Exception:
+            tenant_name = None
+
+        if not base_from:
+            from django.conf import settings
+            base_from = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@abacash.loan")
+
+        if not tenant_name:
+            return base_from
+
+        # base_from may already be "Name <addr>" or a bare address.
+        addr = base_from
+        if "<" in base_from and ">" in base_from:
+            addr = base_from.split("<", 1)[1].rstrip(">").strip()
+        return formataddr((f"{tenant_name} via Abacash", addr))
 
 
 class TenantPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
