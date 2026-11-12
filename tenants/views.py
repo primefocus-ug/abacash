@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.core.mail import mail_admins, send_mail
+from django.core.mail import send_mail
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.core.validators import validate_email
-from django.db import DatabaseError, ProgrammingError, connection
+from django.db import DatabaseError, ProgrammingError, connection, transaction
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -194,6 +194,96 @@ def public_admin_logout(request):
     return redirect('tenants:landing')
 
 
+def platform_admin_password_reset(request):
+    """Request a password-reset link for a PlatformAdmin account (the
+    operator login at /public-admin/). This is a hand-built equivalent of
+    Django's PasswordResetView: PlatformAdmin is a separate model from
+    accounts.User (AUTH_USER_MODEL), so the stock auth views — and the
+    tenant-side TenantPasswordResetView in accounts/urls.py — don't apply
+    to it.
+
+    NOTE: this requires tenants.models.PlatformAdmin to have a
+    get_email_field_name() classmethod returning "email" (added alongside
+    this view) so django.contrib.auth.tokens.default_token_generator can
+    work with a non-AbstractBaseUser model.
+
+    Deliberately doesn't reveal whether the given username/email matched
+    an account: always redirects to the same "done" page either way, same
+    as Django's own PasswordResetView.
+    """
+    if request.method == "POST":
+        identifier = request.POST.get("identifier", "").strip()
+        if identifier:
+            from django.contrib.auth.tokens import default_token_generator
+            from django.utils.encoding import force_bytes
+            from django.utils.http import urlsafe_base64_encode
+
+            from .email_helper import send_platform_admin_password_reset
+            from .models import PlatformAdmin
+
+            admin = PlatformAdmin.objects.filter(is_active=True).filter(
+                Q(username__iexact=identifier) | Q(email__iexact=identifier)
+            ).first()
+            if admin is not None and admin.email:
+                uid = urlsafe_base64_encode(force_bytes(admin.pk))
+                token = default_token_generator.make_token(admin)
+                scheme = "http" if django_settings.DEBUG else "https"
+                reset_path = reverse(
+                    "tenants:platform_admin_password_reset_confirm",
+                    args=[uid, token],
+                )
+                reset_url = f"{scheme}://{request.get_host()}{reset_path}"
+                try:
+                    send_platform_admin_password_reset(admin, reset_url)
+                except Exception:
+                    logger.exception("Failed to send platform admin password reset email for admin %s", admin.pk)
+        return redirect("tenants:platform_admin_password_reset_done")
+
+    return render(request, "tenants/public_admin_password_reset.html")
+
+
+def platform_admin_password_reset_done(request):
+    return render(request, "tenants/public_admin_password_reset_done.html")
+
+
+def platform_admin_password_reset_confirm(request, uidb64, token):
+    """Validate the reset link and let the platform admin set a new password."""
+    from django.contrib.auth.tokens import default_token_generator
+    from django.utils.encoding import force_str
+    from django.utils.http import urlsafe_base64_decode
+
+    from .models import PlatformAdmin
+
+    admin = None
+    try:
+        admin_id = force_str(urlsafe_base64_decode(uidb64))
+        admin = PlatformAdmin.objects.filter(pk=admin_id, is_active=True).first()
+    except (TypeError, ValueError, OverflowError):
+        admin = None
+
+    valid_link = admin is not None and default_token_generator.check_token(admin, token)
+
+    if request.method == "POST" and valid_link:
+        password1 = request.POST.get("new_password1", "")
+        password2 = request.POST.get("new_password2", "")
+        if len(password1) < 8:
+            messages.error(request, "Password must be at least 8 characters.")
+        elif password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        else:
+            admin.set_password(password1)
+            admin.save(update_fields=["password"])
+            return redirect("tenants:platform_admin_password_reset_complete")
+
+    return render(request, "tenants/public_admin_password_reset_confirm.html", {
+        "valid_link": valid_link,
+    })
+
+
+def platform_admin_password_reset_complete(request):
+    return render(request, "tenants/public_admin_password_reset_complete.html")
+
+
 def public_login(request):
     tenant_domain = getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan")
     target_url = None
@@ -376,17 +466,53 @@ def public_admin(request):
             try:
                 from tenants.tasks import provision_tenant_task
 
-                company = Company.objects.create(schema_name=schema, name=name, is_active=True, plan=plan)
-                Domain.objects.create(domain=domain, tenant=company, is_primary=True)
+                # Company.objects.create() commits immediately (no
+                # ATOMIC_REQUESTS, no transaction here previously) — so if
+                # Domain.objects.create() hit a collision, or
+                # provision_tenant_task.delay() itself failed (e.g. the
+                # Celery broker being unreachable), the Company row was
+                # already committed at its default PENDING status with no
+                # cleanup. provision_tenant() (tenants/provisioning.py) is
+                # the *only* thing that ever updates provisioning_status, so
+                # a row that never made it into that function stays on
+                # PENDING forever, even after someone fixes the schema by
+                # hand later.
+                #
+                # Fix: create Company + Domain inside one atomic block (a
+                # failure anywhere in it rolls back the Company row too,
+                # instead of leaving an orphan), and defer the Celery
+                # dispatch to transaction.on_commit() so the task can never
+                # fire before the row it looks up is actually visible in the
+                # database. If dispatch fails anyway (broker down) — which
+                # happens after commit, so it can't be rolled back — mark
+                # that row FAILED with the real error instead of leaving it
+                # silently on PENDING.
+                with transaction.atomic():
+                    company = Company.objects.create(schema_name=schema, name=name, is_active=True, plan=plan)
+                    Domain.objects.create(domain=domain, tenant=company, is_primary=True)
 
-                provision_tenant_task.delay(
-                    company.id, domain, admin_email,
-                    password=admin_password, plan=plan,
-                    phone=request.POST.get("phone", "").strip(),
-                    address=request.POST.get("address", "").strip(),
-                    company_email=request.POST.get("company_email", "").strip() or admin_email,
-                    notify=True,
-                )
+                    def _dispatch_provisioning(company_id=company.id, domain=domain, admin_email=admin_email,
+                                                admin_password=admin_password, plan=plan,
+                                                phone=request.POST.get("phone", "").strip(),
+                                                address=request.POST.get("address", "").strip(),
+                                                company_email=request.POST.get("company_email", "").strip() or admin_email):
+                        try:
+                            provision_tenant_task.delay(
+                                company_id, domain, admin_email,
+                                password=admin_password, plan=plan,
+                                phone=phone,
+                                address=address,
+                                company_email=company_email,
+                                notify=True,
+                            )
+                        except Exception as dispatch_exc:
+                            logger.exception("Failed to dispatch provisioning task for company_id=%s", company_id)
+                            Company.objects.filter(pk=company_id).update(
+                                provisioning_status=Company.ProvisioningStatus.FAILED,
+                                provisioning_error=f"Could not queue provisioning task: {dispatch_exc}",
+                            )
+
+                    transaction.on_commit(_dispatch_provisioning)
 
                 messages.success(
                     request,
@@ -414,6 +540,19 @@ def public_admin(request):
                 messages.warning(request, "Only pending registrations can be onboarded.")
                 return redirect("tenants:public_admin")
 
+            # The confirm popover carries its own admin_email field,
+            # pre-filled with registration.email but editable — so a typo
+            # from the original signup can be corrected right here instead
+            # of silently baking it into the new CEO account. Falls back to
+            # the registration's email if the field was somehow left blank
+            # (e.g. an older cached form).
+            admin_email = request.POST.get("admin_email", "").strip() or registration.email
+            try:
+                validate_email(admin_email)
+            except ValidationError:
+                messages.error(request, f"'{admin_email}' is not a valid email address.")
+                return render(request, "tenants/public_admin.html", admin_context)
+
             schema = slugify(registration.company_name).replace("-", "_")
             plan = registration.plan
             domain_root = getattr(django_settings, "TENANT_PUBLIC_DOMAIN", "abacash.loan")
@@ -427,21 +566,51 @@ def public_admin(request):
             try:
                 from tenants.tasks import provision_tenant_task
 
-                company = Company.objects.create(schema_name=schema, name=registration.company_name, is_active=True,
-                                                 plan=plan)
-                Domain.objects.create(domain=domain, tenant=company, is_primary=True)
+                # See the long comment on the "onboard_tenant" action above
+                # for why this is wrapped in atomic() + on_commit().
+                with transaction.atomic():
+                    company = Company.objects.create(schema_name=schema, name=registration.company_name, is_active=True,
+                                                     plan=plan)
+                    Domain.objects.create(domain=domain, tenant=company, is_primary=True)
 
-                provision_tenant_task.delay(
-                    company.id, domain, registration.email,
-                    password=password, plan=plan,
-                    phone=registration.phone,
-                    address=f"{registration.city}, {registration.country}" if registration.city or registration.country else "",
-                    company_email=registration.email,
-                    notify=True,
-                )
+                    registration.status = CompanyRegistration.Status.ONBOARDED
+                    update_fields = ["status"]
+                    if admin_email != registration.email:
+                        # Keep the registration record in sync with the
+                        # corrected address, so anyone looking at this lead
+                        # later sees the email the account was actually
+                        # created with.
+                        registration.notes = (
+                            registration.notes
+                            + f"\n[email-corrected] {registration.email} -> {admin_email}"
+                        ).strip()
+                        registration.email = admin_email
+                        update_fields += ["email", "notes"]
+                    registration.save(update_fields=update_fields)
 
-                registration.status = CompanyRegistration.Status.ONBOARDED
-                registration.save()
+                    def _dispatch_provisioning(company_id=company.id, domain=domain, email=admin_email,
+                                                password=password, plan=plan, phone=registration.phone,
+                                                address=(f"{registration.city}, {registration.country}"
+                                                         if (registration.city or registration.country) else ""),
+                                                company_email=admin_email):
+                        try:
+                            provision_tenant_task.delay(
+                                company_id, domain, email,
+                                password=password, plan=plan,
+                                phone=phone,
+                                address=address,
+                                company_email=company_email,
+                                notify=True,
+                            )
+                        except Exception as dispatch_exc:
+                            logger.exception("Failed to dispatch provisioning task for company_id=%s", company_id)
+                            Company.objects.filter(pk=company_id).update(
+                                provisioning_status=Company.ProvisioningStatus.FAILED,
+                                provisioning_error=f"Could not queue provisioning task: {dispatch_exc}",
+                            )
+
+                    transaction.on_commit(_dispatch_provisioning)
+
                 messages.success(
                     request,
                     f"Provisioning for '{registration.company_name}' has started as '{schema}'. "
@@ -701,7 +870,20 @@ def _approval_url_for(reg):
 def _notify_admin_new_registration(reg, approval_url=None):
     recipient = getattr(django_settings, "PLATFORM_APPROVAL_EMAIL", "")
     if not recipient:
-        logger.warning("PLATFORM_APPROVAL_EMAIL is not set; no admin email sent for registration %s", reg.pk)
+        # PLATFORM_APPROVAL_EMAIL isn't configured — this used to just log a
+        # warning and send nothing, meaning signups could come in with no
+        # one ever being told. Fall back to notifying every active
+        # PlatformAdmin instead (tenants/email_helper.py), so a missing
+        # setting doesn't mean nobody finds out about a new registration.
+        logger.warning(
+            "PLATFORM_APPROVAL_EMAIL is not set; falling back to notifying "
+            "PlatformAdmins directly for registration %s", reg.pk,
+        )
+        try:
+            from .email_helper import notify_new_registration
+            notify_new_registration(reg)
+        except Exception:
+            logger.exception("Fallback admin notification also failed for registration %s", reg.pk)
         return
 
     if approval_url:
@@ -735,7 +917,29 @@ def _notify_admin_new_registration(reg, approval_url=None):
 
 
 def _start_onboarding(reg, request=None):
-    """Create Company + Domain and queue provisioning. Returns True on success."""
+    """Create Company + Domain and queue provisioning. Returns True on success.
+
+    NOTE on the fix below: Company.objects.create() commits immediately (no
+    ATOMIC_REQUESTS, no transaction here previously) — so if
+    Domain.objects.create() hit a collision (two signups whose company names
+    slugify to the same schema), or provision_tenant_task.delay() itself
+    failed (e.g. the Celery broker being unreachable), the Company row was
+    already committed at its default PENDING status and the old `except`
+    block only wrote a note onto the CompanyRegistration — it never touched
+    that orphaned Company row. provision_tenant() (tenants/provisioning.py)
+    is the *only* thing that ever updates provisioning_status, so a row that
+    never made it into that function stays on PENDING forever, even after
+    someone fixes the schema by hand later.
+
+    Fix: create the Company + Domain rows (and the registration update)
+    inside one atomic block, so a failure anywhere in it rolls back the
+    Company row too instead of leaving an orphan. The Celery dispatch is
+    deferred to transaction.on_commit(), so the task can never fire before
+    the row it looks up is actually visible in the database — and if
+    dispatch fails anyway (broker down, past the point we can roll back), the
+    row is explicitly marked FAILED with the real error instead of being
+    left silently on PENDING.
+    """
     from tenants.tasks import provision_tenant_task
 
     try:
@@ -750,36 +954,51 @@ def _start_onboarding(reg, request=None):
                 f"Schema '{schema}' already exists — pick a different company name or onboard manually."
             )
 
-        company = Company.objects.create(
-            schema_name=schema, name=reg.company_name, is_active=True, plan=reg.plan,
-        )
+        with transaction.atomic():
+            company = Company.objects.create(
+                schema_name=schema, name=reg.company_name, is_active=True, plan=reg.plan,
+            )
+            Domain.objects.create(domain=domain, tenant=company, is_primary=True)
+
+            reg.status = CompanyRegistration.Status.ONBOARDED
+            reg.notes = (
+                    reg.notes
+                    + f"\n[onboard-started] schema:{schema}, domain:{domain}, "
+                      f"company_id:{company.id}, timestamp:{timezone.now().isoformat()}"
+            ).strip()
+            reg.save(update_fields=["status", "notes"])
+
+            def _dispatch_provisioning(company_id=company.id, domain=domain, email=reg.email,
+                                        password=admin_password, plan=reg.plan, phone=reg.phone or '',
+                                        address=(f"{reg.city}, {reg.country}" if (reg.city or reg.country) else ''),
+                                        company_email=reg.email):
+                try:
+                    provision_tenant_task.delay(
+                        company_id, domain, email,
+                        password=password, plan=plan,
+                        phone=phone,
+                        address=address,
+                        company_email=company_email,
+                        notify=True,
+                    )
+                except Exception as dispatch_exc:
+                    logger.exception("Failed to dispatch provisioning task for company_id=%s", company_id)
+                    Company.objects.filter(pk=company_id).update(
+                        provisioning_status=Company.ProvisioningStatus.FAILED,
+                        provisioning_error=f"Could not queue provisioning task: {dispatch_exc}",
+                    )
+
+            transaction.on_commit(_dispatch_provisioning)
+
         if request is not None:
             request.session["onboarding_company_id"] = company.pk
-        Domain.objects.create(domain=domain, tenant=company, is_primary=True)
-
-        provision_tenant_task.delay(
-            company.id, domain, reg.email,
-            password=admin_password, plan=reg.plan,
-            phone=reg.phone or '',
-            address=(f"{reg.city}, {reg.country}" if (reg.city or reg.country) else ''),
-            company_email=reg.email,
-            notify=True,
-        )
-
-        reg.status = CompanyRegistration.Status.ONBOARDED
-        reg.notes = (
-                reg.notes
-                + f"\n[onboard-started] schema:{schema}, domain:{domain}, "
-                  f"company_id:{company.id}, timestamp:{timezone.now().isoformat()}"
-        ).strip()
-        reg.save()
         logger.info("Onboarding queued for registration %s: schema=%s, company_id=%s", reg.id, schema, company.id)
         return True
 
     except Exception as exc:
         error_msg = f"Failed to start onboarding: {exc}"
         reg.notes = (reg.notes + f"\n[onboard-error] {error_msg}").strip()
-        reg.save()
+        reg.save(update_fields=["notes"])
         logger.error(error_msg, exc_info=True)
         return False
 

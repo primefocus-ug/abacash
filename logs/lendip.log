@@ -22053,3 +22053,4 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'platform_admin_password_rese
 2026-11-12 14:45:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-11-12 14:48:27 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
 2026-11-12 14:48:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 14:55:07 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
