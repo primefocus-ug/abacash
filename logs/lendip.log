@@ -21912,3 +21912,141 @@ AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'd
 2026-11-11 16:15:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
 2026-11-11 16:16:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
 2026-11-11 16:16:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-12 13:34:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:36:42 [INFO] django.server: "GET / HTTP/1.1" 200 14292
+2026-11-12 13:36:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-12 13:36:49 [INFO] django.server: code 400, message Bad request version ('²\x07êã\x81')
+2026-11-12 13:36:49 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:36:49 [INFO] django.server: code 400, message Bad request version ('ÉÁgVºL¨2')
+2026-11-12 13:36:49 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:37:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('V\x01Z%!¦ä[>Þ\x9c`')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('0<\x8bqT)')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('ÚÚ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06\x8b')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8a\x8a\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06«')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8a\x8a\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06«**\x00\x00\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x1b\x00\x03\x02\x00\x02\x003\x04ï\x04í')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x02h2\x08http/1.1\x00\x1b\x00\x03\x02\x00\x02\x00')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x12X°_áÃèZË+D2HV.TP?$z¨')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8b²\x01ÑSz±y\x04Ò¤°û¦w\x00åÌºCZH´µ\x12pÀTöºP4µ¾×Y')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:40:34 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:41:37 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:43:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:45:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:03 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-12 13:47:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:23 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-12 13:47:23 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-12 13:47:23 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-12 13:47:24 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-12 13:47:27 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-12 13:47:27 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4726
+2026-11-12 13:47:40 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-12 13:47:41 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-12 13:47:41 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-12 13:47:45 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-12 13:47:52 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-12 13:47:52 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4726
+2026-11-12 13:48:09 [WARNING] django.request: Not Found: /platforms
+2026-11-12 13:48:09 [WARNING] django.server: "GET /platforms HTTP/1.1" 404 4720
+2026-11-12 13:48:22 [INFO] django.server: "GET /platform HTTP/1.1" 301 0
+2026-11-12 13:48:23 [INFO] django.server: "GET /platform/ HTTP/1.1" 302 0
+2026-11-12 13:48:25 [ERROR] django.request: Internal Server Error: /public-admin/login/
+Traceback (most recent call last):
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/nashvybzes/Music/no/abacash/tenants/views.py", line 186, in public_admin_login
+    return render(request, 'tenants/public_admin_login.html', {'error': error})
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/defaulttags.py", line 479, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/urls/resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'platform_admin_password_reset' not found. 'platform_admin_password_reset' is not a valid view function or pattern name.
+2026-11-12 13:48:25 [ERROR] django.server: "GET /public-admin/login/ HTTP/1.1" 500 173528
+2026-11-12 13:49:41 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 38050
+2026-11-12 13:52:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:52:59 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-12 13:52:59 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 50886
+2026-11-12 13:53:12 [INFO] django.server: "GET /platform/companies/test_company/ HTTP/1.1" 200 60166
+2026-11-12 13:53:13 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:16 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:19 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:22 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:25 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:28 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:31 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:34 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:37 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 50886
+2026-11-12 13:53:37 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:48 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 46391
+2026-11-12 13:53:57 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44179
+2026-11-12 13:54:06 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 119676
+2026-11-12 13:54:31 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-12 13:54:31 [INFO] django.server: "GET /platform/companies/noww/ HTTP/1.1" 200 60312
+2026-11-12 13:54:32 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:35 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:38 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:41 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:44 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:47 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:50 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:53 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:56 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 120243
+2026-11-12 13:55:16 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44179
+2026-11-12 13:55:26 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-12 13:55:26 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44314
+2026-11-12 14:38:54 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
+2026-11-12 14:39:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
