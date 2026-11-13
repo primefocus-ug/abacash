@@ -21056,9 +21056,1001 @@ AttributeError: 'Company' object has no attribute 'domain_set'. Did you mean: 'd
 2026-11-11 12:05:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-11-11 12:06:07 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
 2026-11-11 12:06:07 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 38330
-2026-11-11 16:40:45 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
-2026-11-11 16:40:45 [INFO] django.utils.autoreload: C:\Users\USER\abacash\config\settings.py changed, reloading.
-2026-11-11 16:40:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
-2026-11-11 16:40:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
-2026-11-11 17:01:17 [WARNING] django.request: Not Found: /platform/users/
-2026-11-11 17:01:17 [WARNING] django.server: "GET /platform/users/ HTTP/1.1" 404 0
+2026-11-11 15:06:24 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:07:03 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 15:07:05 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-11-11 15:07:05 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 304 0
+2026-11-11 15:07:06 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 304 0
+2026-11-11 15:07:08 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-11 15:07:08 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4510
+2026-11-11 15:07:42 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 15:07:43 [INFO] django.server: "GET /success/ HTTP/1.1" 200 69391
+2026-11-11 15:07:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:07:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:07:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:07:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:07:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:07:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:08:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:09:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:09:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:10:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:11:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:12:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:13:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:14:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:15:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:16:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:17:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:18:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:19:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:20:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:21:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:22:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:23:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:24:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:25:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:25:53 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 15:25:59 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:26:22 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:26:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:26:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:27:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:27:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:27:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:27:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 85
+2026-11-11 15:27:13 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 15:27:13 [INFO] django.server: "GET /success/ HTTP/1.1" 200 69391
+2026-11-11 15:27:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 86
+2026-11-11 15:27:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 86
+2026-11-11 15:30:53 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 15:31:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:36:46 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 15:36:58 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:38:29 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 15:39:08 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 15:39:08 [INFO] django.server: "GET /success/ HTTP/1.1" 200 69391
+2026-11-11 15:39:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:39:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:39:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 82
+2026-11-11 15:39:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:39:51 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:39:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 83
+2026-11-11 15:40:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:40:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:40:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:40:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:41:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:28 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:40 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:55 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:42:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:28 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:43:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:44:58 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:01 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:45:40 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 15:45:54 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:46:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:07 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:46:30 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/urls.py changed, reloading.
+2026-11-11 15:46:33 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:46:59 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
+2026-11-11 15:47:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:47:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:52 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:47:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 84
+2026-11-11 15:48:22 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 15:48:23 [INFO] django.server: "GET /success/ HTTP/1.1" 200 69409
+2026-11-11 15:48:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 15:48:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 15:48:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:48:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:49:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:50:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:50:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:51:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:28 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:34 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:52:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:53:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:54:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 15:57:42 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 15:58:01 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 15:58:06 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 15:58:50 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 15:58:50 [INFO] django.server: "GET /success/ HTTP/1.1" 200 71002
+2026-11-11 15:58:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 15:58:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 15:58:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 15:59:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:19 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:28 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 15:59:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:19 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:00:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:34 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:37 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:00:58 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:01 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:07 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:37 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:40 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:49 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:01:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:04 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:37 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:43 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:49 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:55 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:02:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:04 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:07 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:10 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:13 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:16 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:19 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 16:03:19 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:21 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-11 16:03:21 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-11 16:03:22 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:22 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-11 16:03:25 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:25 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-11 16:03:25 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4731
+2026-11-11 16:03:28 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:31 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:35 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 16:03:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:35 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-11 16:03:35 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-11 16:03:37 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:39 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-11 16:03:40 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:41 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-11 16:03:41 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4730
+2026-11-11 16:03:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:46 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:47 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-11 16:03:47 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-11 16:03:47 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-11 16:03:49 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-11 16:03:49 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:51 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-11 16:03:51 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4731
+2026-11-11 16:03:52 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:03:58 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:04:01 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:04:04 [INFO] django.server: "GET / HTTP/1.1" 200 14292
+2026-11-11 16:04:12 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-11 16:04:12 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-11-11 16:04:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:04:16 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-11-11 16:04:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:04:23 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-11-11 16:04:23 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-11-11 16:04:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:04:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:04:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:05:13 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 16:05:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:05:53 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14292
+2026-11-11 16:06:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:06:09 [INFO] django.server: "GET /accounts/password_reset/ HTTP/1.1" 200 2793
+2026-11-11 16:06:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:06:20 [INFO] django.server: "POST /accounts/password_reset/ HTTP/1.1" 302 0
+2026-11-11 16:06:21 [INFO] django.server: "GET /accounts/password_reset/done/ HTTP/1.1" 200 1687
+2026-11-11 16:06:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-11 16:06:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:07:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:15 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 16:08:22 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 16:08:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:43 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:52 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:08:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:18 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:27 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:30 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:33 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:36 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:39 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:42 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:45 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:48 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:51 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:54 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:09:57 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:00 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:03 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:06 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:09 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:12 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:10:13 [INFO] django.server: "POST /register/ HTTP/1.1" 302 0
+2026-11-11 16:10:15 [INFO] django.server: "GET /success/ HTTP/1.1" 200 71002
+2026-11-11 16:10:15 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 61
+2026-11-11 16:10:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:24 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:10:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 62
+2026-11-11 16:11:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:11:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:11:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:11:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:12:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:21 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:13:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:14:46 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-11 16:14:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-11 16:15:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:08 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:11 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:14 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:17 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:20 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:23 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:26 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:29 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:32 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:35 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:38 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:41 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:44 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:47 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:50 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:53 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:56 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:15:59 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:16:02 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-11 16:16:05 [INFO] django.server: "GET /register/status/ HTTP/1.1" 200 63
+2026-11-12 13:34:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:36:42 [INFO] django.server: "GET / HTTP/1.1" 200 14292
+2026-11-12 13:36:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-12 13:36:49 [INFO] django.server: code 400, message Bad request version ('²\x07êã\x81')
+2026-11-12 13:36:49 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:36:49 [INFO] django.server: code 400, message Bad request version ('ÉÁgVºL¨2')
+2026-11-12 13:36:49 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:37:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('V\x01Z%!¦ä[>Þ\x9c`')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('0<\x8bqT)')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('ÚÚ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06\x8b')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8a\x8a\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06«')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8a\x8a\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06«**\x00\x00\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x1b\x00\x03\x02\x00\x02\x003\x04ï\x04í')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x02h2\x08http/1.1\x00\x1b\x00\x03\x02\x00\x02\x00')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x12X°_áÃèZË+D2HV.TP?$z¨')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:38:26 [INFO] django.server: code 400, message Bad request version ('\x8b²\x01ÑSz±y\x04Ò¤°û¦w\x00åÌºCZH´µ\x12pÀTöºP4µ¾×Y')
+2026-11-12 13:38:26 [ERROR] django.server: You're accessing the development server over HTTPS, but it only supports HTTP.
+2026-11-12 13:40:34 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:41:37 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:43:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:45:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:03 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/config/settings.py changed, reloading.
+2026-11-12 13:47:06 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:47:23 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-12 13:47:23 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-12 13:47:23 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-12 13:47:24 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-12 13:47:27 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-12 13:47:27 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4726
+2026-11-12 13:47:40 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-12 13:47:41 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51057
+2026-11-12 13:47:41 [INFO] django.server: "GET /static/images/logo.png HTTP/1.1" 200 1420572
+2026-11-12 13:47:45 [INFO] django.server: "GET /static/images/aba.png HTTP/1.1" 200 950561
+2026-11-12 13:47:52 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-12 13:47:52 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 4726
+2026-11-12 13:48:09 [WARNING] django.request: Not Found: /platforms
+2026-11-12 13:48:09 [WARNING] django.server: "GET /platforms HTTP/1.1" 404 4720
+2026-11-12 13:48:22 [INFO] django.server: "GET /platform HTTP/1.1" 301 0
+2026-11-12 13:48:23 [INFO] django.server: "GET /platform/ HTTP/1.1" 302 0
+2026-11-12 13:48:25 [ERROR] django.request: Internal Server Error: /public-admin/login/
+Traceback (most recent call last):
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/nashvybzes/Music/no/abacash/tenants/views.py", line 186, in public_admin_login
+    return render(request, 'tenants/public_admin_login.html', {'error': error})
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/template/defaulttags.py", line 479, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nashvybzes/Music/no/abacash/venv/lib/python3.13/site-packages/django/urls/resolvers.py", line 851, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'platform_admin_password_reset' not found. 'platform_admin_password_reset' is not a valid view function or pattern name.
+2026-11-12 13:48:25 [ERROR] django.server: "GET /public-admin/login/ HTTP/1.1" 500 173528
+2026-11-12 13:49:41 [INFO] django.server: "GET /public-admin/login/ HTTP/1.1" 200 38050
+2026-11-12 13:52:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 13:52:59 [INFO] django.server: "POST /public-admin/login/ HTTP/1.1" 302 0
+2026-11-12 13:52:59 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 50886
+2026-11-12 13:53:12 [INFO] django.server: "GET /platform/companies/test_company/ HTTP/1.1" 200 60166
+2026-11-12 13:53:13 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:16 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:19 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:22 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:25 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:28 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:31 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:34 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:37 [INFO] django.server: "GET /platform/ HTTP/1.1" 200 50886
+2026-11-12 13:53:37 [INFO] django.server: "GET /platform/companies/test_company/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:53:48 [INFO] django.server: "GET /platform/companies/ HTTP/1.1" 200 46391
+2026-11-12 13:53:57 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44179
+2026-11-12 13:54:06 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 119676
+2026-11-12 13:54:31 [INFO] django.server: "POST /public-admin/ HTTP/1.1" 302 0
+2026-11-12 13:54:31 [INFO] django.server: "GET /platform/companies/noww/ HTTP/1.1" 200 60312
+2026-11-12 13:54:32 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:35 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:38 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:41 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:44 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:47 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:50 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:53 [INFO] django.server: "GET /platform/companies/noww/provisioning-status/ HTTP/1.1" 200 52
+2026-11-12 13:54:56 [INFO] django.server: "GET /public-admin/ HTTP/1.1" 200 120243
+2026-11-12 13:55:16 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44179
+2026-11-12 13:55:26 [INFO] django.server: "POST /platform/users/ HTTP/1.1" 302 0
+2026-11-12 13:55:26 [INFO] django.server: "GET /platform/users/ HTTP/1.1" 200 44314
+2026-11-12 14:38:54 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
+2026-11-12 14:39:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 14:45:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 14:48:27 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
+2026-11-12 14:48:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-12 14:55:07 [INFO] django.utils.autoreload: Watching for file changes with StatReloader

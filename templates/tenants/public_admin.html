@@ -889,6 +889,9 @@
                       {% csrf_token %}
                       <input type="hidden" name="action" value="onboard_registration">
                       <input type="hidden" name="registration_id" value="{{ reg.id }}">
+                      <label>Admin email
+                        <input type="email" name="admin_email" required value="{{ reg.email }}">
+                      </label>
                       <label>Tenant domain
                         <input type="text" name="tenant_domain" required value="{{ reg.company_name|slugify }}.{{ tenant_domain_root }}">
                       </label>

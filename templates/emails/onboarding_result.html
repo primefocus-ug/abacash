@@ -5,8 +5,8 @@
     <h2 style="margin:0 0 12px; font-size:20px; color:#16a34a;">✅ Onboarding complete</h2>
     <p style="margin:0 0 20px; color:#475569;">
       <strong>{{ reg.company_name }}</strong> has been provisioned successfully
-      {% if reg.schema_name %}as schema <code>{{ reg.schema_name }}</code>{% endif %}
-      {% if reg.domain %}on <code>{{ reg.domain }}</code>{% endif %}.
+      {% if schema_name %}as schema <code>{{ schema_name }}</code>{% endif %}
+      {% if domain %}on <code>{{ domain }}</code>{% endif %}.
     </p>
   {% else %}
     <h2 style="margin:0 0 12px; font-size:20px; color:#ef4444;">⚠️ Onboarding failed</h2>
