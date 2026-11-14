@@ -1,3 +1,4 @@
+from datetime import date
 from io import BytesIO
 from django.http import HttpResponse
 from reportlab.lib.pagesizes import A4, portrait
@@ -6,6 +7,7 @@ from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.units import mm
 from reportlab.platypus import Image, SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
+from xml.sax.saxutils import escape as escape_xml
 
 
 def _format_money(value):
@@ -22,6 +24,222 @@ def _append_signatory(story, signatory, normal_style):
         Paragraph(f"<b>Authorised signatory:</b> {signatory.full_name}", normal_style),
         Image(image_data, width=45*mm, height=18*mm, kind="proportional"),
     ])
+
+
+def generate_loan_calculator_pdf(
+    company_settings,
+    schedule,
+    totals,
+    principal,
+    monthly_rate,
+    term_months,
+    frequency_label,
+    method_label,
+):
+    """Create a tenant-branded PDF for a calculator estimate."""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=15 * mm,
+        leftMargin=15 * mm,
+        topMargin=15 * mm,
+        bottomMargin=18 * mm,
+    )
+    styles = getSampleStyleSheet()
+    company_style = ParagraphStyle(
+        "CalculatorCompany",
+        parent=styles["Heading2"],
+        fontSize=15,
+        leading=18,
+        textColor=colors.HexColor("#12304A"),
+        spaceAfter=4,
+    )
+    title_style = ParagraphStyle(
+        "CalculatorTitle",
+        parent=styles["Heading1"],
+        fontSize=18,
+        leading=22,
+        textColor=colors.HexColor("#0F766E"),
+        spaceBefore=14,
+        spaceAfter=5,
+    )
+    small_style = ParagraphStyle(
+        "CalculatorSmall",
+        parent=styles["Normal"],
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor("#526274"),
+    )
+    cell_style = ParagraphStyle(
+        "CalculatorCell",
+        parent=styles["Normal"],
+        fontSize=8,
+        leading=10,
+    )
+    header_style = ParagraphStyle(
+        "CalculatorTableHeader",
+        parent=cell_style,
+        textColor=colors.white,
+        fontName="Helvetica-Bold",
+    )
+
+    company_name = escape_xml(str(company_settings.company_name or ""))
+    contact_lines = [
+        value for value in (
+            company_settings.company_address,
+            company_settings.company_phone,
+            company_settings.company_email,
+            company_settings.company_website,
+            (
+                f"Registration: {company_settings.company_registration}"
+                if company_settings.company_registration else ""
+            ),
+            (
+                f"Tax ID: {company_settings.tax_identification}"
+                if company_settings.tax_identification else ""
+            ),
+        ) if value
+    ]
+    brand = [Paragraph(company_name, company_style)]
+    brand.extend(
+        Paragraph(escape_xml(str(value)).replace("\n", "<br/>"), small_style)
+        for value in contact_lines
+    )
+
+    logo_cell = ""
+    if company_settings.company_logo:
+        with company_settings.company_logo.open("rb") as logo_file:
+            logo_cell = Image(
+                BytesIO(logo_file.read()),
+                width=30 * mm,
+                height=22 * mm,
+                kind="proportional",
+            )
+    header = Table(
+        [[logo_cell, brand]],
+        colWidths=[35 * mm, 145 * mm],
+    )
+    header.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LINEBELOW", (0, 0), (-1, -1), 1, colors.HexColor("#D9E5EC")),
+    ]))
+
+    currency = escape_xml(str(company_settings.currency_symbol or ""))
+
+    def format_amount(value):
+        amount = f"{value:,.2f}"
+        return f"{currency} {amount}".strip()
+
+    story = [
+        header,
+        Paragraph("Loan repayment estimate", title_style),
+        Paragraph(
+            "Illustrative schedule based on the inputs below. This estimate excludes fees "
+            "and is not a loan offer or approval.",
+            small_style,
+        ),
+        Spacer(1, 10),
+    ]
+
+    terms = [
+        [Paragraph("<b>Loan amount</b>", cell_style), format_amount(principal),
+         Paragraph("<b>Monthly rate</b>", cell_style), f"{monthly_rate:.2f}%"],
+        [Paragraph("<b>Term</b>", cell_style), f"{term_months} months",
+         Paragraph("<b>Repayment</b>", cell_style), escape_xml(str(frequency_label))],
+        [Paragraph("<b>Interest method</b>", cell_style), escape_xml(str(method_label)), "", ""],
+    ]
+    terms_table = Table(terms, colWidths=[30 * mm, 60 * mm, 32 * mm, 58 * mm])
+    terms_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#F0F5F8")),
+        ("BACKGROUND", (2, 0), (2, 1), colors.HexColor("#F0F5F8")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#D9E5EC")),
+        ("INNERGRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#D9E5EC")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 7),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.extend([terms_table, Spacer(1, 12)])
+
+    schedule_data = [[
+        Paragraph("#", header_style),
+        Paragraph("Due date", header_style),
+        Paragraph("Principal", header_style),
+        Paragraph("Interest", header_style),
+        Paragraph("Payment", header_style),
+        Paragraph("Balance", header_style),
+    ]]
+    for row in schedule:
+        due_date = row["due_date"]
+        due_date_text = due_date.strftime("%d %b %Y") if hasattr(due_date, "strftime") else str(due_date)
+        schedule_data.append([
+            str(row["period_number"]),
+            due_date_text,
+            format_amount(row["principal_due"]),
+            format_amount(row["interest_due"]),
+            format_amount(row["total_payment"]),
+            format_amount(row["closing_balance"]),
+        ])
+
+    schedule_table = Table(
+        schedule_data,
+        colWidths=[10 * mm, 27 * mm, 32 * mm, 29 * mm, 38 * mm, 44 * mm],
+        repeatRows=1,
+    )
+    schedule_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#12304A")),
+        ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#D9E5EC")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F7FAFC")]),
+        ("ALIGN", (0, 0), (0, -1), "CENTER"),
+        ("ALIGN", (1, 0), (1, -1), "LEFT"),
+        ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    story.extend([
+        Paragraph("Repayment schedule", styles["Heading2"]),
+        schedule_table,
+        Spacer(1, 12),
+    ])
+
+    summary = Table(
+        [[
+            Paragraph("<b>Total interest</b>", cell_style),
+            Paragraph(f"<b>{format_amount(totals['total_interest'])}</b>", cell_style),
+            Paragraph("<b>Total repayable</b>", cell_style),
+            Paragraph(f"<b>{format_amount(totals['total_repayable'])}</b>", cell_style),
+        ]],
+        colWidths=[38 * mm, 52 * mm, 38 * mm, 52 * mm],
+    )
+    summary.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#EAF5F3")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#BBDDD5")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(summary)
+
+    def draw_page_footer(canvas, document):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.HexColor("#718096"))
+        canvas.drawString(document.leftMargin, 9 * mm, f"Generated {date.today():%d %b %Y}")
+        canvas.drawRightString(A4[0] - document.rightMargin, 9 * mm, f"Page {document.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=draw_page_footer, onLaterPages=draw_page_footer)
+    return buffer.getvalue()
 
 
 def _make_receipt_story(receipt, guarantees, collateral_items, signatory=None):

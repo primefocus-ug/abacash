@@ -1,5 +1,6 @@
+import json
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 from types import SimpleNamespace
 
@@ -10,11 +11,11 @@ from django.test import RequestFactory, SimpleTestCase, TestCase
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from accounts.models import CompanySettings
 from clients.models import Client
-from common.pdf_utils import generate_loan_schedule_pdf
+from common.pdf_utils import generate_loan_calculator_pdf, generate_loan_schedule_pdf
 from loans import views as loan_views
 from loans.models import Loan, LoanProduct
 from loans.utils import calculate_processing_fee_amount, resolve_processing_fee_rate
@@ -89,6 +90,314 @@ class ProcessingFeeResolutionTests(SimpleTestCase):
 
         self.assertEqual(resolve_processing_fee_rate(None, settings), Decimal("2.25"))
 
+    def test_disabled_product_has_no_processing_fee_even_with_company_rate(self):
+        settings = CompanySettings(
+            processing_fee_method="PERCENTAGE",
+            default_processing_fee_percent=Decimal("2.25"),
+        )
+        product = SimpleNamespace(
+            processing_fee_enabled=False,
+            processing_fee_percent=Decimal("1.00"),
+        )
+
+        self.assertEqual(
+            calculate_processing_fee_amount(
+                Decimal("1000000"),
+                product=product,
+                company_settings=settings,
+            ),
+            Decimal("0"),
+        )
+        self.assertEqual(resolve_processing_fee_rate(product, settings), Decimal("0"))
+
+    def test_waived_loan_processing_fee_stays_zero(self):
+        loan = Loan(
+            principal_amount=Decimal("1000000"),
+            processing_fee_enabled=False,
+        )
+
+        self.assertEqual(loan.effective_processing_fee, Decimal("0"))
+
+
+class LoanFeeSwitchTests(SimpleTestCase):
+    def setUp(self):
+        self.product = SimpleNamespace(
+            pk=1,
+            interest_method=LoanProduct.InterestMethod.FLAT_RATE,
+            processing_fee_enabled=True,
+            penalty_enabled=True,
+        )
+
+    def test_application_method_defaults_to_product_but_can_be_changed(self):
+        self.assertEqual(
+            loan_views._resolve_loan_interest_method(self.product, {}),
+            LoanProduct.InterestMethod.FLAT_RATE,
+        )
+        self.assertEqual(
+            loan_views._resolve_loan_interest_method(
+                self.product,
+                {"interest_method": LoanProduct.InterestMethod.INTEREST_ONLY},
+            ),
+            LoanProduct.InterestMethod.INTEREST_ONLY,
+        )
+
+    def test_application_keeps_existing_method_when_product_is_unchanged(self):
+        existing_loan = SimpleNamespace(
+            product_id=self.product.pk,
+            interest_method=LoanProduct.InterestMethod.COMPOUND,
+        )
+
+        self.assertEqual(
+            loan_views._resolve_loan_interest_method(self.product, {}, existing_loan),
+            LoanProduct.InterestMethod.COMPOUND,
+        )
+
+    def test_invalid_application_method_is_rejected(self):
+        with self.assertRaises(ValueError):
+            loan_views._resolve_loan_interest_method(
+                self.product,
+                {"interest_method": "UNKNOWN"},
+            )
+
+    def test_ceo_can_waive_either_fee_for_an_application(self):
+        processing_enabled, penalty_enabled = loan_views._resolve_loan_fee_switches(
+            self.product,
+            {"penalty_enabled": "on"},
+            can_override=True,
+        )
+
+        self.assertFalse(processing_enabled)
+        self.assertTrue(penalty_enabled)
+
+    def test_product_fee_defaults_cannot_be_overridden_by_an_applicant(self):
+        self.product.processing_fee_enabled = False
+        self.product.penalty_enabled = False
+
+        self.assertEqual(
+            loan_views._resolve_loan_fee_switches(
+                self.product,
+                {"processing_fee_enabled": "on", "penalty_enabled": "on"},
+                can_override=True,
+            ),
+            (False, False),
+        )
+
+    def test_non_ceo_reuses_existing_draft_fee_choices(self):
+        existing_loan = SimpleNamespace(
+            product_id=self.product.pk,
+            processing_fee_enabled=False,
+            penalty_enabled=False,
+        )
+
+        self.assertEqual(
+            loan_views._resolve_loan_fee_switches(
+                self.product,
+                {},
+                can_override=False,
+                existing_loan=existing_loan,
+            ),
+            (False, False),
+        )
+
+
+class LoanReviewDecisionTests(SimpleTestCase):
+    def setUp(self):
+        self.request_factory = RequestFactory()
+        self.user = SimpleNamespace(
+            is_authenticated=True,
+            can=lambda codename: codename == "can_approve_loans",
+        )
+        self.loan = SimpleNamespace(
+            pk="00000000-0000-0000-0000-000000000001",
+            loan_number="LN-TEST-1",
+            status=Loan.Status.PENDING,
+            reviewed_by=None,
+            query_reason="",
+            rejection_reason="",
+            save=Mock(),
+        )
+
+    def review_request(self, reason):
+        request = self.request_factory.post(
+            f"/loans/{self.loan.pk}/query/",
+            {"review_reason": reason},
+        )
+        request.user = self.user
+        return request
+
+    def test_query_saves_reason_and_keeps_loan_pending(self):
+        reason = "Please provide the client's recent payslip."
+        request = self.review_request(reason)
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.loan),
+            patch("loans.views.messages.success"),
+        ):
+            response = loan_views.loan_query(request, pk=self.loan.pk)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.loan.status, Loan.Status.PENDING)
+        self.assertEqual(self.loan.query_reason, reason)
+        self.assertIs(self.loan.reviewed_by, self.user)
+        self.loan.save.assert_called_once_with(update_fields=["reviewed_by", "query_reason"])
+
+    def test_query_requires_a_reason(self):
+        request = self.review_request("")
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.loan),
+            patch("loans.views.messages.error") as message_error,
+        ):
+            response = loan_views.loan_query(request, pk=self.loan.pk)
+
+        self.assertEqual(response.status_code, 302)
+        self.loan.save.assert_not_called()
+        message_error.assert_called_once()
+
+    def test_rejection_uses_shared_review_reason_field(self):
+        reason = "Income is not sufficient for the requested amount."
+        self.loan.query_reason = "Please provide income proof."
+        request = self.review_request(reason)
+
+        with (
+            patch("loans.views.get_object_or_404", return_value=self.loan),
+            patch("loans.views.messages.success"),
+        ):
+            response = loan_views.loan_reject(request, pk=self.loan.pk)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.loan.status, Loan.Status.REJECTED)
+        self.assertEqual(self.loan.rejection_reason, reason)
+        self.assertEqual(self.loan.query_reason, "")
+        self.assertIs(self.loan.reviewed_by, self.user)
+
+
+class LoanCalculatorPreviewTests(SimpleTestCase):
+    def setUp(self):
+        self.request_factory = RequestFactory()
+
+    def calculator_request(self, params):
+        request = self.request_factory.get("/loans/calculator/preview/", params)
+        request.user = SimpleNamespace(is_authenticated=True)
+        return request
+
+    def test_returns_schedule_estimates_for_selected_method_and_frequency(self):
+        schedule = [
+            {"total_payment": Decimal("100.00")},
+            {"total_payment": Decimal("110.00")},
+        ]
+        totals = {
+            "total_interest": Decimal("10.00"),
+            "total_repayable": Decimal("210.00"),
+        }
+        request = self.calculator_request({
+            "principal": "1000",
+            "monthly_rate": "5",
+            "term_months": "1",
+            "frequency": "BIWEEKLY",
+            "method": "INTEREST_ONLY",
+        })
+
+        with patch("loans.views.generate_schedule", return_value=(schedule, totals)) as generate:
+            response = loan_views.loan_calculator_preview(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {
+            "period_count": 2,
+            "total_interest": "10.00",
+            "total_repayable": "210.00",
+            "average_payment": "105.00",
+            "first_payment": "100.00",
+            "final_payment": "110.00",
+        })
+        self.assertEqual(generate.call_args.kwargs["annual_rate"], Decimal("60"))
+        self.assertEqual(generate.call_args.kwargs["method"], "INTEREST_ONLY")
+        self.assertEqual(generate.call_args.kwargs["frequency"], "BIWEEKLY")
+
+    def test_rejects_invalid_calculator_input(self):
+        response = loan_views.loan_calculator_preview(self.calculator_request({
+            "principal": "0",
+            "monthly_rate": "5",
+            "term_months": "12",
+            "frequency": "MONTHLY",
+            "method": "FLAT",
+        }))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", json.loads(response.content))
+
+    def test_pdf_endpoint_returns_a_tenant_branded_attachment(self):
+        request = self.calculator_request({
+            "principal": "1000",
+            "monthly_rate": "5",
+            "term_months": "1",
+            "frequency": "MONTHLY",
+            "method": "FLAT",
+        })
+        request.path = "/loans/calculator/pdf/"
+        settings = SimpleNamespace(company_name="North Star Finance")
+        schedule = [{
+            "period_number": 1,
+            "due_date": date(2026, 12, 14),
+            "principal_due": Decimal("1000"),
+            "interest_due": Decimal("50"),
+            "total_payment": Decimal("1050"),
+            "closing_balance": Decimal("0"),
+        }]
+        totals = {
+            "total_interest": Decimal("50"),
+            "total_repayable": Decimal("1050"),
+        }
+
+        with (
+            patch("loans.views.generate_schedule", return_value=(schedule, totals)),
+            patch("loans.views.CompanySettings.get", return_value=settings),
+            patch("loans.views.generate_loan_calculator_pdf", return_value=b"%PDF-test") as make_pdf,
+        ):
+            response = loan_views.loan_calculator_pdf(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertEqual(response.content, b"%PDF-test")
+        self.assertIs(make_pdf.call_args.kwargs["company_settings"], settings)
+
+    def test_branded_pdf_generator_returns_a_pdf_document(self):
+        settings = SimpleNamespace(
+            company_name="North Star Finance",
+            company_address="Kampala",
+            company_phone="+256700000000",
+            company_email="hello@example.test",
+            company_website="",
+            company_registration="",
+            tax_identification="",
+            currency_symbol="UGX",
+            company_logo=None,
+        )
+        schedule = [{
+            "period_number": 1,
+            "due_date": date(2026, 12, 14),
+            "principal_due": Decimal("1000"),
+            "interest_due": Decimal("50"),
+            "total_payment": Decimal("1050"),
+            "closing_balance": Decimal("0"),
+        }]
+        pdf = generate_loan_calculator_pdf(
+            company_settings=settings,
+            schedule=schedule,
+            totals={
+                "total_interest": Decimal("50"),
+                "total_repayable": Decimal("1050"),
+            },
+            principal=Decimal("1000"),
+            monthly_rate=Decimal("5"),
+            term_months=1,
+            frequency_label="Monthly",
+            method_label="Flat Rate",
+        )
+
+        self.assertTrue(pdf.startswith(b"%PDF-"))
+
 
 class LoanProductCreateDefaultsTests(SimpleTestCase):
     def test_new_product_form_defaults_to_active(self):
@@ -101,6 +410,20 @@ class LoanProductCreateDefaultsTests(SimpleTestCase):
         context = render.call_args.args[2]
         self.assertTrue(context["product_form_defaults"]["is_active"])
         self.assertFalse(context["product_form_defaults"]["requires_collateral"])
+        self.assertTrue(context["product_form_defaults"]["penalty_enabled"])
+        self.assertTrue(context["product_form_defaults"]["processing_fee_enabled"])
+        self.assertEqual(
+            context["product_form_defaults"]["interest_method"],
+            LoanProduct.InterestMethod.FLAT_RATE,
+        )
+        self.assertIn(
+            (LoanProduct.InterestMethod.COMPOUND, "Compound Interest"),
+            context["interest_method_choices"],
+        )
+        self.assertIn(
+            (LoanProduct.InterestMethod.INTEREST_ONLY, "Interest Only"),
+            context["interest_method_choices"],
+        )
 
     def test_htmx_request_renders_product_creation_popover(self):
         request = RequestFactory().get(
@@ -127,6 +450,8 @@ class LoanProductCreateDefaultsTests(SimpleTestCase):
                 "min_term_months": "1",
                 "max_term_months": "6",
                 "penalty_rate_monthly": "1",
+                "penalty_enabled": "on",
+                "processing_fee_enabled": "on",
             },
             HTTP_HX_REQUEST="true",
         )
@@ -157,7 +482,9 @@ class LoanProductEditPopoverTests(SimpleTestCase):
             min_term_months=1,
             max_term_months=6,
             penalty_rate_monthly=Decimal("1"),
+            penalty_enabled=True,
             processing_fee_percent=Decimal("0"),
+            processing_fee_enabled=True,
             requires_guarantor=False,
             requires_collateral=False,
             is_active=True,
@@ -195,6 +522,8 @@ class LoanProductEditPopoverTests(SimpleTestCase):
                 "min_term_months": "1",
                 "max_term_months": "6",
                 "penalty_rate_monthly": "1",
+                "penalty_enabled": "on",
+                "processing_fee_enabled": "on",
             },
             HTTP_HX_REQUEST="true",
         )
@@ -209,6 +538,8 @@ class LoanProductEditPopoverTests(SimpleTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(response["HX-Redirect"], reverse("loans:products"))
         self.assertEqual(self.product.name, "Updated Term")
+        self.assertTrue(self.product.penalty_enabled)
+        self.assertTrue(self.product.processing_fee_enabled)
 
     def test_invalid_htmx_edit_renders_errors_inside_the_popover(self):
         request = RequestFactory().post(
@@ -526,6 +857,60 @@ class LoanScheduleCalculationTests(SimpleTestCase):
         self.assertEqual(totals["total_repayable"], total_payment_sum)
         self.assertEqual(totals["total_interest"], total_interest_sum)
 
+    def test_interest_only_collects_interest_until_final_principal_payment(self):
+        from datetime import date
+        from loans.utils import generate_schedule
+
+        principal = Decimal("100000")
+        schedule, totals = generate_schedule(
+            principal=principal,
+            annual_rate=Decimal("24"),
+            term_months=3,
+            start_date=date(2026, 1, 1),
+            method=LoanProduct.InterestMethod.INTEREST_ONLY,
+            frequency="MONTHLY",
+            company_settings=CompanySettings(adjust_due_dates_for_holidays=False),
+        )
+
+        self.assertEqual([row["principal_due"] for row in schedule], [
+            Decimal("0.00"),
+            Decimal("0.00"),
+            principal,
+        ])
+        self.assertEqual([row["interest_due"] for row in schedule], [
+            Decimal("2000.00"),
+            Decimal("2000.00"),
+            Decimal("2000.00"),
+        ])
+        self.assertEqual(totals["total_interest"], Decimal("6000.00"))
+        self.assertEqual(totals["total_repayable"], Decimal("106000.00"))
+
+    def test_compound_method_amortizes_with_effective_repayment_period_rate(self):
+        from datetime import date
+        from loans.utils import generate_schedule
+
+        principal = Decimal("100000")
+        schedule, totals = generate_schedule(
+            principal=principal,
+            annual_rate=Decimal("12"),
+            term_months=1,
+            start_date=date(2026, 1, 1),
+            method=LoanProduct.InterestMethod.COMPOUND,
+            frequency="WEEKLY",
+            company_settings=CompanySettings(adjust_due_dates_for_holidays=False),
+        )
+        expected_first_period_interest = (
+            principal * ((Decimal("1.01") ** (Decimal("1") / Decimal("4"))) - Decimal("1"))
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+        self.assertEqual(len(schedule), 4)
+        self.assertEqual(schedule[0]["interest_due"], expected_first_period_interest)
+        self.assertEqual(schedule[-1]["closing_balance"], Decimal("0.00"))
+        self.assertEqual(
+            totals["total_repayable"],
+            sum(row["total_payment"] for row in schedule),
+        )
+
 
 class LoanOutstandingBalanceTests(TestCase):
     def test_loan_review_submission_stores_principal_plus_interest_only(self):
@@ -738,6 +1123,30 @@ class LoanRescheduleTests(SimpleTestCase):
 
 
 class LoanScheduleContextTests(SimpleTestCase):
+    def test_selected_method_overrides_the_product_default_for_schedule(self):
+        from datetime import date
+        from loans.utils import build_loan_schedule_context
+
+        product = SimpleNamespace(
+            interest_rate_monthly=Decimal("2.00"),
+            interest_method=LoanProduct.InterestMethod.FLAT_RATE,
+            processing_fee_percent=Decimal("0"),
+        )
+        schedule_rows, totals, _, _, _ = build_loan_schedule_context(
+            principal=Decimal("100000"),
+            product=product,
+            term_months=3,
+            frequency="MONTHLY",
+            start_date=date.today(),
+            include_processing_fee=False,
+            interest_method=LoanProduct.InterestMethod.INTEREST_ONLY,
+            company_settings=CompanySettings(adjust_due_dates_for_holidays=False),
+        )
+
+        self.assertEqual(schedule_rows[0]["principal_due"], Decimal("0.00"))
+        self.assertEqual(schedule_rows[-1]["principal_due"], Decimal("100000"))
+        self.assertEqual(totals["total_interest"], Decimal("6000.00"))
+
     def test_schedule_context_total_repayable_inclusive_excludes_processing_fee(self):
         from datetime import date
         from loans.utils import build_loan_schedule_context
@@ -756,6 +1165,11 @@ class LoanScheduleContextTests(SimpleTestCase):
             frequency="MONTHLY",
             start_date=date.today(),
             include_processing_fee=True,
+            company_settings=CompanySettings(
+                processing_fee_method="PERCENTAGE",
+                default_processing_fee_percent=Decimal("0"),
+                adjust_due_dates_for_holidays=False,
+            ),
         )
 
         expected_total_interest = principal * Decimal("0.02") * Decimal("6")

@@ -24,6 +24,10 @@ Design notes
                        divided equally across all periods)
     REDUCING_BALANCE – interest per period calculated on outstanding balance
                        (true amortisation, higher total interest)
+    COMPOUND         – compound the monthly rate to the repayment frequency and
+                       amortize the outstanding balance
+    INTEREST_ONLY    – collect periodic interest, then principal with interest
+                       in the final installment
 
 * Loan approval limits enforced in views/services (not model-level):
     Manager  → can approve loans ≤ UGX 5,000,000
@@ -50,12 +54,15 @@ class LoanProduct(models.Model):
     A loan product defines the rules for a category of loans.
     Example products: "Salary Loan", "Business Loan", "Emergency Loan".
 
-    The CEO configures these; staff cannot change them during loan application.
+    The CEO configures the product terms and defaults. Staff can override the
+    interest method for an individual loan during application.
     """
 
     class InterestMethod(models.TextChoices):
         FLAT_RATE        = "FLAT",     _("Flat Rate")
         REDUCING_BALANCE = "REDUCING", _("Reducing Balance")
+        COMPOUND         = "COMPOUND", _("Compound Interest")
+        INTEREST_ONLY    = "INTEREST_ONLY", _("Interest Only")
 
     class RepaymentFrequency(models.TextChoices):
         DAILY     = "DAILY",     _("Daily")
@@ -75,7 +82,7 @@ class LoanProduct(models.Model):
     )
 
     interest_method = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=InterestMethod.choices,
         default=InterestMethod.FLAT_RATE,
     )
@@ -108,6 +115,10 @@ class LoanProduct(models.Model):
         validators=[MinValueValidator(Decimal("0.00")), MaxValueValidator(Decimal("99.99"))],
         help_text=_("Monthly penalty rate on overdue amounts, e.g. 2.00 for 2%."),
     )
+    penalty_enabled = models.BooleanField(
+        default=True,
+        help_text=_("If disabled, overdue installments are not charged a late-payment penalty."),
+    )
 
     # Processing fee (percentage of loan amount)
     processing_fee_percent = models.DecimalField(
@@ -115,6 +126,10 @@ class LoanProduct(models.Model):
         decimal_places=2,
         default=Decimal("1.00"),
         help_text=_("Processing fee as a percentage of loan amount."),
+    )
+    processing_fee_enabled = models.BooleanField(
+        default=True,
+        help_text=_("If disabled, loans using this product do not incur a processing fee."),
     )
 
     requires_guarantor = models.BooleanField(
@@ -299,7 +314,7 @@ class Loan(models.Model):
         null=True, blank=True,
     )
 
-    # Staff who approved or rejected
+    # Staff who most recently reviewed the application
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -337,8 +352,10 @@ class Loan(models.Model):
 
     # Snapshotted from product at application time
     interest_rate_monthly = models.DecimalField(max_digits=5, decimal_places=2)
-    interest_method       = models.CharField(max_length=10, choices=LoanProduct.InterestMethod.choices)
+    interest_method       = models.CharField(max_length=15, choices=LoanProduct.InterestMethod.choices)
     penalty_rate_monthly  = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("2.00"))
+    penalty_enabled       = models.BooleanField(default=True)
+    processing_fee_enabled = models.BooleanField(default=True)
 
     term_months = models.PositiveSmallIntegerField(
         help_text=_("Loan term in months."),
@@ -405,6 +422,11 @@ class Loan(models.Model):
     rejection_reason = models.TextField(
         blank=True,
         help_text=_("Required when rejecting a loan application."),
+    )
+
+    query_reason = models.TextField(
+        blank=True,
+        help_text=_("Most recent information requested by the loan approver."),
     )
 
     purpose = models.TextField(
@@ -534,6 +556,7 @@ class Loan(models.Model):
             # (e.g. waived to 0) via processing_fee_manually_set.
             if (
                 not self.processing_fee_manually_set
+                and self.processing_fee_enabled
                 and self.processing_fee == Decimal("0")
                 and self.product_id
                 and self.principal_amount
@@ -559,6 +582,8 @@ class Loan(models.Model):
 
     @property
     def effective_processing_fee(self):
+        if not self.processing_fee_enabled:
+            return Decimal("0")
         if self.processing_fee and self.processing_fee > Decimal("0"):
             return self.processing_fee
         if self.processing_fee_manually_set:

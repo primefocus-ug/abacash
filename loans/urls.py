@@ -5,6 +5,8 @@ app_name = "loans"
 
 urlpatterns = [
     path("",                         views.loan_list,       name="list"),
+    path("calculator/preview/",      views.loan_calculator_preview, name="calculator_preview"),
+    path("calculator/pdf/",          views.loan_calculator_pdf, name="calculator_pdf"),
     path("apply/",                   views.loan_apply_step1,    name="apply"),
     path("apply/client-search/",      views.client_search_htmx,  name="client_search"),
     path("apply/<uuid:client_id>/",  views.loan_apply_step2,name="apply_step2"),
@@ -14,6 +16,7 @@ urlpatterns = [
     path("<uuid:pk>/",               views.loan_detail,     name="detail"),
     path("<uuid:pk>/edit/",          views.loan_edit,       name="edit"),
     path("<uuid:pk>/approve/",       views.loan_approve,    name="approve"),
+    path("<uuid:pk>/query/",         views.loan_query,      name="query"),
     path("<uuid:pk>/reject/",        views.loan_reject,     name="reject"),
     path("<uuid:pk>/write-off/",     views.loan_write_off,  name="write_off"),
     path("<uuid:pk>/reinstate/",     views.loan_reinstate,  name="reinstate"),

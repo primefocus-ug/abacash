@@ -1,0 +1,112 @@
+{% load aba_filters %}
+<div class="loan-calc" id="loan-calculator"
+     data-preview-url="{% url 'loans:calculator_preview' %}"
+     data-pdf-url="{% url 'loans:calculator_pdf' %}"
+     data-currency="{% currency_symbol %}">
+    <button class="loan-calc-trigger" id="loan-calculator-trigger" type="button"
+            aria-expanded="false" aria-controls="loan-calculator-panel"
+            aria-label="Open loan calculator">
+        <span class="loan-calc-trigger-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="2.75" width="16" height="18.5" rx="3" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M8 7h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 4h2m4 0h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="loan-calc-trigger-label"></span>
+        <span class="loan-calc-trigger-dot" aria-hidden="true"></span>
+    </button>
+
+    <section class="loan-calc-panel" id="loan-calculator-panel" role="dialog"
+             aria-label="Loan calculator" aria-modal="false" hidden>
+        <div class="loan-calc-panel-top">
+            <div class="loan-calc-heading">
+                <span class="loan-calc-kicker"><span></span> SMART ESTIMATE</span>
+                <h2>Plan your loan</h2>
+                
+            </div>
+            <div class="loan-calc-panel-actions">
+                <button class="loan-calc-share" id="loan-calculator-share" type="button"
+                        aria-label="Share or download loan schedule PDF" title="Share or download PDF">
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <circle cx="15" cy="4" r="2.25" stroke="currentColor" stroke-width="1.6"/>
+                        <circle cx="5" cy="10" r="2.25" stroke="currentColor" stroke-width="1.6"/>
+                        <circle cx="15" cy="16" r="2.25" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="m7 9 5.8-3.5M7 11l5.8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                    <span>Share PDF</span>
+                </button>
+                <button class="loan-calc-close" id="loan-calculator-close" type="button"
+                        aria-label="Close loan calculator">
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="loan-calc-fields">
+            <label class="loan-calc-field loan-calc-field-wide" for="loan-calc-amount">
+                <span>Loan amount <small data-calc-currency></small></span>
+                <input id="loan-calc-amount" name="principal" type="number" min="1"
+                       max="9999999999999.99" step="0.01" value="500000" inputmode="decimal" required>
+            </label>
+            <label class="loan-calc-field" for="loan-calc-rate">
+                <span>Monthly rate <small>%</small></span>
+                <input id="loan-calc-rate" name="monthly_rate" type="number" min="0"
+                       max="99.99" step="0.01" value="5" inputmode="decimal" required>
+            </label>
+            <label class="loan-calc-field" for="loan-calc-term">
+                <span>Term <small>months</small></span>
+                <input id="loan-calc-term" name="term_months" type="number" min="1"
+                       max="60" step="1" value="12" inputmode="numeric" required>
+            </label>
+            <label class="loan-calc-field" for="loan-calc-frequency">
+                <span>Repayment frequency</span>
+                <select id="loan-calc-frequency" name="frequency" data-native-select>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="BIWEEKLY">Every 2 weeks</option>
+                    <option value="WEEKLY">Weekly</option>
+                    <option value="DAILY">Daily</option>
+                </select>
+            </label>
+            <label class="loan-calc-field" for="loan-calc-method">
+                <span>Interest method</span>
+                <select id="loan-calc-method" name="method" data-native-select>
+                    {% for value, label in interest_method_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% empty %}
+                    <option value="FLAT">Flat Rate</option>
+                    <option value="REDUCING">Reducing Balance</option>
+                    <option value="COMPOUND">Compound Interest</option>
+                    <option value="INTEREST_ONLY">Interest Only</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="loan-calc-error" id="loan-calc-error" role="alert" hidden></div>
+        <div class="loan-calc-share-status" id="loan-calc-share-status" role="status" aria-live="polite" hidden></div>
+        <div class="loan-calc-results" id="loan-calc-results" aria-live="polite">
+            <div class="loan-calc-primary-result">
+                <span>Estimated installment</span>
+                <strong id="loan-calc-average">—</strong>
+                <small><span id="loan-calc-period-count">—</span> payments · average per period</small>
+            </div>
+            <div class="loan-calc-result-grid">
+                <div>
+                    <span>Total interest</span>
+                    <strong id="loan-calc-interest">—</strong>
+                </div>
+                <div>
+                    <span>Total repayable</span>
+                    <strong id="loan-calc-total">—</strong>
+                </div>
+            </div>
+            <div class="loan-calc-payment-range">
+                <span>First payment <strong id="loan-calc-first">—</strong></span>
+                <span>Final payment <strong id="loan-calc-final">—</strong></span>
+            </div>
+        </div>
+        <div class="loan-calc-footnote">Estimate excludes fees. Final terms are subject to approval.</div>
+    </section>
+</div>

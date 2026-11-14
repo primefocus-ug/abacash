@@ -2,7 +2,7 @@
 loans/utils.py
 ==============
 
-Two interest methods are supported:
+Interest calculation methods:
 
   FLAT_RATE        – Interest = Principal × monthly_rate × term
                      This total interest is split equally across all periods.
@@ -12,6 +12,12 @@ Two interest methods are supported:
   REDUCING_BALANCE – Each period's interest = outstanding_balance × monthly_rate
                      Principal portion increases as balance drops.
                      True amortisation — total interest is lower than flat rate.
+
+  COMPOUND         – Annuity repayments using an effective compounded rate for
+                     the selected repayment frequency.
+
+  INTEREST_ONLY    – Periodic interest payments with principal due in the final
+                     installment.
 
 Usage
 -----
@@ -129,6 +135,8 @@ def calculate_processing_fee_amount(principal, product=None, company_settings=No
     principal = Decimal(str(principal or "0"))
     if principal <= 0:
         return Decimal("0")
+    if product is not None and not getattr(product, "processing_fee_enabled", True):
+        return Decimal("0")
 
     if company_settings is None:
         try:
@@ -157,6 +165,9 @@ def resolve_processing_fee_rate(product=None, company_settings=None) -> Decimal:
     2. Product-level processing_fee_percent
     3. Zero
     """
+    if product is not None and not getattr(product, "processing_fee_enabled", True):
+        return Decimal("0")
+
     if company_settings is None:
         try:
             from accounts.models import CompanySettings as SettingsModel
@@ -224,7 +235,7 @@ def generate_schedule(
     annual_rate  : annual interest rate as a percentage (e.g. 60 for 60%/year)
     term_months  : loan term in months
     start_date   : disbursement date (first due date is calculated from this)
-    method       : "FLAT" or "REDUCING"
+    method       : "FLAT", "REDUCING", "COMPOUND", or "INTEREST_ONLY"
     frequency    : "WEEKLY", "BIWEEKLY", or "MONTHLY"
     company_settings : CompanySettings instance (fetched lazily if omitted).
         When adjust_due_dates_for_holidays is on, due dates landing on a
@@ -251,6 +262,14 @@ def generate_schedule(
     if method == "FLAT":
         schedule, totals = _flat_rate_schedule(
             principal, monthly_rate, term_months, num_periods, start_date, frequency
+        )
+    elif method == "COMPOUND":
+        schedule, totals = _compound_schedule(
+            principal, monthly_rate, term_months, num_periods, start_date, frequency
+        )
+    elif method == "INTEREST_ONLY":
+        schedule, totals = _interest_only_schedule(
+            principal, monthly_rate, num_periods, start_date, frequency
         )
     else:  # REDUCING
         schedule, totals = _reducing_balance_schedule(
@@ -472,6 +491,79 @@ def _reducing_balance_schedule(
     return schedule, totals
 
 
+def _compound_schedule(principal, monthly_rate, term_months, num_periods, start_date, frequency):
+    """Build amortizing installments using an effective compounded period rate."""
+    periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(frequency, 1)
+    period_rate = (Decimal("1") + monthly_rate) ** (
+        Decimal("1") / Decimal(periods_per_month)
+    ) - Decimal("1")
+
+    if period_rate == 0:
+        period_payment = _round(principal / Decimal(str(num_periods)))
+    else:
+        period_count = Decimal(str(num_periods))
+        period_payment = _round(
+            principal * period_rate / (Decimal("1") - (Decimal("1") + period_rate) ** (-period_count))
+        )
+
+    schedule = []
+    balance = principal
+    total_interest = Decimal("0")
+    for period in range(1, num_periods + 1):
+        interest = _round(balance * period_rate)
+        principal_due = balance if period == num_periods else _round(period_payment - interest)
+        payment = _round(principal_due + interest)
+        opening_balance = _round(balance + interest)
+        balance = max(_round(balance - principal_due), Decimal("0"))
+
+        schedule.append({
+            "period_number": period,
+            "due_date": _next_due_date(start_date, frequency, period),
+            "opening_balance": opening_balance,
+            "principal_due": principal_due,
+            "interest_due": interest,
+            "total_payment": payment,
+            "closing_balance": balance,
+        })
+        total_interest += interest
+
+    totals = {
+        "total_repayable": _round(sum(row["total_payment"] for row in schedule)),
+        "total_interest": _round(total_interest),
+        "effective_apr": _round(monthly_rate * Decimal("12") * Decimal("100")),
+    }
+    return schedule, totals
+
+
+def _interest_only_schedule(principal, monthly_rate, num_periods, start_date, frequency):
+    """Collect interest each period and repay all principal in the final period."""
+    periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(frequency, 1)
+    period_rate = monthly_rate / Decimal(periods_per_month)
+    interest_per_period = _round(principal * period_rate)
+    schedule = []
+
+    for period in range(1, num_periods + 1):
+        principal_due = principal if period == num_periods else Decimal("0")
+        payment = _round(principal_due + interest_per_period)
+        schedule.append({
+            "period_number": period,
+            "due_date": _next_due_date(start_date, frequency, period),
+            "opening_balance": principal,
+            "principal_due": principal_due,
+            "interest_due": interest_per_period,
+            "total_payment": payment,
+            "closing_balance": max(_round(principal - principal_due), Decimal("0")),
+        })
+
+    total_interest = _round(interest_per_period * num_periods)
+    totals = {
+        "total_repayable": _round(principal + total_interest),
+        "total_interest": total_interest,
+        "effective_apr": _round(monthly_rate * Decimal("12") * Decimal("100")),
+    }
+    return schedule, totals
+
+
 # ------------------------------------------------------------------ #
 # Eligibility calculator                                               #
 # ------------------------------------------------------------------ #
@@ -575,6 +667,7 @@ def generate_schedule_preview_pdf(
     totals: dict,
     processing_fee=None,
     fee_source=None,
+    interest_method_label=None,
 ) -> bytes:
     """
     Render an amortization schedule *preview* (not yet an approved/disbursed
@@ -619,7 +712,10 @@ def generate_schedule_preview_pdf(
 
     meta_rows = [
         ["Client:", getattr(client, "full_name", ""), "Client No.:", getattr(client, "client_number", "")],
-        ["Product:", product.name, "Interest Method:", product.get_interest_method_display()],
+        [
+            "Product:", product.name, "Interest Method:",
+            interest_method_label or product.get_interest_method_display(),
+        ],
         ["Principal:", f"UGX {Decimal(principal):,.0f}", "Term:", f"{term_months} month(s)"],
         ["Frequency:", freq_label, "Monthly Rate:", f"{product.interest_rate_monthly}%"],
     ]

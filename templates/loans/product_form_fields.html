@@ -29,6 +29,7 @@
             <option value="{{ val }}" {% if product_form_defaults.interest_method == val %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
+       
       </div>
       <div class="form-group">
         <label for="product-frequency">Repayment Frequency</label>
@@ -48,6 +49,21 @@
         <div class="form-hint product-form-hint">Used only if the company percentage rate is 0.</div>
       </div>
     </div>
+  </section>
+
+  <section class="product-form-section">
+    <h3>Fees</h3>
+    <div class="product-form-flags">
+      <label>
+        <input type="checkbox" name="penalty_enabled" {% if product_form_defaults.penalty_enabled %}checked{% endif %}>
+        Apply late-payment penalty
+      </label>
+      <label>
+        <input type="checkbox" name="processing_fee_enabled" {% if product_form_defaults.processing_fee_enabled %}checked{% endif %}>
+        Charge processing fee
+      </label>
+    </div>
+    <div class="form-hint product-form-hint">These are the defaults for new loans using this product. A CEO can also waive either charge on an individual application.</div>
   </section>
 
   <section class="product-form-section">

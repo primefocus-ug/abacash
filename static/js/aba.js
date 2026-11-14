@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof $ === 'undefined' && typeof jQuery === 'undefined') {
     // Select2 requires jQuery; create a lightweight wrapper
     if (typeof jQuery !== 'undefined') {
-      jQuery('select').select2({
+      jQuery('select:not([data-native-select])').select2({
         width: '100%',
         allowClear: true,
         minimumInputLength: 0,
@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Select2 on all select elements
     if (window.jQuery) {
     // Initialize Select2 on selects that are not already initialized by page-specific scripts.
-    window.jQuery('select').each(function(){
+    window.jQuery('select:not([data-native-select])').each(function(){
       try {
         var $el = window.jQuery(this);
         if ($el.hasClass('select2-hidden-accessible')) return; // already initialized

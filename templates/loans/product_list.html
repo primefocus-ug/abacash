@@ -40,7 +40,7 @@
             <th>Frequency</th>
             <th>Amount Limits</th>
             <th>Term Limits</th>
-            <th>Penalty</th>
+            <th>Fees</th>
             <th>Security</th>
             <th>Status</th>
             {% if is_ceo %}<th></th>{% endif %}
@@ -66,7 +66,14 @@
                 {{ p.min_amount|ugx }} - {{ p.max_amount|ugx }}
               </td>
               <td class="mono">{{ p.min_term_months }} – {{ p.max_term_months }} months</td>
-              <td class="mono">{{ p.penalty_rate_monthly }}%</td>
+              <td class="text-sm">
+                <div>Late penalty:
+                  {% if p.penalty_enabled %}<span class="mono">{{ p.penalty_rate_monthly }}%</span>{% else %}<span class="badge badge-muted">Off</span>{% endif %}
+                </div>
+                <div style="margin-top:4px;">Processing fee:
+                  {% if p.processing_fee_enabled %}<span class="badge badge-green">On</span>{% else %}<span class="badge badge-muted">Off</span>{% endif %}
+                </div>
+              </td>
               <td>
                 <div class="text-sm">Guarantor: {% if p.requires_guarantor %}<span class="badge badge-amber">Required</span>{% else %}<span class="badge badge-muted">Optional</span>{% endif %}</div>
                 <div class="text-sm" style="margin-top:4px;">Collateral: {% if p.requires_collateral %}<span class="badge badge-amber">Required</span>{% else %}<span class="badge badge-muted">Optional</span>{% endif %}</div>

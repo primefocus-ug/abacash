@@ -87,12 +87,26 @@
                       data-min="{{ p.min_amount }}" data-max="{{ p.max_amount }}"
                       data-rate="{{ p.interest_rate_monthly }}" data-method="{{ p.interest_method }}"
                       data-processing-fee-percent="{{ p.processing_fee_percent }}"
+                      data-processing-fee-enabled="{{ p.processing_fee_enabled|yesno:'true,false' }}"
+                      data-penalty-enabled="{{ p.penalty_enabled|yesno:'true,false' }}"
+                      data-penalty-rate="{{ p.penalty_rate_monthly }}"
                       {% if form_data.product and form_data.product.pk == p.pk %}selected{% endif %}>
                 {{ p.name }} — {{ p.interest_rate_monthly }}%/mo ({{ p.get_interest_method_display }})
               </option>
               {% endfor %}
             </select>
             <div id="product-hint" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="interest_method">Interest Method <span style="color:var(--danger);">*</span></label>
+            <select name="interest_method" id="interest_method" required>
+              <option value="">— Select interest method —</option>
+              {% for value, label in interest_method_choices %}
+              <option value="{{ value }}" {% if form_data.interest_method == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            
           </div>
 
           <div class="form-group">
@@ -124,6 +138,23 @@
             <textarea name="purpose" id="purpose" rows="2"
                       placeholder="What will the client use this loan for?">{{ form_data.purpose|default:'' }}</textarea>
           </div>
+
+          {% if can_override_loan_fees %}
+          <div class="form-group" style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;">
+            <div style="font-weight:700;margin-bottom:8px;">Fee overrides</div>
+            <label style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+              <input type="checkbox" id="processing_fee_enabled" name="processing_fee_enabled"
+                     {% if form_data.processing_fee_enabled or not loan %}checked{% endif %}>
+              Charge processing fee
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+              <input type="checkbox" id="penalty_enabled" name="penalty_enabled"
+                     {% if form_data.penalty_enabled or not loan %}checked{% endif %}>
+              Apply late-payment penalty
+            </label>
+            <div class="form-hint">Uncheck either option to waive that charge for this loan. Product-disabled fees cannot be turned back on here.</div>
+          </div>
+          {% endif %}
 
           {# ── Fee summary (always visible, updates via JS) ── #}
           <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:4px;">
@@ -210,6 +241,9 @@
 <script>
 (function () {
   const productSel  = document.getElementById('product');
+  const interestMethodSel = document.getElementById('interest_method');
+  const processingFeeToggle = document.getElementById('processing_fee_enabled');
+  const penaltyToggle = document.getElementById('penalty_enabled');
   const principalIn = document.getElementById('principal');
   const termIn      = document.getElementById('term_months');
   const frequencyIn = document.getElementById('frequency');
@@ -269,13 +303,19 @@
 
     const periodsPerMonth = {DAILY: 30, WEEKLY: 4, BIWEEKLY: 2, MONTHLY: 1}[frequency] || 1;
     const periods = months * periodsPerMonth;
-    const payment = rate > 0
-      ? roundMoney(principal * rate / (1 - Math.pow(1 + rate, -periods)))
+    if (method === 'INTEREST_ONLY') {
+      return roundMoney(roundMoney(principal * rate / periodsPerMonth) * periods);
+    }
+    const periodRate = method === 'COMPOUND'
+      ? Math.pow(1 + rate, 1 / periodsPerMonth) - 1
+      : rate;
+    const payment = periodRate > 0
+      ? roundMoney(principal * periodRate / (1 - Math.pow(1 + periodRate, -periods)))
       : roundMoney(principal / periods);
     let balance = principal;
     let totalInterest = 0;
     for (let period = 1; period <= periods; period++) {
-      const interest = roundMoney(balance * rate);
+      const interest = roundMoney(balance * periodRate);
       const principalDue = period === periods ? balance : roundMoney(payment - interest);
       balance = Math.max(roundMoney(balance - principalDue), 0);
       totalInterest += interest;
@@ -290,15 +330,22 @@
 
     // Product hint
     if (opt && opt.dataset.min) {
-      productHint.textContent = `Range: {% currency_symbol %} ${parseInt(opt.dataset.min).toLocaleString()} – {% currency_symbol %} ${parseInt(opt.dataset.max).toLocaleString()} · ${opt.dataset.rate}%/mo ${opt.dataset.method}`;
+      const selectedMethod = interestMethodSel?.selectedOptions[0]?.textContent.trim() || opt.dataset.method;
+      productHint.textContent = `Range: {% currency_symbol %} ${parseInt(opt.dataset.min).toLocaleString()} – {% currency_symbol %} ${parseInt(opt.dataset.max).toLocaleString()} · ${opt.dataset.rate}%/mo · ${selectedMethod}`;
     } else {
       productHint.textContent = '';
     }
 
     const companyRate = parseFloat(form.dataset.companyFeePercent) || 0;
     const productRate = parseFloat(opt?.dataset.processingFeePercent) || 0;
+    const productFeeEnabled = opt?.dataset.processingFeeEnabled === 'true';
+    const processingFeeEnabled = productFeeEnabled && (
+      !processingFeeToggle || processingFeeToggle.checked
+    );
     let fee = 0, feeLabel = '', feeSource = '';
-    if (form.dataset.processingFeeMethod === 'RANGE') {
+    if (!processingFeeEnabled) {
+      feeSource = 'No processing fee';
+    } else if (form.dataset.processingFeeMethod === 'RANGE') {
       fee = getRangeFee(p);
       feeSource = fee > 0 ? 'Company settings (range)' : 'No matching fee range';
     } else {
@@ -312,7 +359,7 @@
       p,
       parseFloat(opt?.dataset.rate) || 0,
       months,
-      opt?.dataset.method || 'FLAT',
+      interestMethodSel?.value || opt?.dataset.method || 'FLAT',
       frequencyIn.value,
     );
     const totalRepayable = p + interest;
@@ -335,16 +382,62 @@
     });
   }
 
+  function syncFeeToggles(resetToProductDefaults) {
+    const opt = productSel.selectedOptions[0];
+    if (!opt || !opt.value) {
+      if (processingFeeToggle) processingFeeToggle.disabled = true;
+      if (penaltyToggle) penaltyToggle.disabled = true;
+      return;
+    }
+
+    const productFeeEnabled = opt.dataset.processingFeeEnabled === 'true';
+    const productPenaltyEnabled = opt.dataset.penaltyEnabled === 'true';
+    if (processingFeeToggle) {
+      processingFeeToggle.disabled = !productFeeEnabled;
+      if (resetToProductDefaults) processingFeeToggle.checked = productFeeEnabled;
+      if (!productFeeEnabled) processingFeeToggle.checked = false;
+    }
+    if (penaltyToggle) {
+      penaltyToggle.disabled = !productPenaltyEnabled;
+      if (resetToProductDefaults) penaltyToggle.checked = productPenaltyEnabled;
+      if (!productPenaltyEnabled) penaltyToggle.checked = false;
+    }
+  }
+
+  function syncInterestMethod(resetToProductDefault) {
+    const opt = productSel.selectedOptions[0];
+    if (!opt || !opt.value) {
+      interestMethodSel.disabled = true;
+      return;
+    }
+    interestMethodSel.disabled = false;
+    if (resetToProductDefault || !interestMethodSel.value) {
+      interestMethodSel.value = opt.dataset.method;
+    }
+  }
+
   [productSel, principalIn, termIn, frequencyIn].forEach(el => {
     el?.addEventListener('change', updateSummary);
     el?.addEventListener('input', updateSummary);
   });
+  productSel.addEventListener('change', () => {
+    syncFeeToggles(true);
+    syncInterestMethod(true);
+    updateSummary();
+  });
+  if (interestMethodSel) {
+    interestMethodSel.addEventListener('change', updateSummary);
+    syncInterestMethod(false);
+  }
+  if (processingFeeToggle) processingFeeToggle.addEventListener('change', updateSummary);
+  if (penaltyToggle) penaltyToggle.addEventListener('change', updateSummary);
 
   // After HTMX swaps schedule, re-read meta and update summary
   document.body.addEventListener('htmx:afterSwap', e => {
     if (e.detail.target?.id === 'schedule-panel') updateSummary();
   });
 
+  syncFeeToggles(false);
   updateSummary();
 })();
 </script>

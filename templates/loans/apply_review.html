@@ -53,6 +53,7 @@
           <div class="review-row"><span>Term</span><strong>{{ loan.term_months }} months</strong></div>
           <div class="review-row"><span>Frequency</span><strong>{{ loan.get_repayment_frequency_display }}</strong></div>
           <div class="review-row"><span>Interest Rate</span><strong>{{ loan.interest_rate_monthly }}%/month ({{ loan.get_interest_method_display }})</strong></div>
+          <div class="review-row"><span>Late-payment penalty</span><strong>{% if loan.penalty_enabled %}Enabled ({{ loan.penalty_rate_monthly }}% monthly){% else %}Waived{% endif %}</strong></div>
           {% if loan.purpose %}
           <div class="review-row"><span>Purpose</span><span style="text-align:right;max-width:60%;">{{ loan.purpose }}</span></div>
           {% endif %}
@@ -63,7 +64,7 @@
           <div class="review-section-title">Cost Breakdown</div>
           <div class="fee-row"><span>Principal</span><span class="mono">{{ loan.principal_amount|money }}</span></div>
           <div class="fee-row"><span>Total Interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
-          <div class="fee-row"><span>Processing Fee</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
+          <div class="fee-row"><span>Processing Fee{% if not loan.processing_fee_enabled %} (waived){% endif %}</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
           <div class="fee-row"><span>Total Repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
           <div class="fee-row"><span>Nominal APR</span><span class="mono">{{ nominal_apr|floatformat:2 }}%</span></div>
           <div class="fee-row"><span>Total Cost of Credit</span><span class="mono">{{ total_cost_of_credit|money }}</span></div>

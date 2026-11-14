@@ -78,6 +78,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
           crossorigin="anonymous" referrerpolicy="no-referrer">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'css/loan-calculator.css' %}?v=2">
     {% block extra_css %}{% endblock %}
 
     <style>
@@ -5257,13 +5258,17 @@
 {% block auth_content %}{% endblock %}
 {% endif %}
 
+{% if user.is_authenticated %}
+{% include "partials/loan_calculator.html" %}
+{% endif %}
+
 <!-- Scripts -->
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 {% load static %}
-<script src="{% static 'js/aba.js' %}?v=theme-dock-2"></script>
+<script src="{% static 'js/aba.js' %}?v=theme-dock-3"></script>
 
 <script>
     /* ─── Nav Group Accordion ──────────────────────── */
@@ -5665,5 +5670,8 @@
         }
     })();
 </script>
+{% if user.is_authenticated %}
+<script src="{% static 'js/loan-calculator.js' %}?v=2"></script>
+{% endif %}
 </body>
 </html>

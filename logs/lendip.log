@@ -22054,3 +22054,1500 @@ django.urls.exceptions.NoReverseMatch: Reverse for 'platform_admin_password_rese
 2026-11-12 14:48:27 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abacash/tenants/views.py changed, reloading.
 2026-11-12 14:48:47 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-11-12 14:55:07 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:04:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:07:03 [WARNING] django.request: Not Found: /
+2026-11-13 19:07:03 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:07:04 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:07:04 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:07:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:07:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:07:07 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:07:07 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:07:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:08:04 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:04 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:05 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:08:05 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:08:05 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:05 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:08 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:08 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:09 [WARNING] django.request: Not Found: /
+2026-11-13 19:08:09 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:08:10 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:08:10 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /
+2026-11-13 19:09:56 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:10:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:10:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:10:07 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:10:07 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:10:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:10:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:10:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:10:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:10:08 [WARNING] django.request: Not Found: /
+2026-11-13 19:10:08 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:10:08 [WARNING] django.request: Not Found: /
+2026-11-13 19:10:08 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:10:09 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:10:09 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:12:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:12:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:12:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:12:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:12:07 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:12:07 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:12:08 [WARNING] django.request: Not Found: /
+2026-11-13 19:12:08 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:12:09 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:12:09 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:12:56 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:12:56 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:15:49 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:17:00 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:00 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:01 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:17:01 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:17:05 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:05 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:06 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:06 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:07 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:08 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:17:08 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:17:24 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:17:30 [WARNING] django.request: Not Found: /
+2026-11-13 19:17:30 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:17:31 [WARNING] django.request: Not Found: /sw.js
+2026-11-13 19:17:31 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-13 19:21:12 [WARNING] django.request: Not Found: /
+2026-11-13 19:21:12 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:21:12 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-13 19:21:12 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 0
+2026-11-13 19:23:33 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:24:33 [INFO] django.server: "GET / HTTP/1.1" 200 51908
+2026-11-13 19:24:33 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-13 19:24:33 [INFO] django.server: "GET / HTTP/1.1" 200 14161
+2026-11-13 19:25:24 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-13 19:25:24 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-13 19:25:24 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-13 19:25:24 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:25:24 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:25:24 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-13 19:25:24 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-13 19:28:29 [WARNING] django.request: Not Found: /
+2026-11-13 19:28:29 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-13 19:28:53 [WARNING] django.security.SuspiciousSession: Session data corrupted
+2026-11-13 19:28:53 [INFO] django.server: "GET /register/ HTTP/1.1" 200 43000
+2026-11-13 19:28:56 [WARNING] django.security.SuspiciousSession: Session data corrupted
+2026-11-13 19:28:56 [INFO] django.server: "GET /login/ HTTP/1.1" 200 49338
+2026-11-13 19:28:56 [WARNING] django.security.SuspiciousSession: Session data corrupted
+2026-11-13 19:28:56 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-13 19:28:56 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-13 19:28:56 [WARNING] django.security.SuspiciousSession: Session data corrupted
+2026-11-13 19:28:56 [WARNING] django.request: Not Found: /static/images/logo.png
+2026-11-13 19:28:56 [WARNING] django.server: "GET /static/images/logo.png HTTP/1.1" 404 179
+2026-11-13 19:29:01 [WARNING] django.security.SuspiciousSession: Session data corrupted
+2026-11-13 19:29:01 [INFO] django.server: "POST /login/ HTTP/1.1" 302 0
+2026-11-13 19:29:37 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-13 19:29:37 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-13 19:29:37 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-13 19:29:37 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:29:37 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:29:37 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-13 19:29:37 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-13 19:29:47 [INFO] django.server: "POST / HTTP/1.1" 200 14418
+2026-11-13 19:29:47 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-13 19:29:47 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:29:47 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-13 19:29:47 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:38:43 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-11-13 19:38:44 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-13 19:38:44 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:38:44 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:38:45 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-13 19:38:45 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-13 19:38:45 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-13 19:38:47 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:38:47 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:38:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:38:47 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-13 19:38:47 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-13 19:38:48 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-13 19:38:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-13 19:39:08 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:39:08 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 19:39:08 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 19:39:09 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-13 19:39:09 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-13 19:39:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:39:11 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 19:42:34 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:42:35 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:42:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:42:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:42:38 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:43:02 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 19:44:01 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:44:49 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\utils.py changed, reloading.
+2026-11-13 19:44:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:45:02 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-13 19:45:05 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:45:09 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-13 19:45:13 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:46:37 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:46:38 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-13 19:46:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:46:40 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:46:51 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-13 19:46:52 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:47:39 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:47:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:47:54 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:48:22 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:48:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:48:25 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 19:48:33 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-13 19:48:36 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:48:36 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-13 19:48:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:48:40 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:48:40 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:49:28 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:49:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:49:32 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:50:44 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:50:46 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:50:47 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:50:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:52:19 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:52:21 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:52:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:53:06 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:53:07 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:53:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:53:12 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 19:54:30 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:54:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:54:34 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 19:55:49 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 19:55:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 19:55:58 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 23:02:58 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:02:58 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-13 23:03:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:03:51 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:03:51 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 23:03:51 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 23:03:51 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-13 23:03:51 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-13 23:03:51 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-13 23:03:52 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 23:03:52 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 23:03:52 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-13 23:03:52 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-13 23:03:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:03:52 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-13 23:03:52 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-13 23:03:53 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-13 23:04:06 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206100
+2026-11-13 23:04:06 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-13 23:04:06 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-13 23:04:06 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-13 23:04:06 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-13 23:04:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:04:44 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267866
+2026-11-13 23:04:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:04:55 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 206095
+2026-11-13 23:04:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:05:08 [INFO] django.server: "GET /loans/51be3d2d-ebf6-4d11-acf4-fd3f64e162d1/ HTTP/1.1" 200 295078
+2026-11-13 23:05:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:05:52 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 198856
+2026-11-13 23:05:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:06:24 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/edit/ HTTP/1.1" 200 212659
+2026-11-13 23:06:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:06:43 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:06:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:06:46 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4546
+2026-11-13 23:07:12 [INFO] django.server: "POST /loans/products/1/edit/ HTTP/1.1" 204 0
+2026-11-13 23:07:12 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 193472
+2026-11-13 23:07:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:07:38 [INFO] django.server: "GET /accounts/admin-panel/branches/ HTTP/1.1" 200 197696
+2026-11-13 23:07:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:07:41 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 209175
+2026-11-13 23:07:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:08:00 [INFO] django.server: "POST /accounts/admin-panel/settings/ HTTP/1.1" 302 0
+2026-11-13 23:08:00 [INFO] django.server: "GET /accounts/admin-panel/settings/ HTTP/1.1" 200 209690
+2026-11-13 23:08:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:08:11 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 206095
+2026-11-13 23:08:12 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206100
+2026-11-13 23:08:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:08:15 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 203376
+2026-11-13 23:08:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:09:17 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=T4iWZ0NslhqYF2Je3CtK0P4vmCwuZ1Jjzl8D8LNpgi04FUomDD6QTEwO5lbEHSk9&branch=1&product=1&principal=300000&term_months=1&frequency=MONTHLY&purpose= HTTP/1.1" 200 3400
+2026-11-13 23:14:01 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206100
+2026-11-13 23:14:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:14:06 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 206095
+2026-11-13 23:14:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:14:24 [INFO] django.server: "GET /loans/9941ca84-6d9d-48e8-9c82-1aeeac45d072/ HTTP/1.1" 200 205550
+2026-11-13 23:14:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:14:32 [INFO] django.server: "GET /payments/record/9941ca84-6d9d-48e8-9c82-1aeeac45d072/ HTTP/1.1" 200 201507
+2026-11-13 23:15:13 [INFO] django.server: "POST /payments/record/9941ca84-6d9d-48e8-9c82-1aeeac45d072/ HTTP/1.1" 204 0
+2026-11-13 23:15:13 [INFO] django.server: "GET /payments/receipt/f9349ff4-8f69-4eb7-990b-ee8a7b879b0b/ HTTP/1.1" 200 206999
+2026-11-13 23:15:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:15:21 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-13 23:15:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:15:30 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 205968
+2026-11-13 23:15:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:15:49 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-13 23:15:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:16:07 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:16:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:16:11 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-13 23:16:26 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-13 23:28:03 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:28:04 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:28:05 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-13 23:28:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:28:10 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-13 23:28:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:28:12 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267882
+2026-11-13 23:28:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:28:18 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 188567
+2026-11-13 23:28:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:32:57 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267882
+2026-11-13 23:32:59 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:33:14 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-13 23:33:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:33:20 [INFO] django.server: "GET /clients/b76ba857-8284-4cd3-b77f-441029503795/ HTTP/1.1" 200 199455
+2026-11-13 23:33:20 [WARNING] django.request: Not Found: /media/aba/photos/client_b76ba857-8284-4cd3-b77f-441029503795/ID.jfif
+2026-11-13 23:33:20 [WARNING] django.server: "GET /media/aba/photos/client_b76ba857-8284-4cd3-b77f-441029503795/ID.jfif HTTP/1.1" 404 179
+2026-11-13 23:33:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:33:27 [INFO] django.server: "GET /loans/5d05c9c6-50c0-4d6f-b062-7f36d9246ed5/ HTTP/1.1" 200 207301
+2026-11-13 23:33:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:33:34 [INFO] django.server: "GET /payments/record/5d05c9c6-50c0-4d6f-b062-7f36d9246ed5/ HTTP/1.1" 200 201508
+2026-11-13 23:33:51 [INFO] django.server: "POST /payments/record/5d05c9c6-50c0-4d6f-b062-7f36d9246ed5/ HTTP/1.1" 204 0
+2026-11-13 23:33:51 [INFO] django.server: "GET /payments/receipt/35d56eea-72ee-42d2-90d7-321a57a1feb4/ HTTP/1.1" 200 206861
+2026-11-13 23:33:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:33:54 [INFO] django.server: "GET /payments/receipt/35d56eea-72ee-42d2-90d7-321a57a1feb4/?style=modern HTTP/1.1" 200 210964
+2026-11-13 23:33:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:34:26 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-13 23:34:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:34:31 [INFO] django.server: "GET /accounts/dashboard/?period=12&date_from=&date_to=&branch= HTTP/1.1" 200 10298
+2026-11-13 23:34:33 [INFO] django.server: "GET /accounts/dashboard/?period=3&date_from=&date_to=&branch= HTTP/1.1" 200 8804
+2026-11-13 23:34:35 [INFO] django.server: "GET /accounts/dashboard/?period=month&date_from=&date_to=&branch= HTTP/1.1" 200 8329
+2026-11-13 23:34:47 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-13 23:34:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:34:51 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-13 23:34:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:35:46 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-13 23:35:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:36:44 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-13 23:36:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:36:51 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-13 23:36:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:36:54 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 188107
+2026-11-13 23:36:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:37:36 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-13 23:37:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:37:41 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 205968
+2026-11-13 23:37:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:37:55 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-13 23:37:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:38:01 [INFO] django.server: "GET /reports/overdue/ HTTP/1.1" 200 188567
+2026-11-13 23:38:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-13 23:40:05 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-13 23:40:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:09:40 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:09:40 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 00:09:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:09:59 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 00:10:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:10:02 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 203372
+2026-11-14 00:10:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:10:21 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=UzzAMY3eE7NfY38hyzH08pkwFo8WF0HFAQphVJ3bz8nlYVNp8Ak61eMPo7N6nRiv&branch=1&product=1&principal=300000&term_months=1&frequency=MONTHLY&purpose= HTTP/1.1" 200 3400
+2026-11-14 00:10:27 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 00:10:27 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 200 206907
+2026-11-14 00:10:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:11:44 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 200 206907
+2026-11-14 00:11:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:14:13 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:14:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:14:15 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 00:14:17 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 208488
+2026-11-14 00:14:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:14:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:14:19 [INFO] django.server: "GET /loans/98527598-baf6-4ae6-8086-2c1068397ca3/ HTTP/1.1" 200 217167
+2026-11-14 00:14:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:15:41 [INFO] django.server: "GET /loans/98527598-baf6-4ae6-8086-2c1068397ca3/print/ HTTP/1.1" 200 32151
+2026-11-14 00:15:41 [WARNING] django.request: Not Found: /media/aba/user_signatures/sign.png
+2026-11-14 00:15:41 [WARNING] django.server: "GET /media/aba/user_signatures/sign.png HTTP/1.1" 404 179
+2026-11-14 00:15:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:20:23 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 00:20:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:20:25 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:20:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:20:28 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-14 00:20:41 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-14 00:20:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:20:43 [INFO] django.server: "GET /reports/collateral-ledger/ HTTP/1.1" 200 194069
+2026-11-14 00:20:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:21:04 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:21:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:25:21 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\models.py changed, reloading.
+2026-11-14 00:25:23 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:25:30 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\utils.py changed, reloading.
+2026-11-14 00:25:31 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:25:38 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:25:39 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:25:54 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:25:56 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:26:12 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:26:14 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:26:14 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:26:15 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:26:15 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:26:16 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:26:16 [INFO] django.server: "GET /payments/ HTTP/1.1" 200 204135
+2026-11-14 00:26:17 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:26:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:26:19 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:26:30 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:26:32 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:26:38 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:26:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:26:41 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 208488
+2026-11-14 00:26:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:26:48 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 00:26:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:27:47 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 00:27:49 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:29:43 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\utils.py changed, reloading.
+2026-11-14 00:29:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 00:32:34 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:32:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:32:37 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:33:50 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:33:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:33:56 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-14 00:34:39 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:34:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:35:38 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:35:39 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:35:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:35:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:35:46 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:38:50 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:38:51 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:38:51 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:38:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:38:54 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:42:33 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:42:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:42:36 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-14 00:48:27 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:48:28 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:48:29 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:48:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:48:41 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:48:41 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:48:41 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:48:41 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 00:48:41 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 00:48:41 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 00:48:42 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:48:42 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:48:42 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 00:48:42 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 00:48:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:48:42 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 00:48:42 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 00:48:42 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:48:46 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:48:46 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:48:46 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:48:46 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 00:48:46 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 00:48:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:48:49 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:48:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:48:52 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-14 00:49:26 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:49:26 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 00:49:26 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 00:49:26 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 00:49:26 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:49:26 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:49:26 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:49:26 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:49:26 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 00:49:26 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 00:49:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:49:27 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 00:49:27 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 00:49:27 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 00:49:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:49:29 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 4542
+2026-11-14 00:49:33 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:49:41 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 00:49:41 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 00:49:41 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 00:49:41 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 00:49:41 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 00:49:41 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 00:49:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:11 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9724
+2026-11-14 00:50:21 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 00:50:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:24 [INFO] django.server: "GET /clients/new/ HTTP/1.1" 200 212961
+2026-11-14 00:50:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:26 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 00:50:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:31 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 00:50:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:36 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206642
+2026-11-14 00:50:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:41 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 00:50:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:50:43 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 00:51:15 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 208488
+2026-11-14 00:51:16 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 00:51:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:51:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 00:51:18 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 00:51:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:03:53 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 01:03:55 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:11:44 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 01:11:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:22:20 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 01:22:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:22:26 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:22:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:22:30 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 01:24:24 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:24:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:32:22 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:32:22 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:32:23 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:32:23 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:32:23 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:32:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:32:27 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:32:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:32:33 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 01:32:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:32:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:32:53 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:32:53 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:32:53 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:32:53 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 01:32:53 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 01:32:53 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 01:32:54 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:32:54 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:32:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:32:54 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 01:32:54 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 01:32:54 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 01:32:54 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 01:32:54 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 01:32:54 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:32:59 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-11-14 01:32:59 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14239
+2026-11-14 01:32:59 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-14 01:32:59 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:32:59 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-14 01:32:59 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:33:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:33:01 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-11-14 01:33:01 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:33:02 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 01:33:02 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 01:33:02 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 304 0
+2026-11-14 01:33:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:33:06 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 01:33:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:15 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 208488
+2026-11-14 01:34:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:19 [INFO] django.server: "GET /loans/2a249338-193f-4ef2-8b51-26b7f50cc4cb/ HTTP/1.1" 200 205648
+2026-11-14 01:34:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:25 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 01:34:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:31 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206642
+2026-11-14 01:34:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:38 [INFO] django.server: "GET /loans/schedule-preview/?csrfmiddlewaretoken=5VvcfrwUK5HW4pKrn678kcSVEku4b2TWtsU7zDfeJ4cyfbTvss41YjTgxdPiX1RC&branch=1&product=1&principal=300000.00&term_months=3&frequency=MONTHLY&purpose= HTTP/1.1" 200 4054
+2026-11-14 01:34:43 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 01:34:43 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 200 207563
+2026-11-14 01:34:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:49 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/step3/ HTTP/1.1" 302 0
+2026-11-14 01:34:49 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/review/?draft_id=fe7abb26-e776-4a2a-8fef-073b77d2bbde HTTP/1.1" 200 198275
+2026-11-14 01:34:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:34:54 [INFO] django.server: "POST /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/review/?draft_id=fe7abb26-e776-4a2a-8fef-073b77d2bbde HTTP/1.1" 302 0
+2026-11-14 01:34:54 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205703
+2026-11-14 01:34:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:40:47 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 01:40:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:40:54 [INFO] django.server: "GET /accounts/admin-panel/bank-accounts/ HTTP/1.1" 200 189561
+2026-11-14 01:40:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:40:59 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:41:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:41:34 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9724
+2026-11-14 01:42:04 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9724
+2026-11-14 01:42:34 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=&date_to=&branch= HTTP/1.1" 200 9724
+2026-11-14 01:42:49 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 01:42:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:42:52 [INFO] django.server: "GET /clients/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 197719
+2026-11-14 01:42:52 [WARNING] django.request: Not Found: /media/aba/photos/client_e0d66388-1585-4015-82ed-0a336af542f2/ID.jfif
+2026-11-14 01:42:52 [WARNING] django.server: "GET /media/aba/photos/client_e0d66388-1585-4015-82ed-0a336af542f2/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:42:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:43:05 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-14 01:43:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:43:17 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:43:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:44:13 [INFO] django.server: "GET /reports/loan-book/download/?&mode=inline HTTP/1.1" 200 2882
+2026-11-14 01:44:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:49:50 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:49:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:51:15 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:51:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:51:31 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14239
+2026-11-14 01:51:31 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-14 01:51:31 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-14 01:51:31 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:51:31 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:51:31 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-14 01:51:31 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-14 01:51:31 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 01:51:31 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 01:51:50 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-11-14 01:51:50 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:51:51 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:51:51 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:51:51 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 01:51:51 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 01:51:51 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 01:51:51 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:51:51 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:51:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:51:51 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 01:51:51 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 01:51:52 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:51:59 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 207323
+2026-11-14 01:51:59 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 01:51:59 [WARNING] django.request: Not Found: /static/js/aba.js
+2026-11-14 01:51:59 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 01:51:59 [WARNING] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 404 179
+2026-11-14 01:52:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:52:02 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 01:52:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:52:05 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 203376
+2026-11-14 01:52:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:52:17 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:52:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:52:19 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 01:55:29 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 01:55:37 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:55:38 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:55:38 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:55:39 [INFO] django.server: "GET /reports/loan-book/ HTTP/1.1" 200 197709
+2026-11-14 01:55:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:55:42 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:55:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:55:44 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 01:56:04 [WARNING] django.request: Not Found: /loans/products/
+2026-11-14 01:56:04 [WARNING] django.server: "GET /loans/products/ HTTP/1.1" 404 0
+2026-11-14 01:56:05 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 01:56:05 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 01:56:10 [WARNING] django.request: Not Found: /
+2026-11-14 01:56:10 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 01:56:11 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 01:56:11 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 01:56:31 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 01:56:31 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 01:56:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:56:36 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 192935
+2026-11-14 01:56:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 01:56:39 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 4527
+2026-11-14 01:58:08 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 01:58:35 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 01:58:35 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-11-14 01:58:36 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 01:58:36 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 01:58:46 [WARNING] django.request: Not Found: /
+2026-11-14 01:58:46 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 01:58:47 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 01:58:47 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 02:00:20 [WARNING] django.request: Not Found: /
+2026-11-14 02:00:20 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 02:00:20 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 02:00:48 [WARNING] django.request: Not Found: /
+2026-11-14 02:01:39 [WARNING] django.request: Not Found: /
+2026-11-14 02:01:39 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:01:40 [WARNING] django.request: Not Found: /
+2026-11-14 02:01:40 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:01:41 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 02:01:41 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 02:01:59 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 02:01:59 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-11-14 02:01:59 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:01:59 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 0
+2026-11-14 02:02:03 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 02:02:03 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-11-14 02:03:54 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14161
+2026-11-14 02:03:54 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-14 02:03:54 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-14 02:03:54 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:03:54 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:04:11 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 14340
+2026-11-14 02:04:11 [WARNING] django.request: Not Found: /static/css/aba.css
+2026-11-14 02:04:11 [WARNING] django.server: "GET /static/css/aba.css HTTP/1.1" 404 179
+2026-11-14 02:04:42 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 14340
+2026-11-14 02:04:42 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:04:51 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 14340
+2026-11-14 02:04:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:05:00 [INFO] django.server: "GET / HTTP/1.1" 200 14161
+2026-11-14 02:06:07 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 02:06:11 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:11 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:13 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:13 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:13 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:13 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:06:14 [WARNING] django.request: Not Found: /
+2026-11-14 02:06:14 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:07:22 [WARNING] django.request: Not Found: /
+2026-11-14 02:07:22 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:07:22 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:07:22 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 0
+2026-11-14 02:08:07 [WARNING] django.request: Not Found: /
+2026-11-14 02:08:07 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:08:17 [WARNING] django.request: Not Found: /
+2026-11-14 02:08:17 [WARNING] django.server: "GET / HTTP/1.1" 404 0
+2026-11-14 02:08:31 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 02:08:31 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 02:08:31 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 02:08:31 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-11-14 02:08:31 [WARNING] django.request: Not Found: /sw.js
+2026-11-14 02:08:31 [WARNING] django.server: "GET /sw.js HTTP/1.1" 404 0
+2026-11-14 02:08:31 [WARNING] django.request: Not Found: /accounts/login/
+2026-11-14 02:08:31 [WARNING] django.server: "GET /accounts/login/ HTTP/1.1" 404 0
+2026-11-14 02:09:56 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-14 02:09:56 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14239
+2026-11-14 02:09:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:09:56 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:09:56 [INFO] django.server: - Broken pipe from ('127.0.0.1', 64652)
+2026-11-14 02:10:01 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-14 02:10:01 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:10:01 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:10:01 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:10:01 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:10:01 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:10:21 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-11-14 02:10:21 [ERROR] django.request: Internal Server Error: /accounts/dashboard/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 219, in dashboard
+    return _ceo_dashboard(request, today)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 700, in _ceo_dashboard
+    overdue_count = overdue_30.count()
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 620, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 629, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 615, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+2026-11-14 02:10:21 [ERROR] django.server: "GET /accounts/dashboard/ HTTP/1.1" 500 145
+2026-11-14 02:10:59 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:10:59 [ERROR] django.request: Internal Server Error: /accounts/dashboard/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 219, in dashboard
+    return _ceo_dashboard(request, today)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 700, in _ceo_dashboard
+    overdue_count = overdue_30.count()
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 620, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 629, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 615, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+2026-11-14 02:10:59 [ERROR] django.server: "GET /accounts/dashboard/ HTTP/1.1" 500 145
+2026-11-14 02:11:08 [INFO] django.server: "GET / HTTP/1.1" 200 14239
+2026-11-14 02:11:08 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14239
+2026-11-14 02:11:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:11:08 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:11:08 [INFO] django.server: - Broken pipe from ('127.0.0.1', 64755)
+2026-11-14 02:12:37 [ERROR] django.request: Internal Server Error: /accounts/dashboard/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 219, in dashboard
+    return _ceo_dashboard(request, today)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 700, in _ceo_dashboard
+    overdue_count = overdue_30.count()
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 620, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 629, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 615, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column loans_loan.penalty_enabled does not exist
+LINE 1: ..., "loans_loan"."penalty_rate_monthly" AS "col14", "loans_loa...
+                                                             ^
+
+2026-11-14 02:12:37 [ERROR] django.server: "GET /accounts/dashboard/ HTTP/1.1" 500 145
+2026-11-14 02:13:24 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:13:24 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:13:24 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:13:24 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-14 02:13:24 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:13:24 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:13:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:13:24 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 02:13:24 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:13:24 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 02:13:25 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:13:37 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 193197
+2026-11-14 02:13:37 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:13:37 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:13:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:13:40 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 5386
+2026-11-14 02:14:00 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 02:14:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:14:02 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:14:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:14:57 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 193197
+2026-11-14 02:14:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:15:02 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 02:15:35 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:15:36 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:15:36 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-14 02:15:36 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:15:36 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:15:36 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 02:15:36 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:15:36 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:15:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:15:36 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:15:36 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 02:15:36 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 02:15:36 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:15:58 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 206850
+2026-11-14 02:15:58 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:15:58 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:16:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:04 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 196086
+2026-11-14 02:16:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:10 [INFO] django.server: "GET /reports/company-ledger/ HTTP/1.1" 200 238845
+2026-11-14 02:16:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:27 [INFO] django.server: "GET /accounts/guarantors/ HTTP/1.1" 200 188107
+2026-11-14 02:16:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:29 [INFO] django.server: "GET /accounts/guarantors/new/ HTTP/1.1" 200 189276
+2026-11-14 02:16:43 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 200487
+2026-11-14 02:16:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:47 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 199613
+2026-11-14 02:16:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:16:52 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/edit/ HTTP/1.1" 200 212659
+2026-11-14 02:16:54 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:17:18 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 02:17:20 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:17:21 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:17:23 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:20:28 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:20:30 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:20:31 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:20:31 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:20:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:20:59 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:21:00 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:21:00 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:21:02 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:21:32 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 02:21:32 [INFO] django.server: "GET /accounts/login/?next=/loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 14239
+2026-11-14 02:21:32 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:21:32 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:21:32 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:21:49 [INFO] django.server: "POST /accounts/login/?next=/loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 02:21:49 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:21:49 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-14 02:21:49 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 02:21:49 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:21:49 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:21:49 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:21:49 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:21:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:21:49 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:21:49 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:21:49 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 02:21:49 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:21:49 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 02:21:50 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:26:42 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 02:26:44 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 206117
+2026-11-14 02:26:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:26:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:27:58 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 302 0
+2026-11-14 02:27:58 [INFO] django.server: "GET /accounts/login/?next=/loans/apply/ HTTP/1.1" 200 14239
+2026-11-14 02:27:58 [INFO] django.server: - Broken pipe from ('127.0.0.1', 65336)
+2026-11-14 02:28:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:28:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:29:13 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 206117
+2026-11-14 02:29:14 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 206117
+2026-11-14 02:29:15 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 206117
+2026-11-14 02:29:16 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 206117
+2026-11-14 02:29:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:29:38 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:38 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:29:38 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:29:39 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:39 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:40 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:29:40 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:40 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:29:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:29:52 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 02:29:52 [INFO] django.server: "GET /accounts/login/?next=/loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 14239
+2026-11-14 02:29:52 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:29:52 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:29:52 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:29:53 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:29:53 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:30:11 [INFO] django.server: "POST /accounts/login/?next=/loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 14418
+2026-11-14 02:30:11 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:30:11 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:30:29 [INFO] django.server: "POST /accounts/login/?next=/loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 302 0
+2026-11-14 02:30:29 [INFO] django.server: "GET /loans/apply/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 206113
+2026-11-14 02:30:29 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-14 02:30:29 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:30:29 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 02:30:29 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:30:29 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:30:29 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:30:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:30:30 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 02:30:30 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:30:30 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 188706
+2026-11-14 02:30:30 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:32:24 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 193197
+2026-11-14 02:32:24 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:32:24 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:32:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:34:50 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 205923
+2026-11-14 02:34:52 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:38:24 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 02:38:55 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 193197
+2026-11-14 02:38:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:39:05 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 02:39:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:39:08 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 207323
+2026-11-14 02:39:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:39:15 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:39:17 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:39:44 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:39:46 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:39:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:39:47 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:39:47 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:39:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:40:03 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:04 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:05 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:05 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:06 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:40:21 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:22 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:22 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:23 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:40:36 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:37 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:40:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:42:01 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 205923
+2026-11-14 02:42:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:42:06 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 267883
+2026-11-14 02:42:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:42:36 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-13&date_to=2026-11-13&branch= HTTP/1.1" 200 4524
+2026-11-14 02:42:41 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:42:42 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 205169
+2026-11-14 02:42:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:43:06 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-13&date_to=2026-11-13&branch= HTTP/1.1" 200 4524
+2026-11-14 02:43:16 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 206097
+2026-11-14 02:43:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:44:05 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 211098
+2026-11-14 02:44:05 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 200 8366
+2026-11-14 02:44:05 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 200 5990
+2026-11-14 02:44:06 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:44:06 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=INTEREST_ONLY HTTP/1.1" 200 173
+2026-11-14 02:44:07 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:44:55 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:44:55 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 200 8366
+2026-11-14 02:44:55 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 200 5990
+2026-11-14 02:44:57 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:44:58 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:45:12 [INFO] django.server: "GET /loans/calculator/preview/?principal=50000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 167
+2026-11-14 02:45:14 [INFO] django.server: "GET /loans/calculator/preview/?principal=6&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 150
+2026-11-14 02:45:14 [INFO] django.server: "GET /loans/calculator/preview/?principal=60&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 152
+2026-11-14 02:45:15 [INFO] django.server: "GET /loans/calculator/preview/?principal=600&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 157
+2026-11-14 02:45:16 [INFO] django.server: "GET /loans/calculator/preview/?principal=6000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 162
+2026-11-14 02:45:16 [INFO] django.server: "GET /loans/calculator/preview/?principal=60000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 167
+2026-11-14 02:45:18 [INFO] django.server: "GET /loans/calculator/preview/?principal=600000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:45:29 [WARNING] django.request: Bad Request: /loans/calculator/preview/
+2026-11-14 02:45:29 [WARNING] django.server: "GET /loans/calculator/preview/?principal=600000&monthly_rate=&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 400 50
+2026-11-14 02:45:30 [INFO] django.server: "GET /loans/calculator/preview/?principal=600000&monthly_rate=1&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 171
+2026-11-14 02:45:30 [INFO] django.server: "GET /loans/calculator/preview/?principal=600000&monthly_rate=18&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 177
+2026-11-14 02:46:07 [INFO] django.server: "GET /loans/calculator/preview/?principal=600000&monthly_rate=18&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 177
+2026-11-14 02:46:48 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=INTEREST_ONLY HTTP/1.1" 200 173
+2026-11-14 02:47:45 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=INTEREST_ONLY HTTP/1.1" 200 173
+2026-11-14 02:48:27 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 211098
+2026-11-14 02:48:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:48:30 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:48:35 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:48:44 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:48:46 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:48:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:50:10 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:50:12 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:50:13 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:50:28 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 302 0
+2026-11-14 02:50:28 [INFO] django.server: "GET /accounts/login/?next=/loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 14239
+2026-11-14 02:50:28 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 53135
+2026-11-14 02:50:28 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:50:28 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:50:28 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 02:50:28 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 02:50:30 [INFO] django.server: "POST /accounts/login/?next=/loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 302 0
+2026-11-14 02:50:30 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:50:30 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 200 8366
+2026-11-14 02:50:31 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36010
+2026-11-14 02:50:31 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 200 5990
+2026-11-14 02:50:31 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:50:31 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:50:31 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 02:50:32 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:50:32 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:50:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:50:32 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 193818
+2026-11-14 02:50:32 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 02:50:32 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 02:50:32 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 272995
+2026-11-14 02:50:34 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:50:38 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:53:31 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:54:10 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:54:10 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 304 0
+2026-11-14 02:54:11 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 304 0
+2026-11-14 02:54:11 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 02:54:11 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 02:54:11 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 210281
+2026-11-14 02:54:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:54:20 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:54:36 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 211098
+2026-11-14 02:54:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:54:39 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:55:28 [INFO] django.server: "GET /loans/apply/e0d66388-1585-4015-82ed-0a336af542f2/ HTTP/1.1" 200 211098
+2026-11-14 02:55:30 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:55:31 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:55:39 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:57:46 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 198309
+2026-11-14 02:57:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:58:05 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 02:58:16 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 212435
+2026-11-14 02:58:18 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:58:18 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 02:58:24 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 212435
+2026-11-14 02:58:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 02:58:30 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:10:49 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 205599
+2026-11-14 03:10:51 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:14:12 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 201198
+2026-11-14 03:14:13 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 03:14:15 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:14:20 [INFO] django.server: "GET /reports/client-statement/ HTTP/1.1" 200 193581
+2026-11-14 03:14:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:14:22 [INFO] django.server: "GET /reports/client-statement/?client= HTTP/1.1" 200 193589
+2026-11-14 03:14:24 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:14:26 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 198630
+2026-11-14 03:14:28 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:14:36 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:20:33 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 198630
+2026-11-14 03:20:35 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:20:36 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:20:40 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:20:51 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:21:03 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:22:47 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 198630
+2026-11-14 03:22:49 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:22:49 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:22:58 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 212435
+2026-11-14 03:22:58 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 212435
+2026-11-14 03:22:59 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 212435
+2026-11-14 03:23:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:23:01 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 210062
+2026-11-14 03:23:02 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:23:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:23:17 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:23:28 [INFO] django.server: "GET /loans/calculator/preview/?principal=1&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 150
+2026-11-14 03:23:28 [INFO] django.server: "GET /loans/calculator/preview/?principal=10&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 151
+2026-11-14 03:23:28 [INFO] django.server: "GET /loans/calculator/preview/?principal=100&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 156
+2026-11-14 03:23:29 [INFO] django.server: "GET /loans/calculator/preview/?principal=1000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 161
+2026-11-14 03:23:29 [INFO] django.server: "GET /loans/calculator/preview/?principal=10000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 166
+2026-11-14 03:23:29 [INFO] django.server: "GET /loans/calculator/preview/?principal=100000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 171
+2026-11-14 03:23:39 [INFO] django.server: "GET /loans/calculator/preview/?principal=100000&monthly_rate=5&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:23:50 [INFO] django.server: "GET /loans/calculator/preview/?principal=100000&monthly_rate=2&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:23:51 [INFO] django.server: "GET /loans/calculator/preview/?principal=100000&monthly_rate=20&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 173
+2026-11-14 03:28:09 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 198630
+2026-11-14 03:28:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:28:23 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:30:41 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 03:30:42 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 03:30:42 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 200 9527
+2026-11-14 03:30:42 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 200 36062
+2026-11-14 03:30:42 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 200 8879
+2026-11-14 03:30:42 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 03:30:42 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 03:30:42 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 03:30:42 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 03:30:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:30:42 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 03:30:42 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 03:30:42 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 194872
+2026-11-14 03:30:43 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 03:31:03 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:31:18 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=WEEKLY&method=REDUCING HTTP/1.1" 200 173
+2026-11-14 03:32:06 [INFO] django.server: "GET /accounts/dashboard/?period=6&date_from=2026-11-14&date_to=2026-11-14&branch= HTTP/1.1" 200 3549
+2026-11-14 03:32:44 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 199684
+2026-11-14 03:32:44 [INFO] django.server: "GET /static/css/loan-calculator.css?v=1 HTTP/1.1" 304 0
+2026-11-14 03:32:44 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-2 HTTP/1.1" 304 0
+2026-11-14 03:32:44 [INFO] django.server: "GET /static/js/loan-calculator.js?v=1 HTTP/1.1" 304 0
+2026-11-14 03:32:45 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 03:32:45 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 03:32:45 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:32:45 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=WEEKLY&method=REDUCING HTTP/1.1" 200 173
+2026-11-14 03:32:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:34:45 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 03:35:18 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 199684
+2026-11-14 03:35:18 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:35:18 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=WEEKLY&method=REDUCING HTTP/1.1" 200 173
+2026-11-14 03:35:19 [INFO] django.server: "GET /loans/calculator/pdf/?principal=500000&monthly_rate=5&term_months=12&frequency=WEEKLY&method=REDUCING HTTP/1.1" 200 84745
+2026-11-14 03:35:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:36:13 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=WEEKLY&method=REDUCING HTTP/1.1" 200 173
+2026-11-14 03:36:39 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 210062
+2026-11-14 03:36:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:36:41 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:37:35 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 199684
+2026-11-14 03:37:35 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 200 9527
+2026-11-14 03:37:35 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 36062
+2026-11-14 03:37:35 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 200 8879
+2026-11-14 03:37:36 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:37:36 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=BIWEEKLY&method=INTEREST_ONLY HTTP/1.1" 200 173
+2026-11-14 03:37:36 [INFO] django.server: "GET /loans/calculator/pdf/?principal=500000&monthly_rate=5&term_months=12&frequency=BIWEEKLY&method=INTEREST_ONLY HTTP/1.1" 200 82483
+2026-11-14 03:37:36 [INFO] django.server: "GET /loans/calculator/pdf/?principal=500000&monthly_rate=5&term_months=12&frequency=BIWEEKLY&method=INTEREST_ONLY HTTP/1.1" 200 82483
+2026-11-14 03:37:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:42:32 [INFO] django.server: "GET /reports/client-statement/?client=e0d66388-1585-4015-82ed-0a336af542f2 HTTP/1.1" 200 199684
+2026-11-14 03:42:32 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 200 9527
+2026-11-14 03:42:32 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 36062
+2026-11-14 03:42:32 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 200 8879
+2026-11-14 03:42:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:43:51 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 211116
+2026-11-14 03:43:51 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 200 9527
+2026-11-14 03:43:51 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 36062
+2026-11-14 03:43:51 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 200 8879
+2026-11-14 03:43:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 03:43:54 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:59:43 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 211116
+2026-11-14 03:59:43 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 03:59:44 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 211116
+2026-11-14 03:59:46 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 03:59:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:00:01 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 173
+2026-11-14 04:00:02 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=5&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 174
+2026-11-14 04:00:23 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 173
+2026-11-14 04:00:23 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=10&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 04:00:26 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=1&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 173
+2026-11-14 04:00:30 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=5&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 174
+2026-11-14 04:00:39 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=5&frequency=MONTHLY&method=INTEREST_ONLY HTTP/1.1" 200 173
+2026-11-14 04:08:32 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 04:08:40 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 211116
+2026-11-14 04:08:42 [INFO] django.server: "GET /loans/6f30dad7-5831-4b52-952c-b52789d0c6ba/ HTTP/1.1" 200 211116
+2026-11-14 04:08:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:08:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:08:45 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 04:08:47 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 04:09:27 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 04:09:32 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 206653
+2026-11-14 04:09:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:09:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 04:09:37 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:09:59 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 213489
+2026-11-14 04:10:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:10:02 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 211335
+2026-11-14 04:10:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:14:49 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\models.py changed, reloading.
+2026-11-14 04:14:51 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 04:14:56 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\views.py changed, reloading.
+2026-11-14 04:14:57 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 04:15:01 [INFO] django.utils.autoreload: C:\Users\USER\abacash\loans\urls.py changed, reloading.
+2026-11-14 04:15:02 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 04:20:31 [ERROR] django.request: Internal Server Error: /accounts/dashboard/
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column loans_loan.query_reason does not exist
+LINE 1: ...l35", "loans_loan"."rejection_reason" AS "col36", "loans_loa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 23, in _wrapper_view
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 219, in dashboard
+    return _ceo_dashboard(request, today)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\accounts\views.py", line 700, in _ceo_dashboard
+    overdue_count = overdue_30.count()
+                    ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\query.py", line 620, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 629, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\query.py", line 615, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\USER\abacash\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column loans_loan.query_reason does not exist
+LINE 1: ...l35", "loans_loan"."rejection_reason" AS "col36", "loans_loa...
+                                                             ^
+
+2026-11-14 04:20:31 [ERROR] django.server: "GET /accounts/dashboard/ HTTP/1.1" 500 145
+2026-11-14 04:20:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:22:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 04:22:04 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 04:22:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:22:46 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 222447
+2026-11-14 04:22:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:23:58 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 211627
+2026-11-14 04:24:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:24:01 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 211627
+2026-11-14 04:24:03 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:24:17 [INFO] django.server: "POST /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/query/ HTTP/1.1" 302 0
+2026-11-14 04:24:17 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 212387
+2026-11-14 04:24:19 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:24:24 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 213489
+2026-11-14 04:24:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:24:27 [INFO] django.server: "GET /loans/fe7abb26-e776-4a2a-8fef-073b77d2bbde/ HTTP/1.1" 200 211845
+2026-11-14 04:24:29 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:24:29 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 213489
+2026-11-14 04:24:32 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:26:20 [INFO] django.server: "GET /loans/f7f24260-f126-4854-a286-6a2d6a3fc23a/ HTTP/1.1" 200 222447
+2026-11-14 04:26:22 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 04:26:23 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 213489
+2026-11-14 04:26:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:02 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 206653
+2026-11-14 05:08:02 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 05:08:04 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 05:08:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:06 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:09 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 212263
+2026-11-14 05:08:11 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:25 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 05:08:29 [INFO] django.server: "GET /loans/calculator/preview/?principal=1500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 176
+2026-11-14 05:08:44 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 213489
+2026-11-14 05:08:46 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:51 [INFO] django.server: "GET /loans/2a249338-193f-4ef2-8b51-26b7f50cc4cb/ HTTP/1.1" 200 211823
+2026-11-14 05:08:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:08:58 [INFO] django.server: "GET /reports/ HTTP/1.1" 200 202252
+2026-11-14 05:09:00 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:09:02 [INFO] django.server: "GET /reports/cash-flow/ HTTP/1.1" 200 217485
+2026-11-14 05:09:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:09:24 [INFO] django.server: "GET /accounts/admin-panel/expenses/ HTTP/1.1" 200 213016
+2026-11-14 05:09:27 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 05:09:27 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:53:36 [INFO] django.server: "GET /accounts/admin-panel/expenses/2/edit/ HTTP/1.1" 200 200509
+2026-11-14 07:53:36 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 07:53:36 [INFO] django.server: "GET /accounts/admin-panel/expenses/2/edit/ HTTP/1.1" 200 200509
+2026-11-14 07:53:38 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:53:41 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 206653
+2026-11-14 07:53:43 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:53:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 07:53:50 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:54:02 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 205779
+2026-11-14 07:54:04 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:54:07 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:54:11 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:55:23 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 205779
+2026-11-14 07:55:25 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:55:26 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:56:19 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 205779
+2026-11-14 07:56:21 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:56:38 [INFO] django.server: "GET /clients/689c8cb2-f963-44d1-92ef-f2b1bbd9b58e/ HTTP/1.1" 200 205779
+2026-11-14 07:56:38 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 304 0
+2026-11-14 07:56:38 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 304 0
+2026-11-14 07:56:38 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 304 0
+2026-11-14 07:56:38 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 07:56:38 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 07:56:38 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 07:56:40 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 07:56:40 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 07:56:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:56:41 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 07:56:41 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 07:56:41 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 07:56:41 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 194872
+2026-11-14 07:56:41 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 07:56:45 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:56:50 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:57:23 [INFO] django.server: "GET /clients/ HTTP/1.1" 200 206653
+2026-11-14 07:57:23 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 07:57:23 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 07:57:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:57:27 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 07:57:31 [INFO] django.server: "GET /clients/b76ba857-8284-4cd3-b77f-441029503795/ HTTP/1.1" 200 205621
+2026-11-14 07:57:31 [WARNING] django.request: Not Found: /media/aba/photos/client_b76ba857-8284-4cd3-b77f-441029503795/ID.jfif
+2026-11-14 07:57:31 [WARNING] django.server: "GET /media/aba/photos/client_b76ba857-8284-4cd3-b77f-441029503795/ID.jfif HTTP/1.1" 404 179
+2026-11-14 07:57:33 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:57:40 [INFO] django.server: "GET /loans/5aa33be3-6fb5-44fb-8776-a7ae92777bdb/ HTTP/1.1" 200 216439
+2026-11-14 07:57:42 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:57:57 [INFO] django.server: "GET /loans/5aa33be3-6fb5-44fb-8776-a7ae92777bdb/reschedule/ HTTP/1.1" 200 4541
+2026-11-14 07:59:32 [INFO] django.server: "GET /loans/5aa33be3-6fb5-44fb-8776-a7ae92777bdb/ HTTP/1.1" 200 216439
+2026-11-14 07:59:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:59:39 [INFO] django.server: "GET /loans/apply/ HTTP/1.1" 200 212263
+2026-11-14 07:59:41 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:59:41 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 07:59:44 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 07:59:44 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 5386
+2026-11-14 08:00:34 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:00:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:00:38 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:00:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:00:40 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 5386
+2026-11-14 08:00:53 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 08:01:02 [INFO] django.server: "GET /payments/record/ HTTP/1.1" 200 207357
+2026-11-14 08:01:07 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:01:09 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:01:10 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 08:01:57 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 5386
+2026-11-14 08:02:52 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:02:52 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 08:02:52 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 08:02:52 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 08:02:52 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 200 8879
+2026-11-14 08:02:52 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 200 9527
+2026-11-14 08:02:52 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 36062
+2026-11-14 08:02:53 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 08:02:53 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 08:02:53 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:02:53 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 08:02:53 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 08:02:53 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 08:02:53 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 194872
+2026-11-14 08:02:53 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 08:02:54 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 08:03:05 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 08:03:54 [INFO] django.server: "GET /loans/products/new/ HTTP/1.1" 200 5386
+2026-11-14 08:05:35 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:05:35 [INFO] django.server: "GET /static/css/loan-calculator.css?v=2 HTTP/1.1" 200 9527
+2026-11-14 08:05:35 [INFO] django.server: "GET /static/js/loan-calculator.js?v=2 HTTP/1.1" 200 8879
+2026-11-14 08:05:35 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 36062
+2026-11-14 08:05:35 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 08:05:35 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-14 08:05:35 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 08:05:36 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 08:05:36 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 08:05:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:05:36 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-14 08:05:36 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 179
+2026-11-14 08:05:36 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-14 08:05:36 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 37382
+2026-11-14 08:05:36 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 194872
+2026-11-14 08:05:37 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 274049
+2026-11-14 08:05:39 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 08:05:47 [INFO] django.server: "GET /loans/products/1/edit/ HTTP/1.1" 200 5393
+2026-11-14 08:06:58 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-14 08:07:10 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:07:11 [WARNING] django.request: Not Found: /media/aba/company/ID.jfif
+2026-11-14 08:07:11 [WARNING] django.server: "GET /media/aba/company/ID.jfif HTTP/1.1" 404 179
+2026-11-14 08:07:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:07:14 [INFO] django.server: "GET /loans/products/ HTTP/1.1" 200 199363
+2026-11-14 08:07:16 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 08:07:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-14 08:07:21 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172
+2026-11-14 08:07:31 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 172

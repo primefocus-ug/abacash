@@ -309,6 +309,12 @@
           <strong>Rejection reason:</strong> {{ loan.rejection_reason }}
         </div>
         {% endif %}
+        {% if loan.query_reason %}
+        <div class="alert alert-warning mt-2" style="overflow-wrap:break-word;word-break:break-word;">
+          <strong>Information requested by {{ loan.reviewed_by.full_name|default:"the approver" }}:</strong>
+          {{ loan.query_reason }}
+        </div>
+        {% endif %}
       </div>
     </div>
 
@@ -351,14 +357,15 @@
             </form>
           </div>
 
-          <!-- Reject column -->
+          <!-- Query / reject column -->
           <div style="flex:1 1 280px;min-width:200px;max-width:100%;">
-            <form method="post" action="{% url 'loans:reject' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;width:100%;">
+            <form method="post" action="{% url 'loans:query' loan.pk %}" style="display:flex;flex-direction:column;gap:10px;width:100%;">
               {% csrf_token %}
-              <label for="rejection_reason" style="font-weight:600;font-size:13px;color:var(--text-muted);">Rejection reason (required)</label>
-              <textarea name="rejection_reason" id="rejection_reason" rows="4" placeholder="Explain why this loan is being rejected…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;"></textarea>
+              <label for="review_reason" style="font-weight:600;font-size:13px;color:var(--text-muted);">Reason for query or rejection (required)</label>
+              <textarea name="review_reason" id="review_reason" rows="4" placeholder="Enter a reason for querying or rejecting this loan…" required style="padding:8px;border:1px solid var(--border);border-radius:6px;width:100%;max-width:100%;"></textarea>
               <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-                <button type="submit" class="btn btn-danger" style="padding:10px 14px;font-weight:600;">Reject Loan</button>
+                <button type="submit" class="btn btn-secondary" formaction="{% url 'loans:query' loan.pk %}" style="padding:10px 14px;font-weight:600;">Query Applicant</button>
+                <button type="submit" class="btn btn-danger" formaction="{% url 'loans:reject' loan.pk %}" style="padding:10px 14px;font-weight:600;">Reject Loan</button>
               </div>
             </form>
           </div>

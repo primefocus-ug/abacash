@@ -17,7 +17,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from accounts.models import BankAccount, Branch, CompanySettings
 from accounts.branch_scope import (
@@ -51,6 +51,7 @@ from .utils import (
     serialize_loan_snapshot_fields,
     restore_loan_snapshot_fields,
 )
+from common.pdf_utils import generate_loan_calculator_pdf
 from payments.models import Payment
 
 
@@ -92,6 +93,103 @@ def _user_has_permission(user, codename):
     """Return True when the user object exposes the required permission check."""
     can = getattr(user, "can", None)
     return bool(can is not None and callable(can) and can(codename))
+
+
+def _loan_calculator_inputs(query_params):
+    try:
+        principal = Decimal(query_params.get("principal", ""))
+        monthly_rate = Decimal(query_params.get("monthly_rate", ""))
+        term_months = int(query_params.get("term_months", ""))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError("Enter a valid amount, rate, and term.") from None
+
+    if not principal.is_finite() or principal <= 0:
+        raise ValueError("Amount must be greater than zero.")
+    if principal > Decimal("9999999999999.99"):
+        raise ValueError("Amount exceeds the supported maximum.")
+    if not monthly_rate.is_finite() or monthly_rate < 0 or monthly_rate > Decimal("99.99"):
+        raise ValueError("Monthly rate must be between 0 and 99.99%.")
+    if term_months < 1 or term_months > 60:
+        raise ValueError("Term must be between 1 and 60 months.")
+
+    method = query_params.get("method", "")
+    if method not in dict(LoanProduct.InterestMethod.choices):
+        raise ValueError("Select a valid interest method.")
+
+    frequency = query_params.get("frequency", "")
+    if frequency not in dict(Loan.RepaymentFrequency.choices):
+        raise ValueError("Select a valid repayment frequency.")
+
+    return {
+        "principal": principal,
+        "monthly_rate": monthly_rate,
+        "term_months": term_months,
+        "method": method,
+        "frequency": frequency,
+    }
+
+
+def _loan_calculator_schedule(inputs):
+    schedule, totals = generate_schedule(
+        principal=inputs["principal"],
+        annual_rate=inputs["monthly_rate"] * Decimal("12"),
+        term_months=inputs["term_months"],
+        start_date=date.today(),
+        method=inputs["method"],
+        frequency=inputs["frequency"],
+    )
+    return schedule, totals
+
+
+@login_required
+@require_GET
+def loan_calculator_preview(request):
+    """Return a server-calculated estimate for the floating loan calculator."""
+    try:
+        inputs = _loan_calculator_inputs(request.GET)
+    except ValueError as error:
+        return JsonResponse({"error": str(error)}, status=400)
+
+    schedule, totals = _loan_calculator_schedule(inputs)
+    period_count = len(schedule)
+    average_payment = (
+        totals["total_repayable"] / Decimal(period_count)
+    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    return JsonResponse({
+        "period_count": period_count,
+        "total_interest": f'{totals["total_interest"]:.2f}',
+        "total_repayable": f'{totals["total_repayable"]:.2f}',
+        "average_payment": f"{average_payment:.2f}",
+        "first_payment": f'{schedule[0]["total_payment"]:.2f}',
+        "final_payment": f'{schedule[-1]["total_payment"]:.2f}',
+    })
+
+
+@login_required
+@require_GET
+def loan_calculator_pdf(request):
+    """Export the calculator estimate as a tenant-branded repayment schedule."""
+    try:
+        inputs = _loan_calculator_inputs(request.GET)
+    except ValueError as error:
+        return JsonResponse({"error": str(error)}, status=400)
+
+    schedule, totals = _loan_calculator_schedule(inputs)
+    company_settings = CompanySettings.get()
+    pdf_bytes = generate_loan_calculator_pdf(
+        company_settings=company_settings,
+        schedule=schedule,
+        totals=totals,
+        principal=inputs["principal"],
+        monthly_rate=inputs["monthly_rate"],
+        term_months=inputs["term_months"],
+        frequency_label=dict(Loan.RepaymentFrequency.choices)[inputs["frequency"]],
+        method_label=dict(LoanProduct.InterestMethod.choices)[inputs["method"]],
+    )
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="loan-schedule-estimate.pdf"'
+    return response
 
 
 def _disbursement_limit_error(user, amount, disbursement_date):
@@ -159,8 +257,40 @@ def _build_loan_basic_data(loan=None):
         "principal": loan.principal_amount,
         "term_months": loan.term_months,
         "frequency": loan.repayment_frequency,
+        "interest_method": loan.interest_method,
         "purpose": loan.purpose,
+        "processing_fee_enabled": loan.processing_fee_enabled,
+        "penalty_enabled": loan.penalty_enabled,
     }
+
+
+def _resolve_loan_interest_method(product, data, existing_loan=None):
+    method = data.get("interest_method")
+    if not method and existing_loan and existing_loan.product_id == product.pk:
+        method = existing_loan.interest_method
+    method = method or product.interest_method
+    if method not in dict(LoanProduct.InterestMethod.choices):
+        raise ValueError("Select a valid interest method.")
+    return method
+
+
+def _resolve_loan_fee_switches(product, data, can_override, existing_loan=None):
+    same_product_draft = (
+        existing_loan is not None and existing_loan.product_id == product.pk
+    )
+    if can_override:
+        processing_fee_requested = data.get("processing_fee_enabled") == "on"
+        penalty_requested = data.get("penalty_enabled") == "on"
+    elif same_product_draft:
+        processing_fee_requested = existing_loan.processing_fee_enabled
+        penalty_requested = existing_loan.penalty_enabled
+    else:
+        processing_fee_requested = True
+        penalty_requested = True
+
+    processing_fee_enabled = product.processing_fee_enabled and processing_fee_requested
+    penalty_enabled = product.penalty_enabled and penalty_requested
+    return processing_fee_enabled, penalty_enabled
 
 
 def _build_security_data(loan=None):
@@ -332,6 +462,7 @@ def loan_apply_step2(request, client_id):
         can_renew = bool(active_loan and active_loan.product and active_loan.product.allows_renewal and _user_has_permission(request.user, "can_approve_loans"))
 
     products = LoanProduct.objects.filter(is_active=True)
+    can_override_loan_fees = request.user.role == "CEO"
     active_branches = Branch.objects.filter(is_active=True).order_by("name")
     can_choose_branch = bool(getattr(request.user, "is_superuser", False)) or _user_has_permission(request.user, "can_view_all_branches")
     company_settings = CompanySettings.get()
@@ -357,6 +488,10 @@ def loan_apply_step2(request, client_id):
             purpose = data.get("purpose", "").strip()
 
             product = get_object_or_404(LoanProduct, pk=product_id, is_active=True)
+            interest_method = _resolve_loan_interest_method(product, data, loan)
+            processing_fee_enabled, penalty_enabled = _resolve_loan_fee_switches(
+                product, data, can_override_loan_fees, loan
+            )
 
             if principal < product.min_amount or principal > product.max_amount:
                 raise ValueError(
@@ -378,8 +513,13 @@ def loan_apply_step2(request, client_id):
             loan.product = product
             loan.principal_amount = principal
             loan.interest_rate_monthly = product.interest_rate_monthly
-            loan.interest_method = product.interest_method
+            loan.interest_method = interest_method
             loan.penalty_rate_monthly = product.penalty_rate_monthly
+            loan.penalty_enabled = penalty_enabled
+            if not penalty_enabled:
+                loan.penalty_rate_monthly = Decimal("0")
+            loan.processing_fee_enabled = processing_fee_enabled
+            loan.processing_fee_manually_set = not processing_fee_enabled
             loan.term_months = term_months
             loan.repayment_frequency = frequency
             loan.purpose = purpose
@@ -393,7 +533,8 @@ def loan_apply_step2(request, client_id):
                 term_months=term_months,
                 frequency=frequency,
                 start_date=date.today(),
-                include_processing_fee=True,
+                include_processing_fee=processing_fee_enabled,
+                interest_method=interest_method,
             )
             processing_fee_percent = fee_percent
             nominal_apr = product.interest_rate_monthly * Decimal("12")
@@ -401,6 +542,7 @@ def loan_apply_step2(request, client_id):
 
             loan.processing_fee = processing_fee
             loan.processing_fee_percent = fee_percent if fee_percent else None
+            loan.total_fees = processing_fee
             loan.total_interest = totals["total_interest"]
             loan.total_repayable = totals["total_repayable_exclusive"]
             loan.outstanding_balance = loan.total_repayable
@@ -411,7 +553,10 @@ def loan_apply_step2(request, client_id):
                 "principal": principal,
                 "term_months": term_months,
                 "frequency": frequency,
+                "interest_method": interest_method,
                 "purpose": purpose,
+                "processing_fee_enabled": processing_fee_enabled,
+                "penalty_enabled": penalty_enabled,
             }
 
             if data.get("action") == "continue":
@@ -430,7 +575,8 @@ def loan_apply_step2(request, client_id):
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
                 start_date=date.today(),
-                include_processing_fee=True,
+                include_processing_fee=loan.processing_fee_enabled,
+                interest_method=loan.interest_method,
             )
             processing_fee_percent = fee_percent
             nominal_apr = loan.interest_rate_monthly * Decimal("12")
@@ -467,6 +613,7 @@ def loan_apply_step2(request, client_id):
         "loan": loan,
         "active_loan": active_loan,
         "can_renew": can_renew,
+        "can_override_loan_fees": can_override_loan_fees,
         "processing_fee": processing_fee,
         "processing_fee_percent": processing_fee_percent,
         "fee_source": fee_source,
@@ -475,6 +622,7 @@ def loan_apply_step2(request, client_id):
         "company_default_processing_fee_percent": company_default_fee,
         "nominal_apr": nominal_apr,
         "total_cost_of_credit": total_cost_of_credit,
+        "interest_method_choices": LoanProduct.InterestMethod.choices,
     })
 
 
@@ -653,7 +801,8 @@ def loan_apply_step3(request, client_id):
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
                 start_date=date.today(),
-                include_processing_fee=True,
+                include_processing_fee=loan.processing_fee_enabled,
+                interest_method=loan.interest_method,
             )
         except Exception:
             pass
@@ -826,7 +975,8 @@ def loan_apply_review(request, client_id):
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
                 start_date=date.today(),
-                include_processing_fee=True,
+                include_processing_fee=loan.processing_fee_enabled,
+                interest_method=loan.interest_method,
             )
         except Exception:
             pass
@@ -866,19 +1016,25 @@ def loan_apply_review(request, client_id):
                     raise ValueError(
                         f"Loan amount must be between UGX {loan.product.min_amount:,.0f} and {loan.product.max_amount:,.0f}."
                     )
-                schedule_rows, totals, processing_fee, _, _ = build_loan_schedule_context(
+                schedule_rows, totals, processing_fee, fee_percent, _ = build_loan_schedule_context(
                     principal=loan.principal_amount,
                     product=loan.product,
                     term_months=loan.term_months,
                     frequency=loan.repayment_frequency,
                     start_date=date.today(),
-                    include_processing_fee=True,
+                    include_processing_fee=loan.processing_fee_enabled,
+                    interest_method=loan.interest_method,
                 )
 
+                loan.processing_fee = processing_fee
+                loan.processing_fee_manually_set = not loan.processing_fee_enabled
+                loan.processing_fee_percent = fee_percent if fee_percent else None
+                loan.total_fees = processing_fee
                 loan.total_repayable = totals["total_repayable_exclusive"]
                 loan.total_interest = totals["total_interest"]
                 loan.outstanding_balance = totals["total_repayable_exclusive"]
                 loan.status = Loan.Status.PENDING
+                loan.query_reason = ""
                 loan.save()
 
                 LoanSchedule.objects.filter(loan=loan).delete()
@@ -923,6 +1079,7 @@ def loan_apply_review(request, client_id):
         "total_cost_of_credit": totals.get("total_interest", Decimal("0")) + processing_fee,
         "collateral_items": collateral_items,
         "guarantor_rows": guarantor_rows,
+        "can_override_loan_fees": request.user.role == "CEO",
         "eligibility": calculate_eligibility(client, loan.product) if loan and loan.product else None,
         "effective_min": max(loan.product.min_amount, collateral_minimum(collateral_items)) if loan and loan.product else None,
     })
@@ -947,6 +1104,7 @@ def loan_edit(request, pk):
 
     client = loan.client
     products = LoanProduct.objects.filter(is_active=True)
+    can_override_loan_fees = request.user.role == "CEO"
     available_guarantors = Guarantor.objects.filter(is_active=True)
 
     schedule_rows = []
@@ -956,7 +1114,10 @@ def loan_edit(request, pk):
         "principal": loan.principal_amount,
         "term_months": loan.term_months,
         "frequency": loan.repayment_frequency,
+        "interest_method": loan.interest_method,
         "purpose": loan.purpose,
+        "processing_fee_enabled": loan.processing_fee_enabled,
+        "penalty_enabled": loan.penalty_enabled,
         "collateral_items": list(loan.collateral_items.values("description", "estimated_value")) if hasattr(loan, 'collateral_items') else [],
         "guarantor_rows": [
             {
@@ -977,6 +1138,10 @@ def loan_edit(request, pk):
             purpose = data.get("purpose", loan.purpose or "")
 
             product = get_object_or_404(LoanProduct, pk=product_id, is_active=True)
+            interest_method = _resolve_loan_interest_method(product, data, loan)
+            processing_fee_enabled, penalty_enabled = _resolve_loan_fee_switches(
+                product, data, can_override_loan_fees, loan
+            )
 
             # Parse collateral
             collateral_descs = data.getlist("collateral_desc")
@@ -1003,7 +1168,8 @@ def loan_edit(request, pk):
                 term_months=term_months,
                 frequency=frequency,
                 start_date=date.today(),
-                include_processing_fee=True,
+                include_processing_fee=processing_fee_enabled,
+                interest_method=interest_method,
             )
 
             guarantor_ids = data.getlist("guarantor_id")
@@ -1015,19 +1181,26 @@ def loan_edit(request, pk):
                 loan.product = product
                 loan.principal_amount = principal
                 loan.interest_rate_monthly = product.interest_rate_monthly
-                loan.interest_method = product.interest_method
-                loan.penalty_rate_monthly = product.penalty_rate_monthly
+                loan.interest_method = interest_method
+                loan.penalty_enabled = penalty_enabled
+                loan.penalty_rate_monthly = (
+                    product.penalty_rate_monthly if penalty_enabled else Decimal("0")
+                )
+                loan.processing_fee_enabled = processing_fee_enabled
+                loan.processing_fee_manually_set = not processing_fee_enabled
                 loan.term_months = term_months
                 loan.repayment_frequency = frequency
                 fee_percent = resolve_processing_fee_rate(product)
                 loan.processing_fee_percent = fee_percent if fee_percent else None
                 loan.processing_fee = processing_fee
+                loan.total_fees = processing_fee
                 loan.total_repayable = totals["total_repayable_exclusive"]
                 loan.total_interest = totals["total_interest"]
                 loan.outstanding_balance = loan.total_repayable
                 loan.total_fees = processing_fee
                 loan.purpose = purpose
                 loan.applied_by = request.user if not loan.applied_by else loan.applied_by
+                loan.query_reason = ""
                 loan.save()
 
                 # Replace collateral items: delete existing and recreate
@@ -1102,6 +1275,11 @@ def loan_edit(request, pk):
         "eligibility": None,
         "editing": True,
         "loan": loan,
+        "can_override_loan_fees": can_override_loan_fees,
+        "interest_method_choices": LoanProduct.InterestMethod.choices,
+        "processing_fee_method": CompanySettings.get().processing_fee_method,
+        "processing_fee_ranges": CompanySettings.get().processing_fee_ranges,
+        "company_default_processing_fee_percent": CompanySettings.get().default_processing_fee_percent,
     })
 
 
@@ -1665,6 +1843,7 @@ def loan_renew(request, pk):
                 frequency=frequency,
                 start_date=chosen_disbursement,
                 include_processing_fee=True,
+                interest_method=loan.interest_method,
             )
 
             new_loan = Loan.objects.create(
@@ -1681,7 +1860,7 @@ def loan_renew(request, pk):
                 maturity_date=schedule_rows[-1]["due_date"],
                 principal_amount=total_new_principal,
                 interest_rate_monthly=loan.product.interest_rate_monthly,
-                interest_method=loan.product.interest_method,
+                interest_method=loan.interest_method,
                 penalty_rate_monthly=loan.product.penalty_rate_monthly,
                 term_months=term_months,
                 repayment_frequency=frequency,
@@ -1884,6 +2063,7 @@ def loan_approve(request, pk):
     # Immediately activate
     loan.status = Loan.Status.ACTIVE
     loan.disbursed_by = user
+    loan.query_reason = ""
     loan.save()
 
     # Audit disbursement date change on approval
@@ -2032,16 +2212,35 @@ def loan_reinstate(request, pk):
 
 @_permission_required("can_approve_loans")
 @require_POST
+def loan_query(request, pk):
+    """Request more information while keeping the application pending."""
+    loan = get_object_or_404(Loan, pk=pk, status=Loan.Status.PENDING)
+    reason = request.POST.get("review_reason", "").strip()
+    if not reason:
+        messages.error(request, "A reason is required to query this loan.")
+        return redirect("loans:detail", pk=pk)
+
+    loan.reviewed_by = request.user
+    loan.query_reason = reason
+    loan.save(update_fields=["reviewed_by", "query_reason"])
+
+    messages.success(request, f"More information requested for loan {loan.loan_number}.")
+    return redirect("loans:detail", pk=pk)
+
+
+@_permission_required("can_approve_loans")
+@require_POST
 def loan_reject(request, pk):
-    loan   = get_object_or_404(Loan, pk=pk, status=Loan.Status.PENDING)
-    reason = request.POST.get("rejection_reason", "").strip()
+    loan = get_object_or_404(Loan, pk=pk, status=Loan.Status.PENDING)
+    reason = request.POST.get("review_reason", request.POST.get("rejection_reason", "")).strip()
     if not reason:
         messages.error(request, "A rejection reason is required.")
         return redirect("loans:detail", pk=pk)
 
-    loan.status           = Loan.Status.REJECTED
-    loan.reviewed_by      = request.user
+    loan.status = Loan.Status.REJECTED
+    loan.reviewed_by = request.user
     loan.rejection_reason = reason
+    loan.query_reason = ""
     loan.save()
 
     messages.success(request, f"Loan {loan.loan_number} rejected.")
@@ -2074,6 +2273,7 @@ def loan_recall(request, loan_id):
         return redirect("loans:detail", pk=loan.pk)
     loan.status = Loan.Status.DRAFT
     loan.rejection_reason = ""
+    loan.query_reason = ""
     loan.save()
     messages.success(request, "Application recalled — you may now edit and resubmit the draft.")
     url = reverse("loans:apply_step2", kwargs={"client_id": loan.client.pk}) + f"?draft_id={loan.pk}"
@@ -2155,6 +2355,9 @@ def schedule_preview_pdf(request, client_id):
         frequency   = request.GET.get("frequency", "") or Loan.RepaymentFrequency.MONTHLY
 
         product = get_object_or_404(LoanProduct, pk=product_id, is_active=True)
+        interest_method = request.GET.get("interest_method") or product.interest_method
+        if interest_method not in dict(LoanProduct.InterestMethod.choices):
+            return HttpResponseBadRequest("Select a valid interest method.")
 
         if principal <= 0 or term_months <= 0:
             return HttpResponseBadRequest(
@@ -2163,13 +2366,18 @@ def schedule_preview_pdf(request, client_id):
 
         # Mirror the calculation used to render the on-screen preview in
         # loan_apply_step2 so the PDF always matches what the user sees.
+        fee_enabled = product.processing_fee_enabled and (
+            request.user.role != "CEO"
+            or request.GET.get("processing_fee_enabled") == "on"
+        )
         schedule_rows, totals, fee_amount, _, fee_source = build_loan_schedule_context(
             principal=principal,
             product=product,
             term_months=term_months,
             frequency=frequency,
             start_date=date.today(),
-            include_processing_fee=True,
+            include_processing_fee=fee_enabled,
+            interest_method=interest_method,
         )
 
         pdf_bytes = generate_schedule_preview_pdf(
@@ -2182,6 +2390,7 @@ def schedule_preview_pdf(request, client_id):
             totals=totals,
             processing_fee=fee_amount,
             fee_source=fee_source,
+            interest_method_label=dict(LoanProduct.InterestMethod.choices)[interest_method],
         )
     except (ValueError, TypeError):
         return HttpResponseBadRequest(
@@ -2210,12 +2419,19 @@ def schedule_preview(request):
         frequency   = request.GET.get("frequency", "MONTHLY")
 
         product = LoanProduct.objects.get(pk=product_id, is_active=True)
+        interest_method = request.GET.get("interest_method") or product.interest_method
+        if interest_method not in dict(LoanProduct.InterestMethod.choices):
+            return HttpResponseBadRequest("Select a valid interest method.")
+        processing_fee_enabled = product.processing_fee_enabled and (
+            request.user.role != "CEO"
+            or request.GET.get("processing_fee_enabled") == "on"
+        )
         schedule_rows, totals = generate_schedule(
             principal   = principal,
             annual_rate = product.interest_rate_monthly * 12,
             term_months = term_months,
             start_date  = date.today(),
-            method      = product.interest_method,
+            method      = interest_method,
             frequency   = frequency,
         )
         processing_fee = None
@@ -2225,8 +2441,14 @@ def schedule_preview(request):
 
         # Prefer tiered office charge if available
         if product:
-            processing_fee = calculate_processing_fee_amount(principal, product=product)
-            processing_fee_percent = resolve_processing_fee_rate(product)
+            processing_fee = (
+                calculate_processing_fee_amount(principal, product=product)
+                if processing_fee_enabled else Decimal("0")
+            )
+            processing_fee_percent = (
+                resolve_processing_fee_rate(product)
+                if processing_fee_enabled else Decimal("0")
+            )
             fee_source = "Company settings (range)" if (processing_fee and not processing_fee_percent) else (product.name if processing_fee_percent else "Company settings")
             processing_fee_rate_text = f"{processing_fee_percent}%" if processing_fee_percent else ("Fixed range" if processing_fee else "")
 
@@ -2347,7 +2569,10 @@ def loan_product_create(request):
     product_form_defaults = {
         "requires_guarantor": False,
         "requires_collateral": False,
+        "penalty_enabled": True,
+        "processing_fee_enabled": True,
         "is_active": True,
+        "interest_method": LoanProduct.InterestMethod.FLAT_RATE,
     }
     if request.method == "POST":
         d = request.POST
@@ -2363,6 +2588,8 @@ def loan_product_create(request):
             "max_term_months": d.get("max_term_months", ""),
             "penalty_rate_monthly": d.get("penalty_rate_monthly", ""),
             "processing_fee_percent": d.get("processing_fee_percent", "0"),
+            "penalty_enabled": d.get("penalty_enabled") == "on",
+            "processing_fee_enabled": d.get("processing_fee_enabled") == "on",
             "requires_guarantor": d.get("requires_guarantor") == "on",
             "requires_collateral": d.get("requires_collateral") == "on",
             "is_active": d.get("is_active") == "on",
@@ -2379,7 +2606,9 @@ def loan_product_create(request):
                 min_term_months=int(d["min_term_months"]),
                 max_term_months=int(d["max_term_months"]),
                 penalty_rate_monthly=Decimal(d["penalty_rate_monthly"]),
+                penalty_enabled=(d.get("penalty_enabled") == "on"),
                 processing_fee_percent=Decimal(d.get("processing_fee_percent") or "0"),
+                processing_fee_enabled=(d.get("processing_fee_enabled") == "on"),
                 requires_guarantor=(d.get("requires_guarantor") == "on"),
                 requires_collateral=(d.get("requires_collateral") == "on"),
                 is_active=(d.get("is_active") == "on"),
@@ -2433,7 +2662,9 @@ def loan_product_edit(request, pk: int):
             product.min_term_months = int(d["min_term_months"])
             product.max_term_months = int(d["max_term_months"])
             product.penalty_rate_monthly = Decimal(d["penalty_rate_monthly"])
+            product.penalty_enabled = (d.get("penalty_enabled") == "on")
             product.processing_fee_percent = Decimal(d.get("processing_fee_percent") or "0")
+            product.processing_fee_enabled = (d.get("processing_fee_enabled") == "on")
             product.requires_guarantor = (d.get("requires_guarantor") == "on")
             product.requires_collateral = (d.get("requires_collateral") == "on")
             product.is_active = (d.get("is_active") == "on")
@@ -2468,7 +2699,9 @@ def loan_product_edit(request, pk: int):
             "min_term_months": product.min_term_months,
             "max_term_months": product.max_term_months,
             "penalty_rate_monthly": product.penalty_rate_monthly,
+            "penalty_enabled": product.penalty_enabled,
             "processing_fee_percent": product.processing_fee_percent,
+            "processing_fee_enabled": product.processing_fee_enabled,
             "requires_guarantor": product.requires_guarantor,
             "requires_collateral": product.requires_collateral,
             "is_active": product.is_active,
