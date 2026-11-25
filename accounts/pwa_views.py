@@ -157,10 +157,25 @@ function isStaticAsset(request) {
   );
 }
 
+function isCacheableRequest(request) {
+  // Cache API only accepts http/https — reject chrome-extension://, etc.
+  return request.url.startsWith("http://") || request.url.startsWith("https://");
+}
+
+function isApiRequest(request) {
+  // Never cache JSON/PDF API calls — they require a live session and must
+  // not be served stale (e.g. a cached login-redirect HTML breaks the
+  // calculator's content-type check and silently kills the panel).
+  const accept = request.headers.get("Accept") || "";
+  return accept.includes("application/json") || accept.includes("application/pdf");
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
   if (request.method !== "GET") return; // never intercept POST (payments!)
+  if (!isCacheableRequest(request)) return; // skip chrome-extension:// etc.
+  if (isApiRequest(request)) return; // skip JSON/PDF API calls — always fetch live
 
   if (isStaticAsset(request)) {
     event.respondWith(
