@@ -120,7 +120,7 @@ SERVICE_WORKER_JS = r"""
 // registration since service workers are scoped per-origin by the
 // browser — tenant isolation here comes for free from DNS, not code.
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = `lms-cache-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
