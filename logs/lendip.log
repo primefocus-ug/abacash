@@ -1,0 +1,27 @@
+2026-11-25 12:04:28 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-25 12:04:35 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-25 12:04:36 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 275455
+2026-11-25 12:04:36 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 791
+2026-11-25 12:04:36 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-25 12:04:37 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 275455
+2026-11-25 12:04:39 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:04:40 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 182
+2026-11-25 12:04:56 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 224312
+2026-11-25 12:04:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:04:59 [INFO] django.server: "GET /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/ HTTP/1.1" 200 223557
+2026-11-25 12:05:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:05:02 [INFO] django.server: "GET /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/reschedule/ HTTP/1.1" 200 5858
+2026-11-25 12:05:34 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 275455
+2026-11-25 12:05:36 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:05:43 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 224312
+2026-11-25 12:05:45 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:05:45 [INFO] django.server: "GET /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/ HTTP/1.1" 200 223557
+2026-11-25 12:05:47 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:05:50 [INFO] django.server: "GET /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/reschedule/ HTTP/1.1" 200 5858
+2026-11-25 12:06:06 [INFO] django.server: "POST /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/reschedule/ HTTP/1.1" 200 719
+2026-11-25 12:06:06 [INFO] django.server: "GET /loans/9aec9a52-e963-45bf-bce7-f56f5235d067/ HTTP/1.1" 200 226029
+2026-11-25 12:06:08 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:06:08 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 275467
+2026-11-25 12:06:10 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 2035
+2026-11-25 12:06:17 [INFO] django.server: "GET /loans/calculator/preview/?principal=500000&monthly_rate=5&term_months=12&frequency=MONTHLY&method=FLAT HTTP/1.1" 200 182
+2026-11-25 12:14:48 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
