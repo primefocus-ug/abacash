@@ -13,11 +13,71 @@ from django.http import HttpResponse
 from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from PIL import Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph
 
 from .branch_scope import get_single_active_branch_id, resolve_branch_for_write
 from .cash import recent_cash_transactions
 from .models import CapitalInjection
 from .signals import create_initial_tenant_admin
+from .terms import loan_terms_reportlab_markup, sanitize_loan_terms
+from .templatetags.aba_filters import comma_number, money, ugx_plain
+
+
+class LoanTermsSanitizationTests(SimpleTestCase):
+    def test_preserves_allowed_formatting(self):
+        sanitized = sanitize_loan_terms(
+            '<p style="text-align:center"><strong>Important</strong> '
+            '<span style="color:#123456;background-color:#ffff00">terms</span></p>'
+        )
+
+        self.assertIn("<p", sanitized)
+        self.assertIn("<strong>Important</strong>", sanitized)
+        self.assertIn("color:#123456", sanitized)
+        self.assertIn("background-color:#ffff00", sanitized)
+
+    def test_removes_scripts_event_handlers_and_unsafe_elements(self):
+        sanitized = sanitize_loan_terms(
+            '<p onclick="alert(1)">Safe</p><script>alert(2)</script>'
+            '<img src="x" onerror="alert(3)">'
+        )
+
+        self.assertIn("<p>Safe</p>", sanitized)
+        self.assertNotIn("<script", sanitized)
+        self.assertNotIn("onclick", sanitized)
+        self.assertNotIn("<img", sanitized)
+        self.assertNotIn("onerror", sanitized)
+
+    def test_strips_unsupported_css_properties(self):
+        sanitized = sanitize_loan_terms(
+            '<p style="color:#123456;background-image:url(javascript:alert(1))">Safe</p>'
+        )
+
+        self.assertIn("color:#123456", sanitized)
+        self.assertNotIn("background-image", sanitized)
+
+    def test_converts_safe_formatting_for_the_downloadable_schedule(self):
+        markup = loan_terms_reportlab_markup(
+            '<p style="text-align:center"><strong>Title</strong></p>'
+            '<p><span style="color:#123456;background-color:#ffff00">Text</span></p>'
+        )
+
+        paragraph = Paragraph(markup, getSampleStyleSheet()["Normal"])
+
+        self.assertIn('<para align="center">', markup)
+        self.assertIn('color="#123456"', markup)
+        self.assertIsNotNone(paragraph)
+
+
+class MoneyFormattingTests(SimpleTestCase):
+    def test_plain_format_adds_thousands_commas(self):
+        self.assertEqual(ugx_plain(Decimal("1234567")), "1,234,567")
+
+    def test_plain_format_preserves_decimal_places(self):
+        self.assertEqual(comma_number(Decimal("1234567.50")), "1,234,567.50")
+
+    def test_money_format_uses_currency_and_commas(self):
+        self.assertEqual(money(Decimal("1234567"), "UGX"), "UGX 1,234,567")
 from .views import (
     _build_dashboard_performance,
     _on_time_schedule_payment_filter,

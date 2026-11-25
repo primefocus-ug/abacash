@@ -35,6 +35,20 @@
 
     {% csrf_token %}
 
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>{% if is_reschedule %}Loan Product{% else %}New Loan Product{% endif %}</label>
+      <select name="product" id="reschedule-product" required>
+        {% for product in products %}
+        <option value="{{ product.pk }}"
+                data-min-term="{{ product.min_term_months }}"
+                data-max-term="{{ product.max_term_months }}"
+                {% if product.pk == selected_product.pk %}selected{% endif %}>
+          {{ product.name }} — {{ product.interest_rate_monthly }}%/mo ({{ product.get_interest_method_display }})
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
     <div class="form-row" style="margin-bottom:16px;">
       {% if is_reschedule %}
       <div class="form-group" style="margin-bottom:0;">
@@ -48,7 +62,7 @@
       {% endif %}
       <div class="form-group" style="margin-bottom:0;">
         <label>New Term (months)</label>
-        <input type="number" name="term_months"
+        <input type="number" id="reschedule-term" name="term_months"
                value="{{ default_term }}"
                min="{{ min_term }}" max="{{ max_term }}"
                required
@@ -101,3 +115,25 @@
 
   </form>
 </div>
+<script>
+(function () {
+  var productSelect = document.getElementById("reschedule-product");
+  var termInput = document.getElementById("reschedule-term");
+  if (!productSelect || !termInput) return;
+
+  function updateTermBounds() {
+    var option = productSelect.options[productSelect.selectedIndex];
+    if (!option) return;
+    var minTerm = parseInt(option.dataset.minTerm || "1", 10);
+    var maxTerm = parseInt(option.dataset.maxTerm || "360", 10);
+    termInput.min = minTerm;
+    termInput.max = maxTerm;
+    var current = parseInt(termInput.value || "0", 10);
+    if (!current || current < minTerm) termInput.value = minTerm;
+    if (current > maxTerm) termInput.value = maxTerm;
+  }
+
+  productSelect.addEventListener("change", updateTermBounds);
+  updateTermBounds();
+})();
+</script>

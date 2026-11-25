@@ -27,11 +27,15 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 copy .env.example .env
-REM  Edit .env with your DB credentials
+REM  Set DEBUG=True in .env for local development and add your DB credentials
 python manage.py migrate
 python manage.py createsuperuser
-python manage.py runserver
+python manage.py runserver 8002
 ```
+
+`DEBUG=True` enables the `.localhost` development hosts (for example,
+`aba.localhost`). The default is `False`, which intentionally only allows
+production domains. Keep `DEBUG=False` in production.
 
 ### Terminal debug logging
 

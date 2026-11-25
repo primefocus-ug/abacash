@@ -440,6 +440,10 @@ class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
     """
     phone_fields = ("company_phone",)
 
+    class PenaltyFrequency(models.TextChoices):
+        DAILY = "DAILY", _("Daily")
+        MONTHLY = "MONTHLY", _("Monthly")
+
     # Company Information
     company_name            = models.CharField(max_length=200, default="Abacash")
     currency_symbol         = models.CharField(max_length=10, default="UGX",
@@ -464,9 +468,19 @@ class CompanySettings(PhoneNumberNormalizationMixin, models.Model):
         max_digits=15, decimal_places=2, default=5_000_000,
         help_text=_("Maximum loan amount a Manager can approve without CEO sign-off (UGX).")
     )
+    penalties_enabled = models.BooleanField(
+        default=True,
+        help_text=_("Allow late-payment penalties to accrue for this tenant."),
+    )
+    penalty_frequency = models.CharField(
+        max_length=10,
+        choices=PenaltyFrequency.choices,
+        default=PenaltyFrequency.MONTHLY,
+        help_text=_("Interval used to apply late-payment penalties."),
+    )
     default_penalty_rate    = models.DecimalField(
         max_digits=5, decimal_places=2, default=2,
-        help_text=_("Default monthly penalty rate on overdue amounts (%)."),
+        help_text=_("Default penalty rate on overdue amounts per selected interval (%)."),
     )
     income_multiplier       = models.DecimalField(
         max_digits=4, decimal_places=1, default=3,

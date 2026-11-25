@@ -184,4 +184,12 @@ IMPLEMENTATION_SUMMARY.md
 
 # Static and media files in development
 static/
+!static/
+static/*
+!static/css/
+static/css/*
+!static/css/loan-calculator.css
+!static/js/
+static/js/*
+!static/js/loan-calculator.js
 media/

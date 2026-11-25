@@ -15,11 +15,13 @@
 
 {% block extra_css %}
 <style>
-  .filter-bar-wrapper { display:flex; align-items:center; gap:12px; padding:12px 0; }
-  .filter-bar-single-row { display:flex; align-items:center; gap:10px; flex-wrap:nowrap; overflow-x:auto; flex:1; padding:4px 0; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+  .filter-bar-wrapper { display:flex; align-items:center; gap:12px; padding:12px 0; min-width:0; width:100%; }
+  .filter-bar-single-row { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; overflow-x:auto; flex:1; padding:4px 0; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
   .filter-bar-single-row::-webkit-scrollbar { height:4px; }
   .filter-bar-single-row::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-  .filter-field input, .filter-field select { width:100%; min-width:160px; padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface-2); color:var(--text-primary); font-size:13px; transition:all .15s; }
+  .filter-field { flex:0 0 180px; min-width:180px; }
+  .filter-field:first-child { flex:1 1 240px; min-width:180px; max-width:300px; }
+  .filter-field input, .filter-field select { width:100%; min-width:0; height:38px; padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface-2); color:var(--text-primary); font-size:13px; text-overflow:ellipsis; white-space:nowrap; transition:all .15s; }
   .filter-field input:focus, .filter-field select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(96,165,250,.15); outline:none; }
   .filter-field input::placeholder { color:var(--text-muted); }
   .filter-actions { display:flex; gap:6px; flex-shrink:0; }
@@ -55,6 +57,10 @@
   .loan-table th { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); padding:12px 16px; white-space:nowrap; }
   .loan-table td { padding:14px 16px; vertical-align:middle; }
   .card-header-content { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  @media (min-width: 769px) {
+    .loan-list-card-header,
+    .card-header-content { flex-wrap:nowrap; }
+  }
   .empty-state { text-align:center; padding:48px 24px; color:var(--text-muted); }
   .empty-state p { font-size:14px; color:var(--text-secondary); }
 </style>
@@ -67,8 +73,8 @@
 {% if drafts %}
 <div class="card draft-section">
   <div class="draft-section-header">
-    <span>📝 Draft Applications — {{ drafts|length }} incomplete</span>
-    <span style="font-size:12px;color:var(--text-muted);">These have not been submitted for approval</span>
+    <span>📝 Draft &amp; Queried Applications — {{ drafts|length }}</span>
+    <span style="font-size:12px;color:var(--text-muted);">Queried applications need the requested changes before resubmission.</span>
   </div>
   <div class="table-wrap">
     <table class="aba-table loan-table">
@@ -80,12 +86,13 @@
           <th>Principal</th>
           <th>Started</th>
           <th>By</th>
-          <th style="width:160px">Actions</th>
+          <th>Approver query</th>
+          <th style="width:220px">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for loan in drafts %}
-        <tr class="draft-row">
+        <tr class="draft-row{% if loan.query_reason %} queried-row{% endif %}">
           <td class="mono" style="font-weight:500;color:var(--text-muted);">{{ loan.loan_number }}</td>
           <td>
             <div style="font-weight:500;">{{ loan.client.full_name }}</div>
@@ -95,8 +102,23 @@
           <td class="mono" style="color:var(--text-muted);">{{ loan.principal_amount|floatformat:0|intcomma }}</td>
           <td style="font-size:13px;color:var(--text-muted);">{{ loan.application_date }}</td>
           <td style="font-size:13px;color:var(--text-muted);">{{ loan.applied_by.get_short_name|default:"—" }}</td>
+          <td style="min-width:220px;max-width:360px;">
+            {% if loan.query_reason %}
+              <span class="badge badge-amber">Queried by {{ loan.reviewed_by.full_name|default:"approver" }}</span>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:5px;overflow-wrap:anywhere;">
+                {{ loan.query_reason|truncatechars:160 }}
+              </div>
+            {% else %}
+              <span class="badge badge-muted">Draft</span>
+            {% endif %}
+          </td>
           <td>
             <div class="draft-actions">
+              {% if loan.query_reason %}
+              <a href="{% url 'loans:detail' loan.pk %}" class="btn btn-secondary btn-sm">
+                Open application
+              </a>
+              {% endif %}
               <a href="{% url 'loans:apply_step2' loan.client.pk %}?draft_id={{ loan.pk }}"
                  class="btn btn-primary btn-sm" style="gap:5px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -115,6 +137,13 @@
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3" style="text-align:right;">Draft Principal Total</th>
+          <th class="mono">{{ draft_total_principal|money }}</th>
+          <th colspan="4"></th>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </div>
@@ -213,6 +242,14 @@
             </tr>
             {% endfor %}
           </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3" style="text-align:right;">Totals</th>
+              <th class="mono">{{ total_principal|money }}</th>
+              <th class="mono" style="color:var(--amber-400);">{{ total_outstanding|money }}</th>
+              <th colspan="3"></th>
+            </tr>
+          </tfoot>
         </table>
       </div>
     {% else %}

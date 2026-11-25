@@ -9,11 +9,36 @@
 {% endblock %}
 
 {% block content %}
+<style>
+  .payment-filter-row {
+    width: 100%;
+    flex-wrap: nowrap !important;
+  }
+  .payment-filter-row input[name="q"] {
+    flex: 1 1 280px;
+    width: min(360px, 34vw) !important;
+    max-width: 360px;
+  }
+  .payment-filter-row select[name="branch"] {
+    flex: 0 0 160px;
+    width: 160px;
+  }
+  .payment-filter-row .btn,
+  .payment-filter-row a {
+    flex: 0 0 auto;
+  }
+  @media (max-width: 640px) {
+    .payment-filter-row {
+      width: max-content;
+      min-width: 100%;
+    }
+  }
+</style>
 
 {# ── Payment List ───────────────────────────────────────────────── #}
 <div class="card">
   <div class="card-header">
-    <form method="get" class="search-filter-bar">
+    <form method="get" class="search-filter-bar payment-filter-row">
       <input type="text" name="q" value="{{ search }}" placeholder="Search loan # or client…" style="width:280px">
       {% if branches %}
       <select name="branch" onchange="this.form.submit()">
@@ -55,6 +80,13 @@
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3" style="text-align:right;">Total Amount</th>
+          <th class="mono" style="color:var(--success);font-size:14px;">{{ total_amount|money }}</th>
+          <th colspan="4"></th>
+        </tr>
+      </tfoot>
     </table>
     {% else %}
     <div class="empty-state"><p>No payments found.</p></div>

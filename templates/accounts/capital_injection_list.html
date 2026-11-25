@@ -57,7 +57,7 @@
           <td>{{ injection.injected_date }}</td>
           <td><strong>{{ injection.source }}</strong></td>
           <td class="text-sm text-muted">{{ injection.investor_name|default:"-" }}</td>
-          <td class="mono" style="color:var(--green-400);">UGX {{ injection.amount|floatformat:0|intcomma }}</td>
+          <td class="mono" style="color:var(--green-400);">{{ injection.amount|money }}</td>
           <td class="text-sm text-muted">{{ injection.notes|default:"-"|truncatewords:5 }}</td>
           <td style="text-align:center;">
             <a href="{% url 'accounts:capital_injection_edit' injection.pk %}" class="btn btn-xs btn-secondary" hx-get="{% url 'accounts:capital_injection_edit' injection.pk %}" hx-target="#modal-body" hx-select="#quick-form-content" hx-swap="innerHTML">Edit</a>

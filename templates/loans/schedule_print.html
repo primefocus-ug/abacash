@@ -276,6 +276,47 @@
   }
   .btn-close-tab:hover { background: #1e293b; color: #fff; }
 
+  @media screen and (max-width: 720px) {
+    .print-bar {
+      padding: 8px 12px;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .print-bar-title {
+      display: none;
+    }
+    .print-bar-actions {
+      width: 100%;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .btn-edit,
+    .btn-close-tab,
+    .btn-print {
+      white-space: nowrap;
+      padding: 7px 10px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+  }
+  .btn-edit {
+    background: transparent;
+    color: #dbeafe;
+    border: 1px solid #64748b;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+  }
+  .btn-edit:hover { background: #334155; color: #fff; }
+
   /* push content below fixed bar on screen */
   .print-bar + .doc-wrapper { padding-top: 56px; }
 
@@ -311,6 +352,24 @@
 <div class="print-bar">
   <span class="print-bar-title">{{ company.name }} — Repayment Schedule — {{ loan.loan_number }}</span>
   <div class="print-bar-actions">
+    {% if loan.status == 'DRAFT' or loan.status == 'PENDING' %}
+    <a class="btn-edit" href="{% url 'loans:edit' loan.pk %}">
+      Edit Loan Terms
+    </a>
+    {% endif %}
+    {% if loan.status == 'ACTIVE' and user.can_approve_loans %}
+    <a class="btn-edit" href="{% url 'loans:reschedule' loan.pk %}">
+      Edit Schedule
+    </a>
+    {% if loan.product.allows_renewal %}
+    <a class="btn-edit" href="{% url 'loans:renew' loan.pk %}">
+      Renew
+    </a>
+    {% endif %}
+    {% endif %}
+    <a class="btn-close-tab" href="{% url 'loans:detail' loan.pk %}">
+      Loan Details
+    </a>
     <a class="btn-print print-hide" href="{% url 'loans:schedule_download' loan.pk %}">
       Download PDF
     </a>
@@ -537,7 +596,7 @@
 
   <div class="terms-block" style="border:1px solid #c9d6e0;border-radius:8px;padding:14px 18px;margin-top:24px;page-break-inside:avoid;">
     <div class="section-title">06 · Terms and Conditions</div>
-    <div style="font-size:10px;line-height:1.55;color:#334e5f;white-space:pre-line;">{{ company_settings.loan_terms_and_conditions }}</div>
+    <div style="font-size:10px;line-height:1.55;color:#334e5f;white-space:pre-line;">{{ loan_terms_html|safe }}</div>
     <div style="font-size:9px;line-height:1.45;color:#6d7e8f;margin-top:10px;">
       This summary should be read with the signed loan agreement and applicable law. It does not replace independent legal advice.
     </div>

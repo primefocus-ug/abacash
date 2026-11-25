@@ -5,66 +5,428 @@
 
 {% block content %}
 <style>
-  .wiz-bar { display:flex; gap:0; margin-bottom:20px; }
-  .wiz-step { flex:1; display:flex; align-items:center; gap:0; }
-  .wiz-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
-  .wiz-dot.done { background:var(--success); border-color:var(--success); color:#fff; }
-  .wiz-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .wiz-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-left:8px; white-space:nowrap; }
-  .wiz-label.active { color:var(--accent); }
-  .wiz-line { flex:1; height:2px; background:var(--border); margin:0 8px; }
-  .wiz-line.done { background:var(--success); }
-  .app-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:20px; align-items:start; }
-  @media(max-width:1024px){ .app-grid { grid-template-columns:1fr; } }
-  .loan-terms-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-  .fee-override-options { display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; }
-  .fee-override-options label { display:flex; align-items:center; gap:8px; margin:0; }
-  @media(max-width:600px){ .loan-terms-row { grid-template-columns:1fr; } }
-  .fee-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-  .fee-row:last-child { border-bottom:none; font-weight:700; font-size:14px; }
-  .tier-row.match { background:rgba(37,99,235,.07); font-weight:700; }
+/* ─────────────────────────────────────────────────────────────
+   Loan Application — minimal modern UI
+   ───────────────────────────────────────────────────────────── */
+.la{
+  --line:var(--border,rgba(128,128,128,.24));
+  --acc:var(--accent,#2563eb);
+  --soft:var(--surface-2,rgba(128,128,128,.07));
+  --bg:var(--surface,Canvas);
+  --muted:var(--text-muted,#6b7280);
+  --danger:var(--danger,#ef4444);
+  --success:var(--success,#16a34a);
+  --warn:var(--warning,#d97706);
+  width:100%;
+  color:var(--text-primary,inherit);
+}
+.la *{box-sizing:border-box}
+.la [hidden]{display:none!important}
+
+/* Wizard */
+.la .wiz{
+  display:flex;
+  align-items:center;
+  gap:0;
+  margin-bottom:22px;
+  padding:14px 18px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+.la .wiz-step{display:flex;align-items:center;gap:8px;flex:none}
+.la .wiz-dot{
+  width:26px;height:26px;
+  border-radius:50%;
+  border:2px solid var(--line);
+  background:var(--soft);
+  color:var(--muted);
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.la .wiz-dot.done{background:var(--success);border-color:var(--success);color:#fff}
+.la .wiz-dot.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.la .wiz-label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.la .wiz-label.active{color:var(--acc)}
+.la .wiz-line{flex:1;height:2px;background:var(--line);margin:0 10px;min-width:12px}
+.la .wiz-line.done{background:var(--success)}
+@media(max-width:560px){
+  .la .wiz{padding:12px}
+  .la .wiz-label{display:none}
+  .la .wiz-line{margin:0 4px}
+}
+
+/* Layout */
+.la-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,.95fr);
+  gap:22px;
+  align-items:start;
+}
+@media(max-width:1024px){
+  .la-grid{grid-template-columns:1fr}
+}
+
+/* Cards */
+.la .card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--bg);
+  overflow:hidden;
+}
+.la .card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.la .card-title{font-weight:600;font-size:.95rem;line-height:1.3}
+.la .card-meta{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
+.la .card-body{padding:16px 18px}
+
+/* Collapsible sections */
+.la .block{border-top:1px solid var(--line)}
+.la .block:first-of-type{border-top:0}
+.la .block-head{
+  all:unset;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:14px 18px;
+  cursor:pointer;
+  border-radius:0;
+}
+.la .block-head:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.la .block-title{display:flex;flex-direction:column;font-weight:600;line-height:1.3}
+.la .block-title small{margin-top:2px;font-size:.78rem;font-weight:400;color:var(--muted)}
+.la .block-head::after{
+  content:"";
+  flex:none;
+  width:7px;height:7px;
+  margin-left:12px;
+  border:solid currentColor;
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+  opacity:.5;
+  transition:transform .2s;
+}
+.la .block.open>.block-head::after{transform:rotate(225deg)}
+.la .block-body{
+  display:grid;
+  grid-template-rows:0fr;
+  visibility:hidden;
+  transition:grid-template-rows .25s ease,visibility 0s .25s;
+}
+.la .block.open>.block-body{
+  grid-template-rows:1fr;
+  visibility:inherit;
+  transition:grid-template-rows .25s ease,visibility 0s;
+}
+.la .block-inner{min-height:0;overflow:hidden}
+.la .block-pad{padding:0 18px 18px}
+
+/* Fields */
+.la .grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:14px 16px;
+}
+.la .form-group{display:flex;flex-direction:column;min-width:0;margin-bottom:14px}
+.la .form-group:last-child{margin-bottom:0}
+.la .grid .form-group{margin-bottom:0}
+.la label{font-size:.85rem;font-weight:500;margin-bottom:6px;line-height:1.3}
+.la .req{color:var(--danger);margin-left:3px}
+.la .form-hint{font-size:.76rem;color:var(--muted);margin-top:5px;line-height:1.4}
+.la input,.la select,.la textarea{
+  width:100%;
+  font:inherit;
+  font-size:.9rem;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:transparent;
+  color:inherit;
+  transition:border-color .15s,box-shadow .15s;
+}
+.la input:focus,.la select:focus,.la textarea:focus{
+  outline:none;
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent);
+}
+.la input:disabled,.la select:disabled{opacity:.55;cursor:not-allowed}
+.la textarea{resize:vertical;min-height:56px}
+
+/* Toggle switch */
+.la .switch{
+  position:relative;
+  flex:none;
+  width:40px;height:22px;
+  margin-left:auto;
+}
+.la .switch input{
+  appearance:none;
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  margin:0;
+  opacity:0;
+  cursor:pointer;
+  z-index:1;
+}
+.la .switch i{
+  position:absolute;
+  inset:0;
+  border-radius:99px;
+  background:color-mix(in srgb,currentColor 22%,transparent);
+  transition:background .2s;
+}
+.la .switch i::after{
+  content:"";
+  position:absolute;
+  top:3px;left:3px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.3);
+  transition:transform .2s;
+}
+.la .switch input:checked+i{background:var(--acc)}
+.la .switch input:checked+i::after{transform:translateX(18px)}
+.la .switch input:focus-visible+i{outline:2px solid var(--acc);outline-offset:2px}
+.la .switch input:disabled{cursor:not-allowed}
+.la .switch input:disabled+i{opacity:.45}
+
+/* Toggle row */
+.la .tg{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  padding:10px 0;
+}
+.la .tg:first-child{padding-top:0}
+.la .tg:last-child{padding-bottom:0}
+.la .tg-text{flex:1;min-width:0}
+.la .tg-text strong{display:block;font-size:.86rem;font-weight:600;margin-bottom:2px;line-height:1.3}
+.la .tg-text .form-hint{margin-top:2px}
+
+/* Reveal wrapper */
+.la .reveal{
+  display:grid;
+  grid-template-rows:0fr;
+  visibility:hidden;
+  transition:grid-template-rows .22s ease,visibility 0s .22s;
+}
+.la .reveal.show{
+  grid-template-rows:1fr;
+  visibility:inherit;
+  transition:grid-template-rows .22s ease,visibility 0s;
+}
+.la .reveal>div{min-height:0;overflow:hidden}
+.la .reveal-pad{padding-top:10px}
+
+/* Fee summary */
+.la .fee-summary{
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:14px;
+}
+.la .fee-summary-head{
+  padding:10px 14px;
+  background:var(--soft);
+  border-bottom:1px solid var(--line);
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--muted);
+}
+.la .fee-summary-body{padding:6px 14px}
+.la .fee-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px solid var(--line);
+  font-size:.85rem;
+}
+.la .fee-row:last-child{border-bottom:0}
+.la .fee-row.total{font-weight:700;font-size:.92rem;border-top:1px solid var(--line);margin-top:2px;padding-top:10px}
+.la .fee-row .mono{font-variant-numeric:tabular-nums;white-space:nowrap}
+.la .fee-row .label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.la .fee-row .label small{color:var(--muted);font-weight:400;font-size:.76rem}
+.la .fee-source{
+  font-size:.74rem;
+  color:var(--muted);
+  padding:6px 0 4px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.la .fee-source::before{content:"ⓘ";opacity:.6}
+
+/* Tiers */
+.la .tiers{
+  width:100%;
+  font-size:.82rem;
+  border-collapse:collapse;
+}
+.la .tiers th{
+  text-align:left;
+  font-weight:600;
+  font-size:.74rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+}
+.la .tiers th:last-child,.la .tiers td:last-child{text-align:right}
+.la .tiers td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.la .tiers tr:last-child td{border-bottom:0}
+.la .tiers tr.match{
+  background:color-mix(in srgb,var(--acc) 10%,transparent);
+  font-weight:600;
+}
+
+/* Action bar */
+.la .actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--line);
+}
+.la .actions .spacer{flex:1}
+@media(max-width:560px){
+  .la .actions .btn{flex:1 1 100%}
+  .la .actions .spacer{display:none}
+}
+
+/* Right rail — sticky on desktop */
+.la .rail{position:sticky;top:calc(var(--topbar-h,52px) + 16px);align-self:start}
+@media(max-width:1024px){.la .rail{position:static}}
+
+/* Schedule preview */
+.la #schedule-panel{min-height:120px}
+.la #schedule-panel .empty-state{
+  padding:40px 24px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.88rem;
+}
+.la .htmx-indicator{
+  display:none;
+  align-items:center;
+  gap:6px;
+  font-size:.78rem;
+  color:var(--muted);
+}
+.la .htmx-indicator::before{
+  content:"";
+  width:12px;height:12px;
+  border-radius:50%;
+  border:2px solid var(--line);
+  border-top-color:var(--acc);
+  animation:spin .7s linear infinite;
+}
+.la.htmx-request .htmx-indicator{display:inline-flex}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Modal */
+.la-dialog{
+  width:min(680px,94vw);
+  padding:0;
+  border:1px solid var(--line,rgba(128,128,128,.28));
+  border-radius:14px;
+  background:var(--surface,Canvas);
+  color:var(--text-primary,inherit);
+}
+.la-dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+.la-dialog[open]{animation:pop .18s ease}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.la-dialog .dh{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border,rgba(128,128,128,.24));
+  font-weight:600;
+}
+.la-dialog .db{max-height:70vh;padding:16px 18px;overflow:auto}
+.la-dialog .df{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  padding:12px 18px;
+  border-top:1px solid var(--border,rgba(128,128,128,.24));
+  flex-wrap:wrap;
+}
+
+/* Utility */
+.la .mono{font-variant-numeric:tabular-nums}
+.la .sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+@media(prefers-reduced-motion:reduce){
+  .la *{transition:none!important;animation:none!important}
+}
 </style>
 
-{# ── Wizard bar ── #}
-<div class="wiz-bar">
-  <div class="wiz-step">
-    <div class="wiz-dot done">✓</div>
-    <span class="wiz-label">Client</span>
-  </div>
-  <div class="wiz-line done"></div>
-  <div class="wiz-step">
-    <div class="wiz-dot active">2</div>
-    <span class="wiz-label active">Loan Terms</span>
-  </div>
-  <div class="wiz-line"></div>
-  <div class="wiz-step">
-    <div class="wiz-dot">3</div>
-    <span class="wiz-label">Security</span>
-  </div>
-  <div class="wiz-line"></div>
-  <div class="wiz-step">
-    <div class="wiz-dot">4</div>
-    <span class="wiz-label">Review</span>
-  </div>
-</div>
+<div class="la">
 
-<div class="app-grid">
+  {# ── Wizard ── #}
+  <div class="wiz" role="list" aria-label="Application progress">
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot done" aria-label="Step 1 complete">✓</div>
+      <span class="wiz-label">Client</span>
+    </div>
+    <div class="wiz-line done" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot active" aria-current="step">2</div>
+      <span class="wiz-label active">Loan Terms</span>
+    </div>
+    <div class="wiz-line" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot">3</div>
+      <span class="wiz-label">Security</span>
+    </div>
+    <div class="wiz-line" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot">4</div>
+      <span class="wiz-label">Review</span>
+    </div>
+  </div>
 
-  {# ── LEFT: Form ── #}
-  <div>
-    <div class="card">
-      <div class="card-header" style="justify-content:space-between;">
-        <span class="card-title">Loan Terms</span>
-        <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
-      </div>
-      <div class="card-body">
-          <form id="loan-form" method="post"
-            data-processing-fee-method="{{ processing_fee_method }}"
-            data-processing-fee-ranges="{{ processing_fee_ranges }}"
-            data-company-fee-percent="{{ company_default_processing_fee_percent }}"
+  <div class="la-grid">
+
+    {# ── LEFT: Form ── #}
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Loan Terms</span>
+          <span class="card-meta">{{ client.full_name }} · {{ client.client_number }}</span>
+        </div>
+
+        <form id="loan-form" method="post"
+              data-processing-fee-method="{{ processing_fee_method }}"
+              data-processing-fee-ranges="{{ processing_fee_ranges }}"
+              data-company-fee-percent="{{ company_default_processing_fee_percent }}"
               hx-get="{% url 'loans:schedule_preview' %}"
-            hx-trigger="input changed delay:250ms, change delay:250ms"
+              hx-trigger="input changed delay:200ms, change"
               hx-target="#schedule-panel"
+              hx-indicator="#schedule-spinner"
               hx-include="#loan-form">
           {% csrf_token %}
           <input type="hidden" name="client_id" value="{{ client.pk }}">
@@ -72,268 +434,354 @@
           <input type="hidden" name="draft_id" value="{{ loan.pk }}">
           {% endif %}
 
-          {% if can_choose_branch %}
-          <div class="form-group">
-            <label for="branch">Branch <span style="color:var(--danger);">*</span></label>
-            <select name="branch" id="branch" required>
-              <option value="">— Select branch —</option>
-              {% for branch in branches %}
-              <option value="{{ branch.pk }}" {% if selected_branch_id == branch.pk|stringformat:"s" %}selected{% endif %}>
-                {{ branch.name }} ({{ branch.code }})
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          {% endif %}
+          {# ── Block 1: Basic setup (always open) ── #}
+          <section class="block open" data-block>
+            <button type="button" class="block-head" aria-expanded="true">
+              <span class="block-title">Loan setup<small>Product, amount, term and frequency</small></span>
+            </button>
+            <div class="block-body"><div class="block-inner"><div class="block-pad">
 
-          <div class="form-group">
-            <label for="product">Loan Product <span style="color:var(--danger);">*</span></label>
-            <select name="product" id="product" class="select2-init" required>
-              <option value="">— Select product —</option>
-              {% for p in products %}
-              <option value="{{ p.pk }}"
-                      data-min="{{ p.min_amount }}" data-max="{{ p.max_amount }}"
-                      data-rate="{{ p.interest_rate_monthly }}" data-method="{{ p.interest_method }}"
-                      data-processing-fee-percent="{{ p.processing_fee_percent }}"
-                      data-processing-fee-enabled="{{ p.processing_fee_enabled|yesno:'true,false' }}"
-                      data-penalty-enabled="{{ p.penalty_enabled|yesno:'true,false' }}"
-                      data-penalty-rate="{{ p.penalty_rate_monthly }}"
-                      {% if form_data.product and form_data.product.pk == p.pk %}selected{% endif %}>
-                {{ p.name }} — {{ p.interest_rate_monthly }}%/mo ({{ p.get_interest_method_display }})
-              </option>
-              {% endfor %}
-            </select>
-            <div id="product-hint" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
-          </div>
-
-          <div class="loan-terms-row">
-            <div class="form-group">
-              <label for="interest_method">Interest Method <span style="color:var(--danger);">*</span></label>
-              <select name="interest_method" id="interest_method" required
-                      {% if not can_change_loan_interest_method %}disabled{% endif %}>
-                <option value="">— Select interest method —</option>
-                {% for value, label in interest_method_choices %}
-                <option value="{{ value }}" {% if form_data.interest_method == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
-              {% if not can_change_loan_interest_method %}
-              <div class="form-hint">Only users authorized by an administrator can change the interest method.</div>
-              {% endif %}
-            </div>
-            <div class="form-group">
-              <label for="principal">Loan Amount ({% currency_symbol %}) <span style="color:var(--danger);">*</span></label>
-              <input type="number" name="principal" id="principal"
-                     value="{{ form_data.principal|default:'' }}"
-                     placeholder="e.g. 1,000,000" min="0" step="1000" required>
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div class="form-group">
-              <label for="term_months">Term (Months) <span style="color:var(--danger);">*</span></label>
-              <input type="number" name="term_months" id="term_months"
-                     value="{{ form_data.term_months|default:1 }}" min="1" max="60" required>
-            </div>
-            <div class="form-group">
-              <label for="frequency">Repayment Frequency <span style="color:var(--danger);">*</span></label>
-              <select name="frequency" id="frequency" required>
-                <option value="MONTHLY"  {% if form_data.frequency == 'MONTHLY'  or not form_data.frequency %}selected{% endif %}>Monthly</option>
-                <option value="WEEKLY"   {% if form_data.frequency == 'WEEKLY'   %}selected{% endif %}>Weekly</option>
-                <option value="BIWEEKLY" {% if form_data.frequency == 'BIWEEKLY' %}selected{% endif %}>Bi-Weekly</option>
-                <option value="DAILY"    {% if form_data.frequency == 'DAILY'    %}selected{% endif %}>Daily</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="purpose">Loan Purpose</label>
-            <textarea name="purpose" id="purpose" rows="2"
-                      placeholder="What will the client use this loan for?">{{ form_data.purpose|default:'' }}</textarea>
-          </div>
-
-          <div class="form-group" style="padding:12px 14px;border:1px solid var(--border);border-radius:10px;">
-            <div style="font-weight:700;margin-bottom:8px;">Fee overrides</div>
-            <div class="fee-override-options">
-              <label>
-                <input type="checkbox" id="processing_fee_enabled" name="processing_fee_enabled"
-                       {% if not can_override_loan_fees %}disabled{% endif %}
-                       {% if form_data.processing_fee_enabled or not loan %}checked{% endif %}>
-                Charge processing fee
-              </label>
-              <label>
-                <input type="checkbox" id="penalty_enabled" name="penalty_enabled"
-                       {% if not can_override_loan_fees %}disabled{% endif %}
-                       {% if form_data.penalty_enabled or not loan %}checked{% endif %}>
-                Apply late-payment penalty
-              </label>
-            </div>
-            <div class="form-hint">
-              {% if can_override_loan_fees %}
-              Override the product’s processing fee and late-payment penalty for this loan.
-              {% else %}
-              Only users authorized by an administrator can change these fees.
-              {% endif %}
-            </div>
-          </div>
-
-          {# ── Fee summary (always visible, updates via JS) ── #}
-          <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:4px;">
-            <div style="padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);">Fee & Disbursement Summary</div>
-            <div style="padding:12px 14px;">
-              <div class="fee-row"><span>Principal</span><span id="s-principal" class="mono">—</span></div>
-              <div class="fee-row"><span>Total Interest</span><span id="s-interest" class="mono">—</span></div>
-              <div class="fee-row"><span>Processing Fee <span id="s-fee-label" style="color:var(--text-muted);font-weight:400;"></span></span><span id="s-fee" class="mono">—</span></div>
-              <div class="fee-row"><span>Net Disbursed to Client</span><span id="s-net" class="mono">—</span></div>
-              <div class="fee-row"><span>Scheduled Repayment</span><span id="s-total-repayable" class="mono">—</span></div>
-              <div class="fee-row"><span>Nominal APR</span><span id="s-apr" class="mono">—</span></div>
-              <div class="fee-row"><span>Total Cost of Credit</span><span id="s-credit-cost" class="mono">—</span></div>
-              <div class="fee-row" style="color:var(--text-muted);font-size:12px;border-bottom:none;padding-top:4px;">
-                <span id="s-fee-source"></span>
+              {% if can_choose_branch %}
+              <div class="form-group">
+                <label for="branch">Branch <span class="req">*</span></label>
+                <select name="branch" id="branch" required>
+                  <option value="">— Select branch —</option>
+                  {% for branch in branches %}
+                  <option value="{{ branch.pk }}" {% if selected_branch_id == branch.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ branch.name }} ({{ branch.code }})
+                  </option>
+                  {% endfor %}
+                </select>
               </div>
+              {% endif %}
+
+              <div class="form-group">
+                <label for="product">Loan Product <span class="req">*</span></label>
+                <select name="product" id="product" class="select2-init" required>
+                  <option value="">— Select product —</option>
+                  {% for p in products %}
+                  <option value="{{ p.pk }}"
+                          data-min="{{ p.min_amount }}" data-max="{{ p.max_amount }}"
+                          data-rate="{{ p.interest_rate_monthly }}" data-method="{{ p.interest_method }}"
+                          data-processing-fee-percent="{{ p.processing_fee_percent }}"
+                          data-processing-fee-enabled="{{ p.processing_fee_enabled|yesno:'true,false' }}"
+                          data-penalty-enabled="{{ p.penalty_enabled|yesno:'true,false' }}"
+                          data-penalty-rate="{{ p.penalty_rate_monthly }}"
+                          {% if form_data.product and form_data.product.pk == p.pk %}selected{% endif %}>
+                    {{ p.name }} — {{ p.interest_rate_monthly }}%/mo ({{ p.get_interest_method_display }})
+                  </option>
+                  {% endfor %}
+                </select>
+                <div id="product-hint" class="form-hint" aria-live="polite"></div>
+              </div>
+
+              <div class="grid">
+                <div class="form-group">
+                  <label for="interest_method">Interest Method <span class="req">*</span></label>
+                  <select name="interest_method" id="interest_method" required
+                          {% if not can_change_loan_interest_method %}disabled{% endif %}>
+                    <option value="">— Select interest method —</option>
+                    {% for value, label in interest_method_choices %}
+                    <option value="{{ value }}" {% if form_data.interest_method == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  {% if not can_change_loan_interest_method %}
+                  <div class="form-hint">Only users authorized by an administrator can change the interest method.</div>
+                  {% endif %}
+                </div>
+                <div class="form-group">
+                  <label for="principal">Loan Amount ({% currency_symbol %}) <span class="req">*</span></label>
+                  <input type="number" name="principal" id="principal"
+                         value="{{ form_data.principal|default:'' }}"
+                         placeholder="e.g. 1,000,000" min="0" step="1000" required
+                         inputmode="numeric">
+                </div>
+                <div class="form-group">
+                  <label for="term_months">Term (Months) <span class="req">*</span></label>
+                  <input type="number" name="term_months" id="term_months"
+                         value="{{ form_data.term_months|default:1 }}" min="1" max="60" required
+                         inputmode="numeric">
+                </div>
+                <div class="form-group">
+                  <label for="frequency">Repayment Frequency <span class="req">*</span></label>
+                  <select name="frequency" id="frequency" required>
+                    <option value="MONTHLY"  {% if form_data.frequency == 'MONTHLY'  or not form_data.frequency %}selected{% endif %}>Monthly</option>
+                    <option value="WEEKLY"   {% if form_data.frequency == 'WEEKLY'   %}selected{% endif %}>Weekly</option>
+                    <option value="BIWEEKLY" {% if form_data.frequency == 'BIWEEKLY' %}selected{% endif %}>Bi-Weekly</option>
+                    <option value="DAILY"    {% if form_data.frequency == 'DAILY'    %}selected{% endif %}>Daily</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top:14px;">
+                <label for="purpose">Loan Purpose</label>
+                <textarea name="purpose" id="purpose" rows="2"
+                          placeholder="What will the client use this loan for?">{{ form_data.purpose|default:'' }}</textarea>
+              </div>
+            </div></div></div>
+          </section>
+
+          {# ── Block 2: Fees & penalties (collapsed, expands via toggle) ── #}
+          <section class="block" data-block>
+            <button type="button" class="block-head" aria-expanded="false">
+              <span class="block-title">Fees &amp; penalties<small>Override product defaults for this loan</small></span>
+            </button>
+            <div class="block-body"><div class="block-inner"><div class="block-pad">
+
+              <div class="tg">
+                <div class="tg-text">
+                  <strong id="fee-toggle-label">Charge processing fee</strong>
+                  <p class="form-hint" id="fee-toggle-hint">
+                    {% if can_override_loan_fees %}Override the product’s processing fee for this loan.{% else %}Only users authorized by an administrator can change this fee.{% endif %}
+                  </p>
+                </div>
+                <label class="switch" aria-labelledby="fee-toggle-label">
+                  <input type="checkbox" id="processing_fee_enabled" name="processing_fee_enabled"
+                         {% if not can_override_loan_fees %}disabled{% endif %}
+                         {% if form_data.processing_fee_enabled or not loan %}checked{% endif %}>
+                  <i aria-hidden="true"></i>
+                </label>
+              </div>
+
+              <div class="reveal" data-when="processing_fee_enabled"><div class="reveal-pad">
+                <div class="form-group">
+                  <label for="processing_fee_percent_override">Custom processing fee (%)</label>
+                  <input type="number" name="processing_fee_percent_override" id="processing_fee_percent_override"
+                         value="{{ form_data.processing_fee_percent_override|default:'' }}"
+                         min="0" max="100" step="0.1"
+                         placeholder="Leave blank to use product default">
+                  <div class="form-hint">Leave blank to use the product default or company range tiers.</div>
+                </div>
+              </div></div>
+
+              <hr style="border:0;border-top:1px solid var(--line);margin:14px 0;">
+
+              <div class="tg">
+                <div class="tg-text">
+                  <strong id="penalty-toggle-label">Apply late-payment penalty</strong>
+                  <p class="form-hint" id="penalty-toggle-hint">
+                    {% if can_override_loan_fees %}Override the product’s late-payment penalty for this loan.{% else %}Only users authorized by an administrator can change this penalty.{% endif %}
+                  </p>
+                </div>
+                <label class="switch" aria-labelledby="penalty-toggle-label">
+                  <input type="checkbox" id="penalty_enabled" name="penalty_enabled"
+                         {% if not can_override_loan_fees %}disabled{% endif %}
+                         {% if form_data.penalty_enabled or not loan %}checked{% endif %}>
+                  <i aria-hidden="true"></i>
+                </label>
+              </div>
+
+              <div class="reveal" data-when="penalty_enabled"><div class="reveal-pad">
+                <div class="form-group">
+                  <label for="penalty_rate_override">Custom penalty rate (% / month)</label>
+                  <input type="number" name="penalty_rate_override" id="penalty_rate_override"
+                         value="{{ form_data.penalty_rate_override|default:'' }}"
+                         min="0" max="100" step="0.1"
+                         placeholder="Leave blank to use product default">
+                </div>
+              </div></div>
+
+            </div></div></div>
+          </section>
+
+          {# ── Block 3: Processing tiers (only when present) ── #}
+          {% if office_charge_tiers %}
+          <section class="block" data-block>
+            <button type="button" class="block-head" aria-expanded="false">
+              <span class="block-title">Processing charge tiers<small>Reference — matches highlight live</small></span>
+            </button>
+            <div class="block-body"><div class="block-inner"><div class="block-pad">
+              <table class="tiers" aria-label="Processing charge tiers">
+                <thead><tr>
+                  <th scope="col">Loan range</th>
+                  <th scope="col">Charge</th>
+                </tr></thead>
+                <tbody>
+                  {% for tier in office_charge_tiers %}
+                  <tr class="tier-row" data-min="{{ tier.min_amount }}" data-max="{{ tier.max_amount|default:'' }}" data-charge="{{ tier.office_charge }}">
+                    <td>
+                      {% if tier.max_amount %}{{ tier.min_amount|money }} – {{ tier.max_amount|money }}{% else %}{{ tier.min_amount|money }} and above{% endif %}
+                    </td>
+                    <td class="mono">{{ tier.office_charge|money }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div></div></div>
+          </section>
+          {% endif %}
+
+          {# ── Actions ── #}
+          <div style="padding:16px 18px;">
+            <div class="actions" style="margin-top:0;padding-top:0;border-top:0;">
+              <a href="{% url 'loans:apply' %}" class="btn btn-secondary">← Back</a>
+              <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
+              <span class="spacer"></span>
+              <button type="submit" name="action" value="continue" class="btn btn-primary">Continue to Security →</button>
             </div>
           </div>
 
-          {% if office_charge_tiers %}
-          <details style="margin-top:12px;">
-            <summary style="font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;padding:6px 0;">Processing Charge Tiers</summary>
-            <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px;">
-              <thead><tr style="background:var(--surface-2);">
-                <th style="padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);">Loan Range</th>
-                <th style="padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);">Charge</th>
-              </tr></thead>
-              <tbody>
-                {% for tier in office_charge_tiers %}
-                <tr class="tier-row" data-min="{{ tier.min_amount }}" data-max="{{ tier.max_amount|default:'' }}" data-charge="{{ tier.office_charge }}" style="border-bottom:1px solid var(--border);">
-                  <td style="padding:6px 10px;">
-                    {% if tier.max_amount %}{{ tier.min_amount|money }} – {{ tier.max_amount|money }}{% else %}{{ tier.min_amount|money }} and above{% endif %}
-                  </td>
-                  <td style="padding:6px 10px;text-align:right;font-weight:500;">{{ tier.office_charge|money }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </details>
-          {% endif %}
-
-          <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-            <a href="{% url 'loans:apply' %}" class="btn btn-secondary">← Back</a>
-            <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
-            <button type="submit" name="action" value="continue" class="btn btn-primary" style="margin-left:auto;">Continue to Security →</button>
-          </div>
         </form>
       </div>
-    </div>
 
-    {% if active_loan %}
-    <div class="card" style="margin-top:16px;border-left:3px solid var(--warning);">
-      <div class="card-body" style="padding:14px 16px;">
-        <div style="font-weight:600;font-size:13px;color:var(--warning);">⚠ Active Loan Exists</div>
-        <div style="font-size:13px;margin-top:4px;">{{ active_loan.loan_number }} — Outstanding {{ active_loan.outstanding_balance|money }}</div>
-        {% if can_renew %}
-        <a href="{% url 'loans:renew' active_loan.pk %}" class="btn btn-secondary btn-sm" style="margin-top:8px;">Roll Over This Loan</a>
-        {% endif %}
-      </div>
-    </div>
-    {% endif %}
-  </div>
-
-  {# ── RIGHT: Live schedule ── #}
-  <div>
-    <div class="card">
-      <div class="card-header" style="justify-content:space-between;">
-        <span class="card-title">Repayment Schedule Preview</span>
-        <span class="htmx-indicator" style="font-size:12px;color:var(--text-muted);">Calculating…</span>
-      </div>
-      <div id="schedule-panel">
-        {% if schedule_rows %}
-          {% include "partials/schedule_table.html" %}
-        {% else %}
-        <div class="empty-state" style="padding:40px 24px;">
-          <p>Select a product and enter loan details to preview the schedule.</p>
+      {% if active_loan %}
+      <div class="card" style="margin-top:16px;border-left:3px solid var(--warn);">
+        <div class="card-body" style="padding:14px 16px;">
+          <div style="font-weight:600;font-size:.85rem;color:var(--warn);display:flex;align-items:center;gap:6px;">
+            <span aria-hidden="true">⚠</span> Active loan exists
+          </div>
+          <div style="font-size:.85rem;margin-top:4px;">
+            {{ active_loan.loan_number }} — Outstanding {{ active_loan.outstanding_balance|money }}
+          </div>
+          {% if can_renew %}
+          <a href="{% url 'loans:renew' active_loan.pk %}" class="btn btn-secondary btn-sm" style="margin-top:10px;">Roll over this loan</a>
+          {% endif %}
         </div>
-        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── RIGHT: Sticky summary + live schedule ── #}
+    <div class="rail">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Fee &amp; disbursement</span>
+          <span class="card-meta" id="s-fee-source" aria-live="polite"></span>
+        </div>
+        <div class="card-body" style="padding-top:6px;padding-bottom:6px;">
+          <div class="fee-row"><span>Principal</span><span id="s-principal" class="mono">—</span></div>
+          <div class="fee-row"><span>Total interest</span><span id="s-interest" class="mono">—</span></div>
+          <div class="fee-row">
+            <span class="label">Processing fee <small id="s-fee-label"></small></span>
+            <span id="s-fee" class="mono">—</span>
+          </div>
+          <div class="fee-row"><span>Net disbursed</span><span id="s-net" class="mono">—</span></div>
+          <div class="fee-row total"><span>Scheduled repayment</span><span id="s-total-repayable" class="mono">—</span></div>
+          <div class="fee-row"><span>Nominal APR</span><span id="s-apr" class="mono">—</span></div>
+          <div class="fee-row"><span>Total cost of credit</span><span id="s-credit-cost" class="mono">—</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head">
+          <span class="card-title">Repayment schedule</span>
+          <span class="schedule-card-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span class="htmx-indicator" id="schedule-spinner" aria-hidden="true">Calculating…</span>
+            {% include "partials/schedule_preview_print_button.html" with schedule_form_id="loan-form" %}
+          </span>
+        </div>
+        <div id="schedule-panel">
+          {% if schedule_rows %}
+            {% include "partials/schedule_table.html" %}
+          {% else %}
+          <div class="empty-state">
+            <p>Select a product and enter loan details to preview the schedule.</p>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <script>
 (function () {
-  const productSel  = document.getElementById('product');
+  'use strict';
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  /* ── Collapsible blocks ── */
+  $$('.la [data-block]').forEach(block => {
+    const head = $('.block-head', block);
+    if (!head) return;
+    head.addEventListener('click', () => {
+      const open = block.classList.toggle('open');
+      head.setAttribute('aria-expanded', String(open));
+    });
+    head.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        head.click();
+      }
+    });
+  });
+
+  /* ── Conditional reveals ── */
+  const syncReveals = () => {
+    $$('.la .reveal').forEach(r => {
+      const id = r.dataset.when;
+      const cb = id ? document.getElementById(id) : null;
+      r.classList.toggle('show', !!(cb && cb.checked));
+    });
+  };
+  document.getElementById('loan-form')?.addEventListener('change', syncReveals);
+  syncReveals();
+
+  /* ── Live summary ── */
+  const productSel       = document.getElementById('product');
   const interestMethodSel = document.getElementById('interest_method');
   const processingFeeToggle = document.getElementById('processing_fee_enabled');
-  const penaltyToggle = document.getElementById('penalty_enabled');
-  const principalIn = document.getElementById('principal');
-  const termIn      = document.getElementById('term_months');
-  const frequencyIn = document.getElementById('frequency');
-  const sPrincipal  = document.getElementById('s-principal');
-  const sInterest   = document.getElementById('s-interest');
-  const sFee        = document.getElementById('s-fee');
-  const sFeeLabel   = document.getElementById('s-fee-label');
-  const sNet        = document.getElementById('s-net');
-  const sTotal       = document.getElementById('s-total-repayable');
-  const sApr         = document.getElementById('s-apr');
-  const sCreditCost  = document.getElementById('s-credit-cost');
-  const sFeeSource  = document.getElementById('s-fee-source');
-  const productHint = document.getElementById('product-hint');
-  const form = document.getElementById('loan-form');
+  const penaltyToggle    = document.getElementById('penalty_enabled');
+  const principalIn      = document.getElementById('principal');
+  const termIn           = document.getElementById('term_months');
+  const frequencyIn      = document.getElementById('frequency');
+  const sPrincipal       = document.getElementById('s-principal');
+  const sInterest        = document.getElementById('s-interest');
+  const sFee             = document.getElementById('s-fee');
+  const sFeeLabel        = document.getElementById('s-fee-label');
+  const sNet             = document.getElementById('s-net');
+  const sTotal           = document.getElementById('s-total-repayable');
+  const sApr             = document.getElementById('s-apr');
+  const sCreditCost      = document.getElementById('s-credit-cost');
+  const sFeeSource       = document.getElementById('s-fee-source');
+  const productHint      = document.getElementById('product-hint');
+  const form             = document.getElementById('loan-form');
 
-  // Parse tier data from DOM
-  const tiers = Array.from(document.querySelectorAll('.tier-row')).map(r => ({
+  const tiers = $$('.tier-row').map(r => ({
     min: parseFloat(r.dataset.min) || 0,
     max: r.dataset.max ? parseFloat(r.dataset.max) : null,
     charge: parseFloat(r.dataset.charge) || 0,
     el: r,
   }));
 
+  const currencySymbol = '{% currency_symbol %}';
   function fmt(n) {
-    return '{% currency_symbol %} ' + Math.round(n).toLocaleString('en-US');
-  }
-
-  function getOfficeCharge(p) {
-    for (const t of tiers) {
-      if (t.max === null ? p >= t.min : p >= t.min && p <= t.max) return t.charge;
-    }
-    return 0;
+    return currencySymbol + ' ' + Math.round(n).toLocaleString('en-US');
   }
 
   function getRangeFee(principal) {
     for (const line of (form.dataset.processingFeeRanges || '').split(/\s+/)) {
-      const separator = line.indexOf(':');
-      if (separator < 0) continue;
-      const bounds = line.slice(0, separator).split('-', 2);
-      const minimum = bounds[0] ? parseFloat(bounds[0]) : null;
-      const maximum = bounds[1] ? parseFloat(bounds[1]) : null;
-      const amount = parseFloat(line.slice(separator + 1));
-      if (!Number.isFinite(amount)) continue;
-      if ((minimum === null || principal >= minimum) && (maximum === null || principal <= maximum)) return amount;
+      const sep = line.indexOf(':');
+      if (sep < 0) continue;
+      const bounds = line.slice(0, sep).split('-', 2);
+      const min = bounds[0] ? parseFloat(bounds[0]) : null;
+      const max = bounds[1] ? parseFloat(bounds[1]) : null;
+      const amt = parseFloat(line.slice(sep + 1));
+      if (!Number.isFinite(amt)) continue;
+      if ((min === null || principal >= min) && (max === null || principal <= max)) return amt;
     }
     return 0;
   }
 
-  function roundMoney(value) {
-    return Math.round((value + Number.EPSILON) * 100) / 100;
-  }
+  const roundMoney = v => Math.round((v + Number.EPSILON) * 100) / 100;
 
   function calculateInterest(principal, monthlyRatePercent, months, method, frequency) {
     if (principal <= 0 || monthlyRatePercent <= 0 || months <= 0) return 0;
     const rate = monthlyRatePercent / 100;
     if (method === 'FLAT') return roundMoney(principal * rate * months);
-
-    const periodsPerMonth = {DAILY: 30, WEEKLY: 4, BIWEEKLY: 2, MONTHLY: 1}[frequency] || 1;
-    const periods = months * periodsPerMonth;
+    const ppm = {DAILY:30, WEEKLY:4, BIWEEKLY:2, MONTHLY:1}[frequency] || 1;
+    const periods = months * ppm;
     if (method === 'INTEREST_ONLY') {
-      return roundMoney(roundMoney(principal * rate / periodsPerMonth) * periods);
+      return roundMoney(roundMoney(principal * rate / ppm) * periods);
     }
     const periodRate = method === 'COMPOUND'
-      ? Math.pow(1 + rate, 1 / periodsPerMonth) - 1
-      : rate;
+      ? Math.pow(1 + rate, 1 / ppm) - 1
+      : rate / ppm;
     const payment = periodRate > 0
       ? roundMoney(principal * periodRate / (1 - Math.pow(1 + periodRate, -periods)))
       : roundMoney(principal / periods);
-    let balance = principal;
-    let totalInterest = 0;
+    let balance = principal, totalInterest = 0;
     for (let period = 1; period <= periods; period++) {
       const interest = roundMoney(balance * periodRate);
       const principalDue = period === periods ? balance : roundMoney(payment - interest);
@@ -343,111 +791,113 @@
     return roundMoney(totalInterest);
   }
 
-  function updateSummary() {
-    const p = parseFloat(principalIn.value) || 0;
-    const months = parseInt(termIn.value, 10) || 0;
-    const opt = productSel.selectedOptions[0];
+  function updateSummary(useServerSchedule) {
+    const p = parseFloat(principalIn?.value) || 0;
+    const months = parseInt(termIn?.value, 10) || 0;
+    const opt = productSel?.selectedOptions[0];
 
-    // Product hint
-    if (opt && opt.dataset.min) {
-      const selectedMethod = interestMethodSel?.selectedOptions[0]?.textContent.trim() || opt.dataset.method;
-      productHint.textContent = `Range: {% currency_symbol %} ${parseInt(opt.dataset.min).toLocaleString()} – {% currency_symbol %} ${parseInt(opt.dataset.max).toLocaleString()} · ${opt.dataset.rate}%/mo · ${selectedMethod}`;
-    } else {
-      productHint.textContent = '';
+    if (productHint) {
+      if (opt && opt.dataset.min) {
+        const selectedMethod = interestMethodSel?.selectedOptions[0]?.textContent.trim() || opt.dataset.method;
+        productHint.textContent = `Range: ${currencySymbol} ${parseInt(opt.dataset.min).toLocaleString()} – ${currencySymbol} ${parseInt(opt.dataset.max).toLocaleString()} · ${opt.dataset.rate}%/mo · ${selectedMethod}`;
+      } else {
+        productHint.textContent = '';
+      }
     }
 
     const companyRate = parseFloat(form.dataset.companyFeePercent) || 0;
     const productRate = parseFloat(opt?.dataset.processingFeePercent) || 0;
     const productFeeEnabled = opt?.dataset.processingFeeEnabled === 'true';
-    const processingFeeEnabled = processingFeeToggle
-      ? processingFeeToggle.checked
-      : productFeeEnabled;
+    const processingFeeEnabled = processingFeeToggle ? processingFeeToggle.checked : productFeeEnabled;
     let fee = 0, feeLabel = '', feeSource = '';
+
     if (!processingFeeEnabled) {
       feeSource = 'No processing fee';
     } else if (form.dataset.processingFeeMethod === 'RANGE') {
       fee = getRangeFee(p);
-      feeSource = fee > 0 ? 'Company settings (range)' : 'No matching fee range';
+      feeSource = fee > 0 ? 'Company range tiers' : 'No matching fee range';
     } else {
       const feeRate = companyRate > 0 ? companyRate : productRate;
       fee = roundMoney(p * feeRate / 100);
-      feeLabel = feeRate > 0 ? `(${feeRate}%)` : '';
-      feeSource = feeRate > 0 ? (companyRate > 0 ? 'Company settings' : opt?.textContent.split(' — ')[0]) : 'No processing fee';
+      feeLabel = feeRate > 0 ? `${feeRate}%` : '';
+      feeSource = feeRate > 0 ? (companyRate > 0 ? 'Company default' : (opt?.textContent.split(' — ')[0] || 'Product default')) : 'No processing fee';
     }
 
-    const interest = calculateInterest(
+    let interest = calculateInterest(
       p,
       parseFloat(opt?.dataset.rate) || 0,
       months,
       interestMethodSel?.value || opt?.dataset.method || 'FLAT',
-      frequencyIn.value,
+      frequencyIn?.value,
     );
-    const totalRepayable = p + interest;
+    let totalRepayable = p + interest;
+    let scheduleAvailable = !useServerSchedule;
+    if (useServerSchedule) {
+      const meta = document.getElementById('schedule-preview-meta');
+      if (meta) {
+        interest = parseFloat(meta.dataset.totalInterest);
+        totalRepayable = parseFloat(meta.dataset.totalRepayable);
+        scheduleAvailable = Number.isFinite(interest) && Number.isFinite(totalRepayable);
+      }
+    }
     const nominalApr = (parseFloat(opt?.dataset.rate) || 0) * 12;
 
-    sPrincipal.textContent = p > 0 ? fmt(p) : '—';
-    sInterest.textContent = p > 0 && opt?.value ? fmt(interest) : '—';
-    sFee.textContent = p > 0 ? fmt(fee) : '—';
-    sFeeLabel.textContent = feeLabel ? `· ${feeLabel}` : '';
-    sNet.textContent = p > 0 ? fmt(Math.max(0, p - fee)) : '—';
-    sTotal.textContent = p > 0 && opt?.value ? fmt(totalRepayable) : '—';
-    sApr.textContent = opt?.value ? `${nominalApr.toFixed(2)}%` : '—';
-    sCreditCost.textContent = p > 0 && opt?.value ? fmt(interest + fee) : '—';
-    sFeeSource.textContent = feeSource ? `Source: ${feeSource}` : '';
+    if (sPrincipal) sPrincipal.textContent = p > 0 ? fmt(p) : '—';
+    if (sInterest)  sInterest.textContent  = p > 0 && opt?.value && scheduleAvailable ? fmt(interest) : '—';
+    if (sFee)       sFee.textContent       = p > 0 ? fmt(fee) : '—';
+    if (sFeeLabel)  sFeeLabel.textContent  = feeLabel ? `· ${feeLabel}` : '';
+    if (sNet)       sNet.textContent       = p > 0 ? fmt(Math.max(0, p - fee)) : '—';
+    if (sTotal)     sTotal.textContent     = p > 0 && opt?.value && scheduleAvailable ? fmt(totalRepayable) : '—';
+    if (sApr)       sApr.textContent       = opt?.value ? `${nominalApr.toFixed(2)}%` : '—';
+    if (sCreditCost) sCreditCost.textContent = p > 0 && opt?.value && scheduleAvailable ? fmt(interest + fee) : '—';
+    if (sFeeSource) sFeeSource.textContent = feeSource ? `${feeSource}` : '';
 
-    // Highlight matching tier
     tiers.forEach(t => {
       const match = t.max === null ? p >= t.min : p >= t.min && p <= t.max;
       t.el.classList.toggle('match', match && p > 0);
     });
   }
 
-  function syncFeeToggles(resetToProductDefaults) {
-    const opt = productSel.selectedOptions[0];
+  function syncFeeToggles(reset) {
+    const opt = productSel?.selectedOptions[0];
     const hasProduct = Boolean(opt && opt.value);
-    if (processingFeeToggle) {
-      if (resetToProductDefaults && hasProduct) {
-        processingFeeToggle.checked = opt.dataset.processingFeeEnabled === 'true';
-      }
+    if (processingFeeToggle && reset && hasProduct) {
+      processingFeeToggle.checked = opt.dataset.processingFeeEnabled === 'true';
     }
-    if (penaltyToggle) {
-      if (resetToProductDefaults && hasProduct) {
-        penaltyToggle.checked = opt.dataset.penaltyEnabled === 'true';
-      }
+    if (penaltyToggle && reset && hasProduct) {
+      penaltyToggle.checked = opt.dataset.penaltyEnabled === 'true';
     }
+    syncReveals();
   }
 
-  function syncInterestMethod(resetToProductDefault) {
-    const opt = productSel.selectedOptions[0];
-    if (!opt || !opt.value) return;
-    if (resetToProductDefault || !interestMethodSel.value) {
+  function syncInterestMethod(reset) {
+    const opt = productSel?.selectedOptions[0];
+    if (!opt || !opt.value || !interestMethodSel) return;
+    if (reset || !interestMethodSel.value) {
       interestMethodSel.value = opt.dataset.method;
     }
   }
 
   [productSel, principalIn, termIn, frequencyIn].forEach(el => {
-    el?.addEventListener('change', updateSummary);
-    el?.addEventListener('input', updateSummary);
+    el?.addEventListener('change', () => updateSummary(false));
+    el?.addEventListener('input',  () => updateSummary(false));
   });
-  productSel.addEventListener('change', () => {
+  productSel?.addEventListener('change', () => {
     syncFeeToggles(true);
     syncInterestMethod(true);
-    updateSummary();
+    updateSummary(false);
   });
-  if (interestMethodSel) {
-    interestMethodSel.addEventListener('change', updateSummary);
-    syncInterestMethod(false);
-  }
-  if (processingFeeToggle) processingFeeToggle.addEventListener('change', updateSummary);
-  if (penaltyToggle) penaltyToggle.addEventListener('change', updateSummary);
+  interestMethodSel?.addEventListener('change', () => updateSummary(false));
+  interestMethodSel && syncInterestMethod(false);
+  processingFeeToggle?.addEventListener('change', () => { syncReveals(); updateSummary(false); });
+  penaltyToggle?.addEventListener('change', syncReveals);
 
-  // After HTMX swaps schedule, re-read meta and update summary
   document.body.addEventListener('htmx:afterSwap', e => {
-    if (e.detail.target?.id === 'schedule-panel') updateSummary();
+    if (e.detail.target?.id === 'schedule-panel') updateSummary(true);
   });
 
   syncFeeToggles(false);
-  updateSummary();
+  updateSummary(Boolean(document.getElementById('schedule-preview-meta')));
 })();
 </script>
 {% endblock %}

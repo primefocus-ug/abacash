@@ -131,7 +131,7 @@ def generate_loan_calculator_pdf(
     currency = escape_xml(str(company_settings.currency_symbol or ""))
 
     def format_amount(value):
-        amount = f"{value:,.2f}"
+        amount = f"{value:,.4f}"
         return f"{currency} {amount}".strip()
 
     story = [
@@ -147,7 +147,7 @@ def generate_loan_calculator_pdf(
 
     terms = [
         [Paragraph("<b>Loan amount</b>", cell_style), format_amount(principal),
-         Paragraph("<b>Monthly rate</b>", cell_style), f"{monthly_rate:.2f}%"],
+         Paragraph("<b>Monthly rate</b>", cell_style), f"{monthly_rate:.4f}%"],
         [Paragraph("<b>Term</b>", cell_style), f"{term_months} months",
          Paragraph("<b>Repayment</b>", cell_style), escape_xml(str(frequency_label))],
         [Paragraph("<b>Interest method</b>", cell_style), escape_xml(str(method_label)), "", ""],
@@ -364,6 +364,7 @@ def generate_loan_schedule_pdf(loan, signatory=None, loan_terms=None):
     from datetime import datetime
     from xml.sax.saxutils import escape
     from accounts.models import BankAccount, DEFAULT_LOAN_TERMS
+    from accounts.terms import loan_terms_reportlab_markup
 
     styles = getSampleStyleSheet()
     normal = ParagraphStyle("Normal", parent=styles["Normal"], fontSize=9, spaceAfter=2)
@@ -437,10 +438,9 @@ def generate_loan_schedule_pdf(loan, signatory=None, loan_terms=None):
     terms = (loan_terms if loan_terms is not None else DEFAULT_LOAN_TERMS).strip()
     if terms:
         story.append(Paragraph("<b>Terms and conditions</b>", normal))
-        for paragraph in terms.splitlines():
-            paragraph = paragraph.strip()
-            if paragraph:
-                story.append(Paragraph(escape(paragraph), small))
+        terms_markup = loan_terms_reportlab_markup(terms)
+        if terms_markup:
+            story.append(Paragraph(terms_markup, small))
         story.append(Paragraph(
             "This summary should be read with the signed loan agreement and applicable law. "
             "It does not replace independent legal advice.",

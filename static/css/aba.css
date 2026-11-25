@@ -1154,17 +1154,21 @@ textarea { resize: vertical; min-height: 90px; }
   display: flex;
   gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
+  overflow-x: auto;
 }
 .card-header form input,
 .card-header form select,
 .card-header form .form-control {
-  /* allow fields to grow and share available space */
-  flex: 1 1 200px !important;
+  flex: 0 1 180px !important;
   min-width: 120px !important;
   width: auto !important;
+  max-width: 220px;
   margin-bottom: 0 !important;
+  height: 38px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .card-header form button,
 .card-header form .btn {
@@ -1180,8 +1184,9 @@ textarea { resize: vertical; min-height: 90px; }
   .card-header form input,
   .card-header form select,
   .card-header form .form-control {
-    flex: 1 1 100% !important;
-    min-width: 0 !important;
+    flex: 0 0 150px !important;
+    min-width: 150px !important;
+    max-width: 150px;
   }
   .card-header { align-items: flex-start; }
 }
@@ -1450,6 +1455,24 @@ textarea { resize: vertical; min-height: 90px; }
   padding: 4px 0;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+/* Professional, viewport-safe filter controls */
+.search-filter-bar,
+.filter-bar-single-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.search-filter-bar input,
+.search-filter-bar select,
+.filter-bar-single-row .filter-field input,
+.filter-bar-single-row .filter-field select {
+  height: 38px;
+  max-width: 220px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .filter-bar-single-row::-webkit-scrollbar {
@@ -1883,20 +1906,26 @@ textarea { resize: vertical; min-height: 90px; }
   /* Full-width filter inputs */
   .filter-bar-single-row {
     gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
   .filter-bar-single-row input {
     min-width: 120px !important;
-    flex: 1 1 100% !important;
+    flex: 0 0 150px !important;
   }
 
   .filter-bar-single-row select {
-    flex: 1 1 100% !important;
+    flex: 0 0 150px !important;
+    max-width: 150px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .filter-actions {
-    flex: 1 1 100% !important;
+    flex: 0 0 auto !important;
     justify-content: flex-end;
+    white-space: nowrap;
   }
 
   .filter-actions .btn {

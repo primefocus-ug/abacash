@@ -18,7 +18,11 @@ from clients.models import Client
 from common.pdf_utils import generate_loan_calculator_pdf, generate_loan_schedule_pdf
 from loans import views as loan_views
 from loans.models import Loan, LoanProduct
-from loans.utils import calculate_processing_fee_amount, resolve_processing_fee_rate
+from loans.utils import (
+    calculate_penalty,
+    calculate_processing_fee_amount,
+    resolve_processing_fee_rate,
+)
 
 
 class _RelatedList(list):
@@ -39,6 +43,10 @@ class ProcessingFeeResolutionTests(SimpleTestCase):
     def test_new_company_settings_use_default_range_fees(self):
         settings = CompanySettings()
         self.assertEqual(settings.processing_fee_method, "RANGE")
+        self.assertEqual(
+            settings.penalty_frequency,
+            CompanySettings.PenaltyFrequency.MONTHLY,
+        )
         self.assertEqual(
             settings.processing_fee_ranges,
             "0-50000:4000\n"
@@ -147,6 +155,50 @@ class ProcessingFeeResolutionTests(SimpleTestCase):
         self.assertEqual(loan.effective_processing_fee, Decimal("0"))
 
 
+class PenaltyCalculationTests(SimpleTestCase):
+    def test_daily_penalty_applies_rate_for_each_overdue_day(self):
+        self.assertEqual(
+            calculate_penalty(
+                Decimal("1000"),
+                Decimal("2"),
+                days_overdue=5,
+                frequency="DAILY",
+            ),
+            Decimal("100.00"),
+        )
+
+    def test_monthly_penalty_applies_for_each_started_thirty_day_period(self):
+        self.assertEqual(
+            calculate_penalty(
+                Decimal("1000"),
+                Decimal("2"),
+                days_overdue=31,
+                frequency="MONTHLY",
+            ),
+            Decimal("40.00"),
+        )
+
+    def test_no_penalty_is_applied_before_overdue_period_starts(self):
+        self.assertEqual(
+            calculate_penalty(
+                Decimal("1000"),
+                Decimal("2"),
+                days_overdue=0,
+                frequency="DAILY",
+            ),
+            Decimal("0.00"),
+        )
+
+    def test_rejects_unknown_penalty_frequency(self):
+        with self.assertRaises(ValueError):
+            calculate_penalty(
+                Decimal("1000"),
+                Decimal("2"),
+                days_overdue=5,
+                frequency="WEEKLY",
+            )
+
+
 class CEOOnlyLoanActionTests(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -214,6 +266,12 @@ class CEOOnlyLoanActionTests(SimpleTestCase):
 
 class LoanFeeSwitchTests(SimpleTestCase):
     def setUp(self):
+        settings_patcher = patch(
+            "loans.views.CompanySettings.get",
+            return_value=SimpleNamespace(penalties_enabled=True),
+        )
+        settings_patcher.start()
+        self.addCleanup(settings_patcher.stop)
         self.product = SimpleNamespace(
             pk=1,
             interest_method=LoanProduct.InterestMethod.FLAT_RATE,
@@ -301,6 +359,34 @@ class LoanFeeSwitchTests(SimpleTestCase):
                 can_override=True,
             ),
             (True, True),
+        )
+
+    @patch(
+        "loans.views.CompanySettings.get",
+        return_value=SimpleNamespace(penalties_enabled=False),
+    )
+    def test_tenant_can_disable_penalties_even_for_ceo_overrides(self, _get_settings):
+        self.assertEqual(
+            loan_views._resolve_loan_fee_switches(
+                self.product,
+                {"processing_fee_enabled": "on", "penalty_enabled": "on"},
+                can_override=True,
+            ),
+            (True, False),
+        )
+
+    @patch(
+        "loans.views.CompanySettings.get",
+        return_value=SimpleNamespace(penalties_enabled=False),
+    )
+    def test_tenant_can_disable_penalties_for_new_loans(self, _get_settings):
+        self.assertEqual(
+            loan_views._resolve_loan_fee_switches(
+                self.product,
+                {},
+                can_override=False,
+            ),
+            (True, False),
         )
 
     def test_non_ceo_cannot_enable_product_disabled_fees(self):
@@ -459,15 +545,58 @@ class LoanCalculatorPreviewTests(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {
             "period_count": 2,
-            "total_interest": "10.00",
-            "total_repayable": "210.00",
-            "average_payment": "105.00",
-            "first_payment": "100.00",
-            "final_payment": "110.00",
+            "total_interest": "10.0000",
+            "total_repayable": "210.0000",
+            "average_payment": "105.0000",
+            "first_payment": "100.0000",
+            "final_payment": "110.0000",
         })
         self.assertEqual(generate.call_args.kwargs["annual_rate"], Decimal("60"))
         self.assertEqual(generate.call_args.kwargs["method"], "INTEREST_ONLY")
         self.assertEqual(generate.call_args.kwargs["frequency"], "BIWEEKLY")
+        self.assertEqual(generate.call_args.kwargs["decimal_places"], 4)
+
+    def test_returns_estimates_rounded_to_four_decimal_places(self):
+        response = loan_views.loan_calculator_preview(self.calculator_request({
+            "principal": "1234.5678",
+            "monthly_rate": "1.2345",
+            "term_months": "1",
+            "frequency": "MONTHLY",
+            "method": "FLAT",
+        }))
+
+        payload = json.loads(response.content)
+        expected_interest = (
+            Decimal("1234.5678") * Decimal("1.2345") / Decimal("100")
+        ).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["total_interest"], f"{expected_interest:.4f}")
+        self.assertEqual(
+            payload["total_repayable"],
+            f"{Decimal('1234.5678') + expected_interest:.4f}",
+        )
+        self.assertEqual(payload["average_payment"], payload["total_repayable"])
+        self.assertEqual(payload["first_payment"], payload["total_repayable"])
+        self.assertEqual(payload["final_payment"], payload["total_repayable"])
+
+    def test_weekly_flat_rate_example_reports_expected_figures(self):
+        response = loan_views.loan_calculator_preview(self.calculator_request({
+            "principal": "300000",
+            "monthly_rate": "5",
+            "term_months": "12",
+            "frequency": "WEEKLY",
+            "method": "FLAT",
+        }))
+
+        self.assertEqual(json.loads(response.content), {
+            "period_count": 48,
+            "total_interest": "180000.0000",
+            "total_repayable": "480000.0000",
+            "average_payment": "10000.0000",
+            "first_payment": "10000.0000",
+            "final_payment": "10000.0000",
+        })
 
     def test_rejects_invalid_calculator_input(self):
         response = loan_views.loan_calculator_preview(self.calculator_request({
@@ -552,6 +681,98 @@ class LoanCalculatorPreviewTests(SimpleTestCase):
         )
 
         self.assertTrue(pdf.startswith(b"%PDF-"))
+
+
+class LoanApplicationSchedulePreviewTests(SimpleTestCase):
+    def setUp(self):
+        self.request_factory = RequestFactory()
+
+    def test_incomplete_stage_two_terms_show_an_actionable_preview_message(self):
+        request = self.request_factory.get("/loans/schedule-preview/", {
+            "product": "",
+            "principal": "",
+            "term_months": "1",
+            "frequency": "MONTHLY",
+        })
+        request.user = SimpleNamespace(is_authenticated=True)
+
+        response = loan_views.schedule_preview(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Select a product and enter a positive loan amount")
+
+    def test_valid_stage_two_terms_build_a_schedule_for_the_live_preview(self):
+        product = SimpleNamespace(
+            name="Short Term",
+            interest_rate_monthly=Decimal("2"),
+        )
+        request = self.request_factory.get(
+            "/loans/schedule-preview/",
+            {
+                "product": "7",
+                "principal": "500",
+                "term_months": "3",
+                "frequency": "WEEKLY",
+            },
+        )
+        request.user = SimpleNamespace(is_authenticated=True, can=lambda _permission: False)
+        schedule_rows = [SimpleNamespace(period=1)]
+        totals = {
+            "total_interest": Decimal("12"),
+            "total_repayable": Decimal("512"),
+        }
+
+        with (
+            patch("loans.views.LoanProduct.objects.filter") as filter_products,
+            patch("loans.views._get_schedule_preview_draft", return_value=None),
+            patch("loans.views._resolve_loan_interest_method", return_value="FLAT"),
+            patch("loans.views._resolve_loan_fee_switches", return_value=(False, False)),
+            patch("loans.views.generate_schedule", return_value=(schedule_rows, totals)) as generate,
+            patch("loans.views.render", return_value=SimpleNamespace(status_code=200)) as render,
+        ):
+            filter_products.return_value.first.return_value = product
+            response = loan_views.schedule_preview(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(generate.call_args.kwargs["frequency"], "WEEKLY")
+        self.assertEqual(render.call_args.args[2]["schedule_rows"], schedule_rows)
+        self.assertEqual(render.call_args.args[2]["totals"], totals)
+
+    def test_print_preview_uses_saved_draft_terms_on_later_stages(self):
+        client = SimpleNamespace(pk="client-id", client_number="C-1")
+        product = SimpleNamespace(pk=7)
+        draft = SimpleNamespace(
+            pk="draft-id",
+            product_id=7,
+            product=product,
+            principal_amount=Decimal("125000"),
+            term_months=6,
+            repayment_frequency="WEEKLY",
+        )
+        request = self.request_factory.get(
+            "/loans/apply/client-id/schedule-pdf/",
+            {"draft_id": draft.pk},
+        )
+        request.user = SimpleNamespace(is_authenticated=True, can=lambda _permission: False)
+
+        with (
+            patch("loans.views.get_object_or_404", side_effect=[client, product]),
+            patch("loans.views._get_schedule_preview_draft", return_value=draft),
+            patch("loans.views._resolve_loan_interest_method", return_value="FLAT"),
+            patch("loans.views._resolve_loan_fee_switches", return_value=(False, False)),
+            patch(
+                "loans.views.build_loan_schedule_context",
+                return_value=([], {}, Decimal("0"), Decimal("0"), ""),
+            ) as build_schedule,
+            patch("loans.utils.generate_schedule_preview_pdf", return_value=b"%PDF-preview"),
+        ):
+            response = loan_views.schedule_preview_pdf(request, client_id=client.pk)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertEqual(build_schedule.call_args.kwargs["principal"], Decimal("125000"))
+        self.assertEqual(build_schedule.call_args.kwargs["term_months"], 6)
+        self.assertEqual(build_schedule.call_args.kwargs["frequency"], "WEEKLY")
 
 
 class LoanProductCreateDefaultsTests(SimpleTestCase):
@@ -989,8 +1210,49 @@ class LoanApplicationClientSearchTests(TestCase):
         self.assertContains(response, client.client_number)
         self.assertContains(response, "Jane Ann Doe")
 
-
 class LoanScheduleCalculationTests(SimpleTestCase):
+    def test_schedule_methods_support_four_decimal_calculator_precision(self):
+        from datetime import date
+        from loans.utils import generate_schedule
+
+        for method in ("FLAT", "REDUCING", "COMPOUND", "INTEREST_ONLY"):
+            with self.subTest(method=method):
+                schedule, totals = generate_schedule(
+                    principal=Decimal("1234.5678"),
+                    annual_rate=Decimal("14.814"),
+                    term_months=2,
+                    start_date=date(2026, 1, 1),
+                    method=method,
+                    frequency="WEEKLY",
+                    company_settings=CompanySettings(adjust_due_dates_for_holidays=False),
+                    decimal_places=4,
+                )
+
+                self.assertEqual(totals["total_interest"].as_tuple().exponent, -4)
+                self.assertEqual(totals["total_repayable"].as_tuple().exponent, -4)
+                self.assertEqual(schedule[0]["total_payment"].as_tuple().exponent, -4)
+
+    def test_weekly_reducing_balance_uses_a_weekly_rate(self):
+        from datetime import date
+        from loans.utils import generate_schedule
+
+        schedule, totals = generate_schedule(
+            principal=Decimal("100000"),
+            annual_rate=Decimal("60"),
+            term_months=1,
+            start_date=date(2026, 1, 1),
+            method="REDUCING",
+            frequency="WEEKLY",
+            company_settings=CompanySettings(adjust_due_dates_for_holidays=False),
+        )
+
+        self.assertEqual(schedule[0]["interest_due"], Decimal("1250.00"))
+        self.assertEqual(len(schedule), 4)
+        self.assertEqual(
+            totals["total_repayable"],
+            sum(row["total_payment"] for row in schedule),
+        )
+
     def test_reducing_balance_total_repayable_matches_schedule_sum(self):
         from datetime import date
         from loans.utils import generate_schedule

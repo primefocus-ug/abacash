@@ -40,7 +40,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="product-penalty">Penalty Rate (Monthly %)</label>
+        <label for="product-penalty">Penalty Rate ({{ penalty_frequency_label }} %)</label>
         <input id="product-penalty" type="number" name="penalty_rate_monthly" step="0.01" min="0" required value="{{ product_form_defaults.penalty_rate_monthly|default:'' }}">
       </div>
       <div class="form-group">

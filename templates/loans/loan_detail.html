@@ -281,44 +281,24 @@
   <!-- Left column -->
   <div style="min-width:0;max-width:100%;">
 
-    <!-- Loan header card -->
-    <div class="card mb-3 print-hide">
-      <div class="card-body">
-        <div class="flex-between mb-2" style="flex-wrap:wrap;gap:10px;">
-          <div style="min-width:0;max-width:100%;">
-            <div style="font-size:22px;font-weight:600;font-family:var(--font-mono);overflow-wrap:anywhere;word-break:break-all;">{{ loan.loan_number }}</div>
-            <div class="text-muted text-sm">{{ loan.product.name }} — {{ loan.get_interest_method_display }}</div>
-          </div>
-          <span class="badge
-            {% if loan.status == 'ACTIVE' %}badge-green
-            {% elif loan.status == 'PENDING' %}badge-amber
-            {% elif loan.status == 'APPROVED' %}badge-blue
-            {% elif loan.status == 'COMPLETED' %}badge-teal
-            {% elif loan.status == 'REJECTED' or loan.status == 'DEFAULTED' %}badge-red
-            {% else %}badge-muted{% endif %}" style="flex-shrink:0;">
-            {{ loan.get_status_display }}
-          </span>
-        </div>
-
+    <div class="print-hide" style="margin-bottom:12px;">
         {% if loan.purpose %}
-        <div class="mt-2">
-          <div class="text-muted text-sm">Purpose</div>
-          <div style="overflow-wrap:break-word;word-break:break-word;">{{ loan.purpose }}</div>
+        <div class="text-sm" style="margin-bottom:8px;overflow-wrap:anywhere;">
+          <span class="text-muted">Purpose:</span> {{ loan.purpose }}
         </div>
         {% endif %}
 
         {% if loan.rejection_reason %}
-        <div class="alert alert-danger mt-2" style="overflow-wrap:break-word;word-break:break-word;">
+        <div class="alert alert-danger" style="overflow-wrap:anywhere;">
           <strong>Rejection reason:</strong> {{ loan.rejection_reason }}
         </div>
         {% endif %}
         {% if loan.query_reason %}
-        <div class="alert alert-warning mt-2" style="overflow-wrap:break-word;word-break:break-word;">
+        <div class="alert alert-warning" style="overflow-wrap:anywhere;">
           <strong>Information requested by {{ loan.reviewed_by.full_name|default:"the approver" }}:</strong>
           {{ loan.query_reason }}
         </div>
         {% endif %}
-      </div>
     </div>
 
     <!-- Approve / Reject (managers/CEO, pending loans only) -->
@@ -462,6 +442,49 @@
     </div>
     {% endif %}
 
+    <div class="card mb-3 print-hide">
+      <div class="card-header">
+        <span class="card-title">Loan Action History</span>
+        {% if loan_action_history %}
+        <span class="badge badge-muted">{{ loan_action_history|length }} action{{ loan_action_history|length|pluralize }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body" style="padding:0;">
+        {% if loan_action_history %}
+        <div style="padding:8px 16px;">
+          {% for action in loan_action_history %}
+          <div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:10px 0;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
+            <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface-3);color:var(--accent);font-size:12px;font-weight:700;">
+              {% if action.type == 'payment' %}<i class="fas fa-coins"></i>
+              {% elif action.type == 'renewal' or action.type == 'reschedule' %}<i class="fas fa-rotate"></i>
+              {% elif action.type == 'write_off' %}<i class="fas fa-ban"></i>
+              {% elif action.type == 'reinstate' %}<i class="fas fa-arrow-rotate-left"></i>
+              {% elif action.type == 'approval' or action.type == 'approve' %}<i class="fas fa-check"></i>
+              {% elif action.type == 'reject' %}<i class="fas fa-xmark"></i>
+              {% else %}<i class="fas fa-clock"></i>{% endif %}
+            </div>
+            <div style="min-width:0;">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+                <strong style="font-size:13px;">{{ action.label }}</strong>
+                <span class="text-muted text-sm" style="white-space:nowrap;">{{ action.timestamp|date:"d M Y, H:i" }}</span>
+              </div>
+              {% if action.detail %}
+              <div class="text-sm" style="margin-top:3px;overflow-wrap:anywhere;">{{ action.detail }}</div>
+              {% endif %}
+              {% if action.reason %}
+              <div class="text-muted text-sm" style="margin-top:4px;overflow-wrap:anywhere;">{{ action.reason|truncatechars:180 }}</div>
+              {% endif %}
+              <div class="text-muted text-sm" style="margin-top:4px;">By {{ action.actor }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:24px;"><p>No loan actions recorded yet.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
   </div><!-- left col -->
 
   <!-- Right column — client info -->
@@ -513,6 +536,8 @@
       <div class="card" style="width:100%;max-width:100%;">
         <div class="card-header"><span class="card-title">Loan Info</span></div>
         <div class="card-body" style="padding:0;overflow-x:auto;">
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Status</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.get_status_display }}</span></div>
+        <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Product</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.product.name }} — {{ loan.get_interest_method_display }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Applied By</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.applied_by.full_name|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Reviewed By</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.reviewed_by.full_name|default:"—" }}</span></div>
         <div class="receipt-row" style="padding:10px 20px;flex-wrap:wrap;gap:4px;"><span class="receipt-label text-sm" style="flex-shrink:0;">Approved</span><span class="text-sm" style="overflow-wrap:break-word;word-break:break-word;">{{ loan.approval_date|default:"—" }}</span></div>

@@ -60,7 +60,10 @@ if DEBUG and not config("DATABASE_URL", default=None):
             "ENGINE": "django_tenants.postgresql_backend",
             "NAME": config("DB_NAME", default="lendip_db"),
             "USER": config("DB_USER", default="postgres"),
-            "PASSWORD": config("DB_PASSWORD", default=""),
+            "PASSWORD": config(
+                "DB_PASSWORD",
+                default=urlparse(DATABASE_URL).password or "",
+            ),
             "HOST": config("DB_HOST", default="localhost"),
             "PORT": str(config("DB_PORT", default=5432, cast=int)),
         }
@@ -166,6 +169,7 @@ TEMPLATES = [
                 "django.template.context_processors.debug",
                 "config.context_processors.company",
                 "config.context_processors.active_branch_filter",
+                "config.context_processors.navigation",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",

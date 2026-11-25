@@ -4,6 +4,7 @@ django-tenants==3.7.0
 psycopg2-binary==2.9.12
 reportlab==4.2.2
 python-decouple==3.8
+bleach[css]==6.2.0
 django-auditlog==2.3.0
 django-htmx==1.17.3
 celery==5.3.6

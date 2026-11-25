@@ -6,7 +6,9 @@
      data-processing-fee="{{ processing_fee|default:'0' }}"
      data-processing-fee-source="{{ fee_source|default:'' }}"
      data-processing-fee-percent="{{ processing_fee_percent|default:'' }}"
-     data-processing-fee-rate-text="{{ processing_fee_rate_text|default:'' }}">
+     data-processing-fee-rate-text="{{ processing_fee_rate_text|default:'' }}"
+     data-total-interest="{{ totals.total_interest|default:'0' }}"
+     data-total-repayable="{{ totals.total_repayable|default:'0' }}">
 </div>
 <div style="border:1px solid var(--border); border-radius:10px; overflow:hidden; background:var(--surface);">
   <div style="padding:16px 18px; border-bottom:1px solid var(--border); background:linear-gradient(90deg, var(--surface-2), var(--surface));">

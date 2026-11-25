@@ -9,8 +9,9 @@ Interest calculation methods:
                      Each period: same principal chunk + same interest chunk.
                      Common in Ugandan microfinance (simpler for clients to understand).
 
-  REDUCING_BALANCE – Each period's interest = outstanding_balance × monthly_rate
-                     Principal portion increases as balance drops.
+  REDUCING_BALANCE – Each period's interest = outstanding_balance × rate adjusted
+                     for the selected repayment frequency. Principal portion
+                     increases as balance drops.
                      True amortisation — total interest is lower than flat rate.
 
   COMPOUND         – Annuity repayments using an effective compounded rate for
@@ -44,9 +45,9 @@ from dateutil.relativedelta import relativedelta
 # Helpers                                                              #
 # ------------------------------------------------------------------ #
 
-def _round(amount: Decimal) -> Decimal:
-    """Round to 2 decimal places using ROUND_HALF_UP (standard financial rounding)."""
-    return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+def _round(amount: Decimal, decimal_places: int = 2) -> Decimal:
+    """Round using financial half-up rounding at the requested precision."""
+    return amount.quantize(Decimal("1").scaleb(-decimal_places), rounding=ROUND_HALF_UP)
 
 
 def _next_due_date(current: date, frequency: str, period: int) -> date:
@@ -246,6 +247,7 @@ def generate_schedule(
     method: str = "FLAT",
     frequency: str = "MONTHLY",
     company_settings=None,
+    decimal_places: int = 2,
 ) -> tuple[list[dict], dict]:
     """
     Generate a full amortization schedule.
@@ -257,7 +259,8 @@ def generate_schedule(
     term_months  : loan term in months
     start_date   : disbursement date (first due date is calculated from this)
     method       : "FLAT", "REDUCING", "COMPOUND", or "INTEREST_ONLY"
-    frequency    : "WEEKLY", "BIWEEKLY", or "MONTHLY"
+    frequency    : "DAILY", "WEEKLY", "BIWEEKLY", or "MONTHLY"
+    decimal_places : Monetary rounding precision (defaults to 2).
     company_settings : CompanySettings instance (fetched lazily if omitted).
         When adjust_due_dates_for_holidays is on, due dates landing on a
         configured holiday are pushed to the next working day. This is a
@@ -282,19 +285,22 @@ def generate_schedule(
 
     if method == "FLAT":
         schedule, totals = _flat_rate_schedule(
-            principal, monthly_rate, term_months, num_periods, start_date, frequency
+            principal, monthly_rate, term_months, num_periods, start_date, frequency,
+            decimal_places,
         )
     elif method == "COMPOUND":
         schedule, totals = _compound_schedule(
-            principal, monthly_rate, term_months, num_periods, start_date, frequency
+            principal, monthly_rate, term_months, num_periods, start_date, frequency,
+            decimal_places,
         )
     elif method == "INTEREST_ONLY":
         schedule, totals = _interest_only_schedule(
-            principal, monthly_rate, num_periods, start_date, frequency
+            principal, monthly_rate, num_periods, start_date, frequency, decimal_places
         )
     else:  # REDUCING
         schedule, totals = _reducing_balance_schedule(
-            principal, monthly_rate, term_months, num_periods, start_date, frequency
+            principal, monthly_rate, term_months, num_periods, start_date, frequency,
+            decimal_places,
         )
 
     if company_settings is None:
@@ -396,17 +402,18 @@ def build_loan_schedule_context(
 
 
 def _flat_rate_schedule(
-    principal, monthly_rate, term_months, num_periods, start_date, frequency
+    principal, monthly_rate, term_months, num_periods, start_date, frequency,
+    decimal_places=2,
 ):
     """
     Flat rate: total interest is fixed, split equally across all periods.
     Equal total payment every period (simple and predictable for clients).
     """
-    total_interest   = _round(principal * monthly_rate * Decimal(str(term_months)))
-    total_repayable  = _round(principal + total_interest)
-    period_principal = _round(principal / Decimal(str(num_periods)))
-    period_interest  = _round(total_interest / Decimal(str(num_periods)))
-    period_payment   = _round(period_principal + period_interest)
+    total_interest   = _round(principal * monthly_rate * Decimal(str(term_months)), decimal_places)
+    total_repayable  = _round(principal + total_interest, decimal_places)
+    period_principal = _round(principal / Decimal(str(num_periods)), decimal_places)
+    period_interest  = _round(total_interest / Decimal(str(num_periods)), decimal_places)
+    period_payment   = _round(period_principal + period_interest, decimal_places)
 
     schedule           = []
     running_total_paid = Decimal("0")
@@ -416,7 +423,7 @@ def _flat_rate_schedule(
     for i in range(1, num_periods + 1):
         due_date        = _next_due_date(start_date, frequency, i)
         # Opening balance = full amount owed at start of this period
-        opening_balance = _round(total_repayable - running_total_paid)
+        opening_balance = _round(total_repayable - running_total_paid, decimal_places)
 
         # Last period: absorb any rounding remainders
         if i == num_periods:
@@ -426,10 +433,10 @@ def _flat_rate_schedule(
             p        = period_principal
             interest = period_interest
 
-        p        = _round(p)
-        interest = _round(interest)
-        payment  = _round(p + interest)
-        closing  = _round(opening_balance - payment)
+        p        = _round(p, decimal_places)
+        interest = _round(interest, decimal_places)
+        payment  = _round(p + interest, decimal_places)
+        closing  = _round(opening_balance - payment, decimal_places)
 
         schedule.append({
             "period_number":   i,
@@ -445,8 +452,8 @@ def _flat_rate_schedule(
         running_total_p    += p
         running_total_i    += interest
 
-    total_repayable = _round(sum(row["total_payment"] for row in schedule))
-    total_interest = _round(sum(row["interest_due"] for row in schedule))
+    total_repayable = _round(sum(row["total_payment"] for row in schedule), decimal_places)
+    total_interest = _round(sum(row["interest_due"] for row in schedule), decimal_places)
     totals = {
         "total_repayable": total_repayable,
         "total_interest":  total_interest,
@@ -456,7 +463,8 @@ def _flat_rate_schedule(
 
 
 def _reducing_balance_schedule(
-    principal, monthly_rate, term_months, num_periods, start_date, frequency
+    principal, monthly_rate, term_months, num_periods, start_date, frequency,
+    decimal_places=2,
 ):
     """
     Reducing balance: interest calculated on outstanding balance each period.
@@ -465,13 +473,16 @@ def _reducing_balance_schedule(
     # Calculate fixed period payment using annuity formula:
     # PMT = P × r / (1 - (1 + r)^-n)
     # where r = period rate, n = number of periods
-    if monthly_rate == 0:
-        period_payment = _round(principal / Decimal(str(num_periods)))
+    periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(frequency, 1)
+    period_rate = monthly_rate / Decimal(periods_per_month)
+
+    if period_rate == 0:
+        period_payment = _round(principal / Decimal(str(num_periods)), decimal_places)
     else:
-        r   = monthly_rate
+        r   = period_rate
         n   = Decimal(str(num_periods))
         pmt = principal * r / (1 - (1 + r) ** (-n))
-        period_payment = _round(pmt)
+        period_payment = _round(pmt, decimal_places)
 
     schedule           = []
     balance            = principal
@@ -480,18 +491,18 @@ def _reducing_balance_schedule(
 
     for i in range(1, num_periods + 1):
         due_date = _next_due_date(start_date, frequency, i)
-        interest = _round(balance * monthly_rate)
+        interest = _round(balance * period_rate, decimal_places)
 
         if i == num_periods:
             p       = balance
-            payment = _round(p + interest)
+            payment = _round(p + interest, decimal_places)
         else:
             payment = period_payment
-            p       = _round(payment - interest)
+            p       = _round(payment - interest, decimal_places)
 
-        p               = _round(p)
-        opening_balance = _round(balance + interest)  # what client owes at period start
-        closing         = _round(opening_balance - payment)
+        p               = _round(p, decimal_places)
+        opening_balance = _round(balance + interest, decimal_places)
+        closing         = _round(opening_balance - payment, decimal_places)
 
         schedule.append({
             "period_number":   i,
@@ -503,12 +514,12 @@ def _reducing_balance_schedule(
             "closing_balance": max(closing, Decimal("0")),
         })
 
-        balance            = max(_round(balance - p), Decimal("0"))
+        balance            = max(_round(balance - p, decimal_places), Decimal("0"))
         total_interest    += interest
         running_total_paid += payment
 
-    total_repayable = _round(running_total_paid)
-    total_interest = _round(total_interest)
+    total_repayable = _round(running_total_paid, decimal_places)
+    total_interest = _round(total_interest, decimal_places)
 
     totals = {
         "total_repayable": total_repayable,
@@ -518,7 +529,10 @@ def _reducing_balance_schedule(
     return schedule, totals
 
 
-def _compound_schedule(principal, monthly_rate, term_months, num_periods, start_date, frequency):
+def _compound_schedule(
+    principal, monthly_rate, term_months, num_periods, start_date, frequency,
+    decimal_places=2,
+):
     """Build amortizing installments using an effective compounded period rate."""
     periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(frequency, 1)
     period_rate = (Decimal("1") + monthly_rate) ** (
@@ -526,22 +540,25 @@ def _compound_schedule(principal, monthly_rate, term_months, num_periods, start_
     ) - Decimal("1")
 
     if period_rate == 0:
-        period_payment = _round(principal / Decimal(str(num_periods)))
+        period_payment = _round(principal / Decimal(str(num_periods)), decimal_places)
     else:
         period_count = Decimal(str(num_periods))
         period_payment = _round(
-            principal * period_rate / (Decimal("1") - (Decimal("1") + period_rate) ** (-period_count))
+            principal * period_rate / (Decimal("1") - (Decimal("1") + period_rate) ** (-period_count)),
+            decimal_places,
         )
 
     schedule = []
     balance = principal
     total_interest = Decimal("0")
     for period in range(1, num_periods + 1):
-        interest = _round(balance * period_rate)
-        principal_due = balance if period == num_periods else _round(period_payment - interest)
-        payment = _round(principal_due + interest)
-        opening_balance = _round(balance + interest)
-        balance = max(_round(balance - principal_due), Decimal("0"))
+        interest = _round(balance * period_rate, decimal_places)
+        principal_due = balance if period == num_periods else _round(
+            period_payment - interest, decimal_places
+        )
+        payment = _round(principal_due + interest, decimal_places)
+        opening_balance = _round(balance + interest, decimal_places)
+        balance = max(_round(balance - principal_due, decimal_places), Decimal("0"))
 
         schedule.append({
             "period_number": period,
@@ -555,23 +572,25 @@ def _compound_schedule(principal, monthly_rate, term_months, num_periods, start_
         total_interest += interest
 
     totals = {
-        "total_repayable": _round(sum(row["total_payment"] for row in schedule)),
-        "total_interest": _round(total_interest),
+        "total_repayable": _round(sum(row["total_payment"] for row in schedule), decimal_places),
+        "total_interest": _round(total_interest, decimal_places),
         "effective_apr": _round(monthly_rate * Decimal("12") * Decimal("100")),
     }
     return schedule, totals
 
 
-def _interest_only_schedule(principal, monthly_rate, num_periods, start_date, frequency):
+def _interest_only_schedule(
+    principal, monthly_rate, num_periods, start_date, frequency, decimal_places=2
+):
     """Collect interest each period and repay all principal in the final period."""
     periods_per_month = {"DAILY": 30, "WEEKLY": 4, "BIWEEKLY": 2}.get(frequency, 1)
     period_rate = monthly_rate / Decimal(periods_per_month)
-    interest_per_period = _round(principal * period_rate)
+    interest_per_period = _round(principal * period_rate, decimal_places)
     schedule = []
 
     for period in range(1, num_periods + 1):
         principal_due = principal if period == num_periods else Decimal("0")
-        payment = _round(principal_due + interest_per_period)
+        payment = _round(principal_due + interest_per_period, decimal_places)
         schedule.append({
             "period_number": period,
             "due_date": _next_due_date(start_date, frequency, period),
@@ -579,12 +598,14 @@ def _interest_only_schedule(principal, monthly_rate, num_periods, start_date, fr
             "principal_due": principal_due,
             "interest_due": interest_per_period,
             "total_payment": payment,
-            "closing_balance": max(_round(principal - principal_due), Decimal("0")),
+            "closing_balance": max(
+                _round(principal - principal_due, decimal_places), Decimal("0")
+            ),
         })
 
-    total_interest = _round(interest_per_period * num_periods)
+    total_interest = _round(interest_per_period * num_periods, decimal_places)
     totals = {
-        "total_repayable": _round(principal + total_interest),
+        "total_repayable": _round(principal + total_interest, decimal_places),
         "total_interest": total_interest,
         "effective_apr": _round(monthly_rate * Decimal("12") * Decimal("100")),
     }
@@ -662,14 +683,30 @@ def collateral_minimum(collateral_items: list[dict]) -> Decimal:
     return _round(total * Decimal("0.5"))
 
 
-def calculate_penalty(overdue_amount: Decimal, monthly_penalty_rate: Decimal, months_overdue: int) -> Decimal:
+def calculate_penalty(
+    overdue_amount: Decimal,
+    penalty_rate: Decimal,
+    days_overdue: int,
+    frequency: str = "MONTHLY",
+    periods_already_assessed: int = 0,
+) -> Decimal:
     """
-    Calculate late payment penalty.
-    penalty = overdue_amount × (monthly_penalty_rate / 100) × months_overdue
+    Calculate newly accrued penalty per overdue day or started 30-day period.
     """
-    rate    = monthly_penalty_rate / Decimal("100")
-    penalty = overdue_amount * rate * Decimal(str(max(months_overdue, 1)))
-    return _round(penalty)
+    periods_overdue = penalty_periods_elapsed(days_overdue, frequency)
+    new_periods = max(periods_overdue - periods_already_assessed, 0)
+    rate = penalty_rate / Decimal("100")
+    return _round(overdue_amount * rate * Decimal(str(new_periods)))
+
+
+def penalty_periods_elapsed(days_overdue: int, frequency: str) -> int:
+    """Count daily periods or started 30-day periods elapsed while overdue."""
+    days_overdue = max(days_overdue, 0)
+    if frequency == "DAILY":
+        return days_overdue
+    elif frequency == "MONTHLY":
+        return (days_overdue + 29) // 30
+    raise ValueError("Penalty frequency must be DAILY or MONTHLY.")
 
 
 # ------------------------------------------------------------------ #

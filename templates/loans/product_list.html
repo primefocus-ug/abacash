@@ -68,7 +68,7 @@
               <td class="mono">{{ p.min_term_months }} – {{ p.max_term_months }} months</td>
               <td class="text-sm">
                 <div>Late penalty:
-                  {% if p.penalty_enabled %}<span class="mono">{{ p.penalty_rate_monthly }}%</span>{% else %}<span class="badge badge-muted">Off</span>{% endif %}
+                  {% if p.penalty_enabled %}<span class="mono">{{ p.penalty_rate_monthly }}% / {{ penalty_frequency_label|lower }}</span>{% else %}<span class="badge badge-muted">Off</span>{% endif %}
                 </div>
                 <div style="margin-top:4px;">Processing fee:
                   {% if p.processing_fee_enabled %}<span class="badge badge-green">On</span>{% else %}<span class="badge badge-muted">Off</span>{% endif %}

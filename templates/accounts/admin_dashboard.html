@@ -131,7 +131,7 @@
       </div>
       <div class="settings-row">
         <span class="settings-label">Default penalty rate</span>
-        <span class="settings-value mono">{{ s.default_penalty_rate }}% / month</span>
+        <span class="settings-value mono">{{ s.default_penalty_rate }}% / {{ s.get_penalty_frequency_display|lower }}</span>
       </div>
       <div class="settings-row">
         <span class="settings-label">Income multiplier</span>

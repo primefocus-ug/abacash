@@ -28,6 +28,7 @@ from django.conf import settings
 from dateutil.relativedelta import relativedelta
 
 from loans.models import Loan, LoanFee, LoanSchedule, LoanProduct, Guarantor
+from loans.utils import penalty_periods_elapsed
 from payments.models import Payment
 from clients.models import Client
 from .models import CompanySettings, Branch, Expense, CapitalInjection, Investor, InvestorDrawing, FeeType, Holiday, AuditLog, User, TransactionCategory, ExpenseType, BankAccount, BankTransaction
@@ -41,6 +42,7 @@ from .cash import cash_movement, recent_cash_transactions
 from .permissions import PERMISSIONS, ALL_GROUPS
 from .audit import log_action
 from .forms import EmailOrUsernameAuthenticationForm
+from .terms import sanitize_loan_terms
 
 User = get_user_model()
 
@@ -1575,6 +1577,31 @@ def holiday_edit(request, pk):
 # Company Settings                                                     #
 # ------------------------------------------------------------------ #
 
+def _skip_penalty_periods_through_today(settings_obj):
+    today = timezone.localdate()
+    schedules = LoanSchedule.objects.filter(
+        loan__status__in=(Loan.Status.ACTIVE, Loan.Status.RESTRUCTURED),
+        status__in=(
+            LoanSchedule.Status.PENDING,
+            LoanSchedule.Status.OVERDUE,
+            LoanSchedule.Status.PARTIAL,
+        ),
+    ).select_related("loan")
+
+    for schedule in schedules.iterator(chunk_size=500):
+        days_overdue = max(
+            (today - schedule.due_date).days - settings_obj.grace_period_days,
+            0,
+        )
+        current_period = penalty_periods_elapsed(
+            days_overdue,
+            schedule.loan.penalty_frequency,
+        )
+        if current_period > schedule.penalty_periods_processed:
+            schedule.penalty_periods_processed = current_period
+            schedule.save(update_fields=["penalty_periods_processed"])
+
+
 @_permission_required("can_manage_company_settings")
 def company_settings(request):
     settings_obj = CompanySettings.get()
@@ -1582,6 +1609,7 @@ def company_settings(request):
     if request.method == "POST":
         d = request.POST
         try:
+            previous_penalties_enabled = settings_obj.penalties_enabled
             # Company Information
             settings_obj.company_name           = d["company_name"].strip()
             settings_obj.company_address        = d.get("company_address", "").strip()
@@ -1591,9 +1619,9 @@ def company_settings(request):
             settings_obj.company_registration   = d.get("company_registration", "").strip()
             settings_obj.tax_identification     = d.get("tax_identification", "").strip()
             settings_obj.currency_symbol        = d.get("currency_symbol", "UGX").strip() or "UGX"
-            settings_obj.loan_terms_and_conditions = d.get(
-                "loan_terms_and_conditions", ""
-            ).strip()
+            settings_obj.loan_terms_and_conditions = sanitize_loan_terms(
+                d.get("loan_terms_and_conditions", "")
+            )
 
             def _dec(key, default):
                 v = d.get(key, "").strip()
@@ -1617,6 +1645,14 @@ def company_settings(request):
 
             # Loan Business Rules
             settings_obj.manager_approval_limit = _dec("manager_approval_limit", "5000000")
+            settings_obj.penalties_enabled      = d.get("penalties_enabled") == "on"
+            penalty_frequency = d.get(
+                "penalty_frequency",
+                CompanySettings.PenaltyFrequency.MONTHLY,
+            )
+            if penalty_frequency not in CompanySettings.PenaltyFrequency.values:
+                raise ValueError("Select a valid penalty frequency.")
+            settings_obj.penalty_frequency    = penalty_frequency
             settings_obj.default_penalty_rate   = _dec("default_penalty_rate", "2")
             settings_obj.income_multiplier      = _dec("income_multiplier", "3")
             settings_obj.collateral_haircut     = _dec("collateral_haircut", "50")
@@ -1665,7 +1701,10 @@ def company_settings(request):
             settings_obj.updated_by             = request.user
             if request.FILES.get("company_logo"):
                 settings_obj.company_logo = request.FILES["company_logo"]
-            settings_obj.save()
+            with transaction.atomic():
+                settings_obj.save()
+                if previous_penalties_enabled != settings_obj.penalties_enabled:
+                    _skip_penalty_periods_through_today(settings_obj)
             log_action(request.user, AuditLog.Action.UPDATE, settings_obj, request=request,
                        changes={"company_name": settings_obj.company_name},
                        remarks="Company settings updated")
@@ -1696,6 +1735,7 @@ def company_settings(request):
     ]
     return render(request, "accounts/company_settings.html", {
         "s": settings_obj,
+        "penalty_frequency_choices": CompanySettings.PenaltyFrequency.choices,
         "disbursement_limit_periods": disbursement_limit_periods,
         "disbursement_limit_scopes": CompanySettings.DisbursementLimitScope.choices,
     })

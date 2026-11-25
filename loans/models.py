@@ -49,6 +49,27 @@ from django.utils.translation import gettext_lazy as _
 from common.phone_numbers import PhoneNumberNormalizationMixin
 
 
+def cash_disbursed_amount_expression():
+    amount_field = models.DecimalField(max_digits=15, decimal_places=2)
+    return models.Case(
+        models.When(
+            is_renewal=False,
+            then=models.F("principal_amount"),
+        ),
+        models.When(
+            is_renewal=True,
+            renewed_from__isnull=False,
+            principal_amount__gt=models.F("renewed_from__outstanding_balance"),
+            then=(
+                models.F("principal_amount")
+                - models.F("renewed_from__outstanding_balance")
+            ),
+        ),
+        default=models.Value(Decimal("0")),
+        output_field=amount_field,
+    )
+
+
 class LoanProduct(models.Model):
     """
     A loan product defines the rules for a category of loans.
@@ -113,7 +134,7 @@ class LoanProduct(models.Model):
         decimal_places=2,
         default=Decimal("2.00"),
         validators=[MinValueValidator(Decimal("0.00")), MaxValueValidator(Decimal("99.99"))],
-        help_text=_("Monthly penalty rate on overdue amounts, e.g. 2.00 for 2%."),
+        help_text=_("Penalty rate per tenant-selected interval on overdue amounts."),
     )
     penalty_enabled = models.BooleanField(
         default=True,
@@ -271,6 +292,10 @@ class Loan(models.Model):
         BIWEEKLY = "BIWEEKLY", _("Bi-Weekly")
         MONTHLY  = "MONTHLY",  _("Monthly")
 
+    class PenaltyFrequency(models.TextChoices):
+        DAILY = "DAILY", _("Daily")
+        MONTHLY = "MONTHLY", _("Monthly")
+
     class Priority(models.TextChoices):
         LOW      = "LOW",      _("Low")
         NORMAL   = "NORMAL",   _("Normal")
@@ -360,6 +385,11 @@ class Loan(models.Model):
     interest_rate_monthly = models.DecimalField(max_digits=5, decimal_places=2)
     interest_method       = models.CharField(max_length=15, choices=LoanProduct.InterestMethod.choices)
     penalty_rate_monthly  = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("2.00"))
+    penalty_frequency = models.CharField(
+        max_length=10,
+        choices=PenaltyFrequency.choices,
+        default=PenaltyFrequency.MONTHLY,
+    )
     penalty_enabled       = models.BooleanField(default=True)
     processing_fee_enabled = models.BooleanField(default=True)
 
@@ -609,7 +639,17 @@ class Loan(models.Model):
 
     @property
     def cash_disbursed(self):
-        return self.principal_amount
+        annotated_amount = getattr(self, "cash_disbursed_amount", None)
+        if annotated_amount is not None:
+            return annotated_amount
+        if not self.is_renewal:
+            return self.principal_amount
+        if not self.renewed_from_id:
+            return Decimal("0")
+        return max(
+            self.principal_amount - self.renewed_from.outstanding_balance,
+            Decimal("0"),
+        )
 
     @property
     def total_repayable_inclusive_of_charges(self):
@@ -698,6 +738,10 @@ class LoanDisbursementAudit(models.Model):
         ("regenerate", "Regenerate Schedule"),
         ("reschedule", "Reschedule"),
         ("renew", "Renewal"),
+        ("write_off", "Write Off"),
+        ("reinstate", "Reinstate"),
+        ("query", "Information Requested"),
+        ("reject", "Reject"),
     ]
 
     loan = models.ForeignKey(
@@ -1177,6 +1221,8 @@ class LoanSchedule(models.Model):
     principal_due    = models.DecimalField(max_digits=15, decimal_places=2)
     interest_due     = models.DecimalField(max_digits=15, decimal_places=2)
     penalty_due      = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
+    penalty_paid     = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
+    penalty_periods_processed = models.PositiveIntegerField(default=0)
     fee_due          = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal("0"))
     total_payment    = models.DecimalField(
         max_digits=15, decimal_places=2,

@@ -62,6 +62,359 @@
 }
 
 .loan-calc-panel {
+  box-sizing: border-box;
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 14px);
+  width: min(390px, calc(100vw - 28px));
+  max-height: min(700px, calc(100vh - 110px));
+  max-height: min(700px, calc(100dvh - 110px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, .24);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(37,99,235,.10), transparent 36%),
+    var(--surface);
+  box-shadow: 0 26px 80px rgba(15, 23, 42, .24), 0 4px 14px rgba(15,23,42,.08);
+  animation: loan-calc-enter .22s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.loan-calc-panel[hidden] { display: none; }
+
+@keyframes loan-calc-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.loan-calc-panel-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.loan-calc-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.loan-calc-kicker span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16b981;
+  box-shadow: 0 0 0 3px rgba(22,185,129,.12);
+}
+
+.loan-calc-heading h2 {
+  margin: 6px 0 3px;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.loan-calc-heading p { color: var(--text-muted); font-size: 11px; }
+
+.loan-calc-panel-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.loan-calc-share,
+.loan-calc-close {
+  display: grid;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: color .16s ease, border-color .16s ease, transform .16s ease, background .16s ease;
+}
+
+.loan-calc-share {
+  display: inline-flex;
+  gap: 7px;
+  padding: 0 10px;
+  border-color: rgba(37,99,235,.22);
+  color: #2563eb;
+  background: rgba(37,99,235,.07);
+  font: 700 10px var(--font-body);
+}
+
+.loan-calc-share:hover {
+  border-color: #2563eb;
+  background: rgba(37,99,235,.12);
+  transform: translateY(-1px);
+}
+
+.loan-calc-share:disabled {
+  cursor: wait;
+  opacity: .65;
+  transform: none;
+}
+
+.loan-calc-share svg { width: 16px; height: 16px; }
+
+.loan-calc-close {
+  width: 34px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  background: var(--surface-2);
+}
+
+.loan-calc-close:hover { color: var(--accent); border-color: var(--accent); transform: rotate(4deg); }
+.loan-calc-close svg { width: 17px; height: 17px; }
+
+.loan-calc-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+
+.loan-calc-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.loan-calc-field-wide { grid-column: 1 / -1; }
+.loan-calc-field small { color: var(--text-muted); font-size: 9px; font-weight: 600; }
+
+.loan-calc-field input,
+.loan-calc-field select {
+  width: 100%;
+  min-height: 41px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  font: 600 12px var(--font-body);
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.loan-calc-field input:focus,
+.loan-calc-field select:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: 0;
+}
+
+.loan-calc-results { margin-top: 15px; }
+.loan-calc-panel[aria-busy="true"] .loan-calc-results { opacity: .58; }
+
+.loan-calc-primary-result {
+  position: relative;
+  overflow: hidden;
+  padding: 15px 16px 14px;
+  border: 1px solid rgba(96,165,250,.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 96% 8%, rgba(45,212,191,.22), transparent 34%),
+    linear-gradient(125deg, rgba(37,99,235,.10), rgba(15,118,110,.07));
+}
+
+.loan-calc-primary-result::after {
+  position: absolute;
+  top: -25px;
+  right: -16px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgba(37,99,235,.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 12px rgba(37,99,235,.035), 0 0 0 26px rgba(37,99,235,.025);
+  content: "";
+}
+
+.loan-calc-primary-result > span,
+.loan-calc-primary-result > small { position: relative; z-index: 1; display: block; color: var(--text-muted); font-size: 10px; }
+.loan-calc-primary-result > strong { position: relative; z-index: 1; display: block; margin: 2px 0; color: var(--text-primary); font: 800 clamp(18px, 6vw, 26px) var(--font-heading); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.loan-calc-primary-result > small { font-size: 9px; }
+
+.loan-calc-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.loan-calc-result-grid > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+}
+
+.loan-calc-result-grid span,
+.loan-calc-payment-range span { display: block; color: var(--text-muted); font-size: 9px; }
+.loan-calc-result-grid strong { display: block; margin-top: 3px; color: var(--text-primary); font-size: clamp(10px, 3vw, 13px); font-weight: 750; overflow-wrap: anywhere; }
+
+.loan-calc-payment-range {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 11px;
+  padding: 0 2px;
+}
+
+.loan-calc-payment-range span { display: flex; min-width: 0; max-width: 50%; flex-direction: column; gap: 3px; }
+.loan-calc-payment-range span:last-child { align-items: flex-end; text-align: right; }
+.loan-calc-payment-range strong { color: var(--text-secondary); font-size: 10px; overflow-wrap: anywhere; }
+
+.loan-calc-error {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(239,68,68,.22);
+  border-radius: 10px;
+  color: var(--danger);
+  background: rgba(239,68,68,.07);
+  font-size: 11px;
+}
+
+.loan-calc-error[hidden] { display: none; }
+.loan-calc-share-status {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: 10px;
+  color: #047857;
+  background: rgba(16,185,129,.07);
+  font-size: 10px;
+}
+
+.loan-calc-share-status[hidden] { display: none; }
+.loan-calc-share-status[data-state="error"] {
+  border-color: rgba(239,68,68,.22);
+  color: var(--danger);
+  background: rgba(239,68,68,.07);
+}
+.loan-calc-footnote { margin-top: 13px; color: var(--text-muted); font-size: 9px; text-align: center; }
+
+[data-theme="dark"] .loan-calc-panel {
+  border-color: rgba(148,163,184,.2);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(96,165,250,.13), transparent 36%),
+    var(--surface);
+  box-shadow: 0 26px 80px rgba(0,0,0,.52), 0 4px 14px rgba(0,0,0,.2);
+}
+
+[data-theme="dark"] .loan-calc-primary-result {
+  border-color: rgba(96,165,250,.22);
+  background:
+    radial-gradient(circle at 96% 8%, rgba(45,212,191,.15), transparent 34%),
+    linear-gradient(125deg, rgba(37,99,235,.16), rgba(15,118,110,.12));
+}
+
+@media (max-width: 600px) {
+  .loan-calc { right: 14px; bottom: calc(var(--bottom-nav-h, 68px) + 16px); }
+  .loan-calc-trigger { min-height: 52px; padding: 0 13px 0 10px; border-radius: 16px; }
+  .loan-calc-trigger-icon { width: 31px; height: 31px; }
+  .loan-calc-panel {
+    position: fixed;
+    right: 10px;
+    bottom: calc(var(--bottom-nav-h, 68px) + 78px);
+    width: min(390px, calc(100vw - 20px));
+    max-height: calc(100vh - var(--bottom-nav-h, 68px) - 102px);
+    max-height: calc(100dvh - var(--bottom-nav-h, 68px) - 102px);
+    padding: 17px;
+  }
+}
+
+@media (max-width: 380px) {
+  .loan-calc-fields,
+  .loan-calc-result-grid { grid-template-columns: minmax(0, 1fr); }
+  .loan-calc-field-wide { grid-column: auto; }
+  .loan-calc-share span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loan-calc-trigger,
+  .loan-calc-close,
+  .loan-calc-share { transition: none; }
+  .loan-calc-panel { animation: none; }
+}
+.loan-calc {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 10600;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.loan-calc-trigger {
+  position: relative;
+  display: inline-flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 11px;
+  padding: 0 19px 0 13px;
+  border: 1px solid rgba(255, 255, 255, .42);
+  border-radius: 18px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255,255,255,.25), transparent 38%),
+    linear-gradient(135deg, #2563eb 0%, #315ce0 45%, #0f766e 100%);
+  box-shadow: 0 16px 36px rgba(27, 67, 151, .30), inset 0 1px 0 rgba(255,255,255,.24);
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.loan-calc-trigger:hover {
+  transform: translateY(-3px);
+  filter: saturate(1.12);
+  box-shadow: 0 20px 42px rgba(27, 67, 151, .38), inset 0 1px 0 rgba(255,255,255,.28);
+}
+
+.loan-calc-trigger:focus-visible,
+.loan-calc-close:focus-visible,
+.loan-calc-share:focus-visible,
+.loan-calc-field input:focus-visible,
+.loan-calc-field select:focus-visible {
+  outline: 3px solid rgba(96, 165, 250, .55);
+  outline-offset: 3px;
+}
+
+.loan-calc-trigger-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 11px;
+  background: rgba(255,255,255,.14);
+}
+
+.loan-calc-trigger-icon svg { width: 21px; height: 21px; }
+.loan-calc-trigger-label { font-size: 13px; font-weight: 700; letter-spacing: .01em; }
+.loan-calc-trigger-dot {
+  width: 7px;
+  height: 7px;
+  margin-left: 1px;
+  border-radius: 50%;
+  background: #7ef1c2;
+  box-shadow: 0 0 0 4px rgba(126,241,194,.13), 0 0 12px rgba(126,241,194,.7);
+}
+
+.loan-calc-panel {
   position: absolute;
   right: 0;
   bottom: calc(100% + 14px);

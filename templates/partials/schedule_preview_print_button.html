@@ -1,0 +1,78 @@
+<button type="button"
+        class="btn btn-secondary btn-sm"
+        data-schedule-pdf
+        data-pdf-url="{% url 'loans:apply_schedule_pdf' client.pk %}"
+        data-form-id="{{ schedule_form_id|default:'' }}"
+        data-draft-id="{% if loan %}{{ loan.pk }}{% endif %}"
+        {% if not schedule_rows %}disabled{% endif %}>
+  Print schedule
+</button>
+<script>
+(() => {
+  const initSchedulePrint = () => {
+    const buttons = document.querySelectorAll('[data-schedule-pdf]');
+    const names = [
+      'product', 'principal', 'term_months', 'frequency', 'interest_method',
+      'processing_fee_enabled', 'penalty_enabled', 'draft_id',
+    ];
+
+    buttons.forEach(button => {
+      const form = button.dataset.formId
+        ? document.getElementById(button.dataset.formId)
+        : null;
+      if (form) {
+        const updateAvailability = () => {
+          const principal = Number(form.elements.namedItem('principal')?.value);
+          const term = Number(form.elements.namedItem('term_months')?.value);
+          button.disabled = !form.elements.namedItem('product')?.value
+            || !Number.isFinite(principal)
+            || principal <= 0
+            || !Number.isInteger(term)
+            || term < 1
+            || term > 60;
+        };
+        form.addEventListener('input', updateAvailability);
+        form.addEventListener('change', updateAvailability);
+        updateAvailability();
+
+        if (
+          !document.getElementById('schedule-preview-meta')
+          && !button.disabled
+          && window.htmx
+        ) {
+          window.htmx.trigger(form, 'change');
+        }
+      }
+
+      button.addEventListener('click', () => {
+        if (button.disabled) return;
+
+        const params = new URLSearchParams();
+        if (form) {
+          names.forEach(name => {
+            const field = form.elements.namedItem(name);
+            if (!field) return;
+            if (field.type === 'checkbox') {
+              if (field.checked) params.set(name, 'on');
+            } else if (field.value) {
+              params.set(name, field.value);
+            }
+          });
+        } else if (button.dataset.draftId) {
+          params.set('draft_id', button.dataset.draftId);
+        }
+
+        const url = new URL(button.dataset.pdfUrl, window.location.href);
+        url.search = params.toString();
+        window.open(url.toString(), '_blank', 'noopener,noreferrer');
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSchedulePrint, { once: true });
+  } else {
+    initSchedulePrint();
+  }
+})();
+</script>

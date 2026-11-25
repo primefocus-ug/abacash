@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from datetime import date
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -11,7 +12,7 @@ from accounts.templatetags.aba_filters import amount_in_words
 from payments import views as payment_views
 from payments.admin import PaymentAdmin
 from payments.models import Payment
-from payments.views import _receipt_document_basename
+from payments.views import _assess_schedule_penalty, _receipt_document_basename
 
 
 class AmountInWordsTests(SimpleTestCase):
@@ -50,6 +51,119 @@ class ReceiptDocumentNameTests(SimpleTestCase):
         self.assertEqual(
             _receipt_document_basename("Acme/Finance", "Amina Kato", "acme"),
             "acme-finance-amina-kato-acme",
+        )
+
+
+class SchedulePenaltyAssessmentTests(SimpleTestCase):
+    def setUp(self):
+        self.loan = SimpleNamespace(
+            penalty_enabled=True,
+            penalty_rate_monthly=Decimal("2"),
+            penalty_frequency="DAILY",
+        )
+        self.entry = SimpleNamespace(
+            loan=self.loan,
+            due_date=date(2026, 1, 1),
+            total_payment=Decimal("1000"),
+            amount_paid=Decimal("0"),
+            penalty_due=Decimal("0"),
+            penalty_paid=Decimal("0"),
+            penalty_periods_processed=0,
+        )
+        self.company_settings = SimpleNamespace(
+            penalties_enabled=True,
+            grace_period_days=0,
+        )
+
+    def test_daily_penalty_is_assessed_once_per_overdue_day(self):
+        first_assessment = _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 4),
+            self.company_settings,
+        )
+        repeat_assessment = _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 4),
+            self.company_settings,
+        )
+
+        self.assertEqual(first_assessment, Decimal("60.00"))
+        self.assertEqual(repeat_assessment, Decimal("0"))
+        self.assertEqual(self.entry.penalty_due, Decimal("60.00"))
+
+    def test_new_daily_penalty_uses_remaining_unpaid_installment(self):
+        _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 2),
+            self.company_settings,
+        )
+        self.entry.amount_paid = Decimal("520")
+        self.entry.penalty_paid = Decimal("20")
+
+        newly_accrued = _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 3),
+            self.company_settings,
+        )
+
+        self.assertEqual(newly_accrued, Decimal("10.00"))
+        self.assertEqual(self.entry.penalty_due, Decimal("30.00"))
+
+    def test_master_setting_off_skips_periods_without_accruing_them_later(self):
+        self.company_settings.penalties_enabled = False
+        skipped = _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 4),
+            self.company_settings,
+        )
+        self.company_settings.penalties_enabled = True
+        next_period = _assess_schedule_penalty(
+            self.entry,
+            self.loan,
+            date(2026, 1, 5),
+            self.company_settings,
+        )
+
+        self.assertEqual(skipped, Decimal("0"))
+        self.assertEqual(next_period, Decimal("20.00"))
+        self.assertEqual(self.entry.penalty_due, Decimal("20.00"))
+
+    def test_monthly_penalty_uses_started_thirty_day_periods(self):
+        self.loan.penalty_frequency = "MONTHLY"
+        self.assertEqual(
+            _assess_schedule_penalty(
+                self.entry,
+                self.loan,
+                date(2026, 2, 1),
+                self.company_settings,
+            ),
+            Decimal("40.00"),
+        )
+
+    def test_grace_period_is_excluded_from_penalty_days(self):
+        self.company_settings.grace_period_days = 3
+        self.assertEqual(
+            _assess_schedule_penalty(
+                self.entry,
+                self.loan,
+                date(2026, 1, 4),
+                self.company_settings,
+            ),
+            Decimal("0"),
+        )
+        self.assertEqual(
+            _assess_schedule_penalty(
+                self.entry,
+                self.loan,
+                date(2026, 1, 5),
+                self.company_settings,
+            ),
+            Decimal("20.00"),
         )
 
 

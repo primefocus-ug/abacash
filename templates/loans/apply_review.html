@@ -5,139 +5,461 @@
 
 {% block content %}
 <style>
-  .wiz-bar { display:flex; gap:0; margin-bottom:20px; }
-  .wiz-step { flex:1; display:flex; align-items:center; gap:0; }
-  .wiz-dot { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:var(--surface-2); color:var(--text-muted); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .wiz-dot.done { background:var(--success); border-color:var(--success); color:#fff; }
-  .wiz-dot.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .wiz-label { font-size:12px; font-weight:600; color:var(--text-muted); margin-left:8px; white-space:nowrap; }
-  .wiz-label.active { color:var(--accent); }
-  .wiz-line { flex:1; height:2px; background:var(--border); margin:0 8px; }
-  .wiz-line.done { background:var(--success); }
-  .app-grid { display:grid; grid-template-columns:1fr 1.1fr; gap:20px; align-items:start; }
-  @media(max-width:1024px){ .app-grid { grid-template-columns:1fr; } }
-  .review-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
-  .review-row:last-child { border-bottom:none; }
-  .fee-row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
-  .fee-row:last-child { border-bottom:none; font-weight:700; font-size:14px; }
-  .review-section { margin-bottom:20px; }
-  .review-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin-bottom:8px; }
+/* ─────────────────────────────────────────────────────────────
+   Loan Review — minimal modern UI
+   ───────────────────────────────────────────────────────────── */
+.lr{
+  --line:var(--border,rgba(128,128,128,.24));
+  --acc:var(--accent,#2563eb);
+  --soft:var(--surface-2,rgba(128,128,128,.07));
+  --bg:var(--surface,Canvas);
+  --muted:var(--text-muted,#6b7280);
+  --danger:var(--danger,#ef4444);
+  --success:var(--success,#16a34a);
+  --warn:var(--warning,#d97706);
+  width:100%;
+  color:var(--text-primary,inherit);
+}
+.lr *{box-sizing:border-box}
+.lr [hidden]{display:none!important}
+
+/* Wizard */
+.lr .wiz{
+  display:flex;
+  align-items:center;
+  gap:0;
+  margin-bottom:22px;
+  padding:14px 18px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+.lr .wiz-step{display:flex;align-items:center;gap:8px;flex:none}
+.lr .wiz-dot{
+  width:26px;height:26px;
+  border-radius:50%;
+  border:2px solid var(--line);
+  background:var(--soft);
+  color:var(--muted);
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.lr .wiz-dot.done{background:var(--success);border-color:var(--success);color:#fff}
+.lr .wiz-dot.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.lr .wiz-label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.lr .wiz-label.active{color:var(--acc)}
+.lr .wiz-line{flex:1;height:2px;background:var(--line);margin:0 10px;min-width:12px}
+.lr .wiz-line.done{background:var(--success)}
+@media(max-width:560px){
+  .lr .wiz{padding:12px}
+  .lr .wiz-label{display:none}
+  .lr .wiz-line{margin:0 4px}
+}
+
+/* Layout */
+.lr-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,.95fr);
+  gap:22px;
+  align-items:start;
+}
+@media(max-width:1024px){ .lr-grid{grid-template-columns:1fr} }
+
+/* Cards */
+.lr .card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--bg);
+  overflow:hidden;
+}
+.lr .card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.lr .card-title{font-weight:600;font-size:.95rem;line-height:1.3}
+.lr .card-meta{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
+.lr .card-body{padding:16px 18px}
+
+/* Section accordion */
+.lr .block{border-top:1px solid var(--line)}
+.lr .block:first-of-type{border-top:0}
+.lr .block-head{
+  all:unset;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:12px 18px;
+  cursor:pointer;
+}
+.lr .block-head:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.lr .block-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:600;
+  font-size:.9rem;
+  line-height:1.3;
+}
+.lr .block-title .badge{font-size:.68rem;padding:2px 7px}
+.lr .block-head::after{
+  content:"";
+  flex:none;
+  width:6px;height:6px;
+  margin-left:12px;
+  border:solid currentColor;
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+  opacity:.5;
+  transition:transform .2s;
+}
+.lr .block.open>.block-head::after{transform:rotate(225deg)}
+.lr .block-body{
+  display:grid;
+  grid-template-rows:0fr;
+  visibility:hidden;
+  transition:grid-template-rows .25s ease,visibility 0s .25s;
+}
+.lr .block.open>.block-body{
+  grid-template-rows:1fr;
+  visibility:inherit;
+  transition:grid-template-rows .25s ease,visibility 0s;
+}
+.lr .block-inner{min-height:0;overflow:hidden}
+.lr .block-pad{padding:0 18px 14px}
+
+/* Data rows */
+.lr .row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:8px 0;
+  border-bottom:1px solid var(--line);
+  font-size:.85rem;
+}
+.lr .row:last-child{border-bottom:0}
+.lr .row>span:first-child{color:var(--muted);flex:none;max-width:55%}
+.lr .row>span:last-child,.lr .row>strong{
+  text-align:right;
+  overflow-wrap:anywhere;
+  font-weight:500;
+}
+.lr .row>strong{font-weight:600}
+.lr .row.total{
+  border-top:1px solid var(--line);
+  border-bottom:0;
+  margin-top:2px;
+  padding-top:10px;
+  font-weight:700;
+  font-size:.92rem;
+}
+.lr .row.total>span:first-child{color:inherit}
+.lr .mono{font-variant-numeric:tabular-nums}
+
+/* Empty state */
+.lr .empty{
+  color:var(--muted);
+  font-size:.82rem;
+  padding:6px 0;
+}
+
+/* Eligibility banner */
+.lr .elig{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:12px 14px;
+  margin:0 0 14px;
+  border-radius:10px;
+  border-left:3px solid var(--line);
+  background:var(--soft);
+  font-size:.85rem;
+}
+.lr .elig.ok{border-left-color:var(--success)}
+.lr .elig.bad{border-left-color:var(--danger)}
+.lr .elig-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.lr .elig-head strong{font-size:.86rem}
+.lr .elig-flags{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:.78rem;
+  color:var(--warn);
+}
+.lr .elig-flags>div{display:flex;align-items:flex-start;gap:6px}
+.lr .elig-flags>div::before{content:"⚠";flex:none}
+
+/* Badges */
+.lr .badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:2px 8px;
+  border-radius:99px;
+  font-size:.72rem;
+  font-weight:600;
+  background:var(--soft);
+  color:var(--muted);
+}
+.lr .badge-success{background:color-mix(in srgb,var(--success) 18%,transparent);color:var(--success)}
+.lr .badge-danger{background:color-mix(in srgb,var(--danger) 18%,transparent);color:var(--danger)}
+.lr .badge-warning{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+
+/* Action bar */
+.lr .actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+.lr .actions .spacer{flex:1}
+@media(max-width:560px){
+  .lr .actions .btn{flex:1 1 100%}
+  .lr .actions .spacer{display:none}
+}
+
+/* Right rail */
+.lr .rail{position:sticky;top:calc(var(--topbar-h,52px) + 16px);align-self:start}
+@media(max-width:1024px){.lr .rail{position:static}}
+
+/* Schedule panel */
+.lr #schedule-panel{min-height:80px}
+.lr #schedule-panel .empty{
+  padding:32px 24px;
+  text-align:center;
+}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  .lr *{transition:none!important;animation:none!important}
+}
 </style>
 
-<div class="wiz-bar">
-  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Client</span></div>
-  <div class="wiz-line done"></div>
-  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Loan Terms</span></div>
-  <div class="wiz-line done"></div>
-  <div class="wiz-step"><div class="wiz-dot done">✓</div><span class="wiz-label">Security</span></div>
-  <div class="wiz-line done"></div>
-  <div class="wiz-step"><div class="wiz-dot active">4</div><span class="wiz-label active">Review</span></div>
-</div>
+<div class="lr">
 
-<div class="app-grid">
+  {# ── Wizard ── #}
+  <div class="wiz" role="list" aria-label="Application progress">
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot done" aria-label="Step 1 complete">✓</div>
+      <span class="wiz-label">Client</span>
+    </div>
+    <div class="wiz-line done" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot done" aria-label="Step 2 complete">✓</div>
+      <span class="wiz-label">Loan Terms</span>
+    </div>
+    <div class="wiz-line done" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot done" aria-label="Step 3 complete">✓</div>
+      <span class="wiz-label">Security</span>
+    </div>
+    <div class="wiz-line done" aria-hidden="true"></div>
+    <div class="wiz-step" role="listitem">
+      <div class="wiz-dot active" aria-current="step">4</div>
+      <span class="wiz-label active">Review</span>
+    </div>
+  </div>
 
-  {# ── LEFT: Summary + Submit ── #}
-  <div>
-    <div class="card">
-      <div class="card-header" style="justify-content:space-between;">
-        <span class="card-title">Application Summary</span>
-        <span style="font-size:13px;color:var(--text-muted);">{{ client.full_name }} · {{ client.client_number }}</span>
-      </div>
-      <div class="card-body">
+  <div class="lr-grid">
 
-        {# Loan details #}
-        <div class="review-section">
-          <div class="review-section-title">Loan Details</div>
-          <div class="review-row"><span>Product</span><strong>{{ loan.product.name }}</strong></div>
-          <div class="review-row"><span>Principal</span><strong class="mono">{{ loan.principal_amount|money }}</strong></div>
-          <div class="review-row"><span>Term</span><strong>{{ loan.term_months }} months</strong></div>
-          <div class="review-row"><span>Frequency</span><strong>{{ loan.get_repayment_frequency_display }}</strong></div>
-          <div class="review-row"><span>Interest Rate</span><strong>{{ loan.interest_rate_monthly }}%/month ({{ loan.get_interest_method_display }})</strong></div>
-          <div class="review-row"><span>Late-payment penalty</span><strong>{% if loan.penalty_enabled %}Enabled ({{ loan.penalty_rate_monthly }}% monthly){% else %}Waived{% endif %}</strong></div>
-          {% if loan.purpose %}
-          <div class="review-row"><span>Purpose</span><span style="text-align:right;max-width:60%;">{{ loan.purpose }}</span></div>
-          {% endif %}
-        </div>
-
-        {# Fee breakdown #}
-        <div class="review-section">
-          <div class="review-section-title">Cost Breakdown</div>
-          <div class="fee-row"><span>Principal</span><span class="mono">{{ loan.principal_amount|money }}</span></div>
-          <div class="fee-row"><span>Total Interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
-          <div class="fee-row"><span>Processing Fee{% if not loan.processing_fee_enabled %} (waived){% endif %}</span><span class="mono">{{ processing_fee|default:0|money }}</span></div>
-          <div class="fee-row"><span>Total Repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
-          <div class="fee-row"><span>Nominal APR</span><span class="mono">{{ nominal_apr|floatformat:2 }}%</span></div>
-          <div class="fee-row"><span>Total Cost of Credit</span><span class="mono">{{ total_cost_of_credit|money }}</span></div>
-        </div>
-
-        {# Collateral #}
-        <div class="review-section">
-          <div class="review-section-title">
-            Collateral
-            {% if loan.product.requires_collateral %}<span class="badge badge-warning" style="margin-left:6px;font-size:11px;">Required</span>{% endif %}
-          </div>
-          {% if collateral_items %}
-            {% for c in collateral_items %}
-            <div class="review-row"><span>{{ c.description }}</span><span class="mono">{{ c.estimated_value|money }}</span></div>
-            {% endfor %}
-          {% else %}
-            <div style="color:var(--text-muted);font-size:13px;">None provided</div>
-          {% endif %}
-        </div>
-
-        {# Guarantors #}
-        <div class="review-section">
-          <div class="review-section-title">
-            Guarantors
-            {% if loan.product.requires_guarantor %}<span class="badge badge-warning" style="margin-left:6px;font-size:11px;">Required</span>{% endif %}
-          </div>
-          {% if guarantor_rows %}
-            {% for g in guarantor_rows %}
-            <div class="review-row"><span>{{ g.guarantor.full_name }}</span><span class="mono">{% if g.amount %}{{ g.amount|money }}{% else %}Amount not specified{% endif %}</span></div>
-            {% endfor %}
-          {% else %}
-            <div style="color:var(--text-muted);font-size:13px;">None provided</div>
-          {% endif %}
+    {# ── LEFT: Summary + Submit ── #}
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Application summary</span>
+          <span class="card-meta">{{ client.full_name }} · {{ client.client_number }}</span>
         </div>
 
         {% if eligibility %}
-        <div style="padding:10px 14px;border-radius:10px;border-left:3px solid {% if eligibility.eligible %}var(--success){% else %}var(--danger){% endif %};background:var(--surface-2);margin-bottom:16px;font-size:13px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <strong>Eligibility</strong>
-            <span class="badge {% if eligibility.eligible %}badge-success{% else %}badge-danger{% endif %}">{% if eligibility.eligible %}Eligible{% else %}Not Eligible{% endif %}</span>
+        <div style="padding:14px 18px 0;">
+          <div class="elig {% if eligibility.eligible %}ok{% else %}bad{% endif %}"
+               role="status" aria-live="polite">
+            <div class="elig-head">
+              <strong>Eligibility check</strong>
+              <span class="badge {% if eligibility.eligible %}badge-success{% else %}badge-danger{% endif %}">
+                {% if eligibility.eligible %}Eligible{% else %}Not eligible{% endif %}
+              </span>
+            </div>
+            {% if eligibility.flags %}
+            <div class="elig-flags">
+              {% for f in eligibility.flags %}<div>{{ f }}</div>{% endfor %}
+            </div>
+            {% endif %}
           </div>
-          {% for f in eligibility.flags %}
-          <div style="font-size:12px;color:var(--warning);">⚠ {{ f }}</div>
-          {% endfor %}
         </div>
         {% endif %}
 
+        {# Block 1: Loan details (open by default) #}
+        <section class="block open" data-block>
+          <button type="button" class="block-head" aria-expanded="true">
+            <span class="block-title">Loan details</span>
+          </button>
+          <div class="block-body"><div class="block-inner"><div class="block-pad">
+            <div class="row"><span>Product</span><strong>{{ loan.product.name }}</strong></div>
+            <div class="row"><span>Principal</span><strong class="mono">{{ loan.principal_amount|money }}</strong></div>
+            <div class="row"><span>Term</span><strong>{{ loan.term_months }} months</strong></div>
+            <div class="row"><span>Frequency</span><strong>{{ loan.get_repayment_frequency_display }}</strong></div>
+            <div class="row"><span>Interest rate</span><strong>{{ loan.interest_rate_monthly }}%/month ({{ loan.get_interest_method_display }})</strong></div>
+            <div class="row">
+              <span>Late-payment penalty</span>
+              <strong>
+                {% if loan.penalty_enabled %}
+                  Enabled ({{ loan.penalty_rate_monthly }}% {{ loan.get_penalty_frequency_display|lower }})
+                {% else %}
+                  Waived
+                {% endif %}
+              </strong>
+            </div>
+            {% if loan.purpose %}
+            <div class="row"><span>Purpose</span><span>{{ loan.purpose }}</span></div>
+            {% endif %}
+          </div></div></div>
+        </section>
+
+        {# Block 2: Cost breakdown (open by default — key numbers) #}
+        <section class="block open" data-block>
+          <button type="button" class="block-head" aria-expanded="true">
+            <span class="block-title">Cost breakdown</span>
+          </button>
+          <div class="block-body"><div class="block-inner"><div class="block-pad">
+            <div class="row"><span>Principal</span><span class="mono">{{ loan.principal_amount|money }}</span></div>
+            <div class="row"><span>Total interest</span><span class="mono">{{ totals.total_interest|default:0|money }}</span></div>
+            <div class="row">
+              <span>Processing fee{% if not loan.processing_fee_enabled %} (waived){% endif %}</span>
+              <span class="mono">{{ processing_fee|default:0|money }}</span>
+            </div>
+            <div class="row"><span>Nominal APR</span><span class="mono">{{ nominal_apr|floatformat:2 }}%</span></div>
+            <div class="row"><span>Total cost of credit</span><span class="mono">{{ total_cost_of_credit|money }}</span></div>
+            <div class="row total"><span>Total repayable</span><span class="mono">{{ loan.total_repayable|default:0|money }}</span></div>
+          </div></div></div>
+        </section>
+
+        {# Block 3: Collateral (collapsed) #}
+        <section class="block" data-block>
+          <button type="button" class="block-head" aria-expanded="false">
+            <span class="block-title">
+              Collateral
+              {% if loan.product.requires_collateral %}
+                <span class="badge badge-warning">Required</span>
+              {% endif %}
+              <span class="badge">{{ collateral_items|length }}</span>
+            </span>
+          </button>
+          <div class="block-body"><div class="block-inner"><div class="block-pad">
+            {% if collateral_items %}
+              {% for c in collateral_items %}
+              <div class="row">
+                <span>{{ c.description }}</span>
+                <span class="mono">{{ c.estimated_value|money }}</span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty">No collateral provided.</div>
+            {% endif %}
+          </div></div></div>
+        </section>
+
+        {# Block 4: Guarantors (collapsed) #}
+        <section class="block" data-block>
+          <button type="button" class="block-head" aria-expanded="false">
+            <span class="block-title">
+              Guarantors
+              {% if loan.product.requires_guarantor %}
+                <span class="badge badge-warning">Required</span>
+              {% endif %}
+              <span class="badge">{{ guarantor_rows|length }}</span>
+            </span>
+          </button>
+          <div class="block-body"><div class="block-inner"><div class="block-pad">
+            {% if guarantor_rows %}
+              {% for g in guarantor_rows %}
+              <div class="row">
+                <span>{{ g.guarantor.full_name }}</span>
+                <span class="mono">
+                  {% if g.amount %}{{ g.amount|money }}{% else %}<em style="opacity:.6;">Amount not specified</em>{% endif %}
+                </span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="empty">No guarantors provided.</div>
+            {% endif %}
+          </div></div></div>
+        </section>
+
+        {# Submit form #}
         <form method="post">
           {% csrf_token %}
           <input type="hidden" name="draft_id" value="{{ loan.pk }}">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;">
-            <a href="{% url 'loans:apply_step3' client.pk %}?draft_id={{ loan.pk }}" class="btn btn-secondary">← Back</a>
-            <div style="display:flex;gap:10px;">
-              <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
-              <button type="submit" name="action" value="submit" class="btn btn-primary">Submit for Approval →</button>
+          <div style="padding:0 18px 18px;">
+            <div class="actions" style="margin-top:0;padding-top:14px;">
+              <a href="{% url 'loans:apply_step3' client.pk %}?draft_id={{ loan.pk }}" class="btn btn-secondary">← Back</a>
+              <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save draft</button>
+              <span class="spacer"></span>
+              <button type="submit" name="action" value="submit" class="btn btn-primary">Submit for approval →</button>
             </div>
           </div>
         </form>
       </div>
     </div>
-  </div>
 
-  {# ── RIGHT: Full schedule ── #}
-  <div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Repayment Schedule</span></div>
-      {% if schedule_rows %}
-        {% include "partials/schedule_table.html" %}
-      {% else %}
-        <div class="empty-state" style="padding:32px;"><p>Schedule unavailable — loan terms may be incomplete.</p></div>
-      {% endif %}
+    {# ── RIGHT: Full schedule ── #}
+    <div class="rail">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Repayment schedule</span>
+          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            {% include "partials/schedule_preview_print_button.html" %}
+          </span>
+        </div>
+        <div id="schedule-panel">
+          {% if schedule_rows %}
+            {% include "partials/schedule_table.html" %}
+          {% else %}
+            <div class="empty">Schedule unavailable — loan terms may be incomplete.</div>
+          {% endif %}
+        </div>
+      </div>
     </div>
-  </div>
 
+  </div>
 </div>
+
+<script>
+(function () {
+  'use strict';
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  /* Collapsible sections */
+  $$('.lr [data-block]').forEach(block => {
+    const head = block.querySelector('.block-head');
+    if (!head) return;
+    head.addEventListener('click', () => {
+      const open = block.classList.toggle('open');
+      head.setAttribute('aria-expanded', String(open));
+    });
+    head.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        head.click();
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}

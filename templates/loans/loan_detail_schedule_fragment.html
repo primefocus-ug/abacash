@@ -1,9 +1,29 @@
 {% load humanize aba_filters %}
 <div class="card mb-3" id="schedule-print-card">
   <div class="print-only" style="display:none; margin-bottom:10px; font-size:18px; font-weight:600;">Repayment Schedule — {{ loan.loan_number }}</div>
-  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-    <span><span class="card-title">Repayment Schedule</span></span>
-    <span style="display:flex;gap:8px;align-items:center;">
+  <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0;">
+      <span class="card-title">Repayment Schedule</span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);">
+          <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Current Principal</div>
+          <div class="mono" style="font-size:13px;font-weight:700;">{{ loan.principal_amount|money }}</div>
+        </div>
+        <div style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);">
+          <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Total Interest</div>
+          <div class="mono" style="font-size:13px;font-weight:700;">{{ loan.total_interest|money }}</div>
+        </div>
+        <div style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);">
+          <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Interest Rate</div>
+          <div class="mono" style="font-size:13px;font-weight:700;">{{ loan.interest_rate_monthly|floatformat:2 }}% / month</div>
+        </div>
+        <div style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);">
+          <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Installments</div>
+          <div style="font-size:13px;font-weight:700;">{{ schedule|length }}</div>
+        </div>
+      </div>
+    </div>
+    <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       {% if user.role == "CEO" %}
       <button type="button" class="btn btn-secondary btn-sm" 
               hx-get="{% url 'loans:regenerate_schedule' loan.pk %}"

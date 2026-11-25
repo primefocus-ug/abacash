@@ -48,7 +48,12 @@ def money(value, symbol=None):
         symbol = get_currency_symbol()
     try:
         num = Decimal(str(value))
-        formatted = f"{int(num):,}"
+        if num == num.to_integral():
+            formatted = f"{num:,.0f}"
+        else:
+            formatted = f"{num:,.2f}"
+            if formatted.endswith(".00"):
+                formatted = formatted[:-3]
         return f"{symbol} {formatted}"
     except (InvalidOperation, TypeError, ValueError):
         return f"{symbol} 0"
@@ -62,7 +67,23 @@ def ugx(value):
 @register.filter
 def ugx_plain(value):
     try:
-        return f"{int(Decimal(str(value))):,}"
+        num = Decimal(str(value))
+        if num == num.to_integral():
+            return f"{num:,.0f}"
+        formatted = f"{num:,.2f}"
+        return formatted[:-3] if formatted.endswith(".00") else formatted
+    except (InvalidOperation, TypeError, ValueError):
+        return "0"
+
+
+@register.filter
+def comma_number(value):
+    try:
+        num = Decimal(str(value))
+        if num == num.to_integral():
+            return f"{num:,.0f}"
+        formatted = f"{num:,.2f}"
+        return formatted[:-3] if formatted.endswith(".00") else formatted
     except (InvalidOperation, TypeError, ValueError):
         return "0"
 
