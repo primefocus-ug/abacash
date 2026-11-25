@@ -67,3 +67,4 @@
 2026-11-25 14:03:37 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
 2026-11-25 14:03:56 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abaca/abacash/accounts/pwa_views.py changed, reloading.
 2026-11-25 14:04:10 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-25 14:17:38 [INFO] django.utils.autoreload: /home/nashvybzes/Music/no/abaca/abacash/config/settings.py changed, reloading.

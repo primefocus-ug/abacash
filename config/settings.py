@@ -291,10 +291,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-if DEBUG:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-else:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -302,11 +298,28 @@ LOGOUT_REDIRECT_URL = "/"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Without this, all tenants share one physical media folder — uploaded
-# client photos/documents from every tenant would be written into the
-# same directory tree with no isolation. This creates a per-tenant
-# subdirectory under MEDIA_ROOT automatically.
-DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
+# Django 5 replaced DEFAULT_FILE_STORAGE and STATICFILES_STORAGE with a
+# single STORAGES dict. The old settings are silently ignored in Django 5+,
+# which caused TenantFileSystemStorage to never be used — producing media
+# URLs without the tenant schema prefix (e.g. /media/company/logo.png
+# instead of /media/test/company/logo.png) and 404s for all uploaded files.
+STORAGES = {
+    "default": {
+        # Per-tenant media isolation: files are stored under
+        # MEDIA_ROOT/<schema_name>/<upload_to>/<filename>
+        "BACKEND": "django_tenants.files.storage.TenantFileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedStaticFilesStorage"
+        ),
+    },
+}
+
+# Controls the per-tenant subdirectory name inside MEDIA_ROOT.
+# "%s" is replaced with the tenant's schema_name at runtime.
 MULTITENANT_RELATIVE_MEDIA_ROOT = "%s"
 
 INTERNAL_IPS = ["127.0.0.1"]
@@ -392,6 +405,10 @@ else:
     SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", default=True, cast=bool)
     SECURE_REFERRER_POLICY = config("SECURE_REFERRER_POLICY", default="strict-origin-when-cross-origin")
     SECURE_CROSS_ORIGIN_OPENER_POLICY = config("SECURE_CROSS_ORIGIN_OPENER_POLICY", default="same-origin")
+
+    # Tell Django that nginx terminates SSL and forwards requests over HTTP.
+    # Without this, Django sees plain HTTP and SECURE_SSL_REDIRECT loops forever.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
     # Security middleware settings for production
     SECURE_BROWSER_XSS_FILTER = True
