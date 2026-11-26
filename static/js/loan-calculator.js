@@ -78,6 +78,7 @@
     try {
       const response = await fetch(`${widget.dataset.pdfUrl}?${calculatorParams()}`, {
         headers: { Accept: 'application/pdf, application/json' },
+        credentials: 'same-origin',
       });
       if (!response.ok) {
         const contentType = response.headers.get('content-type') || '';
@@ -185,6 +186,7 @@
       const response = await fetch(`${widget.dataset.previewUrl}?${params}`, {
         headers: { Accept: 'application/json' },
         signal: controller.signal,
+        credentials: 'same-origin',
       });
       if (!response.headers.get('content-type')?.includes('application/json')) {
         throw new Error('Refresh the page to continue using the calculator.');

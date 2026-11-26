@@ -120,7 +120,7 @@ SERVICE_WORKER_JS = r"""
 // registration since service workers are scoped per-origin by the
 // browser — tenant isolation here comes for free from DNS, not code.
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = `lms-cache-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
@@ -148,12 +148,38 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+function isSameOrigin(request) {
+  // Only cache requests to our own origin.
+  // Cross-origin fetches (CDN fonts, Font Awesome, etc.) return opaque
+  // responses that the Cache API rejects — causing ERR_FAILED in the console.
+  return new URL(request.url).origin === self.location.origin;
+}
+
 function isStaticAsset(request) {
+  // Only called after isSameOrigin() — safe to check pathname only.
   const url = new URL(request.url);
   return (
     url.pathname.startsWith("/static/") ||
-    url.pathname.startsWith("/media/") ||
-    /\.(?:css|js|woff2?|png|jpg|jpeg|svg|ico)$/.test(url.pathname)
+    url.pathname.startsWith("/media/")
+  );
+}
+
+function isCacheableRequest(request) {
+  // Cache API only accepts http/https — reject chrome-extension://, etc.
+  return request.url.startsWith("http://") || request.url.startsWith("https://");
+}
+
+function isApiRequest(request) {
+  // Never cache JSON/PDF API calls — they require a live authenticated session.
+  // A stale cached login-redirect (HTML) breaks the calculator's content-type
+  // check and silently prevents the panel from opening.
+  const accept = request.headers.get("Accept") || "";
+  const url = new URL(request.url);
+  return (
+    accept.includes("application/json") ||
+    accept.includes("application/pdf") ||
+    url.pathname.startsWith("/loans/calculator/") ||
+    url.pathname.startsWith("/loans/") && url.search.length > 0
   );
 }
 
@@ -161,6 +187,9 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
 
   if (request.method !== "GET") return; // never intercept POST (payments!)
+  if (!isCacheableRequest(request)) return; // skip chrome-extension:// etc.
+  if (!isSameOrigin(request)) return;   // skip CDN/cross-origin — avoids opaque response errors
+  if (isApiRequest(request)) return;    // skip authenticated API calls — always fetch live
 
   if (isStaticAsset(request)) {
     event.respondWith(
