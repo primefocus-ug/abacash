@@ -74,7 +74,7 @@
 
     shareButton.disabled = true;
     shareStatus.hidden = true;
-    showShareStatus('Preparing your branded PDF…', false);
+    showShareStatus('Preparing your PDF download…', false);
     try {
       const response = await fetch(`${widget.dataset.pdfUrl}?${calculatorParams()}`, {
         headers: { Accept: 'application/pdf, application/json' },
@@ -92,32 +92,8 @@
       }
 
       const blob = await response.blob();
-      const file = typeof File === 'undefined'
-        ? null
-        : new File([blob], 'loan-schedule-estimate.pdf', { type: 'application/pdf' });
-      if (
-        file &&
-        typeof navigator.share === 'function' &&
-        (!navigator.canShare || navigator.canShare({ files: [file] }))
-      ) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: 'Loan repayment schedule',
-            text: 'Branded loan repayment schedule estimate',
-          });
-          showShareStatus('Loan schedule shared.', false);
-          return;
-        } catch (error) {
-          if (error.name === 'AbortError') {
-            showShareStatus('Sharing canceled.', false);
-            return;
-          }
-        }
-      }
-
       downloadPdf(blob);
-      showShareStatus('PDF downloaded. You can now share it from your device.', false);
+      showShareStatus('PDF downloaded successfully.', false);
     } catch (error) {
       showShareStatus(error.message || 'Unable to create the loan schedule PDF.', true);
     } finally {
