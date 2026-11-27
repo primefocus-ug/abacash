@@ -15,7 +15,7 @@ DISBURSED_STATUSES = ["ACTIVE", "COMPLETED", "DEFAULTED", "WRITTEN_OFF", "RESTRU
 def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, opening_balance=ZERO):
     """Return physical-cash movement and balance for the selected scope."""
     from .models import CapitalInjection, Expense
-    from loans.models import Loan
+    from loans.models import Loan, cash_disbursed_amount_expression
     from payments.models import Payment
 
     # cash_receipts() excludes internal CREDIT_TRANSFER rows, which move no new cash.
@@ -25,7 +25,7 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
     )
     disbursements = Loan.objects.filter(
         disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
-    )
+    ).annotate(cash_disbursed_amount=cash_disbursed_amount_expression())
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,
@@ -58,7 +58,8 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
 
     payment_total = payments.aggregate(total=Sum("amount_received"))["total"] or ZERO
     injection_total = injections.aggregate(total=Sum("amount"))["total"] or ZERO
-    disbursement_total = disbursements.aggregate(total=Sum("principal_amount"))["total"] or ZERO
+    # Cash actually paid out: for renewals only the new money, not the rolled-over balance.
+    disbursement_total = disbursements.aggregate(total=Sum("cash_disbursed_amount"))["total"] or ZERO
     expense_total = expenses.aggregate(total=Sum("amount"))["total"] or ZERO
     # Processing fees are collected in cash at disbursement (as in the cash-flow report).
     fee_total = sum((l.effective_processing_fee for l in disbursements.select_related("product")), ZERO)
@@ -88,7 +89,7 @@ def recent_cash_transactions(
     cashier views.
     """
     from .models import CapitalInjection, Expense
-    from loans.models import Loan
+    from loans.models import Loan, cash_disbursed_amount_expression
     from payments.models import Payment
 
     # Filter first, then slice each queryset to `limit` so the database returns
@@ -99,7 +100,7 @@ def recent_cash_transactions(
     ).select_related("client").order_by("-created_at")
     disbursements = Loan.objects.filter(
         disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
-    ).select_related("client", "product").order_by("-created_at")
+    ).annotate(cash_disbursed_amount=cash_disbursed_amount_expression()).select_related("client", "product").order_by("-created_at")
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,
@@ -156,7 +157,7 @@ def recent_cash_transactions(
             "timestamp": loan.created_at,
             "type": "Disbursement",
             "description": f"Loan to {loan.client.full_name}",
-            "amount": loan.principal_amount,
+            "amount": loan.cash_disbursed,
             "direction": "out",
         }
         for loan in disbursements
