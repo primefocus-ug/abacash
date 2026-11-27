@@ -137,7 +137,7 @@ def _loan_calculator_schedule(inputs):
         principal=inputs["principal"],
         annual_rate=inputs["monthly_rate"] * Decimal("12"),
         term_months=inputs["term_months"],
-        start_date=date.today(),
+        start_date=timezone.localdate(),
         method=inputs["method"],
         frequency=inputs["frequency"],
         decimal_places=4,
@@ -562,7 +562,7 @@ def loan_apply_step2(request, client_id):
                     client=client,
                     applied_by=request.user,
                     status=Loan.Status.DRAFT,
-                    application_date=date.today(),
+                    application_date=timezone.localdate(),
                 )
 
             loan.product = product
@@ -588,7 +588,7 @@ def loan_apply_step2(request, client_id):
                 product=product,
                 term_months=term_months,
                 frequency=frequency,
-                start_date=date.today(),
+                start_date=timezone.localdate(),
                 include_processing_fee=processing_fee_enabled,
                 interest_method=interest_method,
                 allow_disabled_product_fee=processing_fee_enabled,
@@ -631,7 +631,7 @@ def loan_apply_step2(request, client_id):
                 product=loan.product,
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
-                start_date=date.today(),
+                start_date=timezone.localdate(),
                 include_processing_fee=loan.processing_fee_enabled,
                 interest_method=loan.interest_method,
                 allow_disabled_product_fee=loan.processing_fee_enabled,
@@ -859,7 +859,7 @@ def loan_apply_step3(request, client_id):
                 product=loan.product,
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
-                start_date=date.today(),
+                start_date=timezone.localdate(),
                 include_processing_fee=loan.processing_fee_enabled,
                 interest_method=loan.interest_method,
                 allow_disabled_product_fee=loan.processing_fee_enabled,
@@ -1034,7 +1034,7 @@ def loan_apply_review(request, client_id):
                 product=loan.product,
                 term_months=loan.term_months,
                 frequency=loan.repayment_frequency,
-                start_date=date.today(),
+                start_date=timezone.localdate(),
                 include_processing_fee=loan.processing_fee_enabled,
                 interest_method=loan.interest_method,
                 allow_disabled_product_fee=loan.processing_fee_enabled,
@@ -1082,7 +1082,7 @@ def loan_apply_review(request, client_id):
                     product=loan.product,
                     term_months=loan.term_months,
                     frequency=loan.repayment_frequency,
-                    start_date=date.today(),
+                    start_date=timezone.localdate(),
                     include_processing_fee=loan.processing_fee_enabled,
                     interest_method=loan.interest_method,
                     allow_disabled_product_fee=loan.processing_fee_enabled,
@@ -1236,7 +1236,7 @@ def loan_edit(request, pk):
                 product=product,
                 term_months=term_months,
                 frequency=frequency,
-                start_date=date.today(),
+                start_date=timezone.localdate(),
                 include_processing_fee=processing_fee_enabled,
                 interest_method=interest_method,
                 allow_disabled_product_fee=processing_fee_enabled,
@@ -1521,7 +1521,7 @@ def loan_detail(request, pk):
         "schedule": schedule,
         "payments": payments,
         "renewals": renewals,
-        "today":    date.today(),
+        "today":    timezone.localdate(),
         "recent_disbursement_audits": recent_audits,
         "disbursement_audits_total": audits_total,
         "loan_action_history": action_history,
@@ -1609,7 +1609,7 @@ def loan_reschedule(request, pk):
                 except Exception:
                     raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
             else:
-                chosen_disbursement = date.today()
+                chosen_disbursement = timezone.localdate()
 
             if (
                 term_months == loan.term_months
@@ -1628,7 +1628,7 @@ def loan_reschedule(request, pk):
                 return redirect("loans:detail", pk=loan.pk)
 
             if (
-                chosen_disbursement < date.today()
+                chosen_disbursement < timezone.localdate()
                 and not _user_has_permission(request.user, "can_backdate_transactions")
             ):
                 raise ValueError("Only users with back-dating permission may set a past disbursement date.")
@@ -1744,7 +1744,7 @@ def loan_reschedule(request, pk):
         "default_principal": request.POST.get("principal_amount", loan.outstanding_balance),
         "default_disbursement_date": (
             request.POST.get("disbursement_date")
-            or (loan.disbursement_date or date.today()).isoformat()
+            or (loan.disbursement_date or timezone.localdate()).isoformat()
         ),
         "min_term": selected_product.min_term_months,
         "max_term": selected_product.max_term_months,
@@ -1752,7 +1752,7 @@ def loan_reschedule(request, pk):
         "action_title": "Reschedule Loan",
         "submit_label": "Reschedule Loan",
         "helper_text": "This creates a new repayment schedule for the existing loan.",
-        "today": date.today(),
+        "today": timezone.localdate(),
     }
     if request.headers.get('HX-Request') == 'true' or request.META.get('HTTP_HX_REQUEST') == 'true':
         return render(request, 'loans/renew_loan_fragment.html', context)
@@ -1787,7 +1787,7 @@ def loan_regenerate_schedule(request, pk):
     if request.method == "GET":
         return render(request, "loans/htmx_regenerate_schedule_form.html", {
             "loan": loan,
-            "today": date.today(),
+            "today": timezone.localdate(),
         })
 
     # POST -> perform regeneration
@@ -1811,7 +1811,7 @@ def loan_regenerate_schedule(request, pk):
             return redirect("loans:detail", pk=loan.pk)
 
         # Non-privileged users may not set a start date in the past
-        if not request.user.can("can_backdate_transactions") and parsed < date.today():
+        if not request.user.can("can_backdate_transactions") and parsed < timezone.localdate():
             messages.error(request, "You do not have permission to set a past date.")
             return redirect("loans:detail", pk=loan.pk)
 
@@ -2087,10 +2087,10 @@ def loan_renew(request, pk):
                     chosen_disbursement = date.fromisoformat(provided_disb)
                 except Exception:
                     raise ValueError("Invalid disbursement date format. Use YYYY-MM-DD.")
-                if chosen_disbursement < date.today() and not request.user.can("can_backdate_transactions"):
+                if chosen_disbursement < timezone.localdate() and not request.user.can("can_backdate_transactions"):
                     raise ValueError("Only users with back-dating permission may set a past disbursement date.")
             else:
-                chosen_disbursement = date.today()
+                chosen_disbursement = timezone.localdate()
 
             limit_error = _disbursement_limit_error(request.user, additional_amount, chosen_disbursement)
             if limit_error:
@@ -2118,8 +2118,8 @@ def loan_renew(request, pk):
                     applied_by=request.user,
                     reviewed_by=request.user,
                     disbursed_by=request.user if additional_amount > 0 else None,
-                    application_date=date.today(),
-                    approval_date=date.today(),
+                    application_date=timezone.localdate(),
+                    approval_date=timezone.localdate(),
                     disbursement_date=chosen_disbursement,
                     first_repayment_date=schedule_rows[0]["due_date"],
                     maturity_date=schedule_rows[-1]["due_date"],
@@ -2191,7 +2191,7 @@ def loan_renew(request, pk):
 
                 loan.renewal_count += 1
                 loan.status = Loan.Status.COMPLETED
-                loan.completion_date = date.today()
+                loan.completion_date = timezone.localdate()
                 loan.save(update_fields=["renewal_count", "status", "completion_date"])
 
             messages.success(request, f"Loan renewed into new loan {new_loan.loan_number}.")
@@ -2224,7 +2224,7 @@ def loan_renew(request, pk):
         "default_reason": request.POST.get("reason", ""),
         "default_disbursement_date": request.POST.get(
             "disbursement_date",
-            (loan.disbursement_date or date.today()).isoformat(),
+            (loan.disbursement_date or timezone.localdate()).isoformat(),
         ),
         "min_term": selected_product.min_term_months,
         "max_term": selected_product.max_term_months,
@@ -2236,7 +2236,7 @@ def loan_renew(request, pk):
             if is_reschedule
             else "The current outstanding balance rolls into the new loan. Only the additional amount is disbursed as cash."
         ),
-        "today": date.today(),
+        "today": timezone.localdate(),
     }
 
     # If requested via HTMX, return only the form fragment suitable for modal
@@ -2264,9 +2264,9 @@ def loan_approve(request, pk):
         return redirect("loans:detail", pk=pk)
 
     # Default to today; allow CEOs to override via POST disbursement_date field.
-    disbursement_date = date.today()
+    disbursement_date = timezone.localdate()
     loan.reviewed_by = user
-    loan.approval_date = date.today()
+    loan.approval_date = timezone.localdate()
 
     # If a disbursement_date was provided and user is CEO, validate and apply it
     provided = request.POST.get("disbursement_date", "").strip() if request.POST else ""
@@ -2482,7 +2482,7 @@ def loan_reinstate(request, pk):
         messages.error(request, "A reinstatement reason is required.")
         return redirect("loans:detail", pk=pk)
 
-    today = date.today()
+    today = timezone.localdate()
     with transaction.atomic():
         restored = LoanSchedule.objects.filter(loan=loan, waived_by_writeoff=True)
         for entry in restored:
@@ -2737,7 +2737,7 @@ def schedule_preview_pdf(request, client_id):
             product=product,
             term_months=term_months,
             frequency=frequency,
-            start_date=date.today(),
+            start_date=timezone.localdate(),
             include_processing_fee=fee_enabled,
             interest_method=interest_method,
             allow_disabled_product_fee=fee_enabled,
@@ -2824,7 +2824,7 @@ def schedule_preview(request):
             principal   = principal,
             annual_rate = product.interest_rate_monthly * 12,
             term_months = term_months,
-            start_date  = date.today(),
+            start_date  = timezone.localdate(),
             method      = interest_method,
             frequency   = frequency,
         )

@@ -812,12 +812,22 @@ def _ceo_dashboard(request, today):
     }
 
     is_ajax_request = request.headers.get("x-requested-with") == "XMLHttpRequest"
-    selected_cash = cash_movement(
-        user=request.user,
-        branch_id=branch_id,
-        start_date=period_start,
-        end_date=period_end,
-    )["cash_at_hand"]
+    def period_cash_at_hand(branch=None):
+        # Balance at the start of the period = everything before period_start.
+        opening = cash_movement(
+            user=request.user,
+            branch_id=branch,
+            end_date=period_start - timedelta(days=1),
+        )["cash_at_hand"]
+        return cash_movement(
+            user=request.user,
+            branch_id=branch,
+            start_date=period_start,
+            end_date=period_end,
+            opening_balance=opening,
+        )["cash_at_hand"]
+
+    selected_cash = period_cash_at_hand(branch_id)
     selected_recent_cash = recent_cash_transactions(
         user=request.user,
         branch_id=branch_id,
@@ -828,12 +838,7 @@ def _ceo_dashboard(request, today):
         {
             "id": selected_id,
             "label": label,
-            "balance": str(cash_movement(
-                user=request.user,
-                branch_id=selected_id,
-                start_date=period_start,
-                end_date=period_end,
-            )["cash_at_hand"]),
+            "balance": str(period_cash_at_hand(selected_id)),
             "transactions": [
                 {
                     **transaction,
@@ -1328,8 +1333,7 @@ def branch_edit(request, pk):
 def branch_detail(request, pk):
     """CEO-only detail/summary page for a single branch."""
     branch = get_object_or_404(Branch, pk=pk)
-    from datetime import date
-    today = date.today()
+    today = timezone.localdate()
     month_start = today.replace(day=1)
 
     staff = User.objects.filter(branch=branch, is_active=True).order_by("first_name", "last_name", "username")
@@ -2169,7 +2173,7 @@ def expense_list(request):
             form_data[k] = d.get(k, form_data[k])
         try:
             from datetime import date as _date
-            exp_date = _date.fromisoformat(form_data["expense_date"]) if form_data["expense_date"] else _date.today()
+            exp_date = _date.fromisoformat(form_data["expense_date"]) if form_data["expense_date"] else timezone.localdate()
             amount_val = Decimal(str(form_data["amount"] or "0"))
             if amount_val <= 0:
                 raise ValueError("Amount must be greater than zero.")

@@ -1,1 +1,35 @@
 
+2026-11-27 17:05:09 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-27 17:05:36 [INFO] django.server: "GET / HTTP/1.1" 200 14170
+2026-11-27 17:05:36 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 200 51671
+2026-11-27 17:05:37 [WARNING] django.request: Not Found: /favicon.ico
+2026-11-27 17:05:37 [WARNING] django.server: "GET /favicon.ico HTTP/1.1" 404 3755
+2026-11-27 17:05:46 [INFO] django.server: "POST / HTTP/1.1" 200 14349
+2026-11-27 17:05:56 [INFO] django.server: "POST / HTTP/1.1" 200 14349
+2026-11-27 17:09:46 [INFO] django.server: "POST / HTTP/1.1" 302 0
+2026-11-27 17:09:47 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 215134
+2026-11-27 17:09:47 [INFO] django.server: "GET /static/css/loan-calculator.css?v=4 HTTP/1.1" 200 9825
+2026-11-27 17:09:47 [INFO] django.server: "GET /static/js/loan-calculator.js?v=4 HTTP/1.1" 200 8656
+2026-11-27 17:09:47 [INFO] django.server: "GET /static/js/aba.js?v=theme-dock-3 HTTP/1.1" 200 35052
+2026-11-27 17:09:47 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 800
+2026-11-27 17:09:48 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-27 17:09:48 [INFO] django.server: "GET / HTTP/1.1" 302 0
+2026-11-27 17:09:48 [INFO] django.server: "GET /offline/ HTTP/1.1" 200 196616
+2026-11-27 17:09:48 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 200 3215
+2026-11-27 17:09:48 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 215134
+2026-11-27 17:09:59 [INFO] django.server: "GET /accounts/admin-panel/users/ HTTP/1.1" 200 199101
+2026-11-27 17:10:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-27 17:10:12 [INFO] django.server: "GET /accounts/logout/ HTTP/1.1" 302 0
+2026-11-27 17:10:12 [INFO] django.server: "GET /accounts/login/ HTTP/1.1" 200 14170
+2026-11-27 17:10:12 [INFO] django.server: "GET /static/css/aba.css HTTP/1.1" 304 0
+2026-11-27 17:10:13 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-27 17:10:24 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 200 14349
+2026-11-27 17:10:26 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-27 17:10:31 [INFO] django.server: "POST /accounts/login/ HTTP/1.1" 302 0
+2026-11-27 17:10:32 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 272963
+2026-11-27 17:10:32 [INFO] django.server: "GET /icons/192.png HTTP/1.1" 304 0
+2026-11-27 17:10:34 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-27 17:19:50 [INFO] django.utils.autoreload: /home/prime-focus/Documents/aba/abacash/loans/views.py changed, reloading.
+2026-11-27 17:19:53 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-27 17:20:16 [INFO] django.utils.autoreload: /home/prime-focus/Documents/aba/abacash/accounts/views.py changed, reloading.
+2026-11-27 17:20:18 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
