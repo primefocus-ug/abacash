@@ -144,7 +144,7 @@
       <div id="cash-flow-rows">
         {% for transaction in recent_cash %}
         <div class="cash-flow-row">
-          <span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.date }} at {{ transaction.timestamp|date:'H:i' }}</small></span>
+          <span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.timestamp|date:'d M Y' }} at {{ transaction.timestamp|date:'H:i' }}</small></span>
           <b class="{{ transaction.direction }}">{% if transaction.direction == 'in' %}+{% else %}-{% endif %} {{ transaction.amount|money }}</b>
         </div>
         {% empty %}
@@ -780,8 +780,7 @@
       rows.innerHTML = selected.transactions.length
         ? selected.transactions.map(item =>
             '<div class="cash-flow-row"><span><strong>' + item.type +
-            '</strong><small>' + item.description + ' · ' + item.date +
-            ' at ' + item.timestamp.split(' at ')[1] +
+            '</strong><small>' + item.description + ' · ' + item.timestamp +
             '</small></span><b class="' + item.direction + '">' +
             (item.direction === 'in' ? '+' : '-') + ' ' +
             formatMoney(item.amount) + '</b></div>'
@@ -1168,7 +1167,7 @@
         type.textContent = transaction.type;
         const details = document.createElement('small');
         details.textContent = transaction.description + ' · ' +
-          formatCashDate(transaction.date) + ' at ' + transaction.timestamp;
+          transaction.timestamp;
         description.append(type, details);
         const amount = document.createElement('b');
         amount.className = transaction.direction;

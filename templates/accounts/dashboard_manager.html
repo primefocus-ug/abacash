@@ -50,7 +50,7 @@
     <div class="metric-sub">Running balance{% if not can_view_all_branches %} · your branch{% endif %}</div>
     <div id="cash-at-hand-flow" class="cash-flow-preview" hidden>
       {% for transaction in recent_cash %}
-        <div class="cash-flow-row"><span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.date }} at {{ transaction.timestamp|date:'H:i' }}</small></span><b class="{{ transaction.direction }}">{% if transaction.direction == 'in' %}+{% else %}-{% endif %} {{ transaction.amount|money }}</b></div>
+        <div class="cash-flow-row"><span><strong>{{ transaction.type }}</strong><small>{{ transaction.description }} · {{ transaction.timestamp|date:'d M Y' }} at {{ transaction.timestamp|date:'H:i' }}</small></span><b class="{{ transaction.direction }}">{% if transaction.direction == 'in' %}+{% else %}-{% endif %} {{ transaction.amount|money }}</b></div>
       {% empty %}<small class="text-muted">No cash movements yet.</small>{% endfor %}
       <a href="{% url 'reports:cash_flow' %}">View full cash flow <span aria-hidden="true">→</span></a>
     </div>

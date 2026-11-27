@@ -843,7 +843,7 @@ def _ceo_dashboard(request, today):
                 {
                     **transaction,
                     "date": transaction["date"].isoformat(),
-                    "timestamp": transaction["timestamp"].strftime("%d %b %Y at %H:%M"),
+                    "timestamp": timezone.localtime(transaction["timestamp"]).strftime("%d %b %Y at %H:%M"),
                     "amount": str(transaction["amount"]),
                 }
                 for transaction in recent_cash_transactions(
@@ -955,7 +955,7 @@ def _ceo_dashboard(request, today):
                     "type": item["type"],
                     "description": item["description"],
                     "date": item["date"].isoformat(),
-                    "timestamp": item["timestamp"].strftime("%H:%M"),
+                    "timestamp": timezone.localtime(item["timestamp"]).strftime("%d %b %Y at %H:%M"),
                     "direction": item["direction"],
                     "amount": float(item["amount"]),
                 }
