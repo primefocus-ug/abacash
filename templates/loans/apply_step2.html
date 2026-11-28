@@ -614,10 +614,24 @@
           {# ── Actions ── #}
           <div style="padding:16px 18px;">
             <div class="actions" style="margin-top:0;padding-top:0;border-top:0;">
+              {% if editing and loan and loan.status != 'DRAFT' and loan.status != 'PENDING' %}
+              <a href="{% url 'loans:detail' loan.pk %}" class="btn btn-secondary">← Back</a>
+              <div style="flex:1;min-width:220px;">
+                <label for="edit_reason" style="font-weight:600;font-size:13px;">Reason for this change (required, logged)</label>
+                <textarea name="edit_reason" id="edit_reason" rows="2" required style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
+              </div>
+              <span class="spacer"></span>
+              <button type="submit" name="action" value="submit" class="btn btn-primary">Save changes</button>
+              {% elif editing and loan %}
+              <a href="{% url 'loans:detail' loan.pk %}" class="btn btn-secondary">← Back</a>
+              <span class="spacer"></span>
+              <button type="submit" name="action" value="submit" class="btn btn-primary">Save changes</button>
+              {% else %}
               <a href="{% url 'loans:apply' %}" class="btn btn-secondary">← Back</a>
               <button type="submit" name="action" value="save_draft" class="btn btn-secondary">Save Draft</button>
               <span class="spacer"></span>
               <button type="submit" name="action" value="continue" class="btn btn-primary">Continue to Security →</button>
+              {% endif %}
             </div>
           </div>
 

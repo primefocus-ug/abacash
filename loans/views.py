@@ -12,6 +12,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
+from accounts.audit import log_action
 from django.db.models import Q, Sum
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,7 +21,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
-from accounts.models import BankAccount, Branch, CompanySettings
+from accounts.models import AuditLog, BankAccount, Branch, CompanySettings
 from accounts.terms import sanitize_loan_terms
 from accounts.branch_scope import (
     SESSION_KEY,
@@ -398,6 +400,8 @@ def loan_list(request):
         "client", "product", "applied_by", "reviewed_by"
     ).order_by("-application_date")
     qs = scope_to_branch_request(qs, request)
+    if request.GET.get("show_voided") != "1":
+        qs = qs.filter(is_voided=False)
 
     status_filter = request.GET.get("status", "")
     if status_filter:
@@ -1155,14 +1159,44 @@ def loan_edit(request, pk):
     """
     loan = get_object_or_404(Loan.objects.select_related("client", "product"), pk=pk)
 
-    if loan.status == Loan.Status.REJECTED:
-        messages.error(request, "Rejected loans cannot be edited.")
+    if loan.is_voided:
+        messages.error(request, "Voided loans cannot be edited. Undo the void first.")
         return redirect("loans:detail", pk=loan.pk)
 
-    # Only allow edits for DRAFT or PENDING applications
-    if loan.status not in (Loan.Status.DRAFT, Loan.Status.PENDING):
-        messages.error(request, "Only draft or pending applications can be edited.")
-        return redirect("loans:detail", pk=loan.pk)
+    is_ceo = request.user.role == "CEO"
+    open_stage = loan.status in (Loan.Status.DRAFT, Loan.Status.PENDING)
+
+    if not is_ceo:
+        if loan.status == Loan.Status.REJECTED:
+            messages.error(request, "Rejected loans cannot be edited.")
+            return redirect("loans:detail", pk=loan.pk)
+        # Only allow edits for DRAFT or PENDING applications
+        if not open_stage:
+            messages.error(request, "Only draft or pending applications can be edited.")
+            return redirect("loans:detail", pk=loan.pk)
+
+    # CEO edits on loans past the application stage must give a reason; every save is logged.
+    edit_reason = ""
+    edit_snapshot = _loan_edit_snapshot(loan)
+    if not open_stage and request.method == "POST":
+        edit_reason = request.POST.get("edit_reason", "").strip()
+        if not edit_reason:
+            messages.error(request, "Enter a reason for this change.")
+            return redirect("loans:edit", pk=loan.pk)
+        if loan.payments.exists():
+            # Repayments are tied to the schedule, so only the purpose can change here.
+            old_purpose = loan.purpose or ""
+            new_purpose = request.POST.get("purpose", old_purpose).strip()
+            if new_purpose != old_purpose:
+                loan.purpose = new_purpose
+                loan.save()
+                log_action(request.user, AuditLog.Action.UPDATE, loan,
+                           changes={"purpose": [old_purpose, new_purpose]},
+                           request=request, remarks=edit_reason)
+                messages.success(request, f"Purpose of {loan.loan_number} updated and logged.")
+            else:
+                messages.info(request, "No change made.")
+            return redirect("loans:detail", pk=loan.pk)
 
     client = loan.client
     products = LoanProduct.objects.filter(is_active=True)
@@ -1332,6 +1366,11 @@ def loan_edit(request, pk):
                         g = lg.guarantor
                         g.current_liability = g.current_liability + lg.guaranteed_amount
                         g.save()
+
+                if not open_stage:
+                    log_action(request.user, AuditLog.Action.UPDATE, loan,
+                               changes=_loan_edit_diff(edit_snapshot, _loan_edit_snapshot(loan)),
+                               request=request, remarks=edit_reason)
 
                 messages.success(request, f"Loan {loan.loan_number} updated.")
                 return redirect("loans:detail", pk=loan.pk)
@@ -1517,6 +1556,7 @@ def loan_detail(request, pk):
     )
 
     return render(request, "loans/loan_detail.html", {
+        "has_payments": loan.payments.exists(),
         "loan":     loan,
         "schedule": schedule,
         "payments": payments,
@@ -2597,6 +2637,117 @@ def loan_draft_delete(request, pk):
     ref = loan.loan_number
     loan.delete()
     messages.success(request, f"Draft {ref} deleted.")
+    return redirect("loans:list")
+
+
+EDIT_FIELDS = (
+    "product_id", "principal_amount", "term_months", "repayment_frequency",
+    "interest_method", "interest_rate_monthly", "purpose", "penalty_enabled",
+    "processing_fee_enabled", "processing_fee", "total_interest", "total_repayable",
+)
+
+
+def _loan_edit_snapshot(loan):
+    return {f: str(getattr(loan, f)) for f in EDIT_FIELDS}
+
+
+def _loan_edit_diff(before, after):
+    return {k: [before[k], after[k]] for k in before if before[k] != after[k]}
+
+
+@_require_role("CEO")
+@require_POST
+def loan_void(request, pk):
+    """CEO hides a loan from cash, reports and lists. Kept in the system and logged."""
+    loan = get_object_or_404(Loan, pk=pk)
+    reason = request.POST.get("reason", "").strip()
+    if not reason:
+        messages.error(request, "Enter a reason to void this loan.")
+    elif loan.is_voided:
+        messages.info(request, "This loan is already voided.")
+    elif loan.payments.exists():
+        messages.error(request, "This loan has recorded payments and cannot be voided.")
+    else:
+        with transaction.atomic():
+            loan.is_voided = True
+            loan.voided_at = timezone.now()
+            loan.voided_by = request.user
+            loan.void_reason = reason
+            loan.save(update_fields=["is_voided", "voided_at", "voided_by", "void_reason"])
+            log_action(request.user, AuditLog.Action.OTHER, loan,
+                       changes={"is_voided": [False, True]}, request=request,
+                       remarks=f"VOID: {reason}")
+        messages.success(request, f"Loan {loan.loan_number} voided and logged.")
+    return redirect("loans:detail", pk=loan.pk)
+
+
+@_require_role("CEO")
+@require_POST
+def loan_unvoid(request, pk):
+    """CEO restores a voided loan. Logged with a reason."""
+    loan = get_object_or_404(Loan, pk=pk)
+    reason = request.POST.get("reason", "").strip()
+    if not reason:
+        messages.error(request, "Enter a reason to undo the void.")
+    elif not loan.is_voided:
+        messages.info(request, "This loan is not voided.")
+    else:
+        with transaction.atomic():
+            previous_reason = loan.void_reason
+            loan.is_voided = False
+            loan.voided_at = None
+            loan.voided_by = None
+            loan.void_reason = ""
+            loan.save(update_fields=["is_voided", "voided_at", "voided_by", "void_reason"])
+            log_action(request.user, AuditLog.Action.OTHER, loan,
+                       changes={"is_voided": [True, False]}, request=request,
+                       remarks=f"UNDO VOID: {reason} (previous void reason: {previous_reason})")
+        messages.success(request, f"Void undone for {loan.loan_number}; logged.")
+    return redirect("loans:detail", pk=loan.pk)
+
+
+@_require_role("CEO")
+@require_POST
+def loan_delete(request, pk):
+    """CEO permanently deletes a loan. Needs a reason and typed loan number; full record is logged first."""
+    loan = get_object_or_404(Loan, pk=pk)
+    reason = request.POST.get("reason", "").strip()
+    confirm = request.POST.get("confirm", "").strip()
+    if not reason:
+        messages.error(request, "Enter a reason to delete this loan.")
+        return redirect("loans:detail", pk=loan.pk)
+    if confirm != loan.loan_number:
+        messages.error(request, f"Type the loan number {loan.loan_number} exactly to confirm.")
+        return redirect("loans:detail", pk=loan.pk)
+    if loan.payments.exists():
+        messages.error(request, "This loan has recorded payments and cannot be deleted. Void it instead.")
+        return redirect("loans:detail", pk=loan.pk)
+
+    ref = loan.loan_number
+    snapshot = {
+        **_loan_edit_snapshot(loan),
+        "loan_number": ref,
+        "client": str(loan.client),
+        "status": loan.status,
+        "is_voided": loan.is_voided,
+        "schedule_rows": loan.schedule.count(),
+    }
+    try:
+        with transaction.atomic():
+            log_action(request.user, AuditLog.Action.DELETE, loan,
+                       changes={"deleted_record": snapshot}, request=request,
+                       remarks=f"DELETE: {reason}")
+            # Release guarantor liability held by this loan before removing it.
+            for lg in LoanGuarantee.objects.filter(loan=loan).select_related("guarantor"):
+                g = lg.guarantor
+                g.current_liability = max(Decimal("0"), g.current_liability - lg.guaranteed_amount)
+                g.save()
+            loan.delete()
+    except ProtectedError:
+        messages.error(request, "This loan is linked to other records and cannot be deleted. Void it instead.")
+        return redirect("loans:detail", pk=pk)
+
+    messages.success(request, f"Loan {ref} deleted; full record kept in the audit log.")
     return redirect("loans:list")
 
 

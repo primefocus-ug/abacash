@@ -24,7 +24,7 @@ def cash_movement(*, user=None, branch_id=None, start_date=None, end_date=None, 
         payment_method=Payment.PaymentMethod.CASH,
     )
     disbursements = Loan.objects.filter(
-        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
+        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES, is_voided=False,
     ).annotate(cash_disbursed_amount=cash_disbursed_amount_expression())
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
@@ -99,8 +99,8 @@ def recent_cash_transactions(
         payment_method=Payment.PaymentMethod.CASH,
     ).select_related("client").order_by("-created_at")
     disbursements = Loan.objects.filter(
-        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES,
-    ).annotate(cash_disbursed_amount=cash_disbursed_amount_expression()).select_related("client", "product").order_by("-created_at")
+        disbursement_date__isnull=False, status__in=DISBURSED_STATUSES, is_voided=False,
+    ).select_related("client", "product", "renewed_from").order_by("-created_at")
     expenses = Expense.objects.filter(
         status=Expense.Status.APPROVED,
         payment_method=Expense.PaymentMethod.CASH,

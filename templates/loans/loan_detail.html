@@ -275,6 +275,13 @@
 {% endblock %}
 
 {% block content %}
+{% if loan.is_voided %}
+<div class="card mb-3" style="border-color:#f59e0b;padding:12px;overflow-wrap:break-word;">
+  <strong>VOIDED</strong> on {{ loan.voided_at|date:"d M Y H:i" }} by {{ loan.voided_by.full_name|default:"—" }}.
+  Reason: {{ loan.void_reason }}
+  <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Excluded from cash totals and loan lists. Only the CEO can change this.</div>
+</div>
+{% endif %}
 
 <div class="responsive-two-col-grid">
 
@@ -354,6 +361,47 @@
           </div>
 
         </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if user.role == "CEO" %}
+    <div class="card mb-3 print-hide" id="ceo-loan-controls">
+      <div class="card-header"><span class="card-title">CEO Controls</span></div>
+      <div class="card-body" style="padding:12px;overflow-wrap:break-word;">
+        <div style="margin-bottom:12px;">
+          <a href="{% url 'loans:edit' loan.pk %}" class="btn btn-secondary btn-sm">Edit loan</a>
+        </div>
+        {% if loan.is_voided %}
+        <form method="post" action="{% url 'loans:unvoid' loan.pk %}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          {% csrf_token %}
+          <label style="font-weight:600;font-size:13px;">Undo void — reason (required)</label>
+          <textarea name="reason" rows="2" required style="padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
+          <button type="submit" class="btn btn-secondary btn-sm" style="align-self:flex-start;">Undo void</button>
+        </form>
+        {% elif not has_payments %}
+        <form method="post" action="{% url 'loans:void' loan.pk %}" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+          {% csrf_token %}
+          <label style="font-weight:600;font-size:13px;">Void loan — reason (required)</label>
+          <textarea name="reason" rows="2" required style="padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
+          <div style="font-size:12px;color:var(--text-muted);">Hides the loan from cash and lists. It stays in the system and can be restored.</div>
+          <button type="submit" class="btn btn-secondary btn-sm" style="align-self:flex-start;">Void loan</button>
+        </form>
+        {% endif %}
+        {% if not has_payments %}
+        <form method="post" action="{% url 'loans:delete' loan.pk %}" style="display:flex;flex-direction:column;gap:8px;"
+              onsubmit="return confirm('Permanently delete {{ loan.loan_number }}? The full record is kept in the audit log.');">
+          {% csrf_token %}
+          <label style="font-weight:600;font-size:13px;color:#dc2626;">Delete permanently — reason (required)</label>
+          <textarea name="reason" rows="2" required style="padding:8px;border:1px solid var(--border);border-radius:6px;"></textarea>
+          <label style="font-size:13px;">Type <strong>{{ loan.loan_number }}</strong> to confirm</label>
+          <input type="text" name="confirm" required autocomplete="off" style="padding:8px;border:1px solid var(--border);border-radius:6px;">
+          <button type="submit" class="btn btn-danger btn-sm" style="align-self:flex-start;">Delete permanently</button>
+        </form>
+        {% else %}
+        <div style="font-size:13px;color:var(--text-muted);">This loan has payments, so it cannot be deleted. Void it instead.</div>
+        {% endif %}
+        <div style="font-size:12px;color:var(--text-muted);margin-top:12px;">Every change, void, and deletion is recorded in the audit log with your name, time, and reason.</div>
       </div>
     </div>
     {% endif %}

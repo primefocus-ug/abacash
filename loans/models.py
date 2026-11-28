@@ -637,6 +637,15 @@ class Loan(models.Model):
         except Exception:
             return Decimal("0")
 
+    # Void: CEO can hide a loan from cash, reports and lists without deleting it.
+    is_voided = models.BooleanField(default=False, db_index=True)
+    voided_at = models.DateTimeField(null=True, blank=True)
+    voided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+",
+    )
+    void_reason = models.TextField(blank=True, default="")
+
     @property
     def cash_disbursed(self):
         annotated_amount = getattr(self, "cash_disbursed_amount", None)

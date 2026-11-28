@@ -234,3 +234,15 @@ LINE 1: ...ession_data", "django_session"."expire_date" FROM "django_se...
 2026-11-28 12:49:56 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
 2026-11-28 12:49:59 [INFO] django.server: "GET /accounts/admin-panel/capital-injections/ HTTP/1.1" 200 197726
 2026-11-28 12:50:01 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-28 14:39:40 [INFO] django.utils.autoreload: Watching for file changes with StatReloader
+2026-11-28 14:40:11 [INFO] django.server: "GET /accounts/dashboard/ HTTP/1.1" 200 272863
+2026-11-28 14:40:11 [INFO] django.server: "GET /manifest.webmanifest HTTP/1.1" 200 800
+2026-11-28 14:40:14 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-28 14:40:14 [INFO] django.server: "GET /loans/ HTTP/1.1" 200 217285
+2026-11-28 14:40:16 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-28 14:40:37 [INFO] django.server: "GET /loans/1959be1f-c38f-425b-af9e-07b01af87166/ HTTP/1.1" 200 223309
+2026-11-28 14:40:40 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-28 14:40:56 [INFO] django.server: "GET /loans/1959be1f-c38f-425b-af9e-07b01af87166/edit/ HTTP/1.1" 200 229750
+2026-11-28 14:40:58 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
+2026-11-28 14:41:03 [INFO] django.server: "GET /loans/1959be1f-c38f-425b-af9e-07b01af87166/ HTTP/1.1" 200 223309
+2026-11-28 14:41:05 [INFO] django.server: "GET /sw.js HTTP/1.1" 200 3365
